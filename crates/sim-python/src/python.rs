@@ -1,11 +1,11 @@
 //! PyO3 conversion layer.
 
-use crate::component_catalog::CatalogEntry;
 use crate::netlist::{
     ComponentInput, DeviceRecord, NetlistRequest, NetlistSnapshot, NodeInput, NodeKind, NodeRecord,
 };
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
+use sim_device::CatalogRecord;
 use std::collections::BTreeMap;
 
 /// Python node input.
@@ -85,7 +85,7 @@ fn node_kind(kind: Option<&str>) -> Result<NodeKind, String> {
 /// Converts one catalog entry into a Python dictionary.
 pub(crate) fn entry_dict<'py>(
     py: Python<'py>,
-    entry: &CatalogEntry,
+    entry: &CatalogRecord,
 ) -> PyResult<Bound<'py, PyDict>> {
     let dict = PyDict::new(py);
     dict.set_item("id", entry.id)?;

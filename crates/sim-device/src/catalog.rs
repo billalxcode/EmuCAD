@@ -3,11 +3,13 @@
 #[path = "catalog_data/mod.rs"]
 mod catalog_data;
 mod model;
+mod records;
 mod registry;
 #[cfg(test)]
 mod tests;
 
 pub use model::{CatalogError, ComponentSpec, Family, ModelClass};
+pub use records::{CatalogRecord, catalog_records, find_catalog_record};
 pub use registry::{ComponentRegistry, ComponentRequest};
 
 /// Returns all 500 generic component entries.

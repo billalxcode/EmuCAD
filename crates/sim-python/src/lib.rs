@@ -1,18 +1,17 @@
 //! Python bindings for the EmuCAD component catalog and netlist builder.
 
-#[path = "catalog.rs"]
-mod component_catalog;
 mod netlist;
 mod python;
 
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
+use sim_device::{catalog_records, find_catalog_record};
 
 /// Returns all catalog entries as dictionaries.
 #[pyfunction]
 fn catalog(py: Python<'_>) -> PyResult<Py<PyList>> {
-    let entries = component_catalog::entries();
+    let entries = catalog_records();
     let list = PyList::empty(py);
     for entry in &entries {
         list.append(python::entry_dict(py, entry)?)?;
@@ -23,7 +22,7 @@ fn catalog(py: Python<'_>) -> PyResult<Py<PyList>> {
 /// Finds one catalog entry by ID.
 #[pyfunction]
 fn find_component(py: Python<'_>, id: &str) -> PyResult<Option<Py<PyDict>>> {
-    let Some(entry) = component_catalog::find(id) else {
+    let Some(entry) = find_catalog_record(id) else {
         return Ok(None);
     };
     Ok(Some(python::entry_dict(py, &entry)?.unbind()))
