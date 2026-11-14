@@ -169,10 +169,21 @@ Alamat dan angka menerima desimal atau heksadesimal `0x`.
 ./target/debug/emucad bench 1000 10
 ```
 
+### 5.5 Catalog
+
+```bash
+./target/debug/emucad catalog
+./target/debug/emucad catalog --json
+```
+
+Perintah pertama menampilkan jumlah entri, status solver, dan status
+behavioral. Opsi `--json` mencetak seluruh 500 entri sebagai JSON untuk
+dipakai Python builder atau tool eksternal.
+
 Argumen pertama adalah jumlah iterasi. Argumen kedua adalah jumlah node
 ladder, antara 2 dan 1000.
 
-### 5.5 Virtual serial port dan upload Arduino
+### 5.6 Virtual serial port dan upload Arduino
 
 Mode ini membuat PTY, membuka virtual serial port, dan menerima upload
 STK500/Optiboot. Setelah upload selesai, firmware langsung dijalankan.
@@ -280,7 +291,7 @@ python3 scripts/test-serial-upload.py
 Script tersebut membuat port virtual, mengunggah program blink, memastikan
 LED berubah, lalu memeriksa cleanup.
 
-### 5.6 USB gadget mode
+### 5.7 USB gadget mode
 
 Jalur USB asli untuk Linux memakai `dummy_hcd`, ConfigFS ACM, dan driver
 C++ di `drivers/linux`.

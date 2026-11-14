@@ -50,7 +50,7 @@ embed-emulation/
 | `sim-cells` | Sel CMOS, gerbang, DFF, SRAM cell, characterization | AVR |
 | `sim-avr` | CPU struktural, ISA, register, peripheral | Board |
 | `sim-board` | Board netlist, LED, tombol, UART host | Detail CPU |
-| `sim-cli` | Argumen, orkestrasi, output, monitor | Implementasi internal device |
+| `sim-cli` | Argumen, orkestrasi, output, monitor, catalog JSON | Implementasi internal device |
 | `sim-gui` | UI egui, canvas, persistence, worker simulasi | Implementasi internal device dan solver |
 | `sim-python` | Binding Python untuk katalog dan netlist | Simulasi, GUI, firmware |
 

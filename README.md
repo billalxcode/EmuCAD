@@ -4,7 +4,7 @@
 yang memodelkan transistor, gerbang CMOS, CPU AVR, peripheral, dan board,
 serta mampu menjalankan firmware AVR.
 
-> **Status v0.1:** 760 test lulus, 9 crate, crate simulasi zero external
+> **Status v0.1:** 772 test lulus, 9 crate, crate simulasi zero external
 > dependency; dependensi GUI dan binding Python dibatasi pada daftar yang
 > disetujui di `AGENTS.md`.
 > Tag `v0.1` tersedia. Archive Linux ada di
@@ -88,6 +88,7 @@ cargo run -p sim-avr --example timer_interrupt
 ./target/debug/emucad monitor E005 E013 0F01 9598
 ./target/debug/emucad disasm E005 E013 0F01 9598
 ./target/debug/emucad bench 1000 10
+./target/debug/emucad catalog --json
 ./target/debug/emucad run firmware/blink.hex 100000
 ./target/release/emucad serial
 ./target/release/emucad
@@ -119,7 +120,7 @@ bash .opencode/skills/clean-code/scripts/check.sh
 | `sim-cells` | Sel CMOS struktural dan pustaka digital |
 | `sim-avr` | CPU AVR, decoder, ALU, register, peripheral |
 | `sim-board` | Board, LED, button, UART host, Intel HEX, ELF, CSV/VCD |
-| `sim-cli` | Binary `emucad`, monitor, disassembler, benchmark |
+| `sim-cli` | Binary `emucad`, monitor, disassembler, benchmark, catalog JSON |
 | `sim-python` | Binding Python untuk katalog dan builder netlist |
 | `drivers/` | Scaffold driver virtual USB C++ (opsional, di luar crate) |
 
@@ -164,7 +165,7 @@ Dokumen yang sering dipakai:
 
 Sudah:
 
-- 760 test workspace.
+- 772 test workspace.
 - fmt, clippy, test, dan build release lulus.
 - Paket Linux dapat dibuat.
 - Determinisme Linux diuji.

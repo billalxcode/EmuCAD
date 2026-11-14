@@ -62,17 +62,17 @@ Batch yang gagal salah satu syarat tetap berstatus `tested`, bukan
 
 ## 4. Infrastruktur
 
-- [ ] C1-01 Buat modul katalog di `crates/sim-device`.
+- [x] C1-01 Buat modul katalog di `crates/sim-device`.
 - [x] C1-02 Definisikan struct `ComponentSpec` dan parameter typed.
 - [x] C1-03 Buat validator ID, unit, pin, dan rentang parameter.
 - [x] C1-04 Buat loader katalog deterministik.
-- [ ] C1-05 Tambah perintah `emucad catalog --json`.
+- [x] C1-05 Tambah perintah `emucad catalog --json`.
 - [ ] C1-06 Buat format reference vector dan parser test.
 - [ ] C1-07 Buat harness unit test model.
 - [ ] C1-08 Buat harness conservation test KCL, KVL, dan energi.
 - [ ] C1-09 Buat harness convergence dan parameter fuzz.
 - [ ] C1-10 Buat cross-check opsional terhadap ngspice.
-- [ ] C1-11 Tambah CI Linux untuk katalog dan test model.
+- [x] C1-11 Tambah CI Linux untuk katalog dan test model.
 - [x] C1-12 Tambah laporan coverage per kategori dan status.
 - [x] C1-21 Buat crate `sim-python` dengan `pyo3` untuk katalog dan
   builder netlist.
@@ -240,22 +240,25 @@ Target: 14 entri.
 
 ## 14. Python Builder
 
-- [ ] C11-01 Kunci schema request dan response.
-- [ ] C11-02 Buat loader katalog dari Rust.
+Keputusan: binding langsung memakai `pyo3` di crate `sim-python`, bukan
+subprocess. Python memakai dict untuk request dan response.
+
+- [x] C11-01 Kunci schema request dan response.
+- [x] C11-02 Buat loader katalog dari Rust.
 - [ ] C11-03 Buat DSL Python tipis untuk topologi dan parameter.
-- [ ] C11-04 Buat exporter netlist JSON.
-- [ ] C11-05 Buat runner subprocess ke Rust.
-- [ ] C11-06 Buat mapping error Rust ke exception Python.
-- [ ] C11-07 Buat contoh divider, RC, diode, dan logic.
-- [ ] C11-08 Buat contract test Python ke Rust.
+- [x] C11-04 Buat exporter netlist JSON. (response dict kompatibel `json.dumps`)
+- [x] C11-05 Buat binding PyO3 ke Rust. (menggantikan runner subprocess)
+- [x] C11-06 Buat mapping error Rust ke exception Python.
+- [x] C11-07 Buat contoh divider, RC, diode, dan logic.
+- [x] C11-08 Buat contract test Python ke Rust.
 
 ## 15. Release dan Dokumentasi
 
 - [ ] C12-01 Perbarui `docs/12-device-models.md`.
 - [ ] C12-02 Perbarui `docs/11-netlist.md`.
-- [ ] C12-03 Perbarui `README.md` dan `docs/README.md`.
+- [x] C12-03 Perbarui `README.md` dan `docs/README.md`.
 - [ ] C12-04 Tambah laporan coverage 500 komponen.
-- [ ] C12-05 Jalankan fmt, clippy, test, ASCII, dan package.
+- [x] C12-05 Jalankan fmt, clippy, test, ASCII, dan package.
 - [ ] C12-06 Buat tag katalog komponen.
 
 ## 16. Definition of Done

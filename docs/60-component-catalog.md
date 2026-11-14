@@ -314,8 +314,16 @@ netlist = emucad.build_netlist({
 })
 ```
 
-Bangun modul dengan `cargo build -p sim-python`. Smoke test tersedia
-melalui `bash scripts/test-python.sh`. Node `0` selalu menjadi ground dan
+Rust juga mengekspor JSON melalui CLI:
+
+```bash
+emucad catalog
+emucad catalog --json
+```
+
+Bangun modul Python dengan `cargo build -p sim-python`. Smoke test tersedia
+melalui `bash scripts/test-python.sh`. Contoh lengkap ada di
+`examples/python/build_netlists.py`. Node `0` selalu menjadi ground dan
 tidak perlu dideklarasikan. Builder hanya membangun topologi; simulasi
 tetap dijalankan oleh crate Rust lain.
 
