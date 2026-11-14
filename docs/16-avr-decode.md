@@ -143,8 +143,9 @@ impl ProgramMemory {
 
 ## 11. CPU Integration
 
-CPU kecil di `sim-avr/src/cpu.rs` menghubungkan fetch, register bank, dan unit
-ALU menjadi eksekusi instruksi end-to-end.
+CPU kecil di `sim-avr/src/cpu/mod.rs` menghubungkan fetch, register bank, dan
+unit ALU menjadi eksekusi instruksi end-to-end. Eksekusi, I/O, timer, dan
+interrupt dipecah menjadi submodule di `sim-avr/src/cpu/`.
 
 - Control masih behavioral di Rust, bukan PLA gate-level.
 - Datapath memakai register bank DFF dan unit arithmetic/logic/shift/multiply struktural.

@@ -300,9 +300,9 @@ valid selalu sinkron.
 
 ## 9. Status Implementasi
 
-Katalog 500 entri sudah ada di `crates/sim-device/src/catalog.rs` dan
-`crates/sim-device/src/catalog_data.rs`. File data dihasilkan oleh
-`scripts/gen_component_catalog.py`.
+Katalog 500 entri sudah ada di `crates/sim-device/src/catalog/` dan
+`crates/sim-device/src/catalog_data/`. File data dihasilkan oleh
+`scripts/gen_component_catalog.py` dan dipecah per family atau class.
 
 Jumlah saat ini:
 
