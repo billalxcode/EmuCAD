@@ -173,7 +173,10 @@ impl ModelClass {
         self.requires_passive_device()
             || self.requires_semiconductor_device()
             || self.requires_analog_device()
-            || matches!(self, Self::LogicGate)
+            || matches!(
+                self,
+                Self::LogicGate | Self::SolidStateRelay | Self::Connector
+            )
     }
 
     const fn requires_analog_device(self) -> bool {

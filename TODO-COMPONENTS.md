@@ -1,7 +1,7 @@
 # TODO - Komponen 500
 
 Status: katalog 500 entri sudah diimplementasikan di `sim-device`.
-Registry-backed emulation tersedia untuk 206 entri. Sebanyak 294 entri
+Registry-backed emulation tersedia untuk 215 entri. Sebanyak 285 entri
 behavioral masih menunggu model solver dan belum dapat disimulasikan
 sebagai device MNA. Binding Python `sim-python` sudah menyediakan katalog
 dan builder netlist; simulasi tetap berjalan di crate Rust.
@@ -143,11 +143,11 @@ Target: 43 entri.
 - [ ] C4-01 SCR, TRIAC, DIAC, GTO 8 entri.
 - [ ] C4-02 Fuse, PTC, TVS, varistor 6 entri.
 - [ ] C4-03 Spark gap, crowbar, breaker 4 entri.
-- [ ] C4-04 Mechanical switch 8 entri: SPST, SPDT, DPDT, push, toggle,
+- [x] C4-04 Mechanical switch 8 entri: SPST, SPDT, DPDT, push, toggle,
   DIP, reed, limit.
-- [ ] C4-05 Relay dan solid-state relay 7 entri.
-- [ ] C4-06 Analog switch dan multiplexer 5 entri.
-- [ ] C4-07 Connector, jumper, test point 5 entri.
+- [x] C4-05 Relay dan solid-state relay 7 entri.
+- [x] C4-06 Analog switch dan multiplexer 5 entri.
+- [x] C4-07 Connector, jumper, test point 5 entri.
 
 ## 8. Op-Amp dan Analog IC
 

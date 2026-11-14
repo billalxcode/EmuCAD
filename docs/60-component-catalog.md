@@ -337,8 +337,8 @@ Jumlah saat ini:
 
 - 500 entri katalog.
 - 60 model class.
-- 206 entri solver-backed dengan `DeviceKind`.
-- 294 entri behavioral dengan metadata dan smoke response.
+- 215 entri solver-backed dengan `DeviceKind`.
+- 285 entri behavioral dengan metadata dan smoke response.
 
 Registry `ComponentRegistry` memetakan entry ke `DeviceInstance` dan
 `DeviceModel`. Registry memvalidasi ID, jumlah pin, parameter default, dan
@@ -356,6 +356,8 @@ Test katalog dan emulasi mencakup:
 - Instansiasi dan pembentukan model untuk semua entry solver-backed.
 - Voltage divider melalui registry menghasilkan 2.5 V.
 - Saklar ideal melalui registry mengubah tegangan node.
+- Connector melalui registry mempertahankan tegangan dengan drop kecil.
+- Solid-state relay melalui registry mengikuti tegangan kontrol.
 - Op-amp follower melalui registry mengikuti tegangan input.
 - Comparator melalui registry saturasi ke rel atas dan bawah.
 - Analog switch melalui registry mengikuti tegangan kontrol.

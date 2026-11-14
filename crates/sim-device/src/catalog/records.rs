@@ -64,7 +64,7 @@ mod tests {
         assert_eq!(records.len(), 500);
         assert_eq!(
             records.iter().filter(|record| record.solver_backed).count(),
-            206
+            215
         );
     }
 

@@ -202,7 +202,7 @@ add("switch.mechanical", "Switch", "IdealSwitch", 2, "ron", 0.1, "ohm", [
 add("switch.relay", "Relay", "Relay", 5, "rcoil", 100.0, "ohm", [
     "electromechanical relay", "latching relay", "reed relay",
 ])
-add("switch.ssr", "SolidStateRelay", None, 4, "isolation_voltage", 2500.0, "V", [
+add("switch.ssr", "SolidStateRelay", "Switch", 4, "vth", 2.5, "V", [
     "solid state relay", "opto MOSFET relay", "TRIAC output SSR",
     "time delay relay",
 ])
@@ -210,7 +210,7 @@ add("switch.analog", "AnalogSwitch", "Switch", 4, "ron", 1.0, "ohm", [
     "analog switch", "SPDT analog switch", "4 to 1 analog multiplexer",
     "8 to 1 analog multiplexer", "analog demultiplexer",
 ])
-add("switch.connector", "Connector", None, 2, "voltage", 0.0, "V", [
+add("switch.connector", "Connector", "Resistor", 2, "resistance", 0.001, "ohm", [
     "header connector", "terminal block", "jumper", "test point", "IC socket",
 ])
 

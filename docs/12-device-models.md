@@ -90,6 +90,8 @@ pub fn model_from_instance(
 | Regulator | 3 | Ideal behavioral output voltage | - |
 | LogicGate | 5 | Behavioral gate with rail saturation | - |
 | IdealSwitch | 2 | Fixed on/off conductance | - |
+| Connector | 2 | Ideal wire sebagai resistor 1 milliohm | - |
+| SolidStateRelay | 4 | Switch terkontrol tegangan dengan pin terisolasi | - |
 | OpAmp | 5 | Linear high-gain VCVS macromodel | - |
 | Comparator | 5 | Saturating nonlinear comparator | - |
 
@@ -265,6 +267,8 @@ P-JFET memakai transformasi tanda. Kapasitansi `cgs` dan `cgd` konstan.
 | IdealSwitch | `ron` | 0.01 ohm |
 | IdealSwitch | `roff` | 1e12 ohm |
 | IdealSwitch | `closed` | 0 |
+| Connector | `resistance` | 0.001 ohm | ya |
+| SolidStateRelay | `vth` | 2.5 V | tidak |
 | AnalogSwitch | `ron` | 1 ohm |
 | Relay | `rcoil` | 100 ohm |
 | Relay | `ron` | 0.1 ohm |
@@ -275,6 +279,11 @@ P-JFET memakai transformasi tanda. Kapasitansi `cgs` dan `cgd` konstan.
 | Comparator | `gain` | 1e4 |
 
 CCVS memakai dua branch: sense branch dan output branch.
+
+SolidStateRelay memakai model Switch dengan urutan pin `output+, output-,
+control+, control-`. Rating isolasi tidak disimulasikan; input dan output
+hanya terpisah secara elektrik melalui model switch. Connector dimodelkan
+sebagai resistor 1 milliohm, bukan model mekanis.
 
 Switch memakai conductance halus:
 

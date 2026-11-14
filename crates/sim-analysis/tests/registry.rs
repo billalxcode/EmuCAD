@@ -7,6 +7,8 @@ use sim_device::{ComponentRegistry, ComponentRequest};
 const SOURCE: &str = "source.independent.dc_voltage_source";
 const RESISTOR: &str = "passive.resistor.ideal_resistor";
 const SWITCH: &str = "switch.mechanical.spst_switch";
+const CONNECTOR: &str = "switch.connector.jumper";
+const SSR: &str = "switch.ssr.solid_state_relay";
 const ANALOG_SWITCH: &str = "switch.analog.analog_switch";
 const RELAY: &str = "switch.relay.electromechanical_relay";
 const REGULATOR: &str = "power.linear.linear_regulator";
@@ -38,6 +40,30 @@ fn add_resistor(
     let request = ComponentRequest::new(RESISTOR, name, DeviceId::new(0), vec![first, second])
         .with_parameter("resistance", resistance);
     registry.add_to(builder, &request).expect("resistor");
+}
+
+fn add_connector(
+    registry: &ComponentRegistry,
+    builder: &mut CircuitBuilder,
+    name: &str,
+    first: NodeId,
+    second: NodeId,
+) {
+    let request = ComponentRequest::new(CONNECTOR, name, DeviceId::new(0), vec![first, second]);
+    registry.add_to(builder, &request).expect("connector");
+}
+
+fn add_ssr(
+    registry: &ComponentRegistry,
+    builder: &mut CircuitBuilder,
+    name: &str,
+    output: NodeId,
+    control: NodeId,
+    ground: NodeId,
+) {
+    let pins = vec![output, ground, control, ground];
+    let request = ComponentRequest::new(SSR, name, DeviceId::new(0), pins);
+    registry.add_to(builder, &request).expect("ssr");
 }
 
 fn add_switch(
@@ -162,6 +188,39 @@ fn switch_circuit(closed: f64) -> Circuit {
     add_source(&registry, &mut builder, "V1", source, ground, 5.0);
     add_switch_load(&registry, &mut builder, source, out, ground);
     add_switch(&registry, &mut builder, "SW1", out, ground, closed);
+    builder.build().expect("circuit")
+}
+
+fn connector_circuit() -> Circuit {
+    let registry = ComponentRegistry::new();
+    let mut builder = CircuitBuilder::new();
+    let source = builder.node("source").expect("source");
+    let out = builder.node("out").expect("out");
+    let ground = builder.ground();
+    add_source(&registry, &mut builder, "V1", source, ground, 5.0);
+    add_connector(&registry, &mut builder, "J1", source, out);
+    add_resistor(&registry, &mut builder, "R1", out, ground, 1000.0);
+    builder.build().expect("circuit")
+}
+
+fn ssr_circuit(control_voltage: f64) -> Circuit {
+    let registry = ComponentRegistry::new();
+    let mut builder = CircuitBuilder::new();
+    let source = builder.node("source").expect("source");
+    let out = builder.node("out").expect("out");
+    let control = builder.node("control").expect("control");
+    let ground = builder.ground();
+    add_source(&registry, &mut builder, "V1", source, ground, 5.0);
+    add_resistor(&registry, &mut builder, "R1", source, out, 1000.0);
+    add_ssr(&registry, &mut builder, "SSR1", out, control, ground);
+    add_source(
+        &registry,
+        &mut builder,
+        "VC",
+        control,
+        ground,
+        control_voltage,
+    );
     builder.build().expect("circuit")
 }
 
@@ -331,6 +390,20 @@ fn registry_ideal_switch_changes_node_voltage() {
     let open = dc_voltage(&switch_circuit(0.0), "out");
     assert!(closed < 0.1, "closed {closed}");
     assert!(open > 4.9, "open {open}");
+}
+
+#[test]
+fn registry_connector_preserves_voltage() {
+    let voltage = dc_voltage(&connector_circuit(), "out");
+    assert!((voltage - 5.0).abs() < 1e-3, "voltage {voltage}");
+}
+
+#[test]
+fn registry_ssr_switches_output() {
+    let off = dc_voltage(&ssr_circuit(0.0), "out");
+    let on = dc_voltage(&ssr_circuit(5.0), "out");
+    assert!(off > 4.9, "off {off}");
+    assert!(on < 0.1, "on {on}");
 }
 
 #[test]
