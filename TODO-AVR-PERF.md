@@ -3,6 +3,16 @@
 Target: simulasi AVR mendekati real-time 16 MHz tanpa mengorbankan
 kebenaran fungsional. Setiap perubahan diukur sebelum dan sesudah.
 
+## Status
+
+- Terakhir diperbarui: 2026-11-14.
+- Commit implementasi: `813ab09` (fast core AVR).
+- Commit dokumentasi: `320e7ff` (hasil benchmark).
+- Build benchmark: release.
+- Test workspace: 786 lulus.
+- Hasil: 2,552x sampai 4,557x real-time pada tiga loop benchmark.
+- Sisa pekerjaan: pacing real-time CLI/GUI dan benchmark firmware penuh.
+
 ## Aturan
 
 - Benchmark memakai build release.
@@ -75,8 +85,20 @@ bash scripts/bench-avr.sh 1000000
 - [x] P-A16 Cache decode instruksi per alamat.
 - [x] P-A17 Tambah test signed multiply, shift flags, dan INC/DEC flags.
 - [x] P-A18 Dokumentasikan benchmark dan batas performa.
-- [ ] P-A19 Tambah real-time pacing untuk CLI dan GUI.
-- [ ] P-A20 Ukur firmware Arduino penuh dengan peripheral aktif.
+- [x] P-A19 Tambah trace cepat dengan menyalin array register.
+- [x] P-A20 Tambah benchmark loop memory dan test pointer.
+- [x] P-A21 Inline jalur fetch dan step, lalu ukur ulang.
+- [x] P-A22 Verifikasi final 786 test, clippy, ASCII, dan package.
+- [ ] P-A23 Tambah real-time pacing untuk CLI dan GUI.
+- [ ] P-A24 Ukur firmware Arduino penuh dengan peripheral aktif.
+
+## Riwayat Commit
+
+| Commit | Isi |
+|---|---|
+| `5f7e1f3` | Optimasi topological order, dirty cone, bitset, dan read port |
+| `813ab09` | Functional fast core, decode cache, benchmark, dan test |
+| `320e7ff` | Dokumentasi hasil benchmark dan status performa |
 
 ## Catatan
 
