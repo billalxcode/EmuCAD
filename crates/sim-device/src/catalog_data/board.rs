@@ -158,3 +158,7 @@ pub(crate) const ENTRIES: &[ComponentSpec] = &[
         variant: 0,
     },
 ];
+
+pub(crate) fn entries() -> &'static [ComponentSpec] {
+    ENTRIES
+}

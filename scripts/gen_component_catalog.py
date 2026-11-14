@@ -6,6 +6,7 @@ Run from the repository root:
     python3 scripts/gen_component_catalog.py
 """
 
+import re
 import shutil
 from pathlib import Path
 
@@ -507,18 +508,9 @@ for entry in entries:
     family = entry["id"].split(".", 1)[0]
     by_family[family].append(entry)
 
-for family in FAMILIES:
-    family_entries = by_family[family]
-    needs_device = any(entry["device"] != "None" for entry in family_entries)
-    lines = [
-        f"//! Generated {family} component catalog data.",
-        "",
-        "use crate::catalog::{ComponentSpec, ModelClass};",
-    ]
-    if needs_device:
-        lines.append("use sim_core::DeviceKind;")
-    lines.extend(["", "pub(crate) const ENTRIES: &[ComponentSpec] = &["])
-    for entry in family_entries:
+def entry_lines(entries):
+    lines = []
+    for entry in entries:
         lines.append(
             '    ComponentSpec {{ id: "{}", name: "{}", class: ModelClass::{}, device: {}, pins: {}, parameter: "{}", default: {}, unit: "{}", variant: {} }},'.format(
                 entry["id"], entry["name"], entry["class"], entry["device"],
@@ -526,8 +518,77 @@ for family in FAMILIES:
                 entry["variant"]
             )
         )
-    lines.extend(["];", ""])
+    return lines
+
+
+def class_slug(name):
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
+
+
+def data_header(family, entries):
+    needs_device = any(entry["device"] != "None" for entry in entries)
+    lines = [
+        f"//! Generated {family} component catalog data.",
+        "",
+        "use crate::catalog::{ComponentSpec, ModelClass};",
+    ]
+    if needs_device:
+        lines.append("use sim_core::DeviceKind;")
+    lines.append("")
+    return lines
+
+
+def write_flat_family(family, entries):
+    lines = data_header(family, entries)
+    lines.append("pub(crate) const ENTRIES: &[ComponentSpec] = &[")
+    lines.extend(entry_lines(entries))
+    lines.extend(["];", "", "pub(crate) fn entries() -> &'static [ComponentSpec] {", "    ENTRIES", "}", ""])
     (root / f"{family}.rs").write_text("\n".join(lines))
+
+
+def write_split_family(family, entries):
+    folder = root / family
+    folder.mkdir()
+    by_class = {}
+    for entry in entries:
+        by_class.setdefault(entry["class"], []).append(entry)
+    names = []
+    for class_name, class_entries in by_class.items():
+        name = class_slug(class_name)
+        names.append(name)
+        lines = data_header(f"{family} {name}", class_entries)
+        lines.append("pub(crate) const ENTRIES: &[ComponentSpec] = &[")
+        lines.extend(entry_lines(class_entries))
+        lines.extend(["];", ""])
+        (folder / f"{name}.rs").write_text("\n".join(lines))
+    lines = [
+        f"//! Generated {family} component catalog data.",
+        "",
+        *[f"mod {name};" for name in names],
+        "",
+        "use crate::catalog::ComponentSpec;",
+        "use std::sync::LazyLock;",
+        "",
+        "static CATALOG: LazyLock<Vec<ComponentSpec>> = LazyLock::new(|| {",
+        "    let mut entries = Vec::new();",
+        *[f"    entries.extend_from_slice({name}::ENTRIES);" for name in names],
+        "    entries",
+        "});",
+        "",
+        "pub(crate) fn entries() -> &'static [ComponentSpec] {",
+        "    &CATALOG",
+        "}",
+        "",
+    ]
+    (folder / "mod.rs").write_text("\n".join(lines))
+
+
+for family in FAMILIES:
+    family_entries = by_family[family]
+    if len(family_entries) > 40:
+        write_split_family(family, family_entries)
+    else:
+        write_flat_family(family, family_entries)
 
 module_lines = [
     "//! Generated component catalog aggregator.",
@@ -539,7 +600,7 @@ module_lines = [
     "",
     "static CATALOG: LazyLock<Vec<ComponentSpec>> = LazyLock::new(|| {",
     "    let mut entries = Vec::new();",
-    *[f"    entries.extend_from_slice({family}::ENTRIES);" for family in FAMILIES],
+    *[f"    entries.extend_from_slice({family}::entries());" for family in FAMILIES],
     "    entries",
     "});",
     "",

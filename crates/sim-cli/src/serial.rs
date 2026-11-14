@@ -188,11 +188,7 @@ impl Session {
     }
 
     fn handle_running_input(&mut self) -> Result<(), String> {
-        let Some(index) = self
-            .buffer
-            .iter()
-            .position(|byte| *byte == 0x1B || *byte == 0x30)
-        else {
+        let Some(index) = self.framing_prefix() else {
             self.feed_uart();
             return Ok(());
         };
@@ -209,6 +205,12 @@ impl Session {
                 Ok(())
             }
         }
+    }
+
+    fn framing_prefix(&self) -> Option<usize> {
+        self.buffer
+            .iter()
+            .position(|byte| *byte == 0x1B || *byte == 0x30)
     }
 
     fn feed_uart(&mut self) {

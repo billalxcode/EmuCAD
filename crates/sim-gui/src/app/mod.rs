@@ -70,7 +70,7 @@ const CONTEXT_COLORS: [(&str, [u8; 3]); 6] = [
 ];
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-enum Tool {
+pub(crate) enum Tool {
     #[default]
     Select,
     Place,
@@ -156,7 +156,7 @@ pub(crate) struct FileStamp {
 }
 
 #[derive(Clone, Copy, Debug)]
-struct SegmentDrag {
+pub(crate) struct SegmentDrag {
     wire: WireId,
     index: usize,
 }
@@ -186,7 +186,7 @@ pub(crate) struct SceneState {
     flow_phase: Option<f32>,
 }
 
-struct LibraryState {
+pub(crate) struct LibraryState {
     search: String,
     category: Option<Category>,
     chosen: Option<&'static ComponentDefinition>,

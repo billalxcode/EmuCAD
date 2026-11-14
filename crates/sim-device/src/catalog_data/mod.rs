@@ -22,22 +22,22 @@ use std::sync::LazyLock;
 
 static CATALOG: LazyLock<Vec<ComponentSpec>> = LazyLock::new(|| {
     let mut entries = Vec::new();
-    entries.extend_from_slice(passive::ENTRIES);
-    entries.extend_from_slice(source::ENTRIES);
-    entries.extend_from_slice(diode::ENTRIES);
-    entries.extend_from_slice(transistor::ENTRIES);
-    entries.extend_from_slice(protection::ENTRIES);
-    entries.extend_from_slice(switch::ENTRIES);
-    entries.extend_from_slice(analog::ENTRIES);
-    entries.extend_from_slice(logic::ENTRIES);
-    entries.extend_from_slice(memory::ENTRIES);
-    entries.extend_from_slice(mcu::ENTRIES);
-    entries.extend_from_slice(power::ENTRIES);
-    entries.extend_from_slice(sensor::ENTRIES);
-    entries.extend_from_slice(actuator::ENTRIES);
-    entries.extend_from_slice(rf::ENTRIES);
-    entries.extend_from_slice(behavioral::ENTRIES);
-    entries.extend_from_slice(board::ENTRIES);
+    entries.extend_from_slice(passive::entries());
+    entries.extend_from_slice(source::entries());
+    entries.extend_from_slice(diode::entries());
+    entries.extend_from_slice(transistor::entries());
+    entries.extend_from_slice(protection::entries());
+    entries.extend_from_slice(switch::entries());
+    entries.extend_from_slice(analog::entries());
+    entries.extend_from_slice(logic::entries());
+    entries.extend_from_slice(memory::entries());
+    entries.extend_from_slice(mcu::entries());
+    entries.extend_from_slice(power::entries());
+    entries.extend_from_slice(sensor::entries());
+    entries.extend_from_slice(actuator::entries());
+    entries.extend_from_slice(rf::entries());
+    entries.extend_from_slice(behavioral::entries());
+    entries.extend_from_slice(board::entries());
     entries
 });
 

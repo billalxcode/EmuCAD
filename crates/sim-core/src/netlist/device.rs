@@ -76,13 +76,10 @@ impl DeviceKind {
             Self::Resistor => "resistor",
             Self::Capacitor => "capacitor",
             Self::Inductor => "inductor",
-            Self::VoltageSource => "voltage_source",
-            Self::PulseVoltageSource => "pulse_voltage_source",
-            Self::CurrentSource => "current_source",
-            Self::Vcvs => "vcvs",
-            Self::Vccs => "vccs",
-            Self::Cccs => "cccs",
-            Self::Ccvs => "ccvs",
+            Self::VoltageSource | Self::PulseVoltageSource | Self::CurrentSource => {
+                self.source_name()
+            }
+            Self::Vcvs | Self::Vccs | Self::Cccs | Self::Ccvs => self.controlled_name(),
             Self::Switch => "switch",
             Self::IdealSwitch => "ideal_switch",
             Self::Relay => "relay",
@@ -91,6 +88,23 @@ impl DeviceKind {
             Self::Regulator => "regulator",
             Self::LogicGate => "logic_gate",
             other => other.analog_name(),
+        }
+    }
+
+    fn source_name(&self) -> &'static str {
+        match self {
+            Self::PulseVoltageSource => "pulse_voltage_source",
+            Self::CurrentSource => "current_source",
+            _ => "voltage_source",
+        }
+    }
+
+    fn controlled_name(&self) -> &'static str {
+        match self {
+            Self::Vccs => "vccs",
+            Self::Cccs => "cccs",
+            Self::Ccvs => "ccvs",
+            _ => "vcvs",
         }
     }
 
