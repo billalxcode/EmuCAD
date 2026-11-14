@@ -1,5 +1,5 @@
 use super::{ComponentRegistry, ComponentRequest, Family, catalog};
-use sim_core::{Device, DeviceId, NodeId};
+use sim_core::{CircuitBuilder, Device, DeviceId, NodeId};
 use std::collections::BTreeSet;
 
 #[test]
@@ -233,6 +233,19 @@ fn registry_instantiates_and_models_solver_entries() {
             spec.id
         );
     }
+}
+
+#[test]
+fn registry_add_to_rejects_wrong_pin_count() {
+    let registry = ComponentRegistry::new();
+    let mut builder = CircuitBuilder::new();
+    let request = ComponentRequest::new(
+        "passive.resistor.ideal_resistor",
+        "r1",
+        DeviceId::new(0),
+        vec![NodeId::GROUND],
+    );
+    assert!(registry.add_to(&mut builder, &request).is_err());
 }
 
 #[test]

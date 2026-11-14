@@ -84,12 +84,7 @@ impl ComponentRegistry {
     pub fn instantiate(&self, request: &ComponentRequest) -> Result<DeviceInstance, SimError> {
         let spec = self.require(request.entry)?;
         let device = self.require_device(spec)?;
-        if request.pins.len() != usize::from(spec.pins) {
-            return Err(SimError::InvalidNetlist(format!(
-                "{} requires {} pins",
-                spec.name, spec.pins
-            )));
-        }
+        require_pins(spec, &request.pins)?;
         let parameters = parameters_for(spec, &request.parameters);
         Ok(DeviceInstance::new(
             request.device_id,
@@ -119,6 +114,7 @@ impl ComponentRegistry {
     ) -> Result<DeviceId, SimError> {
         let spec = self.require(request.entry)?;
         let device = self.require_device(spec)?;
+        require_pins(spec, &request.pins)?;
         let parameters = parameters_for(spec, &request.parameters);
         builder.device(
             request.name.clone(),
@@ -138,6 +134,16 @@ impl ComponentRegistry {
             .clone()
             .ok_or_else(|| SimError::UnsupportedDevice(spec.name.to_string()))
     }
+}
+
+fn require_pins(spec: &ComponentSpec, pins: &[NodeId]) -> Result<(), SimError> {
+    if pins.len() == usize::from(spec.pins) {
+        return Ok(());
+    }
+    Err(SimError::InvalidNetlist(format!(
+        "{} requires {} pins",
+        spec.name, spec.pins
+    )))
 }
 
 fn parameters_for(
