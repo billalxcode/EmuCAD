@@ -2,7 +2,7 @@
 
 Daftar tugas lengkap dari hal terkecil sampai rilis. Setiap item harus kecil, dapat diuji, dan tidak menambah dependensi eksternal.
 
-> **Status:** P0 fondasi selesai. P8 selesai penuh. P9 sebagian besar selesai; ELF loader, simbol, ELF ke HEX, dan UART end-to-end selesai. P10 sparse, adaptive step, trapezoidal/Gear, AC linear, noise termal, distorsi kuasi-statis, sensitivitas numerik, suhu device, process corner, BJT, JFET, transmission line, determinisme Linux, fidelity matrix, batasan model, profiling, dan optimasi selesai. Golden suite dan determinisme macOS/Windows belum. P4 harness ngspice dan golden data belum karena ngspice tidak tersedia. P5 characterization, switching, input capacitance, drive strength, dan osilasi ring oscillator selesai; perbandingan ngspice belum. P11 user guide, contoh runnable, workflow CI, dan notices selesai; eksekusi GitHub Actions, tag, dan publikasi belum; packaging dan release notes siap. X-03 panic audit selesai; builder sel mencatat error dan melaporkannya di build. P3 body effect, gmb, Meyer capacitance, overlap, diode nonideal, BJT, JFET, transmission line, VCVS, VCCS, CCVS, CCCS, dan switch selesai; breakdown dan model termal lanjutan belum. P12 selesai: adaptive initial state, Newton transient, dan AC nonlinier. P13 selesai: kapasitansi diode dan MOSFET pada AC; kapasitansi BJT dan JFET belum. P14 selesai: AC controlled sources dan switch. P15 selesai: kapasitansi BJT dan JFET pada AC/transient. P16 selesai: virtual serial upload STK500 via socat. P17 selesai: UART0 register map, TX/RX, dan interrupt otomatis ke serial monitor. P18 riset selesai: virtual USB serial. P19 virtual USB berjalan: bridge C++, ConfigFS ACM, /dev/ttyACM0, STK500v1, upload avrdude, dan sketsa Arduino core `Serial.println("Hello World")` berhasil; verifikasi GUI Arduino IDE dan cleanup gadget belum. P20 desain GUI egui selesai dan implementasi dimulai: crate `sim-gui`, app shell, canvas grid, pan, zoom, status bar, library komponen, placement, selection, drag move, rotate, mirror, inspector, wire ortogonal, junction, warna net, selection wire, delete wire, segment drag, saran jalur L, saran jalur Z, save/load JSON, undo/redo, autosave, backup, recent files, konfigurasi XDG, prompt reload file eksternal, label net, legenda warna, command palette, multi-select, selection box, copy/paste/duplicate, rotate/mirror grup, context menu dasar, monitor UART TX, input UART RX, pola garis net, toast, konfirmasi hapus, export PNG, minimap, log panel, tooltip pin, tema terang, recently used, preview library, drag-and-drop library, ruler grid, probe tegangan PB5, arus LED, animasi aliran sinyal opsional, graph analog PB5, sampling probe N cycle, batas 8 series, API probe read-only, spatial hash hit testing, app error type, toolbar ikon ASCII, golden RGBA headless, net highlight, override warna wire, label net kustom, migrasi JSON v1, simulasi PB5, dan graph digital PB5/LED dengan cursor; dependensi GUI `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png` disetujui hanya untuk `sim-gui`. P21 binding Python selesai untuk katalog dan netlist: crate `sim-python`, `pyo3`, `emucad.catalog`, `emucad.find_component`, `emucad.build_netlist`, error mapping, smoke test, dan dokumentasi; ekspor simulasi ke Python belum.
+> **Status:** P0 fondasi selesai. P8 selesai penuh. P9 sebagian besar selesai; ELF loader, simbol, ELF ke HEX, dan UART end-to-end selesai. P10 sparse, adaptive step, trapezoidal/Gear, AC linear, noise termal, distorsi kuasi-statis, sensitivitas numerik, suhu device, process corner, BJT, JFET, transmission line, determinisme Linux, fidelity matrix, batasan model, profiling, dan optimasi selesai. Golden suite dan determinisme macOS/Windows belum. P4 harness ngspice dan golden data belum karena ngspice tidak tersedia. P5 characterization, switching, input capacitance, drive strength, dan osilasi ring oscillator selesai; perbandingan ngspice belum. P11 user guide, contoh runnable, workflow CI, dan notices selesai; eksekusi GitHub Actions, tag, dan publikasi belum; packaging dan release notes siap. X-03 panic audit selesai; builder sel mencatat error dan melaporkannya di build. P3 body effect, gmb, Meyer capacitance, overlap, diode nonideal, BJT, JFET, transmission line, VCVS, VCCS, CCVS, CCCS, dan switch selesai; breakdown dan model termal lanjutan belum. P12 selesai: adaptive initial state, Newton transient, dan AC nonlinier. P13 selesai: kapasitansi diode dan MOSFET pada AC; kapasitansi BJT dan JFET belum. P14 selesai: AC controlled sources dan switch. P15 selesai: kapasitansi BJT dan JFET pada AC/transient. P16 selesai: virtual serial upload STK500 via socat. P17 selesai: UART0 register map, TX/RX, dan interrupt otomatis ke serial monitor. P18 riset selesai: virtual USB serial. P19 virtual USB berjalan: bridge C++, ConfigFS ACM, /dev/ttyACM0, STK500v1, upload avrdude, dan sketsa Arduino core `Serial.println("Hello World")` berhasil; verifikasi GUI Arduino IDE dan cleanup gadget belum. P20 desain GUI egui selesai dan implementasi dimulai: crate `sim-gui`, app shell, canvas grid, pan, zoom, status bar, library komponen, placement, selection, drag move, rotate, mirror, inspector, wire ortogonal, junction, warna net, selection wire, delete wire, segment drag, saran jalur L, saran jalur Z, save/load JSON, undo/redo, autosave, backup, recent files, konfigurasi XDG, prompt reload file eksternal, label net, legenda warna, command palette, multi-select, selection box, copy/paste/duplicate, rotate/mirror grup, context menu dasar, monitor UART TX, input UART RX, pola garis net, toast, konfirmasi hapus, export PNG, minimap, log panel, tooltip pin, tema terang, recently used, preview library, drag-and-drop library, ruler grid, probe tegangan PB5, arus LED, animasi aliran sinyal opsional, graph analog PB5, sampling probe N cycle, batas 8 series, API probe read-only, spatial hash hit testing, app error type, toolbar ikon ASCII, golden RGBA headless, net highlight, override warna wire, label net kustom, migrasi JSON v1, simulasi PB5, dan graph digital PB5/LED dengan cursor; dependensi GUI `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png` disetujui hanya untuk `sim-gui`. P21 binding Python selesai untuk katalog dan netlist: crate `sim-python`, `pyo3`, `emucad.catalog`, `emucad.find_component`, `emucad.build_netlist`, error mapping, smoke test, dan dokumentasi; ekspor simulasi ke Python belum. P22 performa AVR selesai untuk loop ALU, mixed, dan memory: 2,6-4,6x real-time pada build release; pacing CLI/GUI dan benchmark firmware penuh belum.
 > **Aturan:** satu item selesai = kode + test + dokumentasi singkat.
 
 ---
@@ -907,6 +907,30 @@ Backlog detail: [`TODO-COMPONENTS.md`](TODO-COMPONENTS.md).
 
 **Exit P21:** Python dapat memuat katalog, membangun netlist, menjalankan
 simulasi, dan membaca hasil tanpa menduplikasi model di Python.
+
+---
+
+## P22 - Performa AVR
+
+Backlog detail dan riwayat pengukuran:
+[`TODO-AVR-PERF.md`](TODO-AVR-PERF.md).
+
+- [x] P22-01 Buat benchmark AVR release untuk loop ALU, mixed, dan memory.
+- [x] P22-02 Ukur baseline sebelum optimasi.
+- [x] P22-03 Tambah `step_untraced` dan `run_untraced`.
+- [x] P22-04 Tambah NetId langsung, topological order, dirty cone, dan bitset.
+- [x] P22-05 Tambah register file fungsional dan ALU murni.
+- [x] P22-06 Tambah fast path logic, shift, multiply, INC/DEC, dan NEG.
+- [x] P22-07 Cache decode instruksi per alamat.
+- [x] P22-08 Skip peripheral serial saat idle.
+- [x] P22-09 Tambah test signed multiply, shift flags, dan update flags.
+- [x] P22-10 Dokumentasikan benchmark dan batas performa.
+- [ ] P22-11 Tambah real-time pacing untuk CLI dan GUI.
+- [ ] P22-12 Ukur firmware Arduino penuh dengan timer/UART/GPIO aktif.
+- [ ] P22-13 Tambah switch mode struktural untuk validasi fidelity.
+
+**Exit P22:** simulation AVR berjalan minimal 1x real-time pada loop
+representatif dan tetap lulus seluruh test fungsional.
 
 ---
 

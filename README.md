@@ -4,7 +4,7 @@
 yang memodelkan transistor, gerbang CMOS, CPU AVR, peripheral, dan board,
 serta mampu menjalankan firmware AVR.
 
-> **Status v0.1:** 774 test lulus, 9 crate, crate simulasi zero external
+> **Status v0.1:** 786 test lulus, 9 crate, crate simulasi zero external
 > dependency; dependensi GUI dan binding Python dibatasi pada daftar yang
 > disetujui di `AGENTS.md`.
 > Tag `v0.1` tersedia. Archive Linux ada di
@@ -118,7 +118,7 @@ bash .opencode/skills/clean-code/scripts/check.sh
 | `sim-device` | Model device dan stamping MNA |
 | `sim-analysis` | DC, transient, AC, noise, distorsi, sensitivitas |
 | `sim-cells` | Sel CMOS struktural dan pustaka digital |
-| `sim-avr` | CPU AVR, decoder, ALU, register, peripheral |
+| `sim-avr` | CPU AVR fast functional core, decoder, peripheral, primitif struktural |
 | `sim-board` | Board, LED, button, UART host, Intel HEX, ELF, CSV/VCD |
 | `sim-cli` | Binary `emucad`, monitor, disassembler, benchmark, catalog JSON |
 | `sim-python` | Binding Python untuk katalog dan builder netlist |
@@ -165,7 +165,7 @@ Dokumen yang sering dipakai:
 
 Sudah:
 
-- 774 test workspace.
+- 786 test workspace.
 - fmt, clippy, test, dan build release lulus.
 - Paket Linux dapat dibuat.
 - Determinisme Linux diuji.

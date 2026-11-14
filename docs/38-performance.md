@@ -78,30 +78,45 @@ setelah clone.
 `MnaContext` dan `SimulationSystem` berbagi `Arc<Vec<Option<usize>>>` untuk
 node dan branch. Sebelumnya kedua mapping di-clone pada setiap solve.
 
-### 3.4 Settle per Komponen Digital
+### 3.4 Fast Path Fungsional AVR
 
-Sirkuit digital CPU dipecah menjadi komponen terhubung saat build.
-Perubahan input hanya menandai komponen yang terpengaruh. `settle` kemudian
-mengevaluasi gate pada komponen kotor saja, bukan seluruh sirkuit.
+CPU AVR memakai jalur fungsional untuk instruksi panas:
 
-DFF juga menandai komponennya saat nilai output berubah. Perubahan pada
-register bank tidak lagi memaksa ALU, timer, atau GPIO ikut disettle.
+- Register disimpan sebagai array `[u8; 32]`, bukan register bank gate-level.
+- ADD/ADC/SUB/SBC/CP/CPC/CPI memakai helper flag murni.
+- Logic, INC/DEC/NEG, shift, dan multiply dihitung langsung di Rust.
+- Hasil decode instruksi di-cache per alamat program.
+- Trace hanya dibuat pada API `step`; `step_untraced` tidak menyalin snapshot.
+- Peripheral serial dilewati saat tidak ada transfer aktif dan interrupt UART mati.
 
-Hasil release build, 300 ribu langkah:
+Unit struktural ALU, shift, multiply, dan register bank tetap tersedia di
+`sim-cells` dan `sim-avr` untuk test dan pengembangan mode struktural.
+Hot path `Cpu` tidak lagi membangun unit-unit itu.
 
-| Jalur | Sebelum | Sesudah |
-|---|---|---|
-| LDI | 4.93 s | 1.85 s |
-| ADD | 7.94 s | 2.19 s |
-| OUT | 1.84 s | 0.33 s |
-| Sketsa Arduino 1 juta langkah | 22.5 s | 14.7 s |
+Hasil final, median tiga run, 1.000.000 instruksi, release build:
 
-Angka bergantung mesin. Optimasi ini mempertahankan model register bank
-dan unit datapath struktural.
+| Program | mode | instructions/detik | cycles/detik | real-time |
+|---|---|---:|---:|---:|
+| ALU | traced | 32.667.451 | 40.834.314 | 2,552x |
+| ALU | untraced | 37.830.936 | 47.288.670 | 2,956x |
+| Mixed | traced | 34.835.892 | 41.169.720 | 2,573x |
+| Mixed | untraced | 38.925.844 | 46.003.303 | 2,875x |
+| Memory | traced | 35.460.085 | 62.055.149 | 3,878x |
+| Memory | untraced | 41.667.510 | 72.918.143 | 4,557x |
 
-Bottleneck yang tersisa adalah komponen register bank struktural.
-Penulisan register masih harus men-settle komponen tersebut, sehingga
-simulasi belum mendekati real-time.
+Reproduksi:
+
+```bash
+bash scripts/bench-avr.sh 1000000
+```
+
+Real-time factor dihitung dari cycles/detik dibagi 16 MHz. Nilai di atas 1
+berarti simulasi lebih cepat dari AVR 16 MHz. CLI dan GUI tetap perlu
+pacing agar tidak berjalan terlalu cepat.
+
+Setelah optimasi, circuit CPU berisi 120 gate, 3 komponen, 48 DFF, dengan
+komponen terbesar 40 gate. Sisa bottleneck ada di dispatch `step_inner`,
+fetch cache, dan peripheral yang aktif.
 
 ---
 

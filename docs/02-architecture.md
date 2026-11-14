@@ -48,7 +48,7 @@ embed-emulation/
 | `sim-device` | MOSFET, R, C, L, dioda, BJT, JFET, sumber | Analisis, CPU |
 | `sim-analysis` | DC op, sweep, transient, AC, noise, konvergensi | Firmware, board |
 | `sim-cells` | Sel CMOS, gerbang, DFF, SRAM cell, characterization | AVR |
-| `sim-avr` | CPU struktural, ISA, register, peripheral | Board |
+| `sim-avr` | CPU AVR fast functional core, ISA, peripheral; primitif struktural untuk validasi | Board |
 | `sim-board` | Board netlist, LED, tombol, UART host | Detail CPU |
 | `sim-cli` | Argumen, orkestrasi, output, monitor, catalog JSON | Implementasi internal device |
 | `sim-gui` | UI egui, canvas, persistence, worker simulasi | Implementasi internal device dan solver |

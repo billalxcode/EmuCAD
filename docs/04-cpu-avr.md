@@ -1,6 +1,15 @@
-# 04 — CPU AVR Struktural
+# 04 - CPU AVR Struktural
 
-Dokumen ini menjelaskan desain CPU ATmega328P yang dibangun dari transistor/gerbang, bukan instruction-set simulator.
+Dokumen ini menjelaskan desain target CPU ATmega328P yang dibangun dari
+transistor/gerbang, bukan instruction-set simulator.
+
+> **Status implementasi:** target jangka panjang tetap struktural. Hot path
+> `sim-avr` saat ini memakai functional fast core agar mencapai real-time:
+> register array, ALU murni, shift, multiply, dan decode cache. Primitif
+> struktural tetap tersedia di `sim-cells` dan modul `alu`, `shift`,
+> `multiply`, serta `register_bank` untuk validasi dan pengembangan mode
+> struktural. GPIO masih memakai circuit gate-level; UART/SPI/TWI/ADC
+> behavioral.
 
 ---
 
@@ -24,7 +33,7 @@ Dokumen ini menjelaskan desain CPU ATmega328P yang dibangun dari transistor/gerb
 | Flash | 32 KB (behavioral) |
 | SRAM | 2 KB (behavioral) |
 | EEPROM | 1 KB (behavioral) |
-| Register | 32 × 8-bit |
+| Register | 32 x 8-bit |
 | PC | 16-bit (word/byte address sesuai model) |
 | SP | 16-bit |
 | Clock | 16 MHz |
@@ -40,12 +49,12 @@ Dokumen ini menjelaskan desain CPU ATmega328P yang dibangun dari transistor/gerb
 
 Fase yang direncanakan:
 
-1. **FETCH** — ambil instruction word dari flash.
-2. **DECODE** — decode opcode, baca register.
-3. **EXECUTE** — ALU, address calculation, branch.
-4. **MEMORY** — load/store bila ada.
-5. **WRITEBACK** — tulis register/SREG.
-6. **INTERRUPT CHECK** — sebelum instruksi berikutnya.
+1. **FETCH** - ambil instruction word dari flash.
+2. **DECODE** - decode opcode, baca register.
+3. **EXECUTE** - ALU, address calculation, branch.
+4. **MEMORY** - load/store bila ada.
+5. **WRITEBACK** - tulis register/SREG.
+6. **INTERRUPT CHECK** - sebelum instruksi berikutnya.
 
 Tidak semua instruksi melewati semua fase; FSM memilih jalur sesuai opcode.
 
@@ -54,13 +63,15 @@ Tidak semua instruksi melewati semua fase; FSM memilih jalur sesuai opcode.
 - Hardwired/PLA.
 - Input: opcode, flags, interrupt pending, reset.
 - Output: sinyal kontrol ALU, register write, memory read/write, PC load, SREG update.
-- PLA diimplementasikan dari gerbang CMOS, bukan table di Rust.
-- Untuk milestone awal, table perilaku boleh menjadi spesifikasi test, tetapi implementasi tetap struktural.
+- Target: PLA diimplementasikan dari gerbang CMOS, bukan table di Rust.
+- Status saat ini: dispatch instruksi memakai jalur fungsional Rust. Mode
+  struktural penuh belum diaktifkan.
 
 ### 3.3 ALU
 
-- 8-bit ripple-carry adder.
-- Bit-slice: satu slice per bit.
+- Target: 8-bit ripple-carry adder dan bit-slice per bit.
+- Status saat ini: hot path memakai helper flag murni; unit struktural
+  ripple-carry tetap tersedia untuk test dan validasi.
 - Operasi:
   - ADD, ADC
   - SUB, SBC, SUBI, SBCI
@@ -83,11 +94,11 @@ Tidak semua instruksi melewati semua fase; FSM memilih jalur sesuai opcode.
 
 ### 3.4 Register File
 
-- 32 register × 8-bit.
+- 32 register x 8-bit.
 - DFF statis per bit.
 - Address decoder 5-to-32.
 - Dua port baca, satu port tulis (atau sesuai kebutuhan ISA).
-- Register 26–31 (X, Y, Z) dapat diakses sebagai pasangan 16-bit.
+- Register 26-31 (X, Y, Z) dapat diakses sebagai pasangan 16-bit.
 - Reset state: 0.
 
 ### 3.5 PC, IR, SP
@@ -103,10 +114,10 @@ Tidak semua instruksi melewati semua fase; FSM memilih jalur sesuai opcode.
 - SRAM: behavioral array 2 KB.
 - EEPROM: behavioral array 1 KB.
 - Data space map:
-  - 0x0000–0x001F: register.
-  - 0x0020–0x005F: I/O.
-  - 0x0060–0x00FF: extended I/O.
-  - 0x0100–0x08FF: SRAM.
+  - 0x0000-0x001F: register.
+  - 0x0020-0x005F: I/O.
+  - 0x0060-0x00FF: extended I/O.
+  - 0x0100-0x08FF: SRAM.
 - Akses memori mengikuti timing yang didefinisikan; detail wait state `TBD`.
 
 ---
@@ -176,11 +187,11 @@ Setiap instruksi harus punya test vector, termasuk edge case.
 - Sebagian besar instruksi 1 siklus.
 - Load/store 2 siklus.
 - Branch taken 2 siklus.
-- CALL/RCALL/RET/RETI 3–4 siklus.
+- CALL/RCALL/RET/RETI 3-4 siklus.
 - Interrupt entry 4 siklus.
 - Nilai persis mengikuti datasheet dan diverifikasi lewat test.
 
-Clock 16 MHz → 62.5 ns per siklus. Structural delay harus cukup cepat untuk 16 MHz; jika tidak, itu bug desain.
+Clock 16 MHz -> 62.5 ns per siklus. Structural delay harus cukup cepat untuk 16 MHz; jika tidak, itu bug desain.
 
 ---
 
@@ -290,7 +301,7 @@ quit
 ### 8.1 Test Vector ISA
 
 - Setiap instruksi diuji dengan operand normal, edge case, dan flag.
-- Arithmetic exhaustif untuk 8-bit add/sub (256 × 256).
+- Arithmetic exhaustif untuk 8-bit add/sub (256 x 256).
 - Shift/rotate edge case.
 - Load/store semua mode.
 - Branch taken/not taken.
@@ -317,6 +328,8 @@ quit
 - Model struktural harus cocok dengan model behavioral/ISS untuk perilaku yang sama.
 - Perbedaan timing dicatat dan dijelaskan.
 - Model behavioral dapat menjadi oracle tambahan.
+- Hot path CPU saat ini fungsional untuk mencapai real-time; mode
+  struktural penuh tetap target validasi, bukan default runtime.
 
 ---
 
