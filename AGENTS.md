@@ -19,8 +19,11 @@ Baca file ini sebelum mengubah kode, dokumen, atau konfigurasi.
 
 ## 2. Aturan Tidak Bisa Dinegosiasikan
 
-1. Zero external dependency untuk semua crate, dengan pengecualian `sim-gui` yang boleh memakai `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png`. `egui_plot`, `libloading`, dan crate eksternal lain tidak diizinkan tanpa keputusan baru.
-2. Tidak ada `unsafe`.
+1. Zero external dependency untuk semua crate, dengan pengecualian:
+   - `sim-gui` boleh memakai `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png`.
+   - `sim-python` boleh memakai `pyo3` dan turunannya untuk binding Python.
+   `egui_plot`, `libloading`, dan crate eksternal lain tidak diizinkan tanpa keputusan baru.
+2. Tidak ada `unsafe` manual. Pengecualian hanya untuk kode FFI yang dihasilkan `pyo3` di `sim-python`; crate lain tetap `forbid(unsafe_code)`.
 3. Semua teks baru atau yang diubah harus ASCII.
 4. Tidak ada em dash, en dash, kutip melengkung, elipsis Unicode, panah Unicode, atau bullet Unicode.
 5. Setiap fungsi maksimal 20 baris.
@@ -123,6 +126,11 @@ sim-gui
   +-- sim-analysis
   +-- sim-device
   `-- sim-core
+
+sim-python
+  +-- sim-device
+  |   `-- sim-core
+  `-- sim-core
 ```
 
 Aturan:
@@ -135,8 +143,10 @@ Aturan:
 - `sim-board` hanya bergantung pada `sim-core`, `sim-device`, dan `sim-avr`.
 - `sim-cli` adalah adapter dan komposisi.
 - `sim-gui` adalah adapter dan komposisi.
+- `sim-python` adalah adapter binding Python untuk katalog dan netlist.
 - `sim-gui` boleh memakai `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png`; crate lain tidak boleh.
-- Tidak ada crate yang bergantung pada `sim-cli` atau `sim-gui`.
+- `sim-python` boleh memakai `pyo3`; crate lain tidak boleh.
+- Tidak ada crate yang bergantung pada `sim-cli`, `sim-gui`, atau `sim-python`.
 - Tidak ada siklus.
 - `main.rs` tidak berisi logika simulasi.
 - `sim-core` tidak memakai `println!`, filesystem, atau wall-clock.
@@ -181,8 +191,8 @@ Jika boundary perlu diubah, jelaskan alasan dan dampaknya sebelum menulis kode.
 - Gunakan guard clause.
 - Jaga fungsi maksimal 20 baris.
 - Reuse fungsi yang ada.
-- Jangan menambah dependensi eksternal di luar daftar `sim-gui`.
-- Jangan memakai `unsafe`.
+- Jangan menambah dependensi eksternal di luar daftar `sim-gui` dan `sim-python`.
+- Jangan memakai `unsafe` manual; pengecualian hanya glue `pyo3` di `sim-python`.
 
 ### Langkah 6 - Verifikasi
 
@@ -219,7 +229,7 @@ Berhenti dan tanya jika:
 
 - Permintaan bertentangan dengan aturan di file ini.
 - Perubahan akan melanggar boundary crate.
-- Perlu menambah dependensi eksternal di luar daftar `sim-gui`.
+- Perlu menambah dependensi eksternal di luar daftar `sim-gui` dan `sim-python`.
 - Perlu mengubah API publik tanpa migrasi.
 - Perilaku saat ini tidak dipahami dan belum ada test.
 - Fungsi yang akan diubah sudah lebih dari 20 baris dan pemecahannya tidak jelas.
@@ -239,8 +249,8 @@ Jangan menebak. Jangan mengarang. Jangan memaksa.
 - [ ] Setiap fungsi maksimal 20 baris.
 - [ ] Fungsi existing sudah dicari dan digunakan ulang.
 - [ ] Tidak ada duplikasi fungsi.
-- [ ] Tidak ada dependensi eksternal di luar daftar `sim-gui`.
-- [ ] Tidak ada `unsafe`.
+- [ ] Tidak ada dependensi eksternal di luar daftar `sim-gui` dan `sim-python`.
+- [ ] Tidak ada `unsafe` manual; hanya glue `pyo3` di `sim-python`.
 - [ ] ASCII-only untuk file yang diubah.
 - [ ] `fmt`, `clippy`, dan `test` lulus.
 - [ ] Dokumentasi diperbarui jika perlu.
@@ -388,8 +398,8 @@ Jangan menulis "kode ini buruk" tanpa alasan dan solusi.
 
 ## 13. Larangan
 
-- Jangan menambah crate eksternal di luar daftar `sim-gui`.
-- Jangan memakai `unsafe`.
+- Jangan menambah crate eksternal di luar daftar `sim-gui` dan `sim-python`.
+- Jangan memakai `unsafe` manual; pengecualian hanya glue `pyo3` di `sim-python`.
 - Jangan memakai wall-clock di simulation.
 - Jangan memakai `println!` di core.
 - Jangan memakai `unwrap()` pada input pengguna.

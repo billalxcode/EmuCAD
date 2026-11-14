@@ -10,7 +10,7 @@ Dokumen ini menjelaskan struktur software, model waktu, netlist, API, dan aturan
 2. **Device tidak mengetahui analisis**; device hanya melakukan stamping.
 3. **Netlist adalah pusat**, bukan MCU.
 4. **Hierarchy untuk desain, flatten untuk solver.**
-5. **Zero external dependency untuk crate simulasi**; hanya `sim-gui` yang boleh memakai `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png`.
+5. **Zero external dependency untuk crate simulasi**; hanya `sim-gui` yang boleh memakai `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png`, serta `sim-python` yang boleh memakai `pyo3`.
 6. **Determinisme dulu**, optimasi kemudian.
 7. **Setiap lapisan dapat diuji sendiri.**
 
@@ -20,7 +20,7 @@ Dokumen ini menjelaskan struktur software, model waktu, netlist, API, dan aturan
 
 ```
 embed-emulation/
-|-- Cargo.toml                  # workspace; dependensi eksternal hanya di sim-gui
+|-- Cargo.toml                  # workspace; dependensi eksternal hanya di sim-gui dan sim-python
 |-- rust-toolchain.toml
 |-- LICENSE
 |-- README.md
@@ -34,7 +34,8 @@ embed-emulation/
 |   |-- sim-avr/
 |   |-- sim-board/
 |   |-- sim-cli/
-|   `-- sim-gui/
+|   |-- sim-gui/
+|   `-- sim-python/
 |-- examples/
 `-- firmware/
 ```
@@ -51,6 +52,7 @@ embed-emulation/
 | `sim-board` | Board netlist, LED, tombol, UART host | Detail CPU |
 | `sim-cli` | Argumen, orkestrasi, output, monitor | Implementasi internal device |
 | `sim-gui` | UI egui, canvas, persistence, worker simulasi | Implementasi internal device dan solver |
+| `sim-python` | Binding Python untuk katalog dan netlist | Simulasi, GUI, firmware |
 
 ### 2.2 Dependency Graph
 
@@ -74,11 +76,16 @@ sim-gui
   |-- sim-analysis
   |-- sim-device
   `-- sim-core
+
+sim-python
+  |-- sim-device
+  |     `-- sim-core
+  `-- sim-core
 ```
 
-Tidak ada crate simulasi yang bergantung pada crate GUI atau ke luar
-workspace. Hanya `sim-gui` yang memakai dependensi eksternal yang
-disetujui.
+Tidak ada crate simulasi yang bergantung pada crate GUI, Python, atau ke
+luar workspace. Hanya `sim-gui` dan `sim-python` yang memakai dependensi
+eksternal yang disetujui.
 
 ---
 
