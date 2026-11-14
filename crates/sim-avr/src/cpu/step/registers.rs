@@ -2,10 +2,7 @@ use super::*;
 
 impl Cpu {
     pub fn register(&self, index: u8) -> u8 {
-        self.datapath
-            .bank
-            .read_byte(&self.circuit, usize::from(index))
-            .unwrap_or(0)
+        self.registers.get(usize::from(index)).copied().unwrap_or(0)
     }
 
     /// Returns an I/O register value.

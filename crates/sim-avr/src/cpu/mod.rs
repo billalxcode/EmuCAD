@@ -1,21 +1,17 @@
 //! AVR execution core with a structural datapath.
 
 use super::adc::Adc;
-use super::alu::{ArithmeticUnit, LogicUnit, arithmetic_unit, logic_unit, select_operand};
 use super::fetch::ProgramMemory;
 use super::gpio::GpioPort;
 use super::instruction::{Instruction, Mnemonic, Operand};
-use super::multiply::{MultiplyUnit, multiply_unit};
 use super::pin::{ExternalPin, PinElectrical, PinElectricalConfig, measure_pin};
-use super::register_bank::RegisterBank;
-use super::shift::{ShiftUnit, shift_unit};
 use super::spi::Spi;
 use super::timer0::Timer0;
 use super::timer1::Timer1;
 use super::timer2::Timer2;
 use super::twi::Twi;
 use super::uart::Uart;
-use sim_cells::{DigitalBuilder, DigitalCircuit, NetId, RegisterPorts, read_bits};
+use sim_cells::{DigitalBuilder, DigitalCircuit};
 use sim_core::SimError;
 
 /// AVR status register state.
@@ -128,16 +124,11 @@ pub struct AvrTrace {
     pub total_cycles: u64,
 }
 
-struct AluNets {
-    first: Vec<NetId>,
-    second: Vec<NetId>,
-    immediate: Vec<NetId>,
-    use_immediate: NetId,
-    subtract: NetId,
-    carry: NetId,
+struct StepOutcome {
+    trace: Option<AvrTrace>,
+    cycles: u8,
 }
 
-#[derive(Clone, Copy)]
 struct MemoryMode {
     base: u8,
     post: bool,
@@ -174,11 +165,6 @@ impl Serial {
 }
 
 struct Datapath {
-    bank: RegisterBank,
-    arithmetic: ArithmeticUnit,
-    logic: LogicUnit,
-    shift: ShiftUnit,
-    multiply: MultiplyUnit,
     gpio: Gpio,
     timers: Timers,
     serial: Serial,
@@ -189,6 +175,7 @@ struct Datapath {
 pub struct Cpu {
     circuit: DigitalCircuit,
     datapath: Datapath,
+    registers: [u8; 32],
     program: ProgramMemory,
     pc: u16,
     sreg: Sreg,
@@ -211,14 +198,6 @@ struct PinChange {
     last_pin: [u8; 3],
 }
 
-struct Units {
-    arithmetic: ArithmeticUnit,
-    logic: LogicUnit,
-    shift: ShiftUnit,
-    multiply: MultiplyUnit,
-}
-
-mod arithmetic;
 mod build;
 mod execute;
 mod helpers;

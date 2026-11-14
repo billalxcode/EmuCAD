@@ -114,3 +114,25 @@ fn ijmp_uses_z_pointer() {
     assert_eq!(cpu.register(16), 0);
     assert_eq!(cpu.register(17), 4);
 }
+
+#[test]
+fn memory_benchmark_loop_stays_in_program() {
+    let program = vec![0xE0A0, 0xE0B2, 0xE505, 0x930C, 0x911C, 0x0F01, 0xCFFC];
+    let mut cpu = Cpu::new(program).expect("cpu");
+    for step in 0..10_000 {
+        match cpu.step_untraced() {
+            Ok(Some(_)) => {}
+            Ok(None) => panic!("halted at {step}"),
+            Err(error) => panic!("step {step} pc {} error {error}", cpu.pc()),
+        }
+    }
+}
+
+#[test]
+fn ldi_x_pointer_sets_high_byte() {
+    let mut cpu = Cpu::new(vec![0xE0A0, 0xE0B2]).expect("cpu");
+    cpu.step_untraced().expect("step1");
+    cpu.step_untraced().expect("step2");
+    assert_eq!(cpu.register(26), 0);
+    assert_eq!(cpu.register(27), 2);
+}

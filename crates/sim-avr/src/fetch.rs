@@ -21,13 +21,15 @@ pub struct Fetched {
 #[derive(Clone, Debug)]
 pub struct ProgramMemory {
     words: Vec<u16>,
+    cache: Vec<Option<Fetched>>,
 }
 
 impl ProgramMemory {
     /// Creates program memory from instruction words.
     #[must_use]
     pub fn new(words: Vec<u16>) -> Self {
-        Self { words }
+        let cache = vec![None; words.len()];
+        Self { words, cache }
     }
 
     /// Returns the instruction words.
@@ -45,8 +47,21 @@ impl ProgramMemory {
     }
 
     /// Fetches and decodes an instruction at a word address.
-    pub fn fetch(&self, pc: u16) -> Result<Fetched, SimError> {
+    #[inline]
+    pub fn fetch(&mut self, pc: u16) -> Result<Fetched, SimError> {
         let address = usize::from(pc);
+        if let Some(fetched) = self.cache.get(address).copied().flatten() {
+            return Ok(fetched);
+        }
+        let fetched = self.decode_at(address)?;
+        if let Some(slot) = self.cache.get_mut(address) {
+            *slot = Some(fetched);
+        }
+        Ok(fetched)
+    }
+
+    #[inline]
+    fn decode_at(&self, address: usize) -> Result<Fetched, SimError> {
         let first = self.read(address)?;
         if !uses_second_word(first) {
             return self.single(first);
@@ -79,7 +94,7 @@ mod tests {
 
     #[test]
     fn fetches_single_word_instruction() {
-        let memory = ProgramMemory::new(vec![0xE115]);
+        let mut memory = ProgramMemory::new(vec![0xE115]);
         let fetched = memory.fetch(0).expect("fetch");
         assert_eq!(fetched.words, 1);
         assert_eq!(fetched.second, None);
@@ -89,7 +104,7 @@ mod tests {
 
     #[test]
     fn fetches_two_word_instruction() {
-        let memory = ProgramMemory::new(vec![0x9100, 0x1234]);
+        let mut memory = ProgramMemory::new(vec![0x9100, 0x1234]);
         let fetched = memory.fetch(0).expect("fetch");
         assert_eq!(fetched.words, 2);
         assert_eq!(fetched.second, Some(0x1234));
@@ -99,20 +114,28 @@ mod tests {
 
     #[test]
     fn rejects_truncated_two_word_instruction() {
-        let memory = ProgramMemory::new(vec![0x9100]);
+        let mut memory = ProgramMemory::new(vec![0x9100]);
         assert!(memory.fetch(0).is_err());
     }
 
     #[test]
     fn rejects_address_out_of_range() {
-        let memory = ProgramMemory::new(vec![0x0000]);
+        let mut memory = ProgramMemory::new(vec![0x0000]);
         assert!(memory.fetch(1).is_err());
     }
 
     #[test]
     fn fetch_uses_word_addresses() {
-        let memory = ProgramMemory::new(vec![0x0000, 0xE000]);
+        let mut memory = ProgramMemory::new(vec![0x0000, 0xE000]);
         let fetched = memory.fetch(1).expect("fetch");
         assert_eq!(fetched.instruction.mnemonic, Mnemonic::Ldi);
     }
+}
+
+#[test]
+fn fetch_reuses_cached_instruction() {
+    let mut memory = ProgramMemory::new(vec![0xE115]);
+    let first = memory.fetch(0).expect("first");
+    let second = memory.fetch(0).expect("second");
+    assert_eq!(first, second);
 }

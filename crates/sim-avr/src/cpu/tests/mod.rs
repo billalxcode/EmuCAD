@@ -53,5 +53,6 @@ mod core;
 mod gpio;
 mod memory;
 mod peripherals;
+mod pure_paths;
 mod serial;
 mod timer;

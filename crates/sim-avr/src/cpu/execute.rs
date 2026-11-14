@@ -1,6 +1,14 @@
 use super::*;
+use sim_cells::{AluFlags, add_with_carry, sub_with_borrow};
+
+struct BinaryOutcome {
+    destination: u8,
+    result: sim_cells::AluResult,
+    write: bool,
+}
 
 impl Cpu {
+    #[inline]
     pub(super) fn execute(
         &mut self,
         instruction: &Instruction,
@@ -42,7 +50,7 @@ impl Cpu {
         if is_shift(mnemonic) {
             return self.execute_shift(instruction, next_pc);
         }
-        if mnemonic == Mnemonic::Mul {
+        if is_multiply(mnemonic) {
             return self.execute_multiply(instruction, next_pc);
         }
         self.execute_control(instruction, next_pc)
@@ -184,6 +192,7 @@ impl Cpu {
         Err(unsupported(mnemonic))
     }
 
+    #[inline]
     pub(super) fn execute_move(
         &mut self,
         instruction: &Instruction,
@@ -252,92 +261,168 @@ impl Cpu {
         self.advance(next_pc)
     }
 
+    #[inline]
     pub(super) fn execute_binary_arithmetic(
         &mut self,
         instruction: &Instruction,
         next_pc: u16,
     ) -> Result<(), SimError> {
-        let destination = register(instruction.first)?;
-        let (source, immediate_value) = second_operand(instruction.second)?;
-        let (subtract, use_immediate, carry, write) = arithmetic_control(instruction.mnemonic)?;
-        self.load_arithmetic(destination, source, immediate_value, use_immediate)?;
-        self.set_bool("sub", subtract)?;
-        self.set_bool("cin", carry && self.sreg.carry)?;
-        self.circuit.settle()?;
-        let result = read_bits(&self.circuit, &self.datapath.arithmetic.result) as u8;
-        self.update_binary_flags(instruction.mnemonic);
-        if write {
-            self.write_register(destination, result)?;
+        let outcome = self.binary_outcome(instruction)?;
+        self.apply_binary_flags(instruction.mnemonic, outcome.result.flags);
+        if outcome.write {
+            self.write_register(outcome.destination, outcome.result.value)?;
         }
         self.advance(next_pc)
     }
 
-    pub(super) fn update_binary_flags(&mut self, mnemonic: Mnemonic) {
+    fn binary_outcome(&self, instruction: &Instruction) -> Result<BinaryOutcome, SimError> {
+        let destination = register(instruction.first)?;
+        let (source, immediate_value) = second_operand(instruction.second)?;
+        let (subtract, use_immediate, carry, write) = arithmetic_control(instruction.mnemonic)?;
+        let first = self.register(destination);
+        let second = self.binary_second(source, immediate_value, use_immediate);
+        let carry_in = carry && self.sreg.carry;
+        let result = if subtract {
+            sub_with_borrow(first, second, carry_in)
+        } else {
+            add_with_carry(first, second, carry_in)
+        };
+        Ok(BinaryOutcome {
+            destination,
+            result,
+            write,
+        })
+    }
+
+    fn binary_second(&self, source: u8, immediate_value: u8, use_immediate: bool) -> u8 {
+        if use_immediate {
+            return immediate_value;
+        }
+        self.register(source)
+    }
+
+    fn apply_binary_flags(&mut self, mnemonic: Mnemonic, flags: AluFlags) {
         let previous_zero = self.sreg.zero;
-        self.update_full_flags();
+        self.apply_alu_flags(flags);
         if has_cumulative_zero(mnemonic) {
             self.sreg.zero &= previous_zero;
         }
+    }
+
+    fn apply_alu_flags(&mut self, flags: AluFlags) {
+        self.sreg.carry = flags.carry;
+        self.sreg.zero = flags.zero;
+        self.sreg.negative = flags.negative;
+        self.sreg.overflow = flags.overflow;
+        self.sreg.sign = flags.sign;
+        self.sreg.half_carry = flags.half_carry;
     }
 
     pub(super) fn execute_update(
         &mut self,
         mnemonic: Mnemonic,
         destination: u8,
-        value: u8,
+        _value: u8,
         next_pc: u16,
     ) -> Result<(), SimError> {
-        let (first, second, subtract) = update_values(mnemonic, self.register(destination), value);
-        self.set_byte("a", first)?;
-        self.set_byte("b", second)?;
-        self.set_bool("imm", false)?;
-        self.set_bool("sub", subtract)?;
-        self.set_bool("cin", false)?;
-        self.circuit.settle()?;
-        let result = read_bits(&self.circuit, &self.datapath.arithmetic.result) as u8;
-        self.update_partial_flags();
+        let current = self.register(destination);
+        let result = self.update_value(mnemonic, current)?;
         self.write_register(destination, result)?;
         self.advance(next_pc)
     }
 
+    fn update_value(&mut self, mnemonic: Mnemonic, current: u8) -> Result<u8, SimError> {
+        match mnemonic {
+            Mnemonic::Neg => {
+                let result = sub_with_borrow(0, current, false);
+                self.apply_alu_flags(result.flags);
+                Ok(result.value)
+            }
+            Mnemonic::Inc => Ok(self.update_step(current.wrapping_add(1), current == 0x7F)),
+            Mnemonic::Dec => Ok(self.update_step(current.wrapping_sub(1), current == 0x80)),
+            _ => Err(unsupported(mnemonic)),
+        }
+    }
+
+    fn update_step(&mut self, result: u8, overflow: bool) -> u8 {
+        self.sreg.zero = result == 0;
+        self.sreg.negative = result & 0x80 != 0;
+        self.sreg.overflow = overflow;
+        self.sreg.sign = self.sreg.negative ^ overflow;
+        result
+    }
+
+    #[inline]
     pub(super) fn execute_logic(
         &mut self,
         instruction: &Instruction,
         next_pc: u16,
     ) -> Result<(), SimError> {
-        let (op, use_immediate) = logic_control(instruction.mnemonic)?;
         let destination = register(instruction.first)?;
-        let (source, immediate_value) = if instruction.mnemonic == Mnemonic::Com {
-            (0, 0)
-        } else {
-            second_operand(instruction.second)?
-        };
-        self.load_arithmetic(destination, source, immediate_value, use_immediate)?;
-        self.set_bits("lop", u64::from(op), 2)?;
-        self.circuit.settle()?;
-        let result = read_bits(&self.circuit, &self.datapath.logic.result) as u8;
-        self.update_logic_flags(instruction.mnemonic);
+        let (first, second) = self.logic_inputs(instruction, destination)?;
+        let result = logic_value(instruction.mnemonic, first, second)?;
+        self.apply_logic_flags(result, instruction.mnemonic == Mnemonic::Com);
         self.write_register(destination, result)?;
         self.advance(next_pc)
     }
 
+    fn logic_inputs(
+        &self,
+        instruction: &Instruction,
+        destination: u8,
+    ) -> Result<(u8, u8), SimError> {
+        let (source, immediate_value, use_immediate) = if instruction.mnemonic == Mnemonic::Com {
+            (0, 0, false)
+        } else {
+            let (source, immediate) = second_operand(instruction.second)?;
+            let immediate_flag = matches!(instruction.mnemonic, Mnemonic::Andi | Mnemonic::Ori);
+            (source, immediate, immediate_flag)
+        };
+        let first = self.register(destination);
+        let second = if use_immediate {
+            immediate_value
+        } else {
+            self.register(source)
+        };
+        Ok((first, second))
+    }
+
+    fn apply_logic_flags(&mut self, result: u8, set_carry: bool) {
+        self.sreg.zero = result == 0;
+        self.sreg.negative = result & 0x80 != 0;
+        self.sreg.overflow = false;
+        self.sreg.sign = self.sreg.negative;
+        if set_carry {
+            self.sreg.carry = true;
+        }
+    }
+
+    #[inline]
     pub(super) fn execute_shift(
         &mut self,
         instruction: &Instruction,
         next_pc: u16,
     ) -> Result<(), SimError> {
         let destination = register(instruction.first)?;
-        let op = shift_op(instruction.mnemonic);
-        self.set_byte("a", self.register(destination))?;
-        self.set_bool("cin", self.sreg.carry)?;
-        self.set_bits("sop", u64::from(op), 2)?;
-        self.circuit.settle()?;
-        let result = read_bits(&self.circuit, &self.datapath.shift.result) as u8;
-        self.update_shift_flags();
+        let value = self.register(destination);
+        let (result, carry_out) = shift_value(instruction.mnemonic, value, self.sreg.carry)?;
+        self.apply_shift_flags(result, carry_out, instruction.mnemonic != Mnemonic::Swap);
         self.write_register(destination, result)?;
         self.advance(next_pc)
     }
 
+    fn apply_shift_flags(&mut self, result: u8, carry: bool, update: bool) {
+        if !update {
+            return;
+        }
+        self.sreg.carry = carry;
+        self.sreg.zero = result == 0;
+        self.sreg.negative = result & 0x80 != 0;
+        self.sreg.overflow = self.sreg.negative ^ carry;
+        self.sreg.sign = self.sreg.negative ^ self.sreg.overflow;
+    }
+
+    #[inline]
     pub(super) fn execute_multiply(
         &mut self,
         instruction: &Instruction,
@@ -345,12 +430,11 @@ impl Cpu {
     ) -> Result<(), SimError> {
         let first = register(instruction.first)?;
         let second = register(instruction.second)?;
-        self.set_byte("a", self.register(first))?;
-        self.set_byte("b", self.register(second))?;
-        self.circuit.settle()?;
-        let result = read_bits(&self.circuit, &self.datapath.multiply.result);
-        self.sreg.zero = self.circuit.value(self.datapath.multiply.zero);
-        self.sreg.carry = self.circuit.value(self.datapath.multiply.carry);
+        let first = self.register(first);
+        let second = self.register(second);
+        let result = multiply_value(instruction.mnemonic, first, second)?;
+        self.sreg.zero = result == 0;
+        self.sreg.carry = result & 0x8000 != 0;
         self.write_register(0, result as u8)?;
         self.write_register(1, (result >> 8) as u8)?;
         self.advance(next_pc)
@@ -427,7 +511,7 @@ impl Cpu {
         Ok((value >> bit) & 1)
     }
 
-    pub(super) fn skipped_pc(&self, next_pc: u16) -> Result<u16, SimError> {
+    pub(super) fn skipped_pc(&mut self, next_pc: u16) -> Result<u16, SimError> {
         let fetched = self.program.fetch(next_pc)?;
         Ok(next_pc.wrapping_add(u16::from(fetched.words)))
     }

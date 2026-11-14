@@ -133,6 +133,12 @@ impl Uart {
         }
     }
 
+    /// Returns true while a frame is being transmitted.
+    #[must_use]
+    pub const fn tx_active(&self) -> bool {
+        self.tx_active
+    }
+
     /// Advances the transmitter shift timing by CPU cycles.
     pub fn tick(&mut self, cycles: u32) {
         if cycles == 0 {

@@ -1,11 +1,5 @@
 use super::*;
 
-pub(super) fn named_inputs(builder: &mut DigitalBuilder, prefix: &str, width: usize) -> Vec<NetId> {
-    (0..width)
-        .map(|index| builder.input(&format!("{prefix}{index}")))
-        .collect()
-}
-
 pub(super) fn is_move(mnemonic: Mnemonic) -> bool {
     matches!(mnemonic, Mnemonic::Ldi | Mnemonic::Mov | Mnemonic::Movw)
 }
@@ -40,6 +34,18 @@ pub(super) fn is_arithmetic(mnemonic: Mnemonic) -> bool {
             | Mnemonic::Dec
             | Mnemonic::Adiw
             | Mnemonic::Sbiw
+    )
+}
+
+pub(super) fn is_multiply(mnemonic: Mnemonic) -> bool {
+    matches!(
+        mnemonic,
+        Mnemonic::Mul
+            | Mnemonic::Muls
+            | Mnemonic::Mulsu
+            | Mnemonic::Fmul
+            | Mnemonic::Fmuls
+            | Mnemonic::Fmulsu
     )
 }
 
@@ -100,12 +106,12 @@ pub(super) fn base_cycles(mnemonic: Mnemonic) -> u8 {
 }
 
 pub(super) fn is_two_cycle(mnemonic: Mnemonic) -> bool {
+    if is_multiply(mnemonic) {
+        return true;
+    }
     matches!(
         mnemonic,
-        Mnemonic::Mul
-            | Mnemonic::Muls
-            | Mnemonic::Mulsu
-            | Mnemonic::Push
+        Mnemonic::Push
             | Mnemonic::Pop
             | Mnemonic::Rjmp
             | Mnemonic::Ijmp
@@ -273,27 +279,6 @@ pub(super) fn arithmetic_control(mnemonic: Mnemonic) -> Result<(bool, bool, bool
     }
 }
 
-pub(super) fn logic_control(mnemonic: Mnemonic) -> Result<(u8, bool), SimError> {
-    match mnemonic {
-        Mnemonic::And => Ok((0, false)),
-        Mnemonic::Andi => Ok((0, true)),
-        Mnemonic::Or => Ok((1, false)),
-        Mnemonic::Ori => Ok((1, true)),
-        Mnemonic::Eor => Ok((2, false)),
-        Mnemonic::Com => Ok((3, false)),
-        _ => Err(unsupported(mnemonic)),
-    }
-}
-
-pub(super) fn shift_op(mnemonic: Mnemonic) -> u8 {
-    match mnemonic {
-        Mnemonic::Lsr => 0,
-        Mnemonic::Asr => 1,
-        Mnemonic::Ror => 2,
-        _ => 3,
-    }
-}
-
 pub(super) fn update_operand(instruction: &Instruction) -> Result<Option<(u8, u8)>, SimError> {
     let destination = register(instruction.first)?;
     Ok(match instruction.mnemonic {
@@ -301,14 +286,6 @@ pub(super) fn update_operand(instruction: &Instruction) -> Result<Option<(u8, u8
         Mnemonic::Inc | Mnemonic::Dec => Some((destination, 1)),
         _ => None,
     })
-}
-
-pub(super) fn update_values(mnemonic: Mnemonic, current: u8, value: u8) -> (u8, u8, bool) {
-    if mnemonic == Mnemonic::Neg {
-        (0, current, true)
-    } else {
-        (current, value, mnemonic == Mnemonic::Dec)
-    }
 }
 
 pub(super) fn second_operand(operand: Operand) -> Result<(u8, u8), SimError> {
@@ -394,4 +371,43 @@ pub(super) fn long_address(operand: Operand) -> Result<u32, SimError> {
 
 pub(super) fn unsupported(mnemonic: Mnemonic) -> SimError {
     SimError::Parse(format!("unsupported AVR instruction: {mnemonic:?}"))
+}
+
+pub(super) fn logic_value(mnemonic: Mnemonic, first: u8, second: u8) -> Result<u8, SimError> {
+    match mnemonic {
+        Mnemonic::And | Mnemonic::Andi => Ok(first & second),
+        Mnemonic::Or | Mnemonic::Ori => Ok(first | second),
+        Mnemonic::Eor => Ok(first ^ second),
+        Mnemonic::Com => Ok(!first),
+        _ => Err(unsupported(mnemonic)),
+    }
+}
+
+pub(super) fn shift_value(
+    mnemonic: Mnemonic,
+    value: u8,
+    carry: bool,
+) -> Result<(u8, bool), SimError> {
+    let carry_out = value & 0x01 != 0;
+    match mnemonic {
+        Mnemonic::Lsr => Ok((value >> 1, carry_out)),
+        Mnemonic::Asr => Ok(((value >> 1) | (value & 0x80), carry_out)),
+        Mnemonic::Ror => Ok(((value >> 1) | (u8::from(carry) << 7), carry_out)),
+        Mnemonic::Swap => Ok((value.rotate_left(4), carry)),
+        _ => Err(unsupported(mnemonic)),
+    }
+}
+
+pub(super) fn multiply_value(mnemonic: Mnemonic, first: u8, second: u8) -> Result<u16, SimError> {
+    let signed = i16::from(first as i8) * i16::from(second as i8);
+    let mixed = i16::from(first as i8) * i16::from(second);
+    match mnemonic {
+        Mnemonic::Mul => Ok(u16::from(first) * u16::from(second)),
+        Mnemonic::Muls => Ok(signed as u16),
+        Mnemonic::Mulsu => Ok(mixed as u16),
+        Mnemonic::Fmul => Ok((u16::from(first) * u16::from(second)) << 1),
+        Mnemonic::Fmuls => Ok((signed as u16) << 1),
+        Mnemonic::Fmulsu => Ok((mixed as u16) << 1),
+        _ => Err(unsupported(mnemonic)),
+    }
 }

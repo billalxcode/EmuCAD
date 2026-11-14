@@ -188,3 +188,25 @@ fn interrupt_entry_adds_four_cycles() {
     assert_eq!(trace.cycles, 1);
     assert_eq!(cpu.cycles() - before, 5);
 }
+
+#[test]
+fn untraced_step_updates_state() {
+    let mut cpu = Cpu::new(vec![ldi(16, 5), 0x9598]).expect("cpu");
+    let cycles = cpu.step_untraced().expect("step").expect("cycles");
+    assert_eq!(cycles, 1);
+    assert_eq!(cpu.register(16), 5);
+    assert!(cpu.step_untraced().expect("step").is_some());
+    assert!(cpu.step_untraced().expect("step").is_none());
+}
+
+#[test]
+fn untraced_run_matches_traced_state() {
+    let program = vec![ldi(16, 1), ldi(17, 2), reg_op(0x0C00, 16, 17), 0x9598];
+    let mut traced = Cpu::new(program.clone()).expect("traced");
+    let traces = traced.run(10).expect("run");
+    let mut fast = Cpu::new(program).expect("fast");
+    let executed = fast.run_untraced(10).expect("run");
+    assert_eq!(executed, traces.len() as u64);
+    assert_eq!(fast.register(16), traced.register(16));
+    assert_eq!(fast.cycles(), traced.cycles());
+}

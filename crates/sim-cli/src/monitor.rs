@@ -77,7 +77,7 @@ impl Monitor {
 
     /// Disassembles instructions starting at a word address.
     pub fn disassemble(&self, address: u16, count: usize) -> Result<String, String> {
-        let memory = ProgramMemory::new(self.program.clone());
+        let mut memory = ProgramMemory::new(self.program.clone());
         let mut pc = address;
         let mut lines = Vec::new();
         for _ in 0..count {
