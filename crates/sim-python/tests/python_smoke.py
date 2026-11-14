@@ -1,5 +1,7 @@
 """Smoke test for the EmuCAD Python extension module."""
 
+import json
+
 import emucad
 
 
@@ -44,6 +46,7 @@ def test_netlist() -> None:
     assert result["devices"][0]["pins"] == ["vcc", "out"]
     assert result["devices"][0]["parameters"]["resistance"] == 1000.0
     assert result["devices"][1]["pins"] == ["out", "0"]
+    assert json.loads(json.dumps(result))["devices"][0]["name"] == "r1"
 
 
 def test_errors() -> None:

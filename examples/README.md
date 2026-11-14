@@ -17,6 +17,16 @@ rangkaian RC.
 
 Contoh firmware ada di `../firmware/`.
 
+Python binding:
+
+```bash
+cargo build -p sim-python
+bash scripts/test-python.sh
+```
+
+`python/build_netlists.py` membangun contoh divider, RC low-pass, diode
+clamp, dan logic gate memakai `emucad.build_netlist`.
+
 Proyek GUI:
 
 - `led.emu.json`: resistor dan LED.
