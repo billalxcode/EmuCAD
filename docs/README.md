@@ -2,9 +2,9 @@
 
 Pintu masuk dokumentasi EmuCAD versi 0.1.0.
 
-**Status saat ini:** 751 test lulus, 8 crate, crate simulasi zero external
-dependency Rust. Dependensi GUI dibatasi pada daftar yang disetujui di
-`AGENTS.md`. Tag `v0.1` tersedia.
+**Status saat ini:** 760 test lulus, 9 crate, crate simulasi zero external
+dependency Rust. Dependensi GUI dan binding Python dibatasi pada daftar
+yang disetujui di `AGENTS.md`. Tag `v0.1` tersedia.
 
 ---
 
@@ -162,10 +162,10 @@ Setiap dokumen muncul satu kali pada peta ini.
 |---|---|
 | Versi workspace | `0.1.0` |
 | Tag | `v0.1` |
-| Test | 751 lulus |
-| Crate | 7 |
-| Dependensi eksternal | 0 |
-| `unsafe` | Dilarang di seluruh workspace |
+| Test | 760 lulus |
+| Crate | 9 |
+| Dependensi eksternal | 0 untuk crate simulasi; `pyo3` hanya di `sim-python` |
+| `unsafe` | Dilarang manual; glue `pyo3` diisolasi di `sim-python` |
 | Build release | Lulus |
 | Archive Linux | `dist/emucad-x86_64-unknown-linux-gnu.tar.gz` |
 | Golden ngspice | Belum dijalankan |
@@ -178,14 +178,15 @@ Setiap dokumen muncul satu kali pada peta ini.
 | Crate | Test |
 |---|---|
 | `sim-core` | 62 |
-| `sim-device` | 86 |
+| `sim-device` | 87 |
 | `sim-analysis` | 116 |
 | `sim-cells` | 71 |
 | `sim-avr` | 215 |
-| `sim-board` | 23 |
+| `sim-board` | 24 |
 | `sim-cli` | 26 |
 | `sim-gui` | 151 |
-| **Total** | **751** |
+| `sim-python` | 8 |
+| **Total** | **760** |
 
 ---
 

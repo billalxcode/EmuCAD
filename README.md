@@ -4,9 +4,9 @@
 yang memodelkan transistor, gerbang CMOS, CPU AVR, peripheral, dan board,
 serta mampu menjalankan firmware AVR.
 
-> **Status v0.1:** 751 test lulus, 8 crate, crate simulasi zero external
-> dependency; dependensi GUI dibatasi pada daftar yang disetujui di
-> `AGENTS.md`.
+> **Status v0.1:** 760 test lulus, 9 crate, crate simulasi zero external
+> dependency; dependensi GUI dan binding Python dibatasi pada daftar yang
+> disetujui di `AGENTS.md`.
 > Tag `v0.1` tersedia. Archive Linux ada di
 > `dist/emucad-x86_64-unknown-linux-gnu.tar.gz`.
 
@@ -36,8 +36,9 @@ Satu binary native Rust yang:
 - Memodelkan sel CMOS, CPU AVR, peripheral, dan board.
 - Memuat Intel HEX dan ELF32.
 - Berjalan tanpa VM, browser, atau simulator eksternal saat runtime.
-- Hanya memakai Rust standard library dan crate internal workspace.
-- Tidak memakai `unsafe`.
+- Hanya memakai Rust standard library dan crate internal workspace; binding
+  Python memakai `pyo3` di crate terpisah.
+- Tidak memakai `unsafe` manual; glue FFI `pyo3` diisolasi di `sim-python`.
 
 Target akhirnya adalah **firmware-observable equivalence** untuk board
 profile tertentu, bukan replika silikon identik.
@@ -119,12 +120,14 @@ bash .opencode/skills/clean-code/scripts/check.sh
 | `sim-avr` | CPU AVR, decoder, ALU, register, peripheral |
 | `sim-board` | Board, LED, button, UART host, Intel HEX, ELF, CSV/VCD |
 | `sim-cli` | Binary `emucad`, monitor, disassembler, benchmark |
+| `sim-python` | Binding Python untuk katalog dan builder netlist |
 | `drivers/` | Scaffold driver virtual USB C++ (opsional, di luar crate) |
 
 Aturan utama:
 
 - `sim-core` tidak bergantung pada crate lain.
 - `sim-cli` adalah adapter dan komposisi.
+- `sim-python` adalah adapter binding Python untuk katalog dan netlist.
 - Format CSV, VCD, HEX, dan ELF berada di adapter.
 - Logika simulasi tidak berada di `main.rs`.
 
@@ -161,7 +164,7 @@ Dokumen yang sering dipakai:
 
 Sudah:
 
-- 751 test workspace.
+- 760 test workspace.
 - fmt, clippy, test, dan build release lulus.
 - Paket Linux dapat dibuat.
 - Determinisme Linux diuji.

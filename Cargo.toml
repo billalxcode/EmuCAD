@@ -9,6 +9,7 @@ members = [
     "crates/sim-board",
     "crates/sim-cli",
     "crates/sim-gui",
+    "crates/sim-python",
 ]
 
 [workspace.package]

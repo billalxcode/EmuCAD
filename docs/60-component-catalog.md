@@ -13,7 +13,7 @@ Menyediakan katalog komponen yang:
 - Memiliki referensi yang dapat diaudit.
 - Memiliki unit test dan reference vector yang ketat.
 - Dapat diekspor ke Python builder.
-- Tidak menambah dependensi eksternal Rust.
+- Tidak menambah dependensi eksternal Rust selain binding `pyo3` di crate `sim-python`.
 
 Target angka: 500 entri katalog. Satu entri adalah satu definisi model
 generik, bukan sekadar satu simbol GUI. Status solver ditentukan oleh field
@@ -289,14 +289,35 @@ Python builder tidak menghitung model. Python hanya:
 - Mengirim netlist ke Rust.
 - Menampilkan hasil.
 
-Rust mengekspor katalog:
+Rust mengekspor katalog melalui binding `sim-python`:
 
-```bash
-emucad catalog --json
+```python
+import emucad
+
+entries = emucad.catalog()
+entry = emucad.find_component("passive.resistor.ideal_resistor")
+netlist = emucad.build_netlist({
+    "nodes": [{"name": "vcc", "kind": "supply"}, {"name": "out"}],
+    "components": [
+        {
+            "name": "r1",
+            "part": "passive.resistor.ideal_resistor",
+            "pins": ["vcc", "out"],
+            "parameters": {"resistance": 1000.0},
+        },
+        {
+            "name": "r2",
+            "part": "passive.resistor.ideal_resistor",
+            "pins": ["out", "0"],
+        },
+    ],
+})
 ```
 
-Python memuat katalog itu agar daftar komponen, parameter, dan batas
-valid selalu sinkron.
+Bangun modul dengan `cargo build -p sim-python`. Smoke test tersedia
+melalui `bash scripts/test-python.sh`. Node `0` selalu menjadi ground dan
+tidak perlu dideklarasikan. Builder hanya membangun topologi; simulasi
+tetap dijalankan oleh crate Rust lain.
 
 ## 9. Status Implementasi
 

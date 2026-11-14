@@ -3,7 +3,8 @@
 Status: katalog 500 entri sudah diimplementasikan di `sim-device`.
 Registry-backed emulation tersedia untuk 206 entri. Sebanyak 294 entri
 behavioral masih menunggu model solver dan belum dapat disimulasikan
-sebagai device MNA.
+sebagai device MNA. Binding Python `sim-python` sudah menyediakan katalog
+dan builder netlist; simulasi tetap berjalan di crate Rust.
 
 Tujuan: membangun katalog 500 model komponen yang terverifikasi, dapat
 diekspor ke Python builder, dan diuji dengan unit test ketat.
@@ -73,6 +74,9 @@ Batch yang gagal salah satu syarat tetap berstatus `tested`, bukan
 - [ ] C1-10 Buat cross-check opsional terhadap ngspice.
 - [ ] C1-11 Tambah CI Linux untuk katalog dan test model.
 - [x] C1-12 Tambah laporan coverage per kategori dan status.
+- [x] C1-21 Buat crate `sim-python` dengan `pyo3` untuk katalog dan
+  builder netlist.
+- [x] C1-22 Tambah smoke test Python dan validasi jumlah pin registry.
 
 ## 4a. Status Katalog
 
