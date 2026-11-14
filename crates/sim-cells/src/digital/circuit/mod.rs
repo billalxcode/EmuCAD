@@ -24,10 +24,11 @@ mod evaluate;
 mod machine;
 #[cfg(test)]
 mod tests;
+mod topology;
 mod types;
 
 pub use builder::DigitalBuilder;
 use components::*;
 use evaluate::*;
-pub use machine::DigitalCircuit;
+pub use machine::{CircuitStats, DigitalCircuit};
 use types::{Dff, Gate};

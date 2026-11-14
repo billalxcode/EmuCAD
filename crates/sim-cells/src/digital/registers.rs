@@ -54,8 +54,8 @@ pub fn register_file(
 ) -> Result<RegisterFile, SimError> {
     validate_shape(count, width, ports)?;
     let bits = build_storage(builder, count, width, ports)?;
-    let read_a = build_read_port(builder, &bits, width, &ports.read_address_a)?;
-    let read_b = build_read_port(builder, &bits, width, &ports.read_address_b)?;
+    let read_a = optional_read_port(builder, &bits, width, &ports.read_address_a)?;
+    let read_b = optional_read_port(builder, &bits, width, &ports.read_address_b)?;
     Ok(RegisterFile {
         bits,
         read_a,
@@ -63,12 +63,28 @@ pub fn register_file(
     })
 }
 
+fn optional_read_port(
+    builder: &mut DigitalBuilder,
+    bits: &[Vec<NetId>],
+    width: usize,
+    address: &[NetId],
+) -> Result<Vec<NetId>, SimError> {
+    if address.is_empty() {
+        return Ok(Vec::new());
+    }
+    build_read_port(builder, bits, width, address)
+}
+
 fn validate_shape(count: usize, width: usize, ports: &RegisterPorts) -> Result<(), SimError> {
     validate_count(count)?;
     validate_width(width)?;
     validate_address(count, &ports.write_address)?;
-    validate_address(count, &ports.read_address_a)?;
-    validate_address(count, &ports.read_address_b)?;
+    if !ports.read_address_a.is_empty() {
+        validate_address(count, &ports.read_address_a)?;
+    }
+    if !ports.read_address_b.is_empty() {
+        validate_address(count, &ports.read_address_b)?;
+    }
     validate_data(width, &ports.write_data)
 }
 

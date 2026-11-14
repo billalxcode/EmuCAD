@@ -163,3 +163,18 @@ fn combinational_loop_reports_failure() {
     let error = circuit.settle().expect_err("loop");
     assert!(matches!(error, SimError::ConvergenceFailure { .. }));
 }
+
+#[test]
+fn stats_report_gate_and_component_counts() {
+    let mut builder = DigitalBuilder::new();
+    let input = builder.input("a");
+    let output = builder.not(input);
+    builder.output("y", output);
+    let circuit = builder.build();
+    let stats = circuit.stats();
+    assert_eq!(stats.gates, 1);
+    assert_eq!(stats.components, 1);
+    assert_eq!(stats.dffs, 0);
+    assert_eq!(stats.largest_component, 1);
+    assert_eq!(stats.cyclic_components, 0);
+}

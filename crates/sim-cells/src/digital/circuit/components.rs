@@ -1,9 +1,13 @@
+use super::topology::component_order;
 use super::*;
 
 pub(super) struct CircuitComponents {
     pub(super) gates: Vec<Vec<usize>>,
-    pub(super) nets: Vec<Option<usize>>,
-    pub(super) dffs: Vec<Option<usize>>,
+    pub(super) orders: Vec<Vec<usize>>,
+    pub(super) cyclic: Vec<bool>,
+    pub(super) fanout: Vec<Vec<usize>>,
+    pub(super) gate_component: Vec<usize>,
+    pub(super) gate_rank: Vec<u32>,
 }
 
 struct UnionFind {
@@ -42,40 +46,86 @@ pub(super) fn build_components(values: usize, gates: &[Gate], dffs: &[Dff]) -> C
     for dff in dffs {
         union.union(dff.data.raw(), dff.output.raw());
     }
-    let (component_gates, roots) = assign_gate_components(&mut union, gates);
-    let nets = assign_net_components(&mut union, &roots);
-    let dffs = dffs.iter().map(|dff| nets[dff.output.raw()]).collect();
+    let component_gates = assign_gate_components(&mut union, gates);
+    component_data(component_gates, gates, values)
+}
+
+fn component_data(
+    component_gates: Vec<Vec<usize>>,
+    gates: &[Gate],
+    values: usize,
+) -> CircuitComponents {
+    let (orders, cyclic) = component_layouts(&component_gates, gates, values);
+    let fanout = build_fanout(gates, values);
+    let gate_component = map_gate_components(&component_gates, gates.len());
+    let gate_rank = rank_gates(&orders, gates.len());
     CircuitComponents {
         gates: component_gates,
-        nets,
-        dffs,
+        orders,
+        cyclic,
+        fanout,
+        gate_component,
+        gate_rank,
     }
 }
 
-fn assign_gate_components(
-    union: &mut UnionFind,
+fn rank_gates(orders: &[Vec<usize>], gates: usize) -> Vec<u32> {
+    let mut ranks = vec![0u32; gates];
+    for order in orders {
+        for (rank, &gate) in order.iter().enumerate() {
+            ranks[gate] = rank as u32;
+        }
+    }
+    ranks
+}
+
+fn build_fanout(gates: &[Gate], values: usize) -> Vec<Vec<usize>> {
+    let mut fanout = vec![Vec::new(); values];
+    for (index, &gate) in gates.iter().enumerate() {
+        for input in gate.inputs() {
+            fanout[input.raw()].push(index);
+        }
+    }
+    fanout
+}
+
+fn map_gate_components(components: &[Vec<usize>], gates: usize) -> Vec<usize> {
+    let mut map = vec![0usize; gates];
+    for (component, gate_list) in components.iter().enumerate() {
+        for &gate in gate_list {
+            map[gate] = component;
+        }
+    }
+    map
+}
+
+fn component_layouts(
+    components: &[Vec<usize>],
     gates: &[Gate],
-) -> (Vec<Vec<usize>>, BTreeMap<usize, usize>) {
+    values: usize,
+) -> (Vec<Vec<usize>>, Vec<bool>) {
+    let mut orders = Vec::with_capacity(components.len());
+    let mut cyclic = Vec::with_capacity(components.len());
+    for component in components {
+        let layout = component_order(component, gates, values);
+        orders.push(layout.order);
+        cyclic.push(layout.cyclic);
+    }
+    (orders, cyclic)
+}
+
+fn assign_gate_components(union: &mut UnionFind, gates: &[Gate]) -> Vec<Vec<usize>> {
     let mut roots = BTreeMap::new();
     let mut components: Vec<Vec<usize>> = Vec::new();
     for (index, &gate) in gates.iter().enumerate() {
-        let root = union.find(gate_output(gate).raw());
+        let root = union.find(gate.output().raw());
         let component = *roots.entry(root).or_insert_with(|| {
             components.push(Vec::new());
             components.len() - 1
         });
         components[component].push(index);
     }
-    (components, roots)
-}
-
-fn assign_net_components(
-    union: &mut UnionFind,
-    roots: &BTreeMap<usize, usize>,
-) -> Vec<Option<usize>> {
-    (0..union.parent.len())
-        .map(|net| roots.get(&union.find(net)).copied())
-        .collect()
+    components
 }
 
 fn union_gate(union: &mut UnionFind, gate: Gate) {
@@ -104,19 +154,5 @@ fn gate_nets(gate: Gate) -> Vec<NetId> {
 fn union_nets(union: &mut UnionFind, nets: &[NetId]) {
     for pair in nets.windows(2) {
         union.union(pair[0].raw(), pair[1].raw());
-    }
-}
-
-pub(super) fn gate_output(gate: Gate) -> NetId {
-    match gate {
-        Gate::Const(_, output)
-        | Gate::Buf(_, output)
-        | Gate::Not(_, output)
-        | Gate::And(_, _, output)
-        | Gate::Or(_, _, output)
-        | Gate::Xor(_, _, output)
-        | Gate::Nand(_, _, output)
-        | Gate::Nor(_, _, output) => output,
-        Gate::Mux { output, .. } => output,
     }
 }

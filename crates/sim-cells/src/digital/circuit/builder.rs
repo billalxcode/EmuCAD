@@ -126,18 +126,9 @@ impl DigitalBuilder {
     #[must_use]
     pub fn build(self) -> DigitalCircuit {
         let components = build_components(self.values.len(), &self.gates, &self.dffs);
-        let dirty = vec![true; components.gates.len()];
-        DigitalCircuit {
-            values: self.values,
-            gates: self.gates,
-            dffs: self.dffs,
-            inputs: self.inputs,
-            outputs: self.outputs,
-            component_gates: components.gates,
-            net_component: components.nets,
-            dff_component: components.dffs,
-            dirty,
-        }
+        let mut circuit = assemble(self, components);
+        circuit.mark_all_dirty();
+        circuit
     }
 
     fn new_net(&mut self) -> NetId {
@@ -150,5 +141,24 @@ impl DigitalBuilder {
 impl Default for DigitalBuilder {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+fn assemble(builder: DigitalBuilder, components: CircuitComponents) -> DigitalCircuit {
+    let component_count = components.gates.len();
+    DigitalCircuit {
+        values: builder.values,
+        gates: builder.gates,
+        dffs: builder.dffs,
+        inputs: builder.inputs,
+        outputs: builder.outputs,
+        component_gates: components.gates,
+        orders: components.orders,
+        cyclic: components.cyclic,
+        fanout: components.fanout,
+        gate_component: components.gate_component,
+        gate_rank: components.gate_rank,
+        dirty: vec![true; component_count],
+        dirty_bits: vec![Vec::new(); component_count],
     }
 }
