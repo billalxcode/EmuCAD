@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Generate crates/sim-device/src/catalog_data.rs from the 500 entry plan.
+"""Generate crates/sim-device/src/catalog_data/ from the 500 entry plan.
 
 Run from the repository root:
 
     python3 scripts/gen_component_catalog.py
 """
 
+import shutil
 from pathlib import Path
 
 
@@ -490,24 +491,64 @@ if len(set(ids)) != 500:
             print(item)
     raise SystemExit(1)
 
-lines = []
-lines.append("//! Generated generic component catalog data.")
-lines.append("")
-lines.append("use super::{ComponentSpec, ModelClass};")
-lines.append("use sim_core::DeviceKind;")
-lines.append("")
-lines.append("pub(crate) const CATALOG: &[ComponentSpec] = &[")
+FAMILIES = [
+    "passive", "source", "diode", "transistor", "protection", "switch",
+    "analog", "logic", "memory", "mcu", "power", "sensor", "actuator",
+    "rf", "behavioral", "board",
+]
+
+root = Path("crates/sim-device/src/catalog_data")
+if root.exists():
+    shutil.rmtree(root)
+root.mkdir()
+
+by_family = {family: [] for family in FAMILIES}
 for entry in entries:
-    lines.append(
-        '    ComponentSpec {{ id: "{}", name: "{}", class: ModelClass::{}, device: {}, pins: {}, parameter: "{}", default: {}, unit: "{}", variant: {} }},'.format(
-            entry["id"], entry["name"], entry["class"], entry["device"],
-            entry["pins"], entry["param"], entry["default"], entry["unit"],
-            entry["variant"]
+    family = entry["id"].split(".", 1)[0]
+    by_family[family].append(entry)
+
+for family in FAMILIES:
+    family_entries = by_family[family]
+    needs_device = any(entry["device"] != "None" for entry in family_entries)
+    lines = [
+        f"//! Generated {family} component catalog data.",
+        "",
+        "use crate::catalog::{ComponentSpec, ModelClass};",
+    ]
+    if needs_device:
+        lines.append("use sim_core::DeviceKind;")
+    lines.extend(["", "pub(crate) const ENTRIES: &[ComponentSpec] = &["])
+    for entry in family_entries:
+        lines.append(
+            '    ComponentSpec {{ id: "{}", name: "{}", class: ModelClass::{}, device: {}, pins: {}, parameter: "{}", default: {}, unit: "{}", variant: {} }},'.format(
+                entry["id"], entry["name"], entry["class"], entry["device"],
+                entry["pins"], entry["param"], entry["default"], entry["unit"],
+                entry["variant"]
+            )
         )
-    )
-lines.append("];")
-lines.append("")
-Path("crates/sim-device/src/catalog_data.rs").write_text("\n".join(lines))
+    lines.extend(["];", ""])
+    (root / f"{family}.rs").write_text("\n".join(lines))
+
+module_lines = [
+    "//! Generated component catalog aggregator.",
+    "",
+    *[f"mod {family};" for family in FAMILIES],
+    "",
+    "use crate::catalog::ComponentSpec;",
+    "use std::sync::LazyLock;",
+    "",
+    "static CATALOG: LazyLock<Vec<ComponentSpec>> = LazyLock::new(|| {",
+    "    let mut entries = Vec::new();",
+    *[f"    entries.extend_from_slice({family}::ENTRIES);" for family in FAMILIES],
+    "    entries",
+    "});",
+    "",
+    "pub(crate) fn entries() -> &'static [ComponentSpec] {",
+    "    &CATALOG",
+    "}",
+    "",
+]
+Path("crates/sim-device/src/catalog_data/mod.rs").write_text("\n".join(module_lines))
 
 family_counts = {}
 for entry in entries:
