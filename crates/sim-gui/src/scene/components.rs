@@ -41,8 +41,8 @@ pub(crate) fn draw_component(
     hover: Option<GridPos>,
 ) {
     let body = component_rect(rect, camera, instance, definition);
-    draw_body(painter, body, component_stroke(selected));
-    draw_symbol(painter, body, definition.symbol);
+    draw_selection(painter, body, selected);
+    crate::symbols::draw_symbol(painter, body, definition.symbol, SYMBOL_STROKE);
     draw_pins(painter, rect, camera, definition, instance, hover);
     if show_component_labels(selected, camera.zoom) {
         draw_labels(painter, body, instance);
@@ -53,111 +53,16 @@ pub(crate) fn show_component_labels(selected: bool, zoom: f32) -> bool {
     selected || zoom >= 0.7
 }
 
-pub(crate) fn component_stroke(selected: bool) -> egui::Stroke {
-    if selected {
-        egui::Stroke::new(2.0, SELECTED_STROKE)
-    } else {
-        egui::Stroke::new(1.0, BODY_STROKE)
+pub(crate) fn draw_selection(painter: &egui::Painter, body: egui::Rect, selected: bool) {
+    if !selected {
+        return;
     }
-}
-
-pub(crate) fn draw_body(painter: &egui::Painter, body: egui::Rect, stroke: egui::Stroke) {
-    painter.rect_filled(body, egui::CornerRadius::ZERO, BODY_FILL);
+    painter.rect_filled(body, egui::CornerRadius::ZERO, SELECTED_FILL);
     painter.rect_stroke(
         body,
         egui::CornerRadius::ZERO,
-        stroke,
+        egui::Stroke::new(1.5, SELECTED_STROKE),
         egui::StrokeKind::Middle,
-    );
-}
-
-pub(crate) fn draw_symbol(
-    painter: &egui::Painter,
-    body: egui::Rect,
-    symbol: crate::model::SymbolKind,
-) {
-    let stroke = egui::Stroke::new(1.5, SYMBOL_STROKE);
-    match symbol {
-        crate::model::SymbolKind::Resistor => draw_resistor(painter, body, stroke),
-        crate::model::SymbolKind::Led => draw_led(painter, body, stroke),
-        crate::model::SymbolKind::Button => draw_button(painter, body, stroke),
-        crate::model::SymbolKind::Vcc => draw_vcc(painter, body, stroke),
-        crate::model::SymbolKind::Gnd => draw_gnd(painter, body, stroke),
-        crate::model::SymbolKind::Mcu => draw_mcu(painter, body, stroke),
-    }
-}
-
-pub(crate) fn draw_resistor(painter: &egui::Painter, body: egui::Rect, stroke: egui::Stroke) {
-    let inset = body.shrink2(egui::vec2(body.width() * 0.18, body.height() * 0.22));
-    painter.rect_stroke(
-        inset,
-        egui::CornerRadius::ZERO,
-        stroke,
-        egui::StrokeKind::Middle,
-    );
-}
-
-pub(crate) fn draw_led(painter: &egui::Painter, body: egui::Rect, stroke: egui::Stroke) {
-    let center = body.center();
-    let top = center + egui::vec2(0.0, -body.height() * 0.22);
-    let bottom = center + egui::vec2(0.0, body.height() * 0.22);
-    let left = center + egui::vec2(-body.width() * 0.16, 0.0);
-    let right = center + egui::vec2(body.width() * 0.16, 0.0);
-    painter.add(egui::Shape::convex_polygon(
-        vec![left, right, bottom],
-        SYMBOL_STROKE,
-        stroke,
-    ));
-    painter.line_segment([top, bottom], stroke);
-}
-
-pub(crate) fn draw_button(painter: &egui::Painter, body: egui::Rect, stroke: egui::Stroke) {
-    let center = body.center();
-    let left = center + egui::vec2(-body.width() * 0.18, 0.0);
-    let right = center + egui::vec2(body.width() * 0.18, 0.0);
-    let top = center + egui::vec2(0.0, -body.height() * 0.2);
-    painter.line_segment([left, right], stroke);
-    painter.line_segment(
-        [top + egui::vec2(-6.0, 0.0), top + egui::vec2(6.0, 0.0)],
-        stroke,
-    );
-}
-
-pub(crate) fn draw_vcc(painter: &egui::Painter, body: egui::Rect, stroke: egui::Stroke) {
-    let center = body.center();
-    painter.circle_stroke(center, body.height() * 0.18, stroke);
-    painter.line_segment(
-        [
-            center + egui::vec2(0.0, body.height() * 0.18),
-            center + egui::vec2(0.0, body.height() * 0.4),
-        ],
-        stroke,
-    );
-}
-
-pub(crate) fn draw_gnd(painter: &egui::Painter, body: egui::Rect, stroke: egui::Stroke) {
-    let center = body.center();
-    for (index, width) in [0.35, 0.24, 0.13].iter().enumerate() {
-        let y = center.y + index as f32 * 6.0 - 6.0;
-        painter.line_segment(
-            [
-                egui::pos2(center.x - body.width() * width, y),
-                egui::pos2(center.x + body.width() * width, y),
-            ],
-            stroke,
-        );
-    }
-}
-
-pub(crate) fn draw_mcu(painter: &egui::Painter, body: egui::Rect, stroke: egui::Stroke) {
-    let notch = body.center_top() + egui::vec2(-body.width() * 0.12, 0.0);
-    painter.circle_stroke(notch, body.width() * 0.08, stroke);
-    painter.line_segment(
-        [
-            body.center_top() + egui::vec2(0.0, body.height() * 0.08),
-            body.center_bottom() - egui::vec2(0.0, body.height() * 0.08),
-        ],
-        egui::Stroke::new(1.0, BODY_STROKE),
     );
 }
 

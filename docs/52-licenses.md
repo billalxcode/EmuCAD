@@ -9,7 +9,8 @@ Dokumen ini mencatat status lisensi kode, model, dan data.
 - Lisensi proyek: MIT, lihat `LICENSE`.
 - Semua crate workspace memakai lisensi yang sama.
 - Tidak ada crate Rust eksternal.
-- Tidak ada kode sumber pihak ketiga yang disalin.
+- Tidak ada kode Rust pihak ketiga yang disalin.
+- Aset simbol SVG pihak ketiga dicatat di bagian 3.
 
 ---
 
@@ -29,7 +30,20 @@ lain.
 
 ---
 
-## 3. Data Datasheet
+## 3. Aset Simbol SVG
+
+Simbol library GUI memakai aset SVG dari sumber berikut:
+
+- Resistor, LED, button, dan GND: `chris-pikul/electronic-symbols`,
+  lisensi MIT, copyright (c) 2022 Chris Pikul.
+- MCU: adaptasi dari `GenericIC.svg` di Wikimedia Commons, public domain.
+- VCC: geometri sederhana yang digambar untuk proyek ini.
+
+Teks lisensi lengkap dan URL sumber ada di
+`crates/sim-gui/assets/symbols/NOTICE.md`. Paket rilis menyalin file itu
+ke `share/licenses/sim-gui-symbols.md`.
+
+## 4. Data Datasheet
 
 Kalibrasi pin memakai DC characteristics ATmega328P:
 
@@ -46,16 +60,16 @@ salinan tabel datasheet.
 
 ---
 
-## 4. CI
+## 5. CI
 
 Workflow memakai `actions/checkout@v4` untuk checkout repository. Tidak ada
 dependency Rust eksternal di CI.
 
 ---
 
-## 5. Batas
+## 6. Batas
 
 - Dokumen ini bukan nasihat hukum.
 - Belum ada audit lisensi untuk firmware contoh.
-- Belum ada NOTICE biner release.
+- NOTICE aset SVG sudah disertakan di paket rilis.
 - Belum ada verifikasi lisensi datasheet untuk redistribusi penuh.

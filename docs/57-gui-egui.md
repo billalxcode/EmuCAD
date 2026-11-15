@@ -275,6 +275,16 @@ Setiap instance memiliki:
 - Recently used.
 - Filter berdasarkan tipe pin atau domain sinyal.
 - Simbol bawaan untuk MVP; editor simbol belum tersedia.
+- Simbol dimuat dari aset SVG di `crates/sim-gui/assets/symbols/`.
+- Parser internal mendukung `path`, `line`, `rect`, `circle`, `ellipse`,
+  `polyline`, `polygon`, group, style, dan transform dasar tanpa crate
+  renderer baru.
+- Bounds gambar dipakai untuk fit ke body; ketebalan garis mengikuti zoom.
+- Elemen `text` diabaikan; label referensi dan nilai digambar oleh GUI.
+- Sumber, lisensi, dan perubahan aset dicatat di
+  `crates/sim-gui/assets/symbols/NOTICE.md`.
+- Aset yang gagal diparse tidak membuat aplikasi panic; test aset wajib
+  lulus sebelum commit.
 
 ### 6.4 Penempatan
 
@@ -656,6 +666,7 @@ Target awal:
 - Grafik memakai decimation dan ring buffer 10 detik.
 - Alokasi per frame diminimalkan.
 - Repaint hanya saat input, animasi, atau simulasi berjalan.
+- Hasil parse SVG disimpan di `OnceLock`; tidak ada parsing per frame.
 
 Export:
 
@@ -700,6 +711,9 @@ Test integrasi:
 
 Test visual:
 
+- Setiap aset SVG harus parse, memiliki bounds positif, dan menghasilkan
+  shape.
+- Setiap `SymbolKind` harus memiliki aset yang terdaftar.
 - Snapshot RGBA mentah dari renderer headless atau screenshot test.
 - Golden image membandingkan byte RGBA, bukan file PNG.
 - Perubahan yang disengaja harus memperbarui golden dengan review manual.

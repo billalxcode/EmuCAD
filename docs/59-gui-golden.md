@@ -9,7 +9,7 @@ Golden RGBA sudah tersedia dan berjalan headless di test Linux:
 
 - Renderer: `crates/sim-gui/src/golden.rs`, hanya dikompilasi untuk test.
 - Ukuran: 320 x 240 piksel, skala piksel 1.0.
-- Scene: resistor, LED, label, dan teks tetap pada tema gelap.
+- Scene: resistor dan LED berbasis SVG, label, dan teks tetap pada tema gelap.
 - Golden: `crates/sim-gui/tests/golden/scene-320x240.rgba`.
 - Perbandingan: byte RGBA exact, tanpa toleransi.
 - Diagnostik: piksel, channel, dan nilai byte pertama yang berbeda.

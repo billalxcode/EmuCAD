@@ -4,7 +4,7 @@
 yang memodelkan transistor, gerbang CMOS, CPU AVR, peripheral, dan board,
 serta mampu menjalankan firmware AVR.
 
-> **Status v0.1:** 799 test lulus, 9 crate, crate simulasi zero external
+> **Status v0.1:** 811 test lulus, 9 crate, crate simulasi zero external
 > dependency; dependensi GUI dan binding Python dibatasi pada daftar yang
 > disetujui di `AGENTS.md`.
 > Tag `v0.1` tersedia. Archive Linux ada di
@@ -165,7 +165,7 @@ Dokumen yang sering dipakai:
 
 Sudah:
 
-- 799 test workspace.
+- 811 test workspace.
 - fmt, clippy, test, dan build release lulus.
 - Paket Linux dapat dibuat.
 - Determinisme Linux diuji.
@@ -173,6 +173,7 @@ Sudah:
   `Serial.println("Hello World")` berjalan.
 - GUI egui untuk editing skematik, simulasi PB5, monitor UART TX,
   graph digital, minimap, dan export PNG.
+- Simbol library berbasis aset SVG dengan sumber MIT dan public domain.
 
 Belum:
 

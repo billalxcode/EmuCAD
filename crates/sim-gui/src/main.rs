@@ -21,6 +21,7 @@ mod scene;
 mod selection;
 mod sim;
 mod spatial;
+mod symbols;
 mod uart;
 
 use app::GuiApp;

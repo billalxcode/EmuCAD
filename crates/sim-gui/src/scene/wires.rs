@@ -374,8 +374,7 @@ pub(crate) fn draw_library_preview(
     definition: &ComponentDefinition,
 ) {
     let body = preview_rect(area, definition);
-    draw_body(painter, body, egui::Stroke::new(1.0, BODY_STROKE));
-    draw_symbol(painter, body, definition.symbol);
+    crate::symbols::draw_symbol(painter, body, definition.symbol, SYMBOL_STROKE);
 }
 
 pub(crate) fn preview_rect(area: egui::Rect, definition: &ComponentDefinition) -> egui::Rect {

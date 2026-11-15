@@ -8,9 +8,8 @@ use crate::model::{
 use crate::selection::Selection;
 use eframe::egui;
 
-const BODY_FILL: egui::Color32 = egui::Color32::from_rgb(31, 35, 43);
-const BODY_STROKE: egui::Color32 = egui::Color32::from_rgb(135, 145, 160);
 const SELECTED_STROKE: egui::Color32 = egui::Color32::from_rgb(0, 200, 220);
+const SELECTED_FILL: egui::Color32 = egui::Color32::from_rgba_premultiplied(0, 22, 24, 28);
 const SYMBOL_STROKE: egui::Color32 = egui::Color32::from_rgb(190, 198, 210);
 const PIN_COLOR: egui::Color32 = egui::Color32::from_rgb(215, 220, 230);
 const TEXT_COLOR: egui::Color32 = egui::Color32::from_rgb(200, 205, 215);

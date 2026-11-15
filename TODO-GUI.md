@@ -120,6 +120,8 @@ pan dan zoom stabil, dan area canvas mendominasi layout.
 - [x] G2-04 Buat library sheet dengan pencarian dan kategori.
 - [x] G2-05 Buat daftar recently used di library.
 - [x] G2-15 Buat preview simbol di library.
+- [x] G2-17 Ganti simbol library dengan aset SVG dari sumber MIT dan public domain.
+- [ ] G2-18 Perluas aset SVG dan mapping ke seluruh 500 entri katalog.
 - [x] G2-06 Implementasikan ghost placement dan klik untuk menempatkan.
 - [x] G2-16 Implementasikan drag-and-drop dari library ke kanvas.
 - [x] G2-07 Implementasikan move, rotate, dan mirror di grid dengan pusat rotasi.
@@ -316,6 +318,9 @@ Selesai dan teruji:
   highlight, aturan persilangan.
 - Simulasi PB5/LED, run, pause, step, reset, UART TX, graph digital,
   cursor cycle.
+- Simbol library berbasis aset SVG: resistor, LED, button, VCC, GND, dan
+  MCU. Aset disimpan di `crates/sim-gui/assets/symbols/` dengan catatan
+  sumber dan lisensi.
 - Probe read-only PB5 dan arus LED, buffer 10 detik, decimation min/max,
   sampling N cycle, graph analog dua sumbu, maksimal 8 series.
 - Spatial hash untuk hit testing kabel, benchmark 500 komponen dan 2000
