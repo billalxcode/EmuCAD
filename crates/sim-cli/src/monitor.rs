@@ -1,7 +1,10 @@
 //! Simple AVR monitor used by the CLI.
 
+use crate::pacing::Pacer;
 use sim_avr::{AvrTrace, Cpu, ProgramMemory, disassemble};
 use sim_board::HexImage;
+
+const PACE_CYCLES: u64 = 80_000;
 
 /// A monitor around one AVR core instance.
 pub struct Monitor {
@@ -38,6 +41,32 @@ impl Monitor {
         Ok(format!(
             "{} instructions, {} cycles",
             traces.len(),
+            self.cpu.cycles()
+        ))
+    }
+
+    /// Executes until halt or the step limit at 16 MHz wall-clock speed.
+    pub fn run_realtime(&mut self, limit: usize) -> Result<String, String> {
+        let pacer = Pacer::new(self.cpu.cycles());
+        let mut next = self.cpu.cycles().saturating_add(PACE_CYCLES);
+        let mut executed = 0usize;
+        for _ in 0..limit {
+            let Some(_) = self
+                .cpu
+                .step_untraced()
+                .map_err(|error| error.to_string())?
+            else {
+                break;
+            };
+            executed += 1;
+            if self.cpu.cycles() >= next {
+                pacer.wait(self.cpu.cycles());
+                next = self.cpu.cycles().saturating_add(PACE_CYCLES);
+            }
+        }
+        pacer.wait(self.cpu.cycles());
+        Ok(format!(
+            "{executed} instructions, {} cycles, realtime",
             self.cpu.cycles()
         ))
     }
@@ -183,6 +212,14 @@ mod tests {
             Monitor::new(vec![ldi(16, 0x55), 0x9200 | (16 << 4), 0x0100, 0x9598]).expect("monitor");
         monitor.run(10).expect("run");
         assert!(monitor.memory(0x0100, 1).contains("55"));
+    }
+
+    #[test]
+    fn monitor_runs_realtime() {
+        let mut monitor = Monitor::new(vec![ldi(16, 5), 0x9598]).expect("monitor");
+        let text = monitor.run_realtime(10).expect("run");
+        assert!(text.contains("2 instructions"));
+        assert!(text.contains("realtime"));
     }
 
     #[test]

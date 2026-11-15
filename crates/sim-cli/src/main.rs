@@ -5,6 +5,7 @@ mod bench;
 mod bootloader;
 mod catalog;
 mod monitor;
+mod pacing;
 #[cfg(unix)]
 mod serial;
 #[cfg(not(unix))]
@@ -56,12 +57,18 @@ fn dispatch(command: &str, words: &[String]) -> Result<(), String> {
 fn run_hex(args: &[String]) -> Result<(), String> {
     let path = args.first().ok_or_else(|| "missing HEX path".to_string())?;
     let text = std::fs::read_to_string(path).map_err(|error| error.to_string())?;
-    let limit = match args.get(1) {
+    let realtime = args.iter().any(|arg| arg == "--realtime");
+    let limit = match args.iter().skip(1).find(|arg| !arg.starts_with("--")) {
         Some(raw) => parse_number(raw)?,
         None => 100_000,
     };
     let mut monitor = Monitor::from_hex(&text)?;
-    println!("{}", monitor.run(limit)?);
+    let result = if realtime {
+        monitor.run_realtime(limit)?
+    } else {
+        monitor.run(limit)?
+    };
+    println!("{result}");
     Ok(())
 }
 
@@ -141,5 +148,5 @@ fn number(args: &[&str], index: usize, default: usize) -> Result<usize, String> 
 }
 
 fn usage() -> String {
-    "usage: emucad [--link path] [--socket path] | emucad monitor <hex words...> | emucad disasm <hex words...> | emucad run <file.hex> [steps] | emucad bench [iterations] [nodes] | emucad catalog [--json] | emucad serial [--link path] [--socket path] | emucad usb [--socket path]".to_string()
+    "usage: emucad [--link path] [--socket path] | emucad monitor <hex words...> | emucad disasm <hex words...> | emucad run <file.hex> [steps] [--realtime] | emucad bench [iterations] [nodes] | emucad catalog [--json] | emucad serial [--link path] [--socket path] | emucad usb [--socket path]".to_string()
 }
