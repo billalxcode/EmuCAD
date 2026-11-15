@@ -9,6 +9,8 @@ const MIXED: [u16; 13] = [
     0xCFF5,
 ];
 const MEMORY: [u16; 7] = [0xE0A0, 0xE0B2, 0xE505, 0x930C, 0x911C, 0x0F01, 0xCFFC];
+const TIMER: [u16; 7] = [0xE001, 0xBD05, 0xE012, 0x0F01, 0x1B01, 0x2F01, 0xCFFC];
+const TIMER64: [u16; 7] = [0xE003, 0xBD05, 0xE012, 0x0F01, 0x1B01, 0x2F01, 0xCFFC];
 const CYCLES_PER_SECOND: f64 = 16_000_000.0;
 const WARMUP: usize = 10_000;
 
@@ -28,6 +30,8 @@ fn main() {
         ("alu", &ALU[..]),
         ("mixed", &MIXED[..]),
         ("memory", &MEMORY[..]),
+        ("timer", &TIMER[..]),
+        ("timer64", &TIMER64[..]),
     ] {
         run_program(name, program, steps, &mode);
     }
