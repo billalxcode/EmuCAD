@@ -9,6 +9,7 @@ use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
 const CHUNK: usize = 100;
+const PACE_CYCLES: u64 = 80_000;
 const POLL_MS: u64 = 2;
 const FLASH_BYTES: usize = 0x8000;
 const WAVE_LIMIT: usize = 2048;
@@ -59,6 +60,8 @@ struct WorkerState {
     running: bool,
     last: SampleState,
     sample_every: u64,
+    pacer: pacing::Pacer,
+    next_pace: u64,
 }
 
 impl WorkerState {
@@ -68,6 +71,8 @@ impl WorkerState {
             running: false,
             last: SampleState::default(),
             sample_every: DEFAULT_SAMPLE_EVERY,
+            pacer: pacing::Pacer::new(),
+            next_pace: 0,
         }
     }
 
@@ -79,10 +84,33 @@ impl WorkerState {
             &mut self.last,
             events,
         );
+        self.restart_pacing();
     }
 
     fn run(&mut self, value: bool, events: &Sender<Event>) {
+        if value {
+            self.restart_pacing();
+        }
         update_running(&self.machine, &mut self.running, value, events);
+    }
+
+    fn restart_pacing(&mut self) {
+        let cycles = self.machine_cycles();
+        self.pacer.restart(cycles);
+        self.next_pace = cycles.saturating_add(PACE_CYCLES);
+    }
+
+    fn machine_cycles(&self) -> u64 {
+        self.machine.as_ref().map_or(0, SimMachine::cycles)
+    }
+
+    fn pace(&mut self) {
+        let cycles = self.machine_cycles();
+        if cycles < self.next_pace {
+            return;
+        }
+        self.pacer.wait(cycles);
+        self.next_pace = cycles.saturating_add(PACE_CYCLES);
     }
 
     fn step(&mut self, events: &Sender<Event>) {
@@ -91,6 +119,7 @@ impl WorkerState {
 
     fn reset(&mut self, events: &Sender<Event>) {
         reset_machine(&mut self.machine, &mut self.running, &mut self.last, events);
+        self.restart_pacing();
     }
 
     fn queue_uart(&mut self, data: Vec<u8>) {
@@ -279,6 +308,7 @@ impl SimMachine {
 
 mod handle;
 mod hex;
+mod pacing;
 #[cfg(test)]
 mod tests;
 mod worker;

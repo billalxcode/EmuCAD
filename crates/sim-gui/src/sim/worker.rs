@@ -5,6 +5,7 @@ pub(super) fn worker(commands: Receiver<Command>, events: Sender<Event>) {
     loop {
         if state.running {
             step_chunk(&mut state, &events);
+            state.pace();
             if !drain_commands(&commands, &mut state, &events) {
                 break;
             }
