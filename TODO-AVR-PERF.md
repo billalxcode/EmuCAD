@@ -92,6 +92,26 @@ bash scripts/bench-avr.sh 1000000
 - [ ] P-A23 Tambah real-time pacing untuk CLI dan GUI.
 - [ ] P-A24 Ukur firmware Arduino penuh dengan peripheral aktif.
 
+## Temuan Akurasi 1% (2026-11-15)
+
+- Target: 16.000.000 cycle/detik dengan toleransi 1% (15,84-16,16 juta).
+- Tanpa timer: 2,55x-4,56x real-time, jadi terlalu cepat dan belum di-pace.
+- Timer0 prescaler 64: 1,78x-1,95x real-time.
+- Timer0 prescaler 1: 0,126x-0,127x real-time, sekitar 8x lebih lambat.
+- Penyebab utama: counter Timer0/1/2 masih struktural dan di-tick per cycle.
+- Gap timing lain: UART U2X/parity/stop bit, SPI divider CS=3, ADC
+  konversi pertama, rumus TWI, Timer1/2 belum terhubung ke IO, dan
+  wake-up sleep belum menambah cycle.
+- Instruction cycle belum diaudit menyeluruh; EICALL/EIJMP perlu dicek.
+- Belum ada pacing 16 MHz di CLI maupun GUI.
+
+- [ ] P-A25 Ganti counter Timer0/1/2 dengan counter integer fungsional.
+- [ ] P-A26 Tambah pacing 16 MHz dengan toleransi 1% per 1 detik.
+- [ ] P-A27 Perbaiki timing UART U2X, parity, stop bit, dan 9-bit.
+- [ ] P-A28 Perbaiki tabel divider SPI untuk CS=3 dan SPI2X.
+- [ ] P-A29 Perbaiki ADC first conversion dan rumus TWI.
+- [ ] P-A30 Audit cycle seluruh instruksi dan benchmark firmware penuh.
+
 ## Riwayat Commit
 
 | Commit | Isi |
