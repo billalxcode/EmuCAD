@@ -97,12 +97,16 @@ Hasil final, median tiga run, 1.000.000 instruksi, release build:
 
 | Program | mode | instructions/detik | cycles/detik | real-time |
 |---|---|---:|---:|---:|
-| ALU | traced | 32.667.451 | 40.834.314 | 2,552x |
-| ALU | untraced | 37.830.936 | 47.288.670 | 2,956x |
-| Mixed | traced | 34.835.892 | 41.169.720 | 2,573x |
-| Mixed | untraced | 38.925.844 | 46.003.303 | 2,875x |
-| Memory | traced | 35.460.085 | 62.055.149 | 3,878x |
-| Memory | untraced | 41.667.510 | 72.918.143 | 4,557x |
+| ALU | traced | 34.385.807 | 42.982.259 | 2,686x |
+| ALU | untraced | 40.184.314 | 50.230.393 | 3,139x |
+| Mixed | traced | 35.348.628 | 41.775.680 | 2,611x |
+| Mixed | untraced | 38.913.534 | 45.988.754 | 2,874x |
+| Memory | traced | 35.832.351 | 62.706.614 | 3,919x |
+| Memory | untraced | 41.166.762 | 72.041.833 | 4,503x |
+| Timer0 prescaler 1 | traced | 27.368.581 | 34.210.726 | 2,138x |
+| Timer0 prescaler 1 | untraced | 29.366.545 | 36.708.181 | 2,294x |
+| Timer0 prescaler 64 | traced | 29.420.540 | 36.775.675 | 2,298x |
+| Timer0 prescaler 64 | untraced | 32.874.932 | 41.093.665 | 2,568x |
 
 Reproduksi:
 
@@ -111,12 +115,36 @@ bash scripts/bench-avr.sh 1000000
 ```
 
 Real-time factor dihitung dari cycles/detik dibagi 16 MHz. Nilai di atas 1
-berarti simulasi lebih cepat dari AVR 16 MHz. CLI dan GUI tetap perlu
-pacing agar tidak berjalan terlalu cepat.
+berarti simulasi lebih cepat dari AVR 16 MHz.
+
+Timer0/1 memakai counter integer fungsional dengan pembagian prescaler
+bulk. Timer0 prescaler 1 naik dari 0,126x menjadi 2,14x-2,29x real-time.
+
+### 3.5 Pacing 16 MHz
+
+CLI menyediakan `emucad run <file.hex> [steps] --realtime`. GUI worker
+memakai pacing yang sama secara default. Pacer memakai target cycle
+absolut, sleep untuk sisa di atas 1 ms, lalu spin untuk sisa terakhir.
+
+Verifikasi 10.000.000 instruksi, lima run, toleransi 1%:
+
+| Program | median error | worst error |
+|---|---:|---:|
+| ALU | +0,301% | +0,898% |
+| Mixed | +0,228% | +0,759% |
+| Memory | +0,195% | +0,549% |
+| Timer0 prescaler 1 | +0,509% | +0,646% |
+
+Reproduksi:
+
+```bash
+bash scripts/check-avr-realtime.sh
+```
 
 Setelah optimasi, circuit CPU berisi 120 gate, 3 komponen, 48 DFF, dengan
-komponen terbesar 40 gate. Sisa bottleneck ada di dispatch `step_inner`,
-fetch cache, dan peripheral yang aktif.
+komponen terbesar 40 gate. Timer1/Timer2 belum terhubung ke register IO
+CPU, sleep wake-up belum menambah cycle, dan watchdog belum dimodelkan;
+firmware yang memakai peripheral tersebut belum bisa diklaim cycle-exact.
 
 ---
 

@@ -9,7 +9,8 @@ transistor/gerbang, bukan instruction-set simulator.
 > struktural tetap tersedia di `sim-cells` dan modul `alu`, `shift`,
 > `multiply`, serta `register_bank` untuk validasi dan pengembangan mode
 > struktural. GPIO masih memakai circuit gate-level; UART/SPI/TWI/ADC
-> behavioral.
+> behavioral. CLI dan GUI memakai pacing 16 MHz; loop ALU, mixed, memory,
+> dan Timer0 terverifikasi dalam toleransi 1%.
 
 ---
 

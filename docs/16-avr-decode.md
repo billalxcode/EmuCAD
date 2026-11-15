@@ -229,11 +229,16 @@ Total test `sim-cli`: 26.
 - `AvrTrace` mencatat cycle instruksi dan total cycle.
 - Sebagian besar instruksi memakai 1 cycle.
 - MUL, LD/ST, LDD/STD, LDS/STS, PUSH/POP, RJMP, IJMP, ADIW, SBIW, dan SBI/CBI memakai 2 cycle.
-- JMP, RCALL, ICALL, EICALL, LPM, dan ELPM memakai 3 cycle.
+- JMP, RCALL, ICALL, LPM, dan ELPM memakai 3 cycle.
+- EICALL memakai 4 cycle; EIJMP memakai 2 cycle.
 - CALL, RET, dan RETI memakai 4 cycle.
 - Branch taken menambah 1 cycle.
 - Skip yang melewati instruksi 2 word memakai 3 cycle.
 - Interrupt entry menambah 4 cycle.
+- UART memodelkan U2X, parity, stop bit, dan 9-bit.
+- SPI memakai tabel divider 4/16/64/128; SPI2X membagi dua.
+- ADC memakai 25 clock untuk konversi pertama dan 13 untuk berikutnya.
+- TWI memakai rumus SCL 16 + 2*TWBR*4^TWPS.
 - Model ini belum memasukkan wait state flash dan timing silikon detail.
 
 ## 15. Disassembler

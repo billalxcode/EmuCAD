@@ -4,7 +4,7 @@
 yang memodelkan transistor, gerbang CMOS, CPU AVR, peripheral, dan board,
 serta mampu menjalankan firmware AVR.
 
-> **Status v0.1:** 786 test lulus, 9 crate, crate simulasi zero external
+> **Status v0.1:** 799 test lulus, 9 crate, crate simulasi zero external
 > dependency; dependensi GUI dan binding Python dibatasi pada daftar yang
 > disetujui di `AGENTS.md`.
 > Tag `v0.1` tersedia. Archive Linux ada di
@@ -89,7 +89,7 @@ cargo run -p sim-avr --example timer_interrupt
 ./target/debug/emucad disasm E005 E013 0F01 9598
 ./target/debug/emucad bench 1000 10
 ./target/debug/emucad catalog --json
-./target/debug/emucad run firmware/blink.hex 100000
+./target/debug/emucad run firmware/blink.hex 100000 --realtime
 ./target/release/emucad serial
 ./target/release/emucad
 ./target/release/emucad usb --socket /tmp/emucad-usb.sock
@@ -165,7 +165,7 @@ Dokumen yang sering dipakai:
 
 Sudah:
 
-- 786 test workspace.
+- 799 test workspace.
 - fmt, clippy, test, dan build release lulus.
 - Paket Linux dapat dibuat.
 - Determinisme Linux diuji.

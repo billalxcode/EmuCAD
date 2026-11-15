@@ -5,13 +5,17 @@ kebenaran fungsional. Setiap perubahan diukur sebelum dan sesudah.
 
 ## Status
 
-- Terakhir diperbarui: 2026-11-14.
-- Commit implementasi: `813ab09` (fast core AVR).
-- Commit dokumentasi: `320e7ff` (hasil benchmark).
+- Terakhir diperbarui: 2026-11-15.
+- Commit timer fungsional: `0393547`.
+- Commit perbaikan timing: `9ec28d1`.
+- Commit pacing CLI: `71b1fd5`.
+- Commit pacing GUI: `e173f6b`.
+- Commit verifikasi realtime: `63279a9`.
 - Build benchmark: release.
-- Test workspace: 786 lulus.
-- Hasil: 2,552x sampai 4,557x real-time pada tiga loop benchmark.
-- Sisa pekerjaan: pacing real-time CLI/GUI dan benchmark firmware penuh.
+- Test workspace: 799 lulus.
+- Headroom: 2,14x sampai 4,50x real-time tanpa pacing.
+- Pacing CLI: median 0,195-0,509%, worst di bawah 0,9% pada run final.
+- Sisa pekerjaan: Timer1/2 register IO, sleep wake, dan firmware penuh.
 
 ## Aturan
 
@@ -41,7 +45,8 @@ Baseline awal memakai loop ALU dengan `step` bertrace.
 | Cache decode instruksi | 28.727.904 | 38.745.929 | 48.432.411 | 25,8 | 3,027x |
 | Trace menyalin array register | 31.441.360 | 37.894.437 | 47.368.046 | 26,4 | 2,961x |
 | Fast skip peripheral serial | 32.745.683 | 38.753.664 | 48.442.079 | 25,8 | 3,028x |
-| Final, median 3 run, loop ALU | 32.667.451 | 37.830.936 | 47.288.670 | 26,4 | 2,956x |
+| Timer0 fungsional, prescaler 1 | 27.368.581 | 29.366.545 | 36.708.181 | 34,1 | 2,294x |
+| Final, median 3 run, loop ALU | 34.385.807 | 40.184.314 | 50.230.393 | 24,9 | 3,139x |
 
 ## Hasil Final
 
@@ -49,20 +54,37 @@ Median tiga run, 1.000.000 instruksi, release build:
 
 | Program | mode | instructions/detik | cycles/detik | ns/instruksi | real-time |
 |---|---|---:|---:|---:|---:|
-| ALU | traced | 32.667.451 | 40.834.314 | 30,6 | 2,552x |
-| ALU | untraced | 37.830.936 | 47.288.670 | 26,4 | 2,956x |
-| Mixed | traced | 34.835.892 | 41.169.720 | 28,7 | 2,573x |
-| Mixed | untraced | 38.925.844 | 46.003.303 | 25,7 | 2,875x |
-| Memory | traced | 35.460.085 | 62.055.149 | 28,2 | 3,878x |
-| Memory | untraced | 41.667.510 | 72.918.143 | 24,0 | 4,557x |
+| ALU | traced | 34.385.807 | 42.982.259 | 29,1 | 2,686x |
+| ALU | untraced | 40.184.314 | 50.230.393 | 24,9 | 3,139x |
+| Mixed | traced | 35.348.628 | 41.775.680 | 28,3 | 2,611x |
+| Mixed | untraced | 38.913.534 | 45.988.754 | 25,7 | 2,874x |
+| Memory | traced | 35.832.351 | 62.706.614 | 27,9 | 3,919x |
+| Memory | untraced | 41.166.762 | 72.041.833 | 24,3 | 4,503x |
+| Timer0 prescaler 1 | traced | 27.368.581 | 34.210.726 | 36,5 | 2,138x |
+| Timer0 prescaler 1 | untraced | 29.366.545 | 36.708.181 | 34,1 | 2,294x |
+| Timer0 prescaler 64 | traced | 29.420.540 | 36.775.675 | 34,0 | 2,298x |
+| Timer0 prescaler 64 | untraced | 32.874.932 | 41.093.665 | 30,4 | 2,568x |
 
 Ukuran circuit CPU setelah optimasi: 120 gate, 3 komponen, 48 DFF,
 komponen terbesar 40 gate.
+
+## Pacing Realtime
+
+Target 16.000.000 cycle/detik, toleransi 1%. Pengukuran 10.000.000
+instruksi, lima run, mode `emucad run --realtime`:
+
+| Program | median error | worst error |
+|---|---:|---:|
+| ALU | +0,301% | +0,898% |
+| Mixed | +0,228% | +0,759% |
+| Memory | +0,195% | +0,549% |
+| Timer0 prescaler 1 | +0,509% | +0,646% |
 
 Reproduksi:
 
 ```bash
 bash scripts/bench-avr.sh 1000000
+bash scripts/check-avr-realtime.sh
 ```
 
 ## Fase Optimasi
@@ -88,29 +110,33 @@ bash scripts/bench-avr.sh 1000000
 - [x] P-A19 Tambah trace cepat dengan menyalin array register.
 - [x] P-A20 Tambah benchmark loop memory dan test pointer.
 - [x] P-A21 Inline jalur fetch dan step, lalu ukur ulang.
-- [x] P-A22 Verifikasi final 786 test, clippy, ASCII, dan package.
-- [ ] P-A23 Tambah real-time pacing untuk CLI dan GUI.
-- [ ] P-A24 Ukur firmware Arduino penuh dengan peripheral aktif.
+- [x] P-A22 Verifikasi final 799 test, clippy, ASCII, dan package.
+- [x] P-A23 Tambah real-time pacing untuk CLI dan GUI.
 
 ## Temuan Akurasi 1% (2026-11-15)
 
 - Target: 16.000.000 cycle/detik dengan toleransi 1% (15,84-16,16 juta).
-- Tanpa timer: 2,55x-4,56x real-time, jadi terlalu cepat dan belum di-pace.
-- Timer0 prescaler 64: 1,78x-1,95x real-time.
-- Timer0 prescaler 1: 0,126x-0,127x real-time, sekitar 8x lebih lambat.
-- Penyebab utama: counter Timer0/1/2 masih struktural dan di-tick per cycle.
-- Gap timing lain: UART U2X/parity/stop bit, SPI divider CS=3, ADC
-  konversi pertama, rumus TWI, Timer1/2 belum terhubung ke IO, dan
-  wake-up sleep belum menambah cycle.
-- Instruction cycle belum diaudit menyeluruh; EICALL/EIJMP perlu dicek.
-- Belum ada pacing 16 MHz di CLI maupun GUI.
+- Tanpa timer: 2,69x-4,50x real-time.
+- Timer0 prescaler 64: 2,30x-2,57x real-time.
+- Timer0 prescaler 1: 2,14x-2,29x real-time setelah counter fungsional.
+- Pacing CLI: median 0,195-0,509%, worst di bawah 0,9% pada run final.
+- Pacing GUI memakai algoritma yang sama dan unit test target waktu.
+- Gap yang sudah diperbaiki: UART U2X/parity/stop/9-bit, SPI CS=3,
+  ADC first conversion, rumus TWI, dan EICALL/EIJMP.
+- Gap yang tersisa: Timer1/2 belum terhubung ke IO, sleep wake belum
+  menambah cycle, watchdog belum dimodelkan, dan matrix cycle seluruh
+  instruksi belum lengkap.
 
-- [ ] P-A25 Ganti counter Timer0/1/2 dengan counter integer fungsional.
-- [ ] P-A26 Tambah pacing 16 MHz dengan toleransi 1% per 1 detik.
-- [ ] P-A27 Perbaiki timing UART U2X, parity, stop bit, dan 9-bit.
-- [ ] P-A28 Perbaiki tabel divider SPI untuk CS=3 dan SPI2X.
-- [ ] P-A29 Perbaiki ADC first conversion dan rumus TWI.
-- [ ] P-A30 Audit cycle seluruh instruksi dan benchmark firmware penuh.
+- [x] P-A25 Ganti counter Timer0/1/2 dengan counter integer fungsional.
+- [x] P-A26 Tambah pacing 16 MHz dengan toleransi 1% per 1 detik.
+- [x] P-A27 Perbaiki timing UART U2X, parity, stop bit, dan 9-bit.
+- [x] P-A28 Perbaiki tabel divider SPI untuk CS=3 dan SPI2X.
+- [x] P-A29 Perbaiki ADC first conversion dan rumus TWI.
+- [x] P-A30 Perbaiki EICALL/EIJMP dan verifikasi cycle utama.
+- [ ] P-A31 Hubungkan Timer1 dan Timer2 ke register IO CPU.
+- [ ] P-A32 Modelkan sleep wake-up cycles.
+- [ ] P-A33 Audit matrix cycle seluruh instruksi.
+- [ ] P-A34 Benchmark firmware Arduino penuh dengan Timer1/2 dan UART.
 
 ## Riwayat Commit
 

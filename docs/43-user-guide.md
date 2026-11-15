@@ -131,7 +131,11 @@ Binary hasil build berada di `target/debug/emucad` atau
 
 ```bash
 ./target/debug/emucad run firmware/blink.hex 100000
+./target/debug/emucad run firmware/blink.hex 100000 --realtime
 ```
+
+Opsi `--realtime` menjalankan simulasi pada 16 MHz wall-clock dengan
+toleransi 1%. Tanpa opsi ini simulasi berjalan secepat mungkin.
 
 Argumen kedua adalah batas instruksi. Default 100000.
 
