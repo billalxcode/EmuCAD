@@ -135,6 +135,9 @@ Verifikasi 10.000.000 instruksi, lima run, toleransi 1%:
 | Memory | +0,195% | +0,549% |
 | Timer0 prescaler 1 | +0,509% | +0,646% |
 
+GUI worker memakai algoritma yang sama. Release test menjalankan
+16.000.000 cycle dan selesai dalam sekitar 1,00 detik dengan toleransi 1%.
+
 Reproduksi:
 
 ```bash

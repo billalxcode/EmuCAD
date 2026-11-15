@@ -15,6 +15,7 @@ kebenaran fungsional. Setiap perubahan diukur sebelum dan sesudah.
 - Test workspace: 799 lulus.
 - Headroom: 2,14x sampai 4,50x real-time tanpa pacing.
 - Pacing CLI: median 0,195-0,509%, worst di bawah 0,9% pada run final.
+- Pacing GUI: release test 16.000.000 cycle selesai dalam sekitar 1,00 detik.
 - Sisa pekerjaan: Timer1/2 register IO, sleep wake, dan firmware penuh.
 
 ## Aturan
@@ -120,7 +121,8 @@ bash scripts/check-avr-realtime.sh
 - Timer0 prescaler 64: 2,30x-2,57x real-time.
 - Timer0 prescaler 1: 2,14x-2,29x real-time setelah counter fungsional.
 - Pacing CLI: median 0,195-0,509%, worst di bawah 0,9% pada run final.
-- Pacing GUI memakai algoritma yang sama dan unit test target waktu.
+- Pacing GUI: release test 16.000.000 cycle selesai dalam sekitar 1,00 detik.
+- Pacing GUI memakai algoritma yang sama; release test worker lulus.
 - Gap yang sudah diperbaiki: UART U2X/parity/stop/9-bit, SPI CS=3,
   ADC first conversion, rumus TWI, dan EICALL/EIJMP.
 - Gap yang tersisa: Timer1/2 belum terhubung ke IO, sleep wake belum
@@ -145,6 +147,7 @@ bash scripts/check-avr-realtime.sh
 | `5f7e1f3` | Optimasi topological order, dirty cone, bitset, dan read port |
 | `813ab09` | Functional fast core, decode cache, benchmark, dan test |
 | `320e7ff` | Dokumentasi hasil benchmark dan status performa |
+| `bdd67c6` | Kurangi overhead board GUI dan verifikasi pacing |
 
 ## Catatan
 
