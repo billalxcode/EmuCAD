@@ -3,8 +3,10 @@
 use std::collections::VecDeque;
 
 const TX_ENABLE: u8 = 1 << 3;
+#[cfg(test)]
 const FRAME_BITS: u32 = 10;
 const NORMAL_MODE_FACTOR: u32 = 16;
+const DOUBLE_SPEED_FACTOR: u32 = 8;
 
 /// Behavioral model of the AVR USART.
 pub struct Uart {
@@ -14,6 +16,7 @@ pub struct Uart {
     ubrr: u16,
     tx_data: u8,
     tx_bit_cycles: u32,
+    tx_frame_cycles: u32,
     tx_elapsed: u32,
     tx_active: bool,
     tx_queue: VecDeque<u8>,
@@ -33,10 +36,11 @@ impl Uart {
         Self {
             ucsr_a: 0,
             ucsr_b: 0,
-            ucsr_c: 0,
+            ucsr_c: 0x06,
             ubrr: 0,
             tx_data: 0,
             tx_bit_cycles: 0,
+            tx_frame_cycles: 0,
             tx_elapsed: 0,
             tx_active: false,
             tx_queue: VecDeque::new(),
@@ -78,6 +82,7 @@ impl Uart {
         self.txc = false;
         self.tx_elapsed = 0;
         self.tx_bit_cycles = self.cycles_per_bit();
+        self.tx_frame_cycles = self.tx_bit_cycles.saturating_mul(self.frame_bits());
         self.tx_active = true;
     }
 
@@ -211,8 +216,7 @@ impl Uart {
             return;
         }
         let elapsed = self.tx_elapsed.saturating_add(cycles);
-        let frame_cycles = self.tx_bit_cycles.saturating_mul(FRAME_BITS);
-        if elapsed < frame_cycles {
+        if elapsed < self.tx_frame_cycles {
             self.tx_elapsed = elapsed;
             return;
         }
@@ -223,13 +227,37 @@ impl Uart {
         self.tx_active = false;
         self.tx_elapsed = 0;
         self.tx_bit_cycles = 0;
+        self.tx_frame_cycles = 0;
         self.tx_queue.push_back(self.tx_data);
         self.udre = true;
         self.txc = true;
     }
 
     fn cycles_per_bit(&self) -> u32 {
-        (u32::from(self.ubrr) + 1) * NORMAL_MODE_FACTOR
+        let factor = if self.ucsr_a & 0x02 != 0 {
+            DOUBLE_SPEED_FACTOR
+        } else {
+            NORMAL_MODE_FACTOR
+        };
+        (u32::from(self.ubrr) + 1) * factor
+    }
+
+    fn data_bits(&self) -> u32 {
+        let size = (((self.ucsr_b >> 2) & 1) << 2) | ((self.ucsr_c >> 1) & 0x03);
+        match size {
+            0 => 5,
+            1 => 6,
+            2 => 7,
+            3 => 8,
+            7 => 9,
+            _ => 8,
+        }
+    }
+
+    fn frame_bits(&self) -> u32 {
+        let parity = u32::from(self.ucsr_c & 0x30 != 0);
+        let stop = if self.ucsr_c & 0x08 != 0 { 2 } else { 1 };
+        1 + self.data_bits() + parity + stop
     }
 }
 
@@ -395,5 +423,49 @@ mod tests {
     #[test]
     fn source_is_ascii() {
         assert!(include_str!("uart.rs").is_ascii());
+    }
+    #[test]
+    fn double_speed_halves_frame_time() {
+        let mut uart = enabled_uart();
+        uart.write_control(0, 0x02);
+        uart.write_baud(1, 0);
+        uart.write_tx(0x00);
+        uart.tick(159);
+        assert!(uart.tx_activity());
+        uart.tick(1);
+        assert!(!uart.tx_activity());
+    }
+
+    #[test]
+    fn parity_adds_one_frame_bit() {
+        let mut uart = enabled_uart();
+        uart.write_control(2, 0x36);
+        uart.write_tx(0x00);
+        uart.tick(175);
+        assert!(uart.tx_activity());
+        uart.tick(1);
+        assert!(!uart.tx_activity());
+    }
+
+    #[test]
+    fn two_stop_bits_add_one_frame_bit() {
+        let mut uart = enabled_uart();
+        uart.write_control(2, 0x0E);
+        uart.write_tx(0x00);
+        uart.tick(175);
+        assert!(uart.tx_activity());
+        uart.tick(1);
+        assert!(!uart.tx_activity());
+    }
+
+    #[test]
+    fn nine_data_bits_add_one_frame_bit() {
+        let mut uart = enabled_uart();
+        uart.write_control(1, 0x0C);
+        uart.write_tx(0x00);
+        uart.tick(175);
+        assert!(uart.tx_activity());
+        uart.tick(1);
+        assert!(!uart.tx_activity());
     }
 }

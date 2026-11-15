@@ -19,7 +19,7 @@ fn adc_conversion_advances_from_cpu_cycles() {
     cpu.adc().set_input(0, 0x2AA);
     cpu.adc().write_control_a(0);
     cpu.adc().write_control_b(0xC0);
-    for _ in 0..20 {
+    for _ in 0..30 {
         cpu.step().expect("step");
     }
     assert!(cpu.adc().flag());

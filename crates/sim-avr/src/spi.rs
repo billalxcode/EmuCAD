@@ -6,7 +6,7 @@ const CPOL: u8 = 1 << 3;
 const CLOCK_SELECT_MASK: u8 = 0x03;
 const DOUBLE_SPEED: u8 = 1 << 0;
 const BITS_PER_TRANSFER: u8 = 8;
-const MAX_CYCLES_PER_BIT: u32 = 64;
+const MAX_CYCLES_PER_BIT: u32 = 128;
 
 /// Behavioral model of the AVR SPI peripheral.
 pub struct Spi {
@@ -200,13 +200,14 @@ impl Default for Spi {
     }
 }
 
-/// Maps the clock select bits and SPI2X to cycles per bit, capped at 64.
+/// Maps the clock select bits and SPI2X to cycles per bit, capped at 128.
 ///
-/// Clock select 0/1/2/3 uses 4/16/64/64 cycles; SPI2X halves each value.
+/// Clock select 0/1/2/3 uses 4/16/64/128 cycles; SPI2X halves each value.
 fn select_cycles_per_bit(control: u8, status: u8) -> u32 {
     let base = match control & CLOCK_SELECT_MASK {
         0 => 4,
         1 => 16,
+        2 => MAX_CYCLES_PER_BIT / 2,
         _ => MAX_CYCLES_PER_BIT,
     };
     if status & DOUBLE_SPEED == 0 {
@@ -348,5 +349,27 @@ mod tests {
     #[test]
     fn source_is_ascii() {
         assert!(include_str!("spi.rs").is_ascii());
+    }
+    #[test]
+    fn clock_select_three_uses_128_cycles() {
+        let mut spi = enabled_master();
+        spi.write_control(0x53);
+        spi.write_data(0x00);
+        spi.tick(1023);
+        assert!(spi.busy());
+        spi.tick(1);
+        assert!(!spi.busy());
+    }
+
+    #[test]
+    fn spi2x_cs3_uses_64_cycles() {
+        let mut spi = enabled_master();
+        spi.write_control(0x53);
+        spi.write_status(0x01);
+        spi.write_data(0x00);
+        spi.tick(511);
+        assert!(spi.busy());
+        spi.tick(1);
+        assert!(!spi.busy());
     }
 }

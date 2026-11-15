@@ -33,6 +33,7 @@ pub struct Adc {
     elapsed: u32,
     duration: u32,
     busy: bool,
+    first_conversion: bool,
 }
 
 impl Adc {
@@ -48,6 +49,7 @@ impl Adc {
             elapsed: 0,
             duration: 0,
             busy: false,
+            first_conversion: true,
         }
     }
 
@@ -91,7 +93,7 @@ impl Adc {
         }
         self.busy = true;
         self.elapsed = 0;
-        self.duration = conversion_cycles(self.prescaler());
+        self.duration = conversion_cycles(self.prescaler(), self.first_conversion);
         self.adcsra |= START;
     }
 
@@ -166,6 +168,7 @@ impl Adc {
         self.data = self.conversion_value();
         self.busy = false;
         self.elapsed = 0;
+        self.first_conversion = false;
         self.adcsra &= !START;
         self.adcsra |= FLAG;
     }
@@ -177,9 +180,10 @@ impl Default for Adc {
     }
 }
 
-fn conversion_cycles(select: u8) -> u32 {
+fn conversion_cycles(select: u8, first: bool) -> u32 {
     let divider = PRESCALER_DIVIDERS[usize::from(select & PRESCALER_MASK)];
-    CONVERSION_CLOCKS.saturating_mul(divider)
+    let clocks = if first { 25 } else { CONVERSION_CLOCKS };
+    clocks.saturating_mul(divider)
 }
 
 #[cfg(test)]
@@ -194,7 +198,7 @@ mod tests {
 
     fn convert_once(adc: &mut Adc) {
         adc.start();
-        adc.tick(26);
+        adc.tick(50);
     }
 
     #[test]
@@ -213,7 +217,7 @@ mod tests {
         let mut adc = enabled_adc(0);
         adc.start();
         assert!(adc.busy());
-        adc.tick(25);
+        adc.tick(49);
         assert!(adc.busy());
         assert!(!adc.flag());
         adc.tick(1);
@@ -267,7 +271,7 @@ mod tests {
     fn prescaler_extends_conversion_time() {
         let mut adc = enabled_adc(2);
         adc.start();
-        adc.tick(51);
+        adc.tick(99);
         assert!(adc.busy());
         adc.tick(1);
         assert!(!adc.busy());
@@ -302,7 +306,7 @@ mod tests {
         let mut adc = Adc::new();
         adc.write_control_b(ENABLE | super::START);
         assert!(adc.busy());
-        adc.tick(26);
+        adc.tick(50);
         assert!(adc.flag());
     }
 
@@ -319,5 +323,17 @@ mod tests {
     #[test]
     fn source_is_ascii() {
         assert!(include_str!("adc.rs").is_ascii());
+    }
+    #[test]
+    fn subsequent_conversion_takes_thirteen_clocks() {
+        let mut adc = enabled_adc(0);
+        convert_once(&mut adc);
+        assert!(adc.take_flag());
+        adc.start();
+        adc.tick(25);
+        assert!(adc.busy());
+        adc.tick(1);
+        assert!(!adc.busy());
+        assert!(adc.flag());
     }
 }

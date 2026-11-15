@@ -115,6 +115,7 @@ pub(super) fn is_two_cycle(mnemonic: Mnemonic) -> bool {
             | Mnemonic::Pop
             | Mnemonic::Rjmp
             | Mnemonic::Ijmp
+            | Mnemonic::Eijmp
             | Mnemonic::Adiw
             | Mnemonic::Sbiw
             | Mnemonic::Sbi
@@ -130,7 +131,6 @@ pub(super) fn is_three_cycle(mnemonic: Mnemonic) -> bool {
         Mnemonic::Jmp
             | Mnemonic::Rcall
             | Mnemonic::Icall
-            | Mnemonic::Eicall
             | Mnemonic::LpmZ
             | Mnemonic::LpmZPost
             | Mnemonic::ElpmZ
@@ -139,7 +139,10 @@ pub(super) fn is_three_cycle(mnemonic: Mnemonic) -> bool {
 }
 
 pub(super) fn is_four_cycle(mnemonic: Mnemonic) -> bool {
-    matches!(mnemonic, Mnemonic::Call | Mnemonic::Ret | Mnemonic::Reti)
+    matches!(
+        mnemonic,
+        Mnemonic::Call | Mnemonic::Ret | Mnemonic::Reti | Mnemonic::Eicall
+    )
 }
 
 pub(super) fn is_skip(mnemonic: Mnemonic) -> bool {
@@ -409,5 +412,16 @@ pub(super) fn multiply_value(mnemonic: Mnemonic, first: u8, second: u8) -> Resul
         Mnemonic::Fmuls => Ok((signed as u16) << 1),
         Mnemonic::Fmulsu => Ok((mixed as u16) << 1),
         _ => Err(unsupported(mnemonic)),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn extended_call_and_jump_cycles() {
+        assert_eq!(base_cycles(Mnemonic::Eicall), 4);
+        assert_eq!(base_cycles(Mnemonic::Eijmp), 2);
     }
 }

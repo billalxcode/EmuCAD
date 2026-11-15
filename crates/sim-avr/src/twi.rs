@@ -180,7 +180,7 @@ impl Twi {
 
     fn transaction_cycles(&self) -> u32 {
         let factor = PRESCALER_FACTORS[usize::from(self.prescaler)];
-        (u32::from(self.bitrate) + 1).saturating_mul(factor)
+        16 + 2 * u32::from(self.bitrate) * factor
     }
 }
 
@@ -207,7 +207,7 @@ mod tests {
     fn disabled_start_is_ignored() {
         let mut twi = Twi::new();
         twi.start();
-        twi.tick(1);
+        twi.tick(16);
         assert!(!twi.busy());
         assert!(!twi.twint());
         assert_eq!(twi.status(), STATUS_IDLE);
@@ -220,7 +220,7 @@ mod tests {
         assert!(twi.busy());
         assert_eq!(twi.status(), STATUS_START);
         assert!(!twi.twint());
-        twi.tick(1);
+        twi.tick(16);
         assert!(twi.twint());
     }
 
@@ -228,7 +228,7 @@ mod tests {
     fn restart_clears_twint() {
         let mut twi = enabled_twi();
         twi.start();
-        twi.tick(1);
+        twi.tick(16);
         assert!(twi.twint());
         twi.start();
         assert!(!twi.twint());
@@ -243,7 +243,7 @@ mod tests {
         assert_eq!(twi.status(), STATUS_MT_DATA_ACK);
         assert!(twi.busy());
         assert!(!twi.twint());
-        twi.tick(1);
+        twi.tick(16);
         assert!(twi.twint());
     }
 
@@ -254,7 +254,7 @@ mod tests {
         assert_eq!(twi.read_byte(0x50), 0x3C);
         assert_eq!(twi.read_data(), 0x3C);
         assert_eq!(twi.status(), STATUS_MR_DATA_NACK);
-        twi.tick(1);
+        twi.tick(16);
         assert!(twi.twint());
     }
 
@@ -262,13 +262,13 @@ mod tests {
     fn stop_clears_busy_and_twint() {
         let mut twi = enabled_twi();
         twi.start();
-        twi.tick(1);
+        twi.tick(16);
         assert!(twi.twint());
         twi.stop();
         assert!(!twi.busy());
         assert!(!twi.twint());
         assert_eq!(twi.status(), STATUS_IDLE);
-        twi.tick(1);
+        twi.tick(16);
         assert!(!twi.twint());
     }
 
@@ -287,7 +287,7 @@ mod tests {
         twi.write_status(0x02);
         twi.write_bitrate(1);
         twi.start();
-        twi.tick(31);
+        twi.tick(47);
         assert!(!twi.twint());
         twi.tick(1);
         assert!(twi.twint());
@@ -297,7 +297,7 @@ mod tests {
     fn take_twint_clears_flag() {
         let mut twi = enabled_twi();
         twi.start();
-        twi.tick(1);
+        twi.tick(16);
         assert!(twi.take_twint());
         assert!(!twi.twint());
         assert!(!twi.take_twint());
