@@ -14,7 +14,7 @@ kebenaran fungsional. Setiap perubahan diukur sebelum dan sesudah.
 - Build benchmark: release.
 - Test workspace: 799 lulus.
 - Headroom: 2,14x sampai 4,50x real-time tanpa pacing.
-- Pacing CLI: median 0,195-0,509%, worst di bawah 0,9% pada run final.
+- Pacing CLI: median 0,275-0,536%, worst di bawah 0,9% pada verifikasi final.
 - Pacing GUI: release test 16.000.000 cycle selesai dalam sekitar 1,00 detik.
 - Sisa pekerjaan: Timer1/2 register IO, sleep wake, dan firmware penuh.
 
@@ -76,10 +76,10 @@ instruksi, lima run, mode `emucad run --realtime`:
 
 | Program | median error | worst error |
 |---|---:|---:|
-| ALU | +0,301% | +0,898% |
-| Mixed | +0,228% | +0,759% |
-| Memory | +0,195% | +0,549% |
-| Timer0 prescaler 1 | +0,509% | +0,646% |
+| ALU | +0,454% | +0,606% |
+| Mixed | +0,536% | +0,842% |
+| Memory | +0,275% | +0,416% |
+| Timer0 prescaler 1 | +0,351% | +0,441% |
 
 Reproduksi:
 
@@ -120,7 +120,7 @@ bash scripts/check-avr-realtime.sh
 - Tanpa timer: 2,69x-4,50x real-time.
 - Timer0 prescaler 64: 2,30x-2,57x real-time.
 - Timer0 prescaler 1: 2,14x-2,29x real-time setelah counter fungsional.
-- Pacing CLI: median 0,195-0,509%, worst di bawah 0,9% pada run final.
+- Pacing CLI: median 0,275-0,536%, worst di bawah 0,9% pada verifikasi final.
 - Pacing GUI: release test 16.000.000 cycle selesai dalam sekitar 1,00 detik.
 - Pacing GUI memakai algoritma yang sama; release test worker lulus.
 - Gap yang sudah diperbaiki: UART U2X/parity/stop/9-bit, SPI CS=3,

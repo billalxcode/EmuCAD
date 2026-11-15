@@ -130,10 +130,10 @@ Verifikasi 10.000.000 instruksi, lima run, toleransi 1%:
 
 | Program | median error | worst error |
 |---|---:|---:|
-| ALU | +0,301% | +0,898% |
-| Mixed | +0,228% | +0,759% |
-| Memory | +0,195% | +0,549% |
-| Timer0 prescaler 1 | +0,509% | +0,646% |
+| ALU | +0,454% | +0,606% |
+| Mixed | +0,536% | +0,842% |
+| Memory | +0,275% | +0,416% |
+| Timer0 prescaler 1 | +0,351% | +0,441% |
 
 GUI worker memakai algoritma yang sama. Release test menjalankan
 16.000.000 cycle dan selesai dalam sekitar 1,00 detik dengan toleransi 1%.
