@@ -3,22 +3,52 @@
 The files in this directory are embedded into `sim-gui` at compile time.
 All files are ASCII SVG.
 
-| File | Library component | Source | License | Changes |
-|---|---|---|---|---|
-| `resistor.svg` | Resistor | https://github.com/chris-pikul/electronic-symbols/blob/main/SVG/Resistor-IEC-Standard.svg | MIT | None |
-| `led.svg` | LED | https://github.com/chris-pikul/electronic-symbols/blob/main/SVG/Diode-COM-LED.svg | MIT | None |
-| `button.svg` | Button | https://github.com/chris-pikul/electronic-symbols/blob/main/SVG/Switch-COM-Pushbutton-NO.svg | MIT | None |
-| `gnd.svg` | GND | https://github.com/chris-pikul/electronic-symbols/blob/main/SVG/Ground-COM-General.svg | MIT | None |
-| `mcu.svg` | ATmega328P | https://commons.wikimedia.org/wiki/File:GenericIC.svg | Public domain | Simplified DIP outline; text and pin boxes removed |
-| `vcc.svg` | VCC | Original simple geometry | Public domain | Drawn for EmuCAD |
+## Class Base Symbols
 
-The MCU outline is adapted from `GenericIC.svg`, originally uploaded by
-Thomas Lake (Tswsl1989) and later made generic by Fredvanner. The original
-file is released into the public domain.
+Most class base symbols are copied without modification from
+`chris-pikul/electronic-symbols`:
 
-The VCC symbol is a simple supply-rail shape drawn for this project. It is
-based on the common IEC-style power symbol convention and contains no
-copyrightable authorship.
+https://github.com/chris-pikul/electronic-symbols
+
+That project is licensed under the MIT License, copyright (c) 2022
+Chris Pikul. The license text is reproduced below.
+
+The following files are original simple geometry drawn for EmuCAD:
+
+- `vcc.svg`
+- `thermistor.svg`
+- `transmission_line.svg`
+- `diode_array.svg`
+- `igbt.svg`
+- `scr.svg`
+- `triac.svg`
+- `diac.svg`
+- `connector.svg`
+- `ic.svg`
+- `flip_flop.svg`
+- `regulator.svg`
+- `dcdc.svg`
+- `sensor.svg`
+- `display.svg`
+- `rf.svg`
+- `behavioral.svg`
+- `board.svg`
+- `motor.svg`
+
+`mcu.svg` is a simplified DIP outline adapted from `GenericIC.svg` on
+Wikimedia Commons. The original was uploaded by Thomas Lake (Tswsl1989)
+and later made generic by Fredvanner. It is released into the public
+domain.
+
+https://commons.wikimedia.org/wiki/File:GenericIC.svg
+
+## Per-Entry Variant Code
+
+Every catalog entry gets a unique `SymbolKind::Catalog` value. The
+renderer draws the class base symbol plus a 3 by 3 variant code in the
+top-left of the component body. The code uses nine bits from the catalog
+index, so all 500 entries have a distinct rendered symbol. The variant
+code is original geometry and adds no third-party license obligation.
 
 ## MIT License for chris-pikul/electronic-symbols
 

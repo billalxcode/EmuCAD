@@ -266,9 +266,12 @@ Setiap instance memiliki:
 
 - Library awal: ATmega328P, board Arduino, passive, LED, button, VCC,
   dan GND.
-- Definisi komponen disimpan sebagai kode Rust internal.
-- Kategori tetap disiapkan untuk MCU, board, passive, diode, transistor,
-  digital, source, probe, ground, dan power.
+- Library juga memuat seluruh 500 entri katalog komponen.
+- Definisi komponen disimpan sebagai kode Rust internal; entri katalog
+  dibangun saat pertama kali diakses.
+- Kategori: Board, Passive, Source, Diode, Transistor, Protection,
+  Switch, Analog, Logic, Memory, MCU, Power, Sensor, Actuator, RF, dan
+  Behavioral.
 - Pencarian nama dan kategori.
 - Preview simbol.
 - Drag-and-drop ke canvas atau klik lalu tempatkan.
@@ -279,8 +282,14 @@ Setiap instance memiliki:
 - Parser internal mendukung `path`, `line`, `rect`, `circle`, `ellipse`,
   `polyline`, `polygon`, group, style, dan transform dasar tanpa crate
   renderer baru.
+- Setiap entri katalog memakai base symbol sesuai kelas atau varian.
+- Setiap entri katalog juga mendapat kode varian 3 x 3 yang unik, sehingga
+  500 entri memiliki simbol yang berbeda.
 - Bounds gambar dipakai untuk fit ke body; ketebalan garis mengikuti zoom.
 - Elemen `text` diabaikan; label referensi dan nilai digambar oleh GUI.
+- Kategori library mengikuti 16 keluarga katalog.
+- Daftar library memakai `ScrollArea::show_rows` agar 500 entri tetap
+  responsif.
 - Sumber, lisensi, dan perubahan aset dicatat di
   `crates/sim-gui/assets/symbols/NOTICE.md`.
 - Aset yang gagal diparse tidak membuat aplikasi panic; test aset wajib
@@ -667,6 +676,8 @@ Target awal:
 - Alokasi per frame diminimalkan.
 - Repaint hanya saat input, animasi, atau simulasi berjalan.
 - Hasil parse SVG disimpan di `OnceLock`; tidak ada parsing per frame.
+- Daftar library memakai virtualisasi baris; hanya baris yang terlihat
+  yang membangun widget.
 
 Export:
 
@@ -714,6 +725,8 @@ Test visual:
 - Setiap aset SVG harus parse, memiliki bounds positif, dan menghasilkan
   shape.
 - Setiap `SymbolKind` harus memiliki aset yang terdaftar.
+- Setiap entri katalog harus punya base asset dan kode varian unik.
+- Library window harus dapat dirender dengan seluruh 500 entri katalog.
 - Snapshot RGBA mentah dari renderer headless atau screenshot test.
 - Golden image membandingkan byte RGBA, bukan file PNG.
 - Perubahan yang disengaja harus memperbarui golden dengan review manual.

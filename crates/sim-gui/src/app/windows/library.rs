@@ -36,7 +36,7 @@ impl GuiApp {
         self.library_filters(ui, &mut state.search, &mut state.category);
         ui.separator();
         if state.chosen.is_none() {
-            state.chosen = library_list(
+            state.chosen = library_scroll(
                 ui,
                 self.library,
                 &state.search,

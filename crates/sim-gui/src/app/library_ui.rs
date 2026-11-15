@@ -14,7 +14,7 @@ pub(crate) fn category_buttons(ui: &mut egui::Ui, category: &mut Option<Category
     }
 }
 
-pub(crate) fn library_list<'a>(
+pub(crate) fn library_scroll<'a>(
     ui: &mut egui::Ui,
     library: &'a [ComponentDefinition],
     search: &str,
@@ -22,16 +22,35 @@ pub(crate) fn library_list<'a>(
     hovered: &mut Option<&'a ComponentDefinition>,
     dragged: &mut Option<&'a ComponentDefinition>,
 ) -> Option<&'a ComponentDefinition> {
+    let definitions = filtered_library(library, search, category);
+    let row_height = ui.spacing().interact_size.y.max(18.0);
+    let mut chosen = None;
+    let height = (ui.available_height() - 140.0).max(160.0);
+    egui::ScrollArea::vertical().max_height(height).show_rows(
+        ui,
+        row_height,
+        definitions.len(),
+        |ui, range| {
+            for index in range {
+                if library_item(ui, definitions[index], hovered, dragged) {
+                    chosen = Some(definitions[index]);
+                }
+            }
+        },
+    );
+    chosen
+}
+
+pub(crate) fn filtered_library<'a>(
+    library: &'a [ComponentDefinition],
+    search: &str,
+    category: Option<Category>,
+) -> Vec<&'a ComponentDefinition> {
     let needle = search.to_lowercase();
-    for definition in library {
-        if !library_matches(definition, &needle, category) {
-            continue;
-        }
-        if library_item(ui, definition, hovered, dragged) {
-            return Some(definition);
-        }
-    }
-    None
+    library
+        .iter()
+        .filter(|definition| library_matches(definition, &needle, category))
+        .collect()
 }
 
 pub(crate) fn library_matches(

@@ -222,18 +222,49 @@ pub enum SymbolKind {
     Vcc,
     Gnd,
     Mcu,
+    Catalog { base: &'static str, variant: u16 },
 }
 
 /// Library category.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Category {
     Board,
     Passive,
+    Source,
+    Diode,
+    Transistor,
+    Protection,
+    Switch,
+    Analog,
+    Logic,
+    Memory,
+    Mcu,
     Power,
+    Sensor,
+    Actuator,
+    Rf,
+    Behavioral,
 }
 
 impl Category {
-    pub const ALL: [Self; 3] = [Self::Board, Self::Passive, Self::Power];
+    pub const ALL: [Self; 16] = [
+        Self::Board,
+        Self::Passive,
+        Self::Source,
+        Self::Diode,
+        Self::Transistor,
+        Self::Protection,
+        Self::Switch,
+        Self::Analog,
+        Self::Logic,
+        Self::Memory,
+        Self::Mcu,
+        Self::Power,
+        Self::Sensor,
+        Self::Actuator,
+        Self::Rf,
+        Self::Behavioral,
+    ];
 
     /// Returns a human-readable label.
     #[must_use]
@@ -241,7 +272,43 @@ impl Category {
         match self {
             Self::Board => "Board",
             Self::Passive => "Passive",
+            Self::Source => "Source",
+            Self::Diode => "Diode",
+            Self::Transistor => "Transistor",
+            Self::Protection => "Protection",
+            Self::Switch => "Switch",
+            Self::Analog => "Analog",
+            Self::Logic => "Logic",
+            Self::Memory => "Memory",
+            Self::Mcu => "MCU",
             Self::Power => "Power",
+            Self::Sensor => "Sensor",
+            Self::Actuator => "Actuator",
+            Self::Rf => "RF",
+            Self::Behavioral => "Behavioral",
+        }
+    }
+
+    /// Maps a catalog family name to a library category.
+    #[must_use]
+    pub fn from_family(family: &str) -> Self {
+        match family {
+            "passive" => Self::Passive,
+            "source" => Self::Source,
+            "diode" => Self::Diode,
+            "transistor" => Self::Transistor,
+            "protection" => Self::Protection,
+            "switch" => Self::Switch,
+            "analog" => Self::Analog,
+            "logic" => Self::Logic,
+            "memory" => Self::Memory,
+            "mcu" => Self::Mcu,
+            "power" => Self::Power,
+            "sensor" => Self::Sensor,
+            "actuator" => Self::Actuator,
+            "rf" => Self::Rf,
+            "behavioral" => Self::Behavioral,
+            _ => Self::Board,
         }
     }
 }

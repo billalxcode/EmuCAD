@@ -34,12 +34,17 @@ lain.
 
 Simbol library GUI memakai aset SVG dari sumber berikut:
 
-- Resistor, LED, button, dan GND: `chris-pikul/electronic-symbols`,
+- Sebagian besar base symbol kelas: `chris-pikul/electronic-symbols`,
   lisensi MIT, copyright (c) 2022 Chris Pikul.
 - MCU: adaptasi dari `GenericIC.svg` di Wikimedia Commons, public domain.
-- VCC: geometri sederhana yang digambar untuk proyek ini.
+- VCC, thermistor, transmission line, diode array, IGBT, SCR, TRIAC,
+  DIAC, connector, IC, flip-flop, regulator, DC-DC, sensor, display, RF,
+  behavioral, board, dan motor: geometri sederhana yang digambar untuk
+  proyek ini.
+- Setiap entri katalog mendapat kode varian 3 x 3 yang digambar oleh
+  renderer. Kode ini membedakan 500 entri tanpa lisensi tambahan.
 
-Teks lisensi lengkap dan URL sumber ada di
+Teks lisensi lengkap, daftar aset, dan URL sumber ada di
 `crates/sim-gui/assets/symbols/NOTICE.md`. Paket rilis menyalin file itu
 ke `share/licenses/sim-gui-symbols.md`.
 

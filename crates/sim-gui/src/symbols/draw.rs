@@ -6,6 +6,9 @@ use crate::model::SymbolKind;
 use eframe::egui;
 
 const MIN_STROKE: f32 = 1.25;
+const CODE_MARGIN: f32 = 5.0;
+const CODE_STEP: f32 = 4.0;
+const CODE_RADIUS: f32 = 1.1;
 
 /// Draws one library symbol into a screen rectangle.
 pub(crate) fn draw_symbol(
@@ -23,6 +26,40 @@ pub(crate) fn draw_symbol(
     for shape in &symbol.shapes {
         draw_shape(painter, shape, fit, color);
     }
+    if let SymbolKind::Catalog { variant, .. } = kind {
+        draw_variant_code(painter, body, variant, color);
+    }
+}
+
+fn draw_variant_code(
+    painter: &egui::Painter,
+    body: egui::Rect,
+    variant: u16,
+    color: egui::Color32,
+) {
+    if body.width() < 32.0 || body.height() < 24.0 {
+        return;
+    }
+    let origin = body.left_top() + egui::vec2(CODE_MARGIN, CODE_MARGIN);
+    for bit in 0..9 {
+        draw_code_dot(painter, origin, bit, variant, color);
+    }
+}
+
+fn draw_code_dot(
+    painter: &egui::Painter,
+    origin: egui::Pos2,
+    bit: usize,
+    variant: u16,
+    color: egui::Color32,
+) {
+    let center = origin + egui::vec2((bit % 3) as f32 * CODE_STEP, (bit / 3) as f32 * CODE_STEP);
+    if variant & (1 << bit) != 0 {
+        painter.circle_filled(center, CODE_RADIUS, with_alpha(color, 0.55));
+        return;
+    }
+    let stroke = egui::Stroke::new(0.6, with_alpha(color, 0.22));
+    painter.circle_stroke(center, CODE_RADIUS, stroke);
 }
 
 #[derive(Clone, Copy)]
@@ -136,6 +173,42 @@ mod tests {
         });
         output.textures_delta.clear();
         assert!(!output.shapes.is_empty());
+    }
+
+    fn catalog_input() -> egui::RawInput {
+        egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(320.0, 240.0),
+            )),
+            ..Default::default()
+        }
+    }
+
+    fn draw_catalog_symbols(
+        context: &egui::Context,
+        definitions: &[crate::model::ComponentDefinition],
+    ) -> usize {
+        let mut count = 0;
+        let mut output = context.run_ui(catalog_input(), |ui| {
+            let body = egui::Rect::from_min_size(egui::pos2(10.0, 10.0), egui::vec2(80.0, 40.0));
+            for definition in definitions {
+                if matches!(definition.symbol, SymbolKind::Catalog { .. }) {
+                    draw_symbol(ui.painter(), body, definition.symbol, egui::Color32::WHITE);
+                    count += 1;
+                }
+            }
+        });
+        output.textures_delta.clear();
+        assert!(!output.shapes.is_empty());
+        count
+    }
+
+    #[test]
+    fn catalog_symbols_draw_shapes() {
+        let definitions = crate::library::builtin();
+        let count = draw_catalog_symbols(&egui::Context::default(), definitions);
+        assert_eq!(count, 500);
     }
 
     #[test]
