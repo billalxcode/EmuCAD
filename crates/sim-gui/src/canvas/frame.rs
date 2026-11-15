@@ -1,4 +1,5 @@
 use super::*;
+use crate::design;
 
 /// Draws the canvas and applies pan and zoom input.
 pub fn show(
@@ -54,12 +55,13 @@ impl<'a> CanvasFrame<'a> {
         draw_scene: impl FnOnce(&egui::Painter, egui::Rect, &GridCamera, Option<egui::Pos2>),
     ) {
         let painter = self.painter;
-        painter.rect_filled(self.rect, egui::CornerRadius::ZERO, BACKGROUND);
+        let palette = design::palette_for(painter.ctx());
+        painter.rect_filled(self.rect, egui::CornerRadius::ZERO, palette.canvas);
         if self.grid_visible {
-            draw_grid(painter, self.rect, self.camera);
+            draw_grid(painter, self.rect, self.camera, &palette);
         }
         draw_scene(painter, self.rect, self.camera, self.pointer);
-        paint_focus_ring(self.response, painter, self.rect);
+        paint_focus_ring(self.response, painter, self.rect, &palette);
     }
 }
 
@@ -69,14 +71,19 @@ fn focus_canvas(response: &egui::Response) {
     }
 }
 
-fn paint_focus_ring(response: &egui::Response, painter: &egui::Painter, rect: egui::Rect) {
+fn paint_focus_ring(
+    response: &egui::Response,
+    painter: &egui::Painter,
+    rect: egui::Rect,
+    palette: &design::Palette,
+) {
     if !response.has_focus() {
         return;
     }
     painter.rect_stroke(
         rect.shrink(1.0),
         0.0,
-        egui::Stroke::new(2.0, FOCUS_COLOR),
+        egui::Stroke::new(2.0, palette.focus),
         egui::StrokeKind::Inside,
     );
 }

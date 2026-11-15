@@ -76,9 +76,10 @@ pub(crate) fn signal_rows(plot: egui::Rect) -> (egui::Rect, egui::Rect) {
 }
 
 pub(crate) fn paint_graph_background(painter: &egui::Painter, rect: egui::Rect, plot: egui::Rect) {
-    painter.rect_filled(rect, 4.0, egui::Color32::from_rgb(18, 22, 26));
+    let colors = crate::design::palette_for(painter.ctx());
+    painter.rect_filled(rect, 4.0, colors.graph_bg);
     let middle = plot.center().y;
-    let stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(70, 78, 90));
+    let stroke = egui::Stroke::new(1.0, colors.graph_grid);
     painter.line_segment(
         [
             egui::pos2(plot.left(), middle),
@@ -92,7 +93,7 @@ pub(crate) fn paint_cursor(painter: &egui::Painter, plot: egui::Rect, cursor: Op
     let Some(position) = cursor else {
         return;
     };
-    let stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(240, 220, 120));
+    let stroke = egui::Stroke::new(1.0, crate::design::palette_for(painter.ctx()).warning);
     painter.line_segment(
         [
             egui::pos2(position.x, plot.top()),
@@ -126,8 +127,8 @@ pub(crate) fn paint_signal(
 }
 
 pub(crate) fn paint_signal_labels(painter: &egui::Painter, rect: egui::Rect, plot: egui::Rect) {
-    let dim = egui::Color32::from_rgb(150, 160, 170);
-    let font = egui::FontId::monospace(10.0);
+    let dim = crate::design::palette_for(painter.ctx()).text_muted;
+    let font = crate::design::mono(10.0);
     let high = egui::pos2(rect.left() + 4.0, plot.top() + 4.0);
     let low = egui::pos2(rect.left() + 4.0, plot.bottom() - 4.0);
     painter.text(high, egui::Align2::LEFT_TOP, "PB5", font.clone(), dim);

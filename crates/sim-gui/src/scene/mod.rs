@@ -8,15 +8,9 @@ use crate::model::{
 use crate::selection::Selection;
 use eframe::egui;
 
-const SELECTED_STROKE: egui::Color32 = egui::Color32::from_rgb(0, 200, 220);
-const SELECTED_FILL: egui::Color32 = egui::Color32::from_rgba_premultiplied(0, 22, 24, 28);
-const SYMBOL_STROKE: egui::Color32 = egui::Color32::from_rgb(190, 198, 210);
-const PIN_COLOR: egui::Color32 = egui::Color32::from_rgb(215, 220, 230);
-const TEXT_COLOR: egui::Color32 = egui::Color32::from_rgb(200, 205, 215);
-const JUNCTION_COLOR: egui::Color32 = egui::Color32::from_rgb(230, 235, 245);
-const GHOST_OK: egui::Color32 = egui::Color32::from_rgb(60, 210, 130);
-const GHOST_BAD: egui::Color32 = egui::Color32::from_rgb(230, 80, 80);
-const PREVIEW_BAD: egui::Color32 = egui::Color32::from_rgb(240, 90, 90);
+pub(crate) fn palette(painter: &egui::Painter) -> crate::design::Palette {
+    crate::design::palette_for(painter.ctx())
+}
 
 #[derive(Clone, Copy)]
 pub(crate) struct WireStyle {
@@ -106,12 +100,12 @@ fn draw_selection_box(
         return;
     };
     let box_rect = screen_box(rect, camera, start, end);
-    let fill = egui::Color32::from_rgba_unmultiplied(0, 200, 220, 28);
-    painter.rect_filled(box_rect, 0.0, fill);
+    let colors = palette(painter);
+    painter.rect_filled(box_rect, 0.0, colors.selection);
     painter.rect_stroke(
         box_rect,
         0.0,
-        egui::Stroke::new(1.0, SELECTED_STROKE),
+        egui::Stroke::new(1.0, colors.accent),
         egui::StrokeKind::Middle,
     );
 }

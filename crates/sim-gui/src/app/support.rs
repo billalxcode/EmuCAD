@@ -61,16 +61,6 @@ pub(crate) fn conflict_contents(
     });
 }
 
-pub(crate) fn configure_style(context: &eframe::CreationContext<'_>) {
-    context.egui_ctx.set_theme(egui::ThemePreference::Dark);
-    context.egui_ctx.style_mut_of(egui::Theme::Dark, |style| {
-        for font in style.text_styles.values_mut() {
-            font.family = egui::FontFamily::Monospace;
-        }
-        style.visuals.selection.bg_fill = egui::Color32::from_rgb(0, 150, 170);
-    });
-}
-
 pub(crate) fn load_config() -> (Option<PathBuf>, config::AppConfig) {
     let Some(path) = config::path() else {
         return (None, config::AppConfig::default());

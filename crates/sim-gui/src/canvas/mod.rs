@@ -2,13 +2,6 @@
 
 use eframe::egui;
 
-const BACKGROUND: egui::Color32 = egui::Color32::from_rgb(18, 20, 24);
-const MINOR_DOT: egui::Color32 = egui::Color32::from_rgb(55, 60, 70);
-const MAJOR_LINE: egui::Color32 = egui::Color32::from_rgb(40, 45, 54);
-const AXIS_LINE: egui::Color32 = egui::Color32::from_rgb(90, 100, 118);
-const FOCUS_COLOR: egui::Color32 = egui::Color32::from_rgb(80, 215, 225);
-const RULER_COLOR: egui::Color32 = egui::Color32::from_rgb(145, 155, 170);
-
 /// Screen-space state of the grid camera.
 mod camera;
 mod frame;

@@ -108,7 +108,11 @@ pub(crate) fn paint_analog_plot(
     ranges: PlotRanges,
     view: PlotView,
 ) {
-    painter.rect_filled(rect, 4.0, egui::Color32::from_rgb(18, 22, 26));
+    painter.rect_filled(
+        rect,
+        4.0,
+        crate::design::palette_for(painter.ctx()).graph_bg,
+    );
     paint_value_grid(painter, plot, ranges);
     for probe in probes.probes() {
         paint_probe_series(painter, plot, probe, window, ranges);
@@ -120,7 +124,7 @@ pub(crate) fn paint_analog_plot(
 }
 
 pub(crate) fn paint_value_grid(painter: &egui::Painter, plot: egui::Rect, ranges: PlotRanges) {
-    let stroke = egui::Stroke::new(1.0, egui::Color32::from_rgb(40, 46, 56));
+    let stroke = egui::Stroke::new(1.0, crate::design::palette_for(painter.ctx()).graph_grid);
     for step in 0..=4 {
         let y = plot.top() + plot.height() * step as f32 / 4.0;
         painter.line_segment(
@@ -142,11 +146,8 @@ pub(crate) fn paint_axis_labels(
     range: (f64, f64),
     right: bool,
 ) {
-    let color = if right {
-        LED_COLOR
-    } else {
-        egui::Color32::from_rgb(150, 160, 175)
-    };
+    let colors = crate::design::palette_for(painter.ctx());
+    let color = if right { LED_COLOR } else { colors.text_muted };
     for step in 0..=4 {
         paint_axis_label(painter, plot, range, right, step, color);
     }
@@ -165,7 +166,7 @@ pub(crate) fn paint_axis_label(
         egui::pos2(x, axis_y(plot, step)),
         align,
         axis_label(axis_value(range, step), range),
-        egui::FontId::monospace(9.0),
+        crate::design::mono(10.0),
         color,
     );
 }
@@ -250,8 +251,8 @@ pub(crate) fn paint_analog_legend(painter: &egui::Painter, plot: egui::Rect, pro
             egui::pos2(plot.right() - 138.0, y),
             egui::Align2::LEFT_TOP,
             format!("{} ({})", probe.spec().label, probe.spec().unit),
-            egui::FontId::monospace(9.0),
-            egui::Color32::from_rgb(190, 198, 210),
+            crate::design::mono(10.0),
+            crate::design::palette_for(painter.ctx()).text,
         );
         y += 12.0;
     }
@@ -275,7 +276,7 @@ pub(crate) fn paint_analog_cursor(
 pub(crate) fn paint_cursor_line(painter: &egui::Painter, plot: egui::Rect, x: f32) {
     painter.line_segment(
         [egui::pos2(x, plot.top()), egui::pos2(x, plot.bottom())],
-        egui::Stroke::new(1.0, egui::Color32::from_rgb(80, 215, 225)),
+        egui::Stroke::new(1.0, crate::design::palette_for(painter.ctx()).warning),
     );
 }
 
@@ -290,8 +291,8 @@ pub(crate) fn paint_cursor_label(
         egui::pos2(x + 4.0, plot.top() + 4.0),
         egui::Align2::LEFT_TOP,
         analog_cursor_text(probes, cycle),
-        egui::FontId::monospace(9.0),
-        egui::Color32::from_rgb(210, 218, 228),
+        crate::design::mono(10.0),
+        crate::design::palette_for(painter.ctx()).text,
     );
 }
 

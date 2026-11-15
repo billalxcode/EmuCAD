@@ -89,8 +89,14 @@ pub(crate) fn library_preview(ui: &mut egui::Ui, definition: &ComponentDefinitio
         egui::vec2(ui.available_width().max(180.0), 96.0),
         egui::Sense::hover(),
     );
-    ui.painter()
-        .rect_filled(rect, 4.0, egui::Color32::from_rgb(22, 26, 32));
+    let colors = crate::design::palette(ui.visuals().dark_mode);
+    ui.painter().rect_filled(rect, 4.0, colors.surface);
+    ui.painter().rect_stroke(
+        rect,
+        4.0,
+        egui::Stroke::new(1.0, colors.border),
+        egui::StrokeKind::Middle,
+    );
     scene::draw_library_preview(ui.painter(), rect.shrink(8.0), definition);
     ui.label(format!(
         "{}  {} pins",

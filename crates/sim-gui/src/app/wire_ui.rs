@@ -21,8 +21,8 @@ pub(crate) fn show_wire_class_combo(
     }
 }
 
-pub(crate) fn wire_rgb(wire: &crate::model::Wire) -> [u8; 3] {
-    let [red, green, blue, _] = scene::wire_color(wire).to_srgba_unmultiplied();
+pub(crate) fn wire_rgb(wire: &crate::model::Wire, dark: bool) -> [u8; 3] {
+    let [red, green, blue, _] = scene::wire_color(wire, dark).to_srgba_unmultiplied();
     [red, green, blue]
 }
 

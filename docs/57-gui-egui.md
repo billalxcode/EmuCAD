@@ -176,9 +176,9 @@ Aturan layout:
 - Grafik dapat menjadi tab di analysis drawer atau floating window.
 - Layout terakhir disimpan di file konfigurasi.
 - Tema default gelap, dengan opsi tema terang.
-- Aksen UI cyan.
+- Aksen UI blue yang mengikuti token Spectrum.
 - UI berbahasa Inggris; dokumentasi tetap Indonesia.
-- Font UI monospace untuk seluruh antarmuka.
+- Font UI Source Sans 3; data teknis memakai Source Code Pro.
 - Target kontras WCAG AA.
 - Pin/unpin sheet mengubah overlay menjadi sidebar tanpa docking penuh.
 
@@ -406,7 +406,7 @@ Aturan:
 - Toolbar memakai ikon dan teks singkat.
 - Error ditampilkan sebagai toast singkat dan status bar.
 - Log error opsional tersedia sebagai tab di analysis drawer.
-- Font UI monospace untuk seluruh antarmuka.
+- Font UI Source Sans 3; data teknis memakai Source Code Pro.
 
 ### 8.2 Shortcut
 
@@ -804,7 +804,7 @@ Test visual:
 15. Konfigurasi di XDG config.
 16. Autosave debounce 2 detik.
 17. Recent files 10.
-18. Aksen UI cyan.
+18. Aksen UI blue yang mengikuti token Spectrum.
 19. Toolbar ikon dan teks.
 20. Shortcut CAD-like.
 21. Error berupa toast dan status bar.
@@ -822,7 +822,7 @@ Test visual:
 33. Probe analog memakai API read-only.
 34. Satu proyek per window dan prompt reload saat file berubah.
 35. Library komponen berupa kode Rust internal.
-36. Font UI monospace untuk seluruh antarmuka.
+36. Font UI Source Sans 3 dan Source Code Pro untuk data teknis.
 37. Minimap di kanan bawah, default tersembunyi.
 38. Multi-select dipindahkan bersama.
 39. Snap selalu aktif, Alt menonaktifkan sementara.

@@ -1,5 +1,6 @@
 //! Headless RGBA golden renderer for GUI regression tests.
 
+use crate::design;
 use crate::model::{Document, GridPos, Mirror, NetClass, Rotation};
 use crate::scene::{self, Scene};
 use crate::selection::Selection;
@@ -19,6 +20,7 @@ struct Texture {
 /// Renders the fixed golden scene into straight RGBA bytes.
 pub fn render_golden() -> Vec<u8> {
     let context = egui::Context::default();
+    design::install_fonts(&context);
     let input = egui::RawInput {
         screen_rect: Some(Rect::from_min_size(
             Pos2::ZERO,
@@ -36,14 +38,14 @@ pub fn render_golden() -> Vec<u8> {
 fn draw_golden(ui: &mut egui::Ui) {
     let rect = ui.max_rect();
     let painter = ui.painter();
-    painter.rect_filled(rect, 0.0, Color32::from_rgb(18, 20, 24));
+    painter.rect_filled(rect, 0.0, design::DARK.canvas);
     draw_golden_scene(painter, rect);
     painter.text(
         egui::pos2(10.0, 216.0),
         egui::Align2::LEFT_TOP,
         "EmuCAD golden",
-        egui::FontId::monospace(12.0),
-        Color32::from_rgb(220, 228, 238),
+        design::mono(12.0),
+        design::DARK.text,
     );
 }
 

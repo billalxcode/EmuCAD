@@ -39,11 +39,12 @@ pub(crate) fn minimap_area(rect: egui::Rect) -> egui::Rect {
 }
 
 pub(crate) fn paint_minimap_frame(painter: &egui::Painter, area: egui::Rect) {
-    painter.rect_filled(area, 4.0, egui::Color32::from_black_alpha(205));
+    let colors = palette(painter);
+    painter.rect_filled(area, 4.0, colors.surface);
     painter.rect_stroke(
         area,
         4.0,
-        egui::Stroke::new(1.0, JUNCTION_COLOR),
+        egui::Stroke::new(1.0, colors.border),
         egui::StrokeKind::Middle,
     );
 }
@@ -70,7 +71,7 @@ pub(crate) fn minimap_map(area: egui::Rect, min: GridPos, max: GridPos) -> Optio
 
 pub(crate) fn draw_minimap_wires(painter: &egui::Painter, map: MinimapMap, document: &Document) {
     for wire in document.wires() {
-        let color = wire_color(wire).gamma_multiply(0.8);
+        let color = wire_color(wire, crate::design::is_dark(painter.ctx())).gamma_multiply(0.8);
         for segment in wire.points.windows(2) {
             painter.line_segment(
                 [map.point(segment[0]), map.point(segment[1])],
@@ -96,7 +97,7 @@ pub(crate) fn draw_minimap_components(
         painter.rect_filled(
             minimap_component_rect(map, instance, definition),
             1.0,
-            egui::Color32::from_rgb(120, 130, 150),
+            palette(painter).text_muted,
         );
     }
 }
@@ -125,7 +126,7 @@ pub(crate) fn draw_minimap_viewport(
     painter.rect_stroke(
         egui::Rect::from_two_pos(min, max),
         0.0,
-        egui::Stroke::new(1.0, egui::Color32::from_rgb(240, 220, 120)),
+        egui::Stroke::new(1.0, palette(painter).warning),
         egui::StrokeKind::Middle,
     );
 }

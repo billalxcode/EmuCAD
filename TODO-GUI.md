@@ -59,7 +59,7 @@ di bagian Status Akhir.
 - Overlap komponen ditolak.
 - Selection box memakai full containment.
 - Zoom berpusat di kursor.
-- Font UI monospace.
+- Font UI Source Sans 3 dan Source Code Pro untuk data teknis.
 - Minimap di kanan bawah, default tersembunyi.
 
 ---
@@ -99,12 +99,13 @@ membangun crate, dan tidak ada dependensi eksternal di luar daftar
 - [x] G1-06 Buat layout canvas dominan dengan sheet overlay.
 - [x] G1-07 Implementasikan culling grid dan objek di luar viewport.
 - [x] G1-08 Tampilkan koordinat grid dan status snap di status bar.
-- [x] G1-09 Tambahkan tema gelap, terang, high-DPI, dan aksen cyan.
+- [x] G1-09 Tambahkan tema gelap, terang, high-DPI, dan aksen blue.
 - [x] G1-10 Test transformasi, zoom, snap, dan culling.
 - [x] G1-11 Implementasikan minimap opsional di kanan bawah.
 - [x] G1-12 Terapkan latar dark dotted dan toolbar ikon serta teks.
 - [x] G1-13 Tampilkan koordinat, zoom, seleksi, sim time, dan FPS di status bar.
-- [x] G1-14 Gunakan font monospace untuk seluruh UI.
+- [x] G1-14 Gunakan Source Sans 3 untuk UI dan Source Code Pro untuk data teknis.
+- [x] G1-16 Terapkan design token warna, tipe, spacing, radius, dan kontrol.
 - [x] G1-15 Implementasikan zoom berpusat di kursor.
 
 **Acceptance G1:** canvas kosong berjalan 60 FPS, grid simetris terlihat,
@@ -325,6 +326,9 @@ Selesai dan teruji:
   `crates/sim-gui/assets/symbols/` dengan catatan sumber dan lisensi.
 - Library memiliki 16 kategori keluarga dan definisi pin untuk 1 sampai
   8 pin per entri. Daftar library memakai virtualisasi baris.
+- Design system Adobe Spectrum-inspired: Source Sans 3 untuk UI, Source
+  Code Pro untuk data teknis, token warna dark/light, spacing 4 px,
+  radius 4/6 px, dan kontrol 24 px.
 - Probe read-only PB5 dan arus LED, buffer 10 detik, decimation min/max,
   sampling N cycle, graph analog dua sumbu, maksimal 8 series.
 - Spatial hash untuk hit testing kabel, benchmark 500 komponen dan 2000

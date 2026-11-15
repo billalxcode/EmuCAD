@@ -4,7 +4,7 @@
 yang memodelkan transistor, gerbang CMOS, CPU AVR, peripheral, dan board,
 serta mampu menjalankan firmware AVR.
 
-> **Status v0.1:** 821 test lulus, 9 crate, crate simulasi zero external
+> **Status v0.1:** 825 test lulus, 9 crate, crate simulasi zero external
 > dependency; dependensi GUI dan binding Python dibatasi pada daftar yang
 > disetujui di `AGENTS.md`.
 > Tag `v0.1` tersedia. Archive Linux ada di
@@ -155,6 +155,7 @@ Dokumen yang sering dipakai:
 | [`docs/58-gui-user-guide.md`](docs/58-gui-user-guide.md) | Panduan pengguna GUI |
 | [`docs/59-gui-golden.md`](docs/59-gui-golden.md) | Status dan prosedur golden RGBA GUI |
 | [`docs/60-component-catalog.md`](docs/60-component-catalog.md) | Katalog 500 komponen, akurasi, dan schema |
+| [`docs/61-design-system.md`](docs/61-design-system.md) | Design system GUI, font, warna, dan spacing |
 | [`TODO-COMPONENTS.md`](TODO-COMPONENTS.md) | Backlog katalog komponen dan Python builder |
 | [`TODO.md`](TODO.md) | Pekerjaan yang tersisa |
 | [`TODO-GUI.md`](TODO-GUI.md) | Backlog GUI egui |
@@ -165,7 +166,7 @@ Dokumen yang sering dipakai:
 
 Sudah:
 
-- 821 test workspace.
+- 825 test workspace.
 - fmt, clippy, test, dan build release lulus.
 - Paket Linux dapat dibuat.
 - Determinisme Linux diuji.
@@ -174,6 +175,7 @@ Sudah:
 - GUI egui untuk editing skematik, simulasi PB5, monitor UART TX,
   graph digital, minimap, dan export PNG.
 - Library GUI memuat 6 komponen kurasi dan 500 entri katalog dengan 16 kategori, definisi pin, dan simbol SVG unik per entri.
+- Design system GUI berbasis Adobe Spectrum dengan font Source Sans 3 dan Source Code Pro, token warna dark/light, serta spacing yang konsisten.
 
 Belum:
 

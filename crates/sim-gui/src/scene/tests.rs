@@ -171,7 +171,10 @@ fn wire_midpoint_uses_middle_segment() {
 
 #[test]
 fn net_colors_are_distinct() {
-    let colors: Vec<_> = NetClass::ALL.into_iter().map(net_color).collect();
+    let colors: Vec<_> = NetClass::ALL
+        .into_iter()
+        .map(|class| net_color(class, true))
+        .collect();
     for (index, color) in colors.iter().enumerate() {
         for other in &colors[index + 1..] {
             assert_ne!(color, other);
@@ -189,7 +192,7 @@ fn wire_color_uses_override() {
         label: Some("LED_A".to_string()),
     };
     assert_eq!(
-        super::wire_color(&wire),
+        super::wire_color(&wire, true),
         eframe::egui::Color32::from_rgb(1, 2, 3)
     );
     assert_eq!(super::wire_label_text(&wire), "LED_A");
@@ -197,11 +200,16 @@ fn wire_color_uses_override() {
 
 #[test]
 fn net_colors_meet_wcag_aa_on_canvas() {
-    let background = luminance(eframe::egui::Color32::from_rgb(18, 22, 26));
-    for class in NetClass::ALL {
-        let foreground = luminance(net_color(class));
-        let ratio = (foreground.max(background) + 0.05) / (foreground.min(background) + 0.05);
-        assert!(ratio >= 4.5, "{} contrast {ratio:.2}", class.label());
+    for (dark, background) in [
+        (true, crate::design::DARK.canvas),
+        (false, crate::design::LIGHT.canvas),
+    ] {
+        let background = luminance(background);
+        for class in NetClass::ALL {
+            let foreground = luminance(net_color(class, dark));
+            let ratio = (foreground.max(background) + 0.05) / (foreground.min(background) + 0.05);
+            assert!(ratio >= 4.5, "{} contrast {ratio:.2}", class.label());
+        }
     }
 }
 

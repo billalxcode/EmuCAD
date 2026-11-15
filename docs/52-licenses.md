@@ -48,7 +48,19 @@ Teks lisensi lengkap, daftar aset, dan URL sumber ada di
 `crates/sim-gui/assets/symbols/NOTICE.md`. Paket rilis menyalin file itu
 ke `share/licenses/sim-gui-symbols.md`.
 
-## 4. Data Datasheet
+## 4. Font GUI
+
+GUI membundel font open-source dari Adobe:
+
+- Source Sans 3 Regular, Medium, Semibold, dan Bold: UI, tombol, heading, dan judul.
+- Source Code Pro Regular: nilai teknis, pin, koordinat, dan log.
+
+Keduanya memakai SIL Open Font License 1.1. Teks lisensi dan URL sumber
+ada di `crates/sim-gui/assets/fonts/NOTICE.md`. Paket rilis menyalin
+`NOTICE.md`, `OFL-SourceSans.txt`, dan `OFL-SourceCodePro.txt` ke
+`share/licenses/`.
+
+## 5. Data Datasheet
 
 Kalibrasi pin memakai DC characteristics ATmega328P:
 
@@ -65,16 +77,16 @@ salinan tabel datasheet.
 
 ---
 
-## 5. CI
+## 6. CI
 
 Workflow memakai `actions/checkout@v4` untuk checkout repository. Tidak ada
 dependency Rust eksternal di CI.
 
 ---
 
-## 6. Batas
+## 7. Batas
 
 - Dokumen ini bukan nasihat hukum.
 - Belum ada audit lisensi untuk firmware contoh.
-- NOTICE aset SVG sudah disertakan di paket rilis.
+- NOTICE aset SVG dan font sudah disertakan di paket rilis.
 - Belum ada verifikasi lisensi datasheet untuk redistribusi penuh.

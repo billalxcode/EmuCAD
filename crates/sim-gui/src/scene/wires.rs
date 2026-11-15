@@ -27,11 +27,12 @@ pub(crate) fn segment_midpoint(first: GridPos, second: GridPos) -> egui::Pos2 {
 
 pub(crate) fn draw_handle(painter: &egui::Painter, screen: egui::Pos2) {
     let handle = egui::Rect::from_center_size(screen, egui::vec2(8.0, 8.0));
-    painter.rect_filled(handle, egui::CornerRadius::ZERO, SELECTED_STROKE);
+    let colors = palette(painter);
+    painter.rect_filled(handle, egui::CornerRadius::ZERO, colors.accent);
     painter.rect_stroke(
         handle,
         egui::CornerRadius::ZERO,
-        egui::Stroke::new(1.0, JUNCTION_COLOR),
+        egui::Stroke::new(1.0, colors.junction),
         egui::StrokeKind::Middle,
     );
 }
@@ -99,14 +100,15 @@ pub(crate) fn draw_net_label(
         return;
     };
     let pos = camera.world_to_screen(rect, midpoint) + egui::vec2(4.0, -16.0);
-    let color = wire_color(wire);
+    let color = wire_color(wire, crate::design::is_dark(painter.ctx()));
+    let colors = palette(painter);
     let galley = painter.layout_no_wrap(
         wire_label_text(wire).to_string(),
-        egui::FontId::monospace(11.0),
+        crate::design::mono(11.0),
         color,
     );
-    let background = egui::Rect::from_min_size(pos, galley.size()).expand(3.0);
-    painter.rect_filled(background, 3.0, egui::Color32::from_black_alpha(190));
+    let background = egui::Rect::from_min_size(pos, galley.size()).expand(4.0);
+    painter.rect_filled(background, 4.0, colors.surface);
     painter.galley(pos, galley, color);
 }
 
@@ -125,11 +127,15 @@ pub(crate) fn draw_wire(
     flow_phase: Option<f32>,
 ) {
     if selected {
-        let halo = SELECTED_STROKE.gamma_multiply(0.6);
+        let halo = palette(painter).accent.gamma_multiply(0.6);
         draw_polyline(painter, rect, camera, &wire.points, halo, 6.0);
         draw_wire_ends(painter, rect, camera, wire);
     }
-    let style = wire_style(wire_color(wire), wire.class, flow_phase);
+    let style = wire_style(
+        wire_color(wire, crate::design::is_dark(painter.ctx())),
+        wire.class,
+        flow_phase,
+    );
     draw_patterned_polyline(painter, rect, camera, &wire.points, style);
 }
 
@@ -157,7 +163,7 @@ pub(crate) fn draw_wire_ends(
         .flatten()
     {
         let screen = screen_pos(rect, camera, *point);
-        painter.circle_stroke(screen, 5.0, egui::Stroke::new(1.5, SELECTED_STROKE));
+        painter.circle_stroke(screen, 5.0, egui::Stroke::new(1.5, palette(painter).accent));
     }
 }
 
@@ -172,7 +178,7 @@ pub(crate) fn draw_junctions(
         if !rect.contains(screen) {
             continue;
         }
-        painter.circle_filled(screen, 3.2, JUNCTION_COLOR);
+        painter.circle_filled(screen, 3.2, palette(painter).junction);
     }
 }
 
@@ -186,7 +192,8 @@ pub(crate) fn draw_wire_preview(
     if scene.wire_preview.is_empty() {
         return;
     }
-    let color = net_color(scene.wire_class).gamma_multiply(0.8);
+    let color =
+        net_color(scene.wire_class, crate::design::is_dark(painter.ctx())).gamma_multiply(0.8);
     let style = wire_style(color, scene.wire_class, None);
     draw_patterned_polyline(painter, rect, camera, scene.wire_preview, style);
     draw_preview_extension(painter, rect, camera, scene, hover, style);
@@ -204,7 +211,7 @@ pub(crate) fn draw_preview_extension(
         return;
     };
     if !scene.document.can_add_segment(scene.library, last, hover) {
-        style.color = PREVIEW_BAD;
+        style.color = palette(painter).danger;
     }
     draw_patterned_segment(painter, rect, camera, last, hover, style);
 }
@@ -338,9 +345,9 @@ pub(crate) fn draw_segment(
     painter.line_segment([start, end], egui::Stroke::new(width, color));
 }
 
-pub(crate) fn wire_color(wire: &crate::model::Wire) -> egui::Color32 {
+pub(crate) fn wire_color(wire: &crate::model::Wire, dark: bool) -> egui::Color32 {
     wire.color_override.map_or_else(
-        || net_color(wire.class),
+        || net_color(wire.class, dark),
         |[red, green, blue]| egui::Color32::from_rgb(red, green, blue),
     )
 }
@@ -352,19 +359,42 @@ pub(crate) fn wire_label_text(wire: &crate::model::Wire) -> &str {
         .unwrap_or(wire.class.label())
 }
 
-pub(crate) fn net_color(class: NetClass) -> egui::Color32 {
+pub(crate) fn net_color(class: NetClass, dark: bool) -> egui::Color32 {
+    if dark {
+        return dark_net_color(class);
+    }
+    light_net_color(class)
+}
+
+fn dark_net_color(class: NetClass) -> egui::Color32 {
     match class {
-        NetClass::Power => egui::Color32::from_rgb(225, 85, 85),
-        NetClass::Ground => egui::Color32::from_rgb(125, 130, 140),
-        NetClass::Digital => egui::Color32::from_rgb(85, 205, 125),
-        NetClass::Analog => egui::Color32::from_rgb(90, 155, 240),
+        NetClass::Power => egui::Color32::from_rgb(235, 110, 110),
+        NetClass::Ground => egui::Color32::from_rgb(175, 175, 175),
+        NetClass::Digital => egui::Color32::from_rgb(70, 200, 135),
+        NetClass::Analog => egui::Color32::from_rgb(105, 149, 254),
         NetClass::Clock => egui::Color32::from_rgb(240, 165, 75),
-        NetClass::Uart => egui::Color32::from_rgb(80, 215, 225),
-        NetClass::Spi => egui::Color32::from_rgb(185, 125, 235),
-        NetClass::I2c => egui::Color32::from_rgb(230, 210, 95),
-        NetClass::Pwm => egui::Color32::from_rgb(230, 115, 195),
-        NetClass::Reset => egui::Color32::from_rgb(185, 135, 95),
-        NetClass::User => egui::Color32::from_rgb(195, 200, 210),
+        NetClass::Uart => egui::Color32::from_rgb(70, 200, 215),
+        NetClass::Spi => egui::Color32::from_rgb(170, 125, 245),
+        NetClass::I2c => egui::Color32::from_rgb(225, 195, 85),
+        NetClass::Pwm => egui::Color32::from_rgb(235, 125, 195),
+        NetClass::Reset => egui::Color32::from_rgb(200, 150, 105),
+        NetClass::User => egui::Color32::from_rgb(205, 205, 205),
+    }
+}
+
+fn light_net_color(class: NetClass) -> egui::Color32 {
+    match class {
+        NetClass::Power => egui::Color32::from_rgb(180, 40, 40),
+        NetClass::Ground => egui::Color32::from_rgb(92, 92, 92),
+        NetClass::Digital => egui::Color32::from_rgb(8, 112, 68),
+        NetClass::Analog => egui::Color32::from_rgb(45, 82, 210),
+        NetClass::Clock => egui::Color32::from_rgb(154, 82, 0),
+        NetClass::Uart => egui::Color32::from_rgb(0, 110, 128),
+        NetClass::Spi => egui::Color32::from_rgb(98, 56, 170),
+        NetClass::I2c => egui::Color32::from_rgb(120, 96, 0),
+        NetClass::Pwm => egui::Color32::from_rgb(160, 40, 118),
+        NetClass::Reset => egui::Color32::from_rgb(118, 72, 42),
+        NetClass::User => egui::Color32::from_rgb(92, 92, 92),
     }
 }
 
@@ -374,7 +404,7 @@ pub(crate) fn draw_library_preview(
     definition: &ComponentDefinition,
 ) {
     let body = preview_rect(area, definition);
-    crate::symbols::draw_symbol(painter, body, definition.symbol, SYMBOL_STROKE);
+    crate::symbols::draw_symbol(painter, body, definition.symbol, palette(painter).symbol);
 }
 
 pub(crate) fn preview_rect(area: egui::Rect, definition: &ComponentDefinition) -> egui::Rect {

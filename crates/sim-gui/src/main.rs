@@ -4,6 +4,7 @@ mod app;
 mod canvas;
 mod clipboard;
 mod config;
+mod design;
 mod error;
 mod export;
 #[cfg(test)]

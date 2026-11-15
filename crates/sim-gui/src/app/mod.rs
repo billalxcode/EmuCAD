@@ -58,8 +58,8 @@ use std::time::{Duration, Instant, SystemTime};
 const AUTOSAVE_DELAY: Duration = Duration::from_secs(2);
 const WATCH_INTERVAL: Duration = Duration::from_secs(1);
 const TOAST_DURATION: Duration = Duration::from_secs(3);
-const PB5_COLOR: egui::Color32 = egui::Color32::from_rgb(0, 190, 210);
-const LED_COLOR: egui::Color32 = egui::Color32::from_rgb(85, 205, 125);
+const PB5_COLOR: egui::Color32 = egui::Color32::from_rgb(75, 117, 255);
+const LED_COLOR: egui::Color32 = egui::Color32::from_rgb(14, 175, 98);
 const CONTEXT_COLORS: [(&str, [u8; 3]); 6] = [
     ("Red", [225, 85, 85]),
     ("Green", [85, 205, 125]),
@@ -261,7 +261,7 @@ pub struct GuiApp {
 
 impl GuiApp {
     pub fn new(context: &eframe::CreationContext<'_>) -> Self {
-        configure_style(context);
+        crate::design::configure(context);
         let (config_path, config) = load_config();
         let mut app = Self {
             library: BuiltinComponents.definitions(),

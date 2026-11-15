@@ -30,7 +30,7 @@ impl GuiApp {
     }
 
     pub(super) fn toolbar_tools(&mut self, ui: &mut egui::Ui) {
-        ui.strong("EmuCAD");
+        ui.label(egui::RichText::new("EmuCAD").font(crate::design::bold(16.0)));
         ui.separator();
         self.file_buttons(ui);
         self.edit_buttons(ui);

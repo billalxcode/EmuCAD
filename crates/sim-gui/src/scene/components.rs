@@ -42,7 +42,8 @@ pub(crate) fn draw_component(
 ) {
     let body = component_rect(rect, camera, instance, definition);
     draw_selection(painter, body, selected);
-    crate::symbols::draw_symbol(painter, body, definition.symbol, SYMBOL_STROKE);
+    let colors = palette(painter);
+    crate::symbols::draw_symbol(painter, body, definition.symbol, colors.symbol);
     draw_pins(painter, rect, camera, definition, instance, hover);
     if show_component_labels(selected, camera.zoom) {
         draw_labels(painter, body, instance);
@@ -57,11 +58,12 @@ pub(crate) fn draw_selection(painter: &egui::Painter, body: egui::Rect, selected
     if !selected {
         return;
     }
-    painter.rect_filled(body, egui::CornerRadius::ZERO, SELECTED_FILL);
+    let colors = palette(painter);
+    painter.rect_filled(body, egui::CornerRadius::ZERO, colors.selection);
     painter.rect_stroke(
         body,
         egui::CornerRadius::ZERO,
-        egui::Stroke::new(1.5, SELECTED_STROKE),
+        egui::Stroke::new(1.5, colors.accent),
         egui::StrokeKind::Middle,
     );
 }
@@ -92,8 +94,9 @@ pub(crate) fn draw_pin(
     let screen = screen_pos(rect, camera, world);
     let direction = pin_direction(definition, pin, instance.rotation, instance.mirror);
     let stub = pin_stub(rect, camera, world, direction);
-    painter.line_segment([screen, stub], egui::Stroke::new(1.5, PIN_COLOR));
-    painter.circle_filled(stub, 2.0, PIN_COLOR);
+    let colors = palette(painter);
+    painter.line_segment([screen, stub], egui::Stroke::new(1.5, colors.pin));
+    painter.circle_filled(stub, 2.0, colors.pin);
     let hovered = hover == Some(world) || hover == Some(world.offset(direction));
     draw_pin_details(painter, stub, pin, direction, camera.zoom, hovered);
 }
@@ -122,10 +125,21 @@ pub(crate) fn draw_pin_tooltip(
 ) {
     let text = pin_tooltip(pin, direction);
     let pos = position + egui::vec2(8.0, -22.0);
-    let galley = painter.layout_no_wrap(text, egui::FontId::monospace(10.0), TEXT_COLOR);
-    let background = egui::Rect::from_min_size(pos, galley.size()).expand(3.0);
-    painter.rect_filled(background, 3.0, egui::Color32::from_black_alpha(210));
-    painter.galley(pos, galley, TEXT_COLOR);
+    let colors = palette(painter);
+    let galley = painter.layout_no_wrap(
+        text,
+        crate::design::mono(crate::design::SIZE_PIN),
+        colors.text,
+    );
+    let background = egui::Rect::from_min_size(pos, galley.size()).expand(4.0);
+    painter.rect_filled(background, 4.0, colors.surface);
+    painter.rect_stroke(
+        background,
+        4.0,
+        egui::Stroke::new(1.0, colors.border),
+        egui::StrokeKind::Middle,
+    );
+    painter.galley(pos, galley, colors.text_strong);
 }
 
 pub(crate) fn pin_tooltip(pin: &crate::model::PinDefinition, direction: GridPos) -> String {
@@ -160,8 +174,8 @@ pub(crate) fn draw_pin_label(
         position + offset,
         pin_anchor(direction),
         pin_label_text(pin),
-        egui::FontId::monospace(9.0),
-        TEXT_COLOR,
+        crate::design::mono(crate::design::SIZE_PIN),
+        palette(painter).text_muted,
     );
 }
 
@@ -191,8 +205,8 @@ pub(crate) fn draw_labels(
         body.center_bottom() + egui::vec2(0.0, 4.0),
         egui::Align2::CENTER_TOP,
         text,
-        egui::FontId::monospace(10.0),
-        TEXT_COLOR,
+        crate::design::semibold(11.0),
+        palette(painter).text,
     );
 }
 
@@ -205,7 +219,7 @@ pub(crate) fn draw_ghost(
     hover: GridPos,
 ) {
     let position = placement_position(definition, hover, scene.rotation);
-    let color = ghost_color(scene, definition, position);
+    let color = ghost_color(scene, definition, position, palette(painter));
     let body = rect_for(
         rect,
         camera,
@@ -219,6 +233,7 @@ pub(crate) fn ghost_color(
     scene: &Scene<'_>,
     definition: &ComponentDefinition,
     position: GridPos,
+    colors: crate::design::Palette,
 ) -> egui::Color32 {
     let valid = scene.document.can_place(
         scene.library,
@@ -227,7 +242,7 @@ pub(crate) fn ghost_color(
         scene.rotation,
         scene.mirror,
     );
-    if valid { GHOST_OK } else { GHOST_BAD }
+    if valid { colors.success } else { colors.danger }
 }
 
 pub(crate) fn draw_ghost_body(painter: &egui::Painter, body: egui::Rect, color: egui::Color32) {

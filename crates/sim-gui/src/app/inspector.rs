@@ -40,7 +40,7 @@ impl GuiApp {
         action: &mut Option<InspectorAction>,
     ) {
         show_wire_class_combo(ui, "multi_wire_class", self.selection_wire_class(), action);
-        if let Some(rgb) = self.selection_wire_rgb() {
+        if let Some(rgb) = self.selection_wire_rgb(ui.visuals().dark_mode) {
             show_wire_color_button(ui, rgb, self.selection_has_color_override(), action);
         }
         if self.selection.components().is_empty() && ui.button("Delete").clicked() {
@@ -60,13 +60,13 @@ impl GuiApp {
         classes.all(|class| class == first).then_some(first)
     }
 
-    pub(super) fn selection_wire_rgb(&self) -> Option<[u8; 3]> {
+    pub(super) fn selection_wire_rgb(&self, dark: bool) -> Option<[u8; 3]> {
         self.selection.wires().iter().find_map(|id| {
             self.document
                 .wires()
                 .iter()
                 .find(|wire| wire.id == *id)
-                .map(wire_rgb)
+                .map(|wire| wire_rgb(wire, dark))
         })
     }
 
@@ -115,7 +115,12 @@ impl GuiApp {
         ui.label(format!("Wire {}", wire.id.0));
         show_wire_class_combo(ui, "inspector_wire_class", Some(wire.class), action);
         ui.label(format!("Vertices: {}", wire.points.len()));
-        show_wire_color_button(ui, wire_rgb(wire), wire.color_override.is_some(), action);
+        show_wire_color_button(
+            ui,
+            wire_rgb(wire, ui.visuals().dark_mode),
+            wire.color_override.is_some(),
+            action,
+        );
         show_wire_label_editor(ui, wire.label.as_deref(), action);
         if ui.button("Delete").clicked() {
             *action = Some(InspectorAction::Delete);
