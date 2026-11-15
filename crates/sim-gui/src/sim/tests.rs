@@ -166,3 +166,25 @@ fn worker_realtime_pacing_matches_clock() {
     assert!(error.abs() < 0.01, "realtime error {error:.4}");
     handle.pause().expect("pause");
 }
+
+#[test]
+#[ignore = "release throughput measurement"]
+fn sim_machine_throughput() {
+    use std::time::Instant;
+    let mut machine = SimMachine::new(blink_program()).expect("machine");
+    let start = Instant::now();
+    let mut steps = 0;
+    for _ in 0..1_000_000 {
+        if !machine.step().expect("step") {
+            break;
+        }
+        steps += 1;
+    }
+    let elapsed = start.elapsed().as_secs_f64();
+    println!(
+        "sim_machine steps={steps} cycles={} instr_per_s={:.0} cycles_per_s={:.0}",
+        machine.cycles(),
+        steps as f64 / elapsed,
+        machine.cycles() as f64 / elapsed
+    );
+}

@@ -8,7 +8,8 @@ use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender, TryRecvError};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
-const CHUNK: usize = 100;
+const CHUNK: usize = 1000;
+const BOARD_INTERVAL: u64 = 100;
 const PACE_CYCLES: u64 = 80_000;
 const POLL_MS: u64 = 2;
 const FLASH_BYTES: usize = 0x8000;
@@ -222,6 +223,7 @@ struct SimMachine {
     led_microamps: i32,
     uart_bytes: Vec<u8>,
     uart_rx: VecDeque<u8>,
+    next_board: u64,
 }
 
 impl SimMachine {
@@ -237,16 +239,23 @@ impl SimMachine {
             led_microamps: 0,
             uart_bytes: Vec::new(),
             uart_rx: VecDeque::new(),
+            next_board: 0,
         })
     }
 
     fn step(&mut self) -> Result<bool, String> {
         self.pump_uart_rx();
-        let trace = self.cpu.step().map_err(|error| error.to_string())?;
-        if trace.is_none() {
+        let Some(_) = self
+            .cpu
+            .step_untraced()
+            .map_err(|error| error.to_string())?
+        else {
             return Ok(false);
+        };
+        if self.cpu.cycles() >= self.next_board {
+            self.update_board()?;
+            self.next_board = self.cpu.cycles().saturating_add(BOARD_INTERVAL);
         }
-        self.update_board()?;
         self.update_uart();
         Ok(true)
     }
@@ -298,6 +307,7 @@ impl SimMachine {
         self.led_microamps = 0;
         self.uart_bytes.clear();
         self.uart_rx.clear();
+        self.next_board = 0;
         Ok(())
     }
 
