@@ -404,7 +404,9 @@ pub(crate) fn draw_library_preview(
     definition: &ComponentDefinition,
 ) {
     let body = preview_rect(area, definition);
-    crate::symbols::draw_symbol(painter, body, definition.symbol, palette(painter).symbol);
+    let colors = palette(painter);
+    painter.rect_filled(body, egui::CornerRadius::ZERO, colors.surface);
+    crate::symbols::draw_symbol(painter, body, definition.symbol, colors.symbol);
 }
 
 pub(crate) fn preview_rect(area: egui::Rect, definition: &ComponentDefinition) -> egui::Rect {

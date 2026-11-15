@@ -127,6 +127,10 @@ Aturan implementasi:
 - Jangan menulis ukuran font baru di luar skala.
 - Komponen custom wajib membaca `palette_for(painter.ctx())`.
 - Baris library memakai tinggi tetap 28 px, nama di kiri, nilai di kanan.
+- Garis simbol dibatasi 1.25 sampai 2.0 px agar tetap standar saat zoom.
+- Body komponen memakai mask warna canvas agar garis grid dan wire tidak
+  menembus simbol.
+- Lingkaran SVG memakai 64 segmen agar tidak terlihat datar saat zoom tinggi.
 - Nilai yang sama dengan nama tidak ditampilkan dua kali.
 - Teks yang terlalu panjang dipotong, bukan dibungkus, agar scrollbar stabil.
 

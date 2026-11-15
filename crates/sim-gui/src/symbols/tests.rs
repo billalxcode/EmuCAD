@@ -44,3 +44,10 @@ fn text_is_ignored() {
 fn empty_documents_are_rejected() {
     assert_eq!(svg::parse(""), Err(SvgError::Empty));
 }
+
+#[test]
+fn circles_use_enough_segments() {
+    let text = r##"<svg><circle cx="5" cy="5" r="3"/></svg>"##;
+    let symbol = svg::parse(text).expect("symbol");
+    assert!(symbol.shapes[0].points.len() >= 64);
+}

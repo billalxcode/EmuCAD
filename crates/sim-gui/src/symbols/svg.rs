@@ -2,7 +2,7 @@
 
 use super::path::{self, Subpath};
 
-const CIRCLE_SEGMENTS: usize = 32;
+const CIRCLE_SEGMENTS: usize = 64;
 
 /// One point in SVG user units.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]

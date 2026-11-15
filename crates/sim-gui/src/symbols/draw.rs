@@ -6,6 +6,7 @@ use crate::model::SymbolKind;
 use eframe::egui;
 
 const MIN_STROKE: f32 = 1.25;
+const MAX_STROKE: f32 = 2.0;
 const CODE_MARGIN: f32 = 5.0;
 const CODE_STEP: f32 = 4.0;
 const CODE_RADIUS: f32 = 1.1;
@@ -101,9 +102,13 @@ fn draw_shape(painter: &egui::Painter, shape: &SvgShape, fit: Fit, color: egui::
         paint_fill(painter, &points, color, alpha);
     }
     if let Some(alpha) = shape.stroke {
-        let width = (shape.width * fit.scale).max(MIN_STROKE);
+        let width = stroke_width(shape.width, fit.scale);
         paint_stroke(painter, &points, shape.closed, color, alpha, width);
     }
+}
+
+fn stroke_width(source_width: f32, scale: f32) -> f32 {
+    (source_width * scale).clamp(MIN_STROKE, MAX_STROKE)
 }
 
 fn paint_fill(painter: &egui::Painter, points: &[egui::Pos2], color: egui::Color32, alpha: f32) {
@@ -209,6 +214,13 @@ mod tests {
         let definitions = crate::library::builtin();
         let count = draw_catalog_symbols(&egui::Context::default(), definitions);
         assert_eq!(count, 500);
+    }
+
+    #[test]
+    fn stroke_width_is_bounded() {
+        assert_eq!(super::stroke_width(5.0, 4.0), super::MAX_STROKE);
+        assert_eq!(super::stroke_width(5.0, 0.1), super::MIN_STROKE);
+        assert!((super::stroke_width(5.0, 0.3) - 1.5).abs() < 0.01);
     }
 
     #[test]

@@ -41,8 +41,9 @@ pub(crate) fn draw_component(
     hover: Option<GridPos>,
 ) {
     let body = component_rect(rect, camera, instance, definition);
-    draw_selection(painter, body, selected);
     let colors = palette(painter);
+    painter.rect_filled(body, egui::CornerRadius::ZERO, colors.canvas);
+    draw_selection(painter, body, selected);
     crate::symbols::draw_symbol(painter, body, definition.symbol, colors.symbol);
     draw_pins(painter, rect, camera, definition, instance, hover);
     if show_component_labels(selected, camera.zoom) {
