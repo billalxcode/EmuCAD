@@ -1,14 +1,12 @@
 //! Timer0 counter, prescaler, normal mode, and CTC.
 
-use sim_cells::{DigitalBuilder, DigitalCircuit, NetId, increment, read_bits};
 use sim_core::SimError;
 
-/// Timer0 core with an 8-bit structural counter.
+/// Timer0 core with an 8-bit functional counter.
 pub struct Timer0 {
-    circuit: DigitalCircuit,
-    bits: Vec<NetId>,
-    prescaler: u16,
-    divider: u16,
+    counter: u8,
+    prescaler: u32,
+    divider: u32,
     compare: u8,
     ctc: bool,
     pwm: bool,
@@ -21,10 +19,8 @@ pub struct Timer0 {
 impl Timer0 {
     /// Builds Timer0 in normal mode with prescaler 1.
     pub fn new() -> Result<Self, SimError> {
-        let (circuit, bits) = build_counter();
         Ok(Self {
-            circuit,
-            bits,
+            counter: 0,
             prescaler: 0,
             divider: 1,
             compare: 0,
@@ -84,16 +80,19 @@ impl Timer0 {
 
     /// Advances the timer by CPU cycles.
     pub fn tick(&mut self, cycles: u32) -> Result<(), SimError> {
-        for _ in 0..cycles {
-            self.tick_once()?;
+        self.prescaler = self.prescaler.saturating_add(cycles);
+        let ticks = self.prescaler / self.divider;
+        self.prescaler %= self.divider;
+        for _ in 0..ticks {
+            self.step();
         }
         Ok(())
     }
 
     /// Returns the counter value.
     #[must_use]
-    pub fn counter(&self) -> u8 {
-        read_bits(&self.circuit, &self.bits) as u8
+    pub const fn counter(&self) -> u8 {
+        self.counter
     }
 
     /// Takes and clears the overflow flag.
@@ -124,39 +123,24 @@ impl Timer0 {
 
     /// Resets the counter, prescaler, and flags.
     pub fn reset(&mut self) -> Result<(), SimError> {
-        self.clear_counter()?;
+        self.counter = 0;
         self.prescaler = 0;
         self.overflow = false;
         self.compare_match = false;
         Ok(())
     }
 
-    fn tick_once(&mut self) -> Result<(), SimError> {
-        self.prescaler += 1;
-        if self.prescaler < self.divider {
-            return Ok(());
-        }
-        self.prescaler = 0;
-        let previous = self.counter();
-        self.pulse()?;
-        let current = self.counter();
+    fn step(&mut self) {
+        let previous = self.counter;
+        self.counter = self.counter.wrapping_add(1);
         self.update_pwm();
         self.overflow |= previous == 0xFF;
-        if current != self.compare {
-            return Ok(());
+        if self.counter == self.compare {
+            self.compare_match = true;
+            if self.ctc {
+                self.counter = 0;
+            }
         }
-        self.compare_match = true;
-        if self.ctc {
-            self.clear_counter()?;
-        }
-        Ok(())
-    }
-
-    fn pulse(&mut self) -> Result<(), SimError> {
-        self.set_bool("enable", true)?;
-        self.circuit.tick()?;
-        self.set_bool("enable", false)?;
-        self.circuit.settle()
     }
 
     fn update_pwm(&mut self) {
@@ -164,39 +148,12 @@ impl Timer0 {
             self.pwm_output = false;
             return;
         }
-        let counter = self.counter();
         self.pwm_output = if self.inverting {
-            counter >= self.compare
+            self.counter >= self.compare
         } else {
-            counter < self.compare
+            self.counter < self.compare
         };
     }
-
-    fn clear_counter(&mut self) -> Result<(), SimError> {
-        self.set_bool("reset", true)?;
-        self.circuit.tick()?;
-        self.set_bool("reset", false)?;
-        self.circuit.settle()
-    }
-
-    fn set_bool(&mut self, name: &str, value: bool) -> Result<(), SimError> {
-        self.circuit.set_input(name, value)
-    }
-}
-
-fn build_counter() -> (DigitalCircuit, Vec<NetId>) {
-    let mut builder = DigitalBuilder::new();
-    let enable = builder.input("enable");
-    let reset = builder.input("reset");
-    let bits: Vec<NetId> = (0..8).map(|_| builder.net()).collect();
-    let incremented = increment(&mut builder, &bits);
-    let zero = builder.constant(false);
-    for index in 0..8 {
-        let stepped = builder.mux(bits[index], incremented[index], enable);
-        let next = builder.mux(stepped, zero, reset);
-        builder.dff_into(next, bits[index]);
-    }
-    (builder.build(), bits)
 }
 
 #[cfg(test)]

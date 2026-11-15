@@ -1,12 +1,10 @@
 //! Timer1 16-bit counter, prescaler, compare, capture, and PWM.
 
-use sim_cells::{DigitalBuilder, DigitalCircuit, NetId, increment, read_bits};
 use sim_core::SimError;
 
-/// Timer1 core with a 16-bit structural counter.
+/// Timer1 core with a 16-bit functional counter.
 pub struct Timer1 {
-    circuit: DigitalCircuit,
-    bits: Vec<NetId>,
+    counter: u16,
     prescaler: u32,
     divider: u32,
     compare_a: u16,
@@ -25,10 +23,8 @@ pub struct Timer1 {
 impl Timer1 {
     /// Builds Timer1 with prescaler 1.
     pub fn new() -> Result<Self, SimError> {
-        let (circuit, bits) = build_counter();
         Ok(Self {
-            circuit,
-            bits,
+            counter: 0,
             prescaler: 0,
             divider: 1,
             compare_a: 0,
@@ -100,16 +96,19 @@ impl Timer1 {
 
     /// Advances the timer by CPU cycles.
     pub fn tick(&mut self, cycles: u32) -> Result<(), SimError> {
-        for _ in 0..cycles {
-            self.tick_once()?;
+        self.prescaler = self.prescaler.saturating_add(cycles);
+        let ticks = self.prescaler / self.divider;
+        self.prescaler %= self.divider;
+        for _ in 0..ticks {
+            self.step();
         }
         Ok(())
     }
 
     /// Returns the counter value.
     #[must_use]
-    pub fn counter(&self) -> u16 {
-        read_bits(&self.circuit, &self.bits) as u16
+    pub const fn counter(&self) -> u16 {
+        self.counter
     }
 
     /// Returns the PWM output compare A signal.
@@ -164,7 +163,7 @@ impl Timer1 {
 
     /// Resets counter, prescaler, and flags.
     pub fn reset(&mut self) -> Result<(), SimError> {
-        self.clear_counter()?;
+        self.counter = 0;
         self.prescaler = 0;
         self.overflow = false;
         self.compare_a_flag = false;
@@ -173,57 +172,28 @@ impl Timer1 {
         Ok(())
     }
 
-    fn tick_once(&mut self) -> Result<(), SimError> {
-        self.prescaler += 1;
-        if self.prescaler < self.divider {
-            return Ok(());
-        }
-        self.prescaler = 0;
-        let previous = self.counter();
-        self.pulse()?;
-        let current = self.counter();
-        self.update_flags(previous, current);
-        if current == self.compare_a && self.ctc {
-            self.clear_counter()?;
-        }
-        Ok(())
-    }
-
-    fn update_flags(&mut self, previous: u16, current: u16) {
+    fn step(&mut self) {
+        let previous = self.counter;
+        self.counter = self.counter.wrapping_add(1);
         self.overflow |= previous == u16::MAX;
-        self.compare_a_flag |= current == self.compare_a;
-        self.compare_b_flag |= current == self.compare_b;
-        self.update_pwm(current);
+        self.compare_a_flag |= self.counter == self.compare_a;
+        self.compare_b_flag |= self.counter == self.compare_b;
+        self.update_pwm();
+        if self.ctc && self.counter == self.compare_a {
+            self.counter = 0;
+        }
     }
 
-    fn update_pwm(&mut self, value: u16) {
+    fn update_pwm(&mut self) {
         if !self.pwm {
             self.pwm_output = false;
             return;
         }
         self.pwm_output = if self.inverting {
-            value >= self.compare_a
+            self.counter >= self.compare_a
         } else {
-            value < self.compare_a
+            self.counter < self.compare_a
         };
-    }
-
-    fn pulse(&mut self) -> Result<(), SimError> {
-        self.set_bool("enable", true)?;
-        self.circuit.tick()?;
-        self.set_bool("enable", false)?;
-        self.circuit.settle()
-    }
-
-    fn clear_counter(&mut self) -> Result<(), SimError> {
-        self.set_bool("reset", true)?;
-        self.circuit.tick()?;
-        self.set_bool("reset", false)?;
-        self.circuit.settle()
-    }
-
-    fn set_bool(&mut self, name: &str, value: bool) -> Result<(), SimError> {
-        self.circuit.set_input(name, value)
     }
 }
 
@@ -231,21 +201,6 @@ fn take(value: &mut bool) -> bool {
     let result = *value;
     *value = false;
     result
-}
-
-fn build_counter() -> (DigitalCircuit, Vec<NetId>) {
-    let mut builder = DigitalBuilder::new();
-    let enable = builder.input("enable");
-    let reset = builder.input("reset");
-    let bits: Vec<NetId> = (0..16).map(|_| builder.net()).collect();
-    let incremented = increment(&mut builder, &bits);
-    let zero = builder.constant(false);
-    for index in 0..16 {
-        let stepped = builder.mux(bits[index], incremented[index], enable);
-        let next = builder.mux(stepped, zero, reset);
-        builder.dff_into(next, bits[index]);
-    }
-    (builder.build(), bits)
 }
 
 #[cfg(test)]
