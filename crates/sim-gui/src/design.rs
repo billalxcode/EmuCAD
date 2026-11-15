@@ -12,6 +12,7 @@ pub(crate) const SIZE_HEADING: f32 = 18.0;
 pub(crate) const SIZE_TITLE: f32 = 22.0;
 pub(crate) const SIZE_MONO: f32 = 13.0;
 pub(crate) const SIZE_PIN: f32 = 10.0;
+pub(crate) const ROW_HEIGHT: f32 = 28.0;
 
 const MEDIUM_NAME: &str = "medium";
 const SEMIBOLD_NAME: &str = "semibold";
@@ -195,24 +196,28 @@ const FONT_DATA: [(&str, &[u8]); 5] = [
 
 fn font_definitions() -> egui::FontDefinitions {
     let mut fonts = egui::FontDefinitions::default();
-    for (name, bytes) in FONT_DATA {
-        let font = egui::FontData::from_static(bytes);
-        fonts.font_data.insert(name.to_owned(), Arc::new(font));
-    }
-    add_primary(
-        &mut fonts,
-        egui::FontFamily::Proportional,
-        "source_sans_regular",
-    );
-    add_primary(
-        &mut fonts,
-        egui::FontFamily::Monospace,
-        "source_code_pro_regular",
-    );
+    add_font_data(&mut fonts);
+    add_primary_fonts(&mut fonts);
     add_named(&mut fonts, MEDIUM_NAME, "source_sans_medium");
     add_named(&mut fonts, SEMIBOLD_NAME, "source_sans_semibold");
     add_named(&mut fonts, BOLD_NAME, "source_sans_bold");
     fonts
+}
+
+fn add_font_data(fonts: &mut egui::FontDefinitions) {
+    for (name, bytes) in FONT_DATA {
+        let font = egui::FontData::from_static(bytes);
+        fonts.font_data.insert(name.to_owned(), Arc::new(font));
+    }
+}
+
+fn add_primary_fonts(fonts: &mut egui::FontDefinitions) {
+    add_primary(fonts, egui::FontFamily::Proportional, "source_sans_regular");
+    add_primary(
+        fonts,
+        egui::FontFamily::Monospace,
+        "source_code_pro_regular",
+    );
 }
 
 fn add_primary(fonts: &mut egui::FontDefinitions, family: egui::FontFamily, name: &str) {
@@ -474,26 +479,31 @@ mod tests {
     #[test]
     fn fonts_are_registered() {
         let fonts = font_definitions();
-        assert!(fonts.font_data.contains_key("source_sans_regular"));
-        assert!(fonts.font_data.contains_key("source_sans_medium"));
-        assert!(fonts.font_data.contains_key("source_code_pro_regular"));
-        assert!(
-            fonts
-                .families
-                .contains_key(&egui::FontFamily::Name("medium".into()))
-        );
-        assert!(
-            fonts
-                .families
-                .contains_key(&egui::FontFamily::Name("semibold".into()))
-        );
-        assert!(
-            fonts
-                .families
-                .get(&egui::FontFamily::Proportional)
-                .is_some_and(|list| list
-                    .first()
-                    .is_some_and(|name| name == "source_sans_regular"))
+        for name in [
+            "source_sans_regular",
+            "source_sans_medium",
+            "source_code_pro_regular",
+        ] {
+            assert!(fonts.font_data.contains_key(name));
+        }
+        for name in ["medium", "semibold"] {
+            assert!(
+                fonts
+                    .families
+                    .contains_key(&egui::FontFamily::Name(name.into()))
+            );
+        }
+        assert_primary_font(&fonts);
+    }
+
+    fn assert_primary_font(fonts: &egui::FontDefinitions) {
+        let list = fonts
+            .families
+            .get(&egui::FontFamily::Proportional)
+            .expect("proportional");
+        assert_eq!(
+            list.first().map(String::as_str),
+            Some("source_sans_regular")
         );
     }
 }

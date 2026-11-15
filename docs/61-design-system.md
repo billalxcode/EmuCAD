@@ -101,6 +101,7 @@ Aturan:
 | Slider width | 120 px |
 | Combo width | 140 px |
 | Text edit width | 220 px |
+| Library row height | 28 px |
 | Widget radius | 4 px |
 | Window radius | 6 px |
 | Focus ring | 2 px |
@@ -125,6 +126,9 @@ Aturan implementasi:
 - Jangan menulis `FontId::monospace` baru; pakai `design::mono`.
 - Jangan menulis ukuran font baru di luar skala.
 - Komponen custom wajib membaca `palette_for(painter.ctx())`.
+- Baris library memakai tinggi tetap 28 px, nama di kiri, nilai di kanan.
+- Nilai yang sama dengan nama tidak ditampilkan dua kali.
+- Teks yang terlalu panjang dipotong, bukan dibungkus, agar scrollbar stabil.
 
 ## 7. Verifikasi
 

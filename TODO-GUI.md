@@ -124,6 +124,7 @@ pan dan zoom stabil, dan area canvas mendominasi layout.
 - [x] G2-17 Ganti simbol library dengan aset SVG dari sumber MIT dan public domain.
 - [x] G2-18 Petakan aset SVG per kelas dan tambahkan kode varian unik untuk 500 entri katalog.
 - [x] G2-19 Tambahkan definisi pin dan 16 kategori untuk seluruh entri katalog.
+- [x] G2-20 Rapikan row library: tinggi tetap, dua kolom, dan tanpa nilai duplikat.
 - [x] G2-06 Implementasikan ghost placement dan klik untuk menempatkan.
 - [x] G2-16 Implementasikan drag-and-drop dari library ke kanvas.
 - [x] G2-07 Implementasikan move, rotate, dan mirror di grid dengan pusat rotasi.

@@ -12,7 +12,7 @@ kebenaran fungsional. Setiap perubahan diukur sebelum dan sesudah.
 - Commit pacing GUI: `e173f6b`.
 - Commit verifikasi realtime: `63279a9`.
 - Build benchmark: release.
-- Test workspace: 825 lulus.
+- Test workspace: 827 lulus.
 - Headroom: 2,14x sampai 4,50x real-time tanpa pacing.
 - Pacing CLI: median 0,275-0,536%, worst di bawah 0,9% pada verifikasi final.
 - Pacing GUI: release test 16.000.000 cycle selesai dalam sekitar 1,00 detik.
@@ -111,7 +111,7 @@ bash scripts/check-avr-realtime.sh
 - [x] P-A19 Tambah trace cepat dengan menyalin array register.
 - [x] P-A20 Tambah benchmark loop memory dan test pointer.
 - [x] P-A21 Inline jalur fetch dan step, lalu ukur ulang.
-- [x] P-A22 Verifikasi final 825 test, clippy, ASCII, dan package.
+- [x] P-A22 Verifikasi final 827 test, clippy, ASCII, dan package.
 - [x] P-A23 Tambah real-time pacing untuk CLI dan GUI.
 
 ## Temuan Akurasi 1% (2026-11-15)

@@ -100,3 +100,32 @@ fn library_window_renders_full_catalog() {
     assert!(open);
     assert!(!output.shapes.is_empty());
 }
+
+#[test]
+fn library_value_omits_duplicate_names() {
+    let atmega = crate::library::find("atmega328p").expect("atmega");
+    let led = crate::library::find("led").expect("led");
+    let resistor = crate::library::find("resistor").expect("resistor");
+    assert_eq!(crate::app::library_ui::library_value(atmega), None);
+    assert_eq!(crate::app::library_ui::library_value(led), None);
+    assert_eq!(crate::app::library_ui::library_value(resistor), Some("220"));
+}
+
+#[test]
+fn library_rows_use_a_fixed_height() {
+    assert_eq!(crate::design::ROW_HEIGHT, 28.0);
+    let definitions = crate::library::builtin();
+    let mut hovered = None;
+    let mut dragged = None;
+    let (_, output) = run_library_ui(320.0, 240.0, |ui| {
+        let _ = crate::app::library_ui::library_scroll(
+            ui,
+            definitions,
+            "",
+            None,
+            &mut hovered,
+            &mut dragged,
+        );
+    });
+    assert!(!output.shapes.is_empty());
+}
