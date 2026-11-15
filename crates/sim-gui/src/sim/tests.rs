@@ -147,3 +147,22 @@ fn hex_text_becomes_words() {
     assert_eq!(&words[..2], &[0x0201, 0x0403]);
     assert_eq!(words.len(), super::FLASH_BYTES / 2);
 }
+
+#[test]
+#[ignore = "wall-clock release test"]
+fn worker_realtime_pacing_matches_clock() {
+    use std::time::{Duration, Instant};
+
+    let handle = SimHandle::spawn();
+    handle.load(blink_program()).expect("load");
+    handle.wait_status().expect("load status");
+    let start = Instant::now();
+    handle.run().expect("run");
+    let status = handle
+        .wait_until(|status| status.running && status.cycles >= 16_000_000)
+        .expect("status");
+    let expected = Duration::from_secs_f64(status.cycles as f64 / 16_000_000.0);
+    let error = (start.elapsed().as_secs_f64() - expected.as_secs_f64()) / expected.as_secs_f64();
+    assert!(error.abs() < 0.01, "realtime error {error:.4}");
+    handle.pause().expect("pause");
+}

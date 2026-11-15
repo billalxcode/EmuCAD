@@ -10,3 +10,4 @@ fi
 
 cargo build --release -p sim-cli
 python3 scripts/check-avr-realtime.py
+cargo test --release -p sim-gui worker_realtime_pacing_matches_clock -- --ignored
