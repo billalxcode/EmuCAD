@@ -188,7 +188,7 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         DeviceKind::JfetN | DeviceKind::JfetP => JFET,
         DeviceKind::Nmos | DeviceKind::Pmos => MOSFET,
         DeviceKind::Switch => SWITCH,
-        DeviceKind::IdealSwitch => TWO_TERMINAL,
+        DeviceKind::IdealSwitch | DeviceKind::Fuse | DeviceKind::Varistor => TWO_TERMINAL,
         DeviceKind::Relay => RELAY,
         _ => &[],
     }

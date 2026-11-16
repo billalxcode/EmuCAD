@@ -221,6 +221,7 @@ impl ModelClass {
                 | Self::Switch
                 | Self::Relay
                 | Self::AnalogSwitch
+                | Self::Protection
         )
     }
 

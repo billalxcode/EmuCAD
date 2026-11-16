@@ -137,6 +137,7 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::Comparator
             | DeviceKind::Relay
             | DeviceKind::LogicGate
+            | DeviceKind::Varistor
     )
 }
 

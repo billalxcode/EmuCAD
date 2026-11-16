@@ -223,12 +223,17 @@ add("transistor.other", "OtherTransistor", None, 3, "gain", 10.0, "ratio", [
 add("protection.thyristor", "Thyristor", None, 3, "holding_current", 0.01, "A", [
     "SCR", "TRIAC", "DIAC", "GTO", "MCT", "SCS", "LASCR", "PUT thyristor",
 ])
-add("protection.device", "Protection", None, 2, "trip_current", 1.0, "A", [
-    "fuse", "resettable PTC fuse", "TVS diode", "metal oxide varistor",
-    "polyfuse", "thermal fuse",
+add("protection.device", "Protection", "Fuse", 2, "trip_current", 1.0, "A", [
+    "fuse", "resettable PTC fuse", "polyfuse", "thermal fuse",
 ])
-add("protection.breaker", "Protection", None, 2, "trip_current", 10.0, "A", [
-    "spark gap", "crowbar", "circuit breaker", "surge arrester",
+add("protection.device", "Protection", "Varistor", 2, "clamp_voltage", 6.0, "V", [
+    "TVS diode", "metal oxide varistor",
+])
+add("protection.breaker", "Protection", "Varistor", 2, "clamp_voltage", 100.0, "V", [
+    "spark gap", "crowbar", "surge arrester",
+])
+add("protection.breaker", "Protection", "Fuse", 2, "trip_current", 10.0, "A", [
+    "circuit breaker",
 ])
 
 add("switch.mechanical", "Switch", "IdealSwitch", 2, "ron", 0.1, "ohm", [

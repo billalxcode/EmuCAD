@@ -158,6 +158,20 @@ const MOSFET: &[ParameterSpec] = &[
     ParameterSpec::number("cgdo", "F", 0.0, 0.0, 1e6),
 ];
 
+const VARISTOR: &[ParameterSpec] = &[
+    ParameterSpec::number("clamp_voltage", "V", 6.0, 1e-9, 1e9),
+    ParameterSpec::number("clamp_current", "A", 1.0, 1e-12, 1e9),
+    ParameterSpec::number("alpha", "ratio", 4.0, 1.01, 1e3),
+    ParameterSpec::number("leakage", "S", 1e-9, 0.0, 1e9),
+];
+
+const FUSE: &[ParameterSpec] = &[
+    ParameterSpec::number("resistance", "ohm", 0.1, 1e-12, 1e12),
+    ParameterSpec::number("trip_current", "A", 1.0, 1e-12, 1e9),
+    ParameterSpec::number("trip_time", "s", 1e-3, 1e-12, 1e9),
+    ParameterSpec::boolean("reset", false),
+];
+
 const SWITCH: &[ParameterSpec] = &[
     ParameterSpec::number("vth", "V", 2.5, -1e6, 1e6),
     ParameterSpec::number("ron", "ohm", 1.0, 1e-12, 1e12),
@@ -246,6 +260,8 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::Switch => SWITCH,
         DeviceKind::IdealSwitch => IDEAL_SWITCH,
         DeviceKind::Relay => RELAY,
+        DeviceKind::Varistor => VARISTOR,
+        DeviceKind::Fuse => FUSE,
         _ => &[],
     }
 }
@@ -291,6 +307,8 @@ mod tests {
         DeviceKind::Comparator,
         DeviceKind::Regulator,
         DeviceKind::LogicGate,
+        DeviceKind::Varistor,
+        DeviceKind::Fuse,
     ];
 
     #[test]

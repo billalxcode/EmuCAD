@@ -59,6 +59,10 @@ pub enum DeviceKind {
     Crystal,
     /// A two-winding transformer with mutual inductance.
     Transformer,
+    /// A voltage-clamping protection device.
+    Varistor,
+    /// A current-triggered fuse or breaker.
+    Fuse,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -123,6 +127,8 @@ impl DeviceKind {
             Self::TransmissionLine => "transmission_line",
             Self::Crystal => "crystal",
             Self::Transformer => "transformer",
+            Self::Varistor => "varistor",
+            Self::Fuse => "fuse",
             Self::Diode => "diode",
             _ => "custom",
         }

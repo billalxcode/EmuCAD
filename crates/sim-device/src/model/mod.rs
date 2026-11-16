@@ -10,6 +10,7 @@ use crate::logic::LogicGateModel;
 use crate::mosfet::MosfetModel;
 use crate::opamp::OpAmpModel;
 use crate::passive::{CapacitorModel, InductorModel, ResistorModel};
+use crate::protection::{FuseModel, VaristorModel};
 use crate::regulator::RegulatorModel;
 use crate::relay::RelayModel;
 use crate::source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
@@ -101,6 +102,8 @@ fn passive_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel
         DeviceKind::TransmissionLine => Box::new(TransmissionLineModel::from_instance(instance)?),
         DeviceKind::Crystal => Box::new(CrystalModel::from_instance(instance)?),
         DeviceKind::Transformer => Box::new(TransformerModel::from_instance(instance)?),
+        DeviceKind::Varistor => Box::new(VaristorModel::from_instance(instance)?),
+        DeviceKind::Fuse => Box::new(FuseModel::from_instance(instance)?),
         _ => return Ok(None),
     };
     Ok(Some(model))

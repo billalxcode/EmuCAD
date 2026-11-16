@@ -41,16 +41,6 @@ protection.thyristor.mct,protection,Thyristor,compact-analog,protection compact 
 protection.thyristor.scs,protection,Thyristor,compact-analog,protection compact model,S5-1,P1
 protection.thyristor.lascr,protection,Thyristor,compact-analog,protection compact model,S5-1,P1
 protection.thyristor.put_thyristor,protection,Thyristor,compact-analog,protection compact model,S5-1,P1
-protection.device.fuse,protection,Protection,compact-analog,protection compact model,S5-1,P1
-protection.device.resettable_ptc_fuse,protection,Protection,compact-analog,protection compact model,S5-1,P1
-protection.device.tvs_diode,protection,Protection,compact-analog,protection compact model,S5-1,P1
-protection.device.metal_oxide_varistor,protection,Protection,compact-analog,protection compact model,S5-1,P1
-protection.device.polyfuse,protection,Protection,compact-analog,protection compact model,S5-1,P1
-protection.device.thermal_fuse,protection,Protection,compact-analog,protection compact model,S5-1,P1
-protection.breaker.spark_gap,protection,Protection,compact-analog,protection compact model,S5-1,P1
-protection.breaker.crowbar,protection,Protection,compact-analog,protection compact model,S5-1,P1
-protection.breaker.circuit_breaker,protection,Protection,compact-analog,protection compact model,S5-1,P1
-protection.breaker.surge_arrester,protection,Protection,compact-analog,protection compact model,S5-1,P1
 analog.timer.555_timer,analog,Timer,behavioral-electrical,timer macromodel,S5-2,P2
 analog.timer.monostable_multivibrator,analog,Timer,behavioral-electrical,timer macromodel,S5-2,P2
 analog.timer.astable_multivibrator,analog,Timer,behavioral-electrical,timer macromodel,S5-2,P2

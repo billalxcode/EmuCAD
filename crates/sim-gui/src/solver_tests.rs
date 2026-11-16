@@ -377,3 +377,115 @@ fn crystal_oscillates_near_its_frequency() {
     assert!(slow >= 4, "slow={slow}");
     assert!(fast > slow, "slow={slow} fast={fast}");
 }
+
+fn varistor_clamp() -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let (source, output, ground) = clamp_nodes(&mut builder, "source", "out");
+    add_input(&mut builder, "V1", source, ground, 10.0);
+    add_load(&mut builder, "R1", source, output);
+    add_varistor(&mut builder, output, ground);
+    builder.build().expect("circuit")
+}
+
+fn clamp_nodes(
+    builder: &mut CircuitBuilder,
+    first: &str,
+    second: &str,
+) -> (NodeId, NodeId, NodeId) {
+    let source = builder.node(first).expect("node");
+    let output = builder.node(second).expect("node");
+    (source, output, builder.ground())
+}
+
+fn add_varistor(builder: &mut CircuitBuilder, positive: NodeId, negative: NodeId) {
+    builder
+        .device(
+            "RV1",
+            DeviceKind::Varistor,
+            vec![positive, negative],
+            params(&[
+                ("clamp_voltage", 5.0),
+                ("clamp_current", 1.0),
+                ("alpha", 4.0),
+                ("leakage", 1e-9),
+            ]),
+        )
+        .expect("RV1");
+}
+
+#[test]
+fn varistor_limits_output_voltage() {
+    let result = solve(&varistor_clamp());
+    let output = result.solution.voltage(NodeId::new(2)).expect("output");
+    assert!(output > 5.0 && output < 8.0, "output={output}");
+}
+
+fn fuse_circuit() -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let (source, output, ground) = clamp_nodes(&mut builder, "source", "out");
+    add_fuse_source(&mut builder, source, ground);
+    add_fuse_resistor(&mut builder, source, output);
+    add_fuse(&mut builder, output, ground);
+    builder.build().expect("circuit")
+}
+
+fn add_fuse_source(builder: &mut CircuitBuilder, positive: NodeId, negative: NodeId) {
+    builder
+        .device(
+            "V1",
+            DeviceKind::PulseVoltageSource,
+            vec![positive, negative],
+            params(&[
+                ("v1", 0.0),
+                ("v2", 10.0),
+                ("delay", 0.0),
+                ("rise", 1e-9),
+                ("fall", 1e-9),
+                ("width", 1.0),
+                ("period", 2.0),
+            ]),
+        )
+        .expect("V1");
+}
+
+fn add_fuse_resistor(builder: &mut CircuitBuilder, positive: NodeId, negative: NodeId) {
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![positive, negative],
+            params(&[("resistance", 5.0)]),
+        )
+        .expect("R1");
+}
+
+fn add_fuse(builder: &mut CircuitBuilder, positive: NodeId, negative: NodeId) {
+    builder
+        .device(
+            "F1",
+            DeviceKind::Fuse,
+            vec![positive, negative],
+            params(&[
+                ("resistance", 0.1),
+                ("trip_current", 1.0),
+                ("trip_time", 1e-3),
+                ("reset", 0.0),
+            ]),
+        )
+        .expect("F1");
+}
+
+#[test]
+fn fuse_opens_after_sustained_overcurrent() {
+    let circuit = fuse_circuit();
+    let config = sim_analysis::TransientConfig {
+        dt: 1e-4,
+        steps: 50,
+        ..sim_analysis::TransientConfig::default()
+    };
+    let samples = sim_analysis::transient(&circuit, &config).expect("transient");
+    let early = samples[3].device_currents[2].expect("early current");
+    let late = samples[40].device_currents[2].expect("late current");
+    assert!(early > 1.0, "early={early}");
+    assert!(late.abs() < 1e-6, "late={late}");
+}

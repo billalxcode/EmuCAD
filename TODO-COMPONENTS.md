@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 219 entri dapat
-diinstansiasi lewat registry, dan 281 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 229 entri dapat
+diinstansiasi lewat registry, dan 271 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 219 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 229 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 219 | dapat masuk netlist lewat registry |
+| mapped | 229 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 219 `mapped` bukan 219 model yang benar. Audit menemukan
+Peringatan: 229 `mapped` bukan 229 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -178,8 +178,8 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C3-10 | 8 | 2 | 2 power MOSFET generik; 6 IGBT, GaN, SiC belum. |
 | C3-11 | 4 | 0 | Belum ada model. |
 | C4-01 | 8 | 0 | Belum ada model thyristor. |
-| C4-02 | 6 | 0 | Belum ada model proteksi; duplikasi konsep dengan fuse dan varistor di C2-01. |
-| C4-03 | 4 | 0 | Belum ada model breaker. |
+| C4-02 | 6 | 6 | Fuse atau varistor; TVS memakai clamp varistor; verifikasi batch belum. |
+| C4-03 | 4 | 4 | Circuit breaker memakai fuse; spark gap, crowbar, surge arrester memakai varistor. |
 | C4-04 | 8 | 8 | 5 SPST-like layak; SPDT, DPST, DPDT 2 pin dan tidak bisa changeover. |
 | C4-05 | 7 | 7 | Relay 5 pin ada; latching dan time delay belum; SSR memakai switch generik. |
 | C4-06 | 5 | 5 | 2 switch layak; 4:1, 8:1, demux 4 pin salah. |
@@ -291,7 +291,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 899 test workspace lulus pada audit ini.
+- 905 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -381,8 +381,13 @@ Target: 95 entri.
 Target: 43 entri.
 
 - [ ] C4-01 SCR, TRIAC, DIAC, GTO 8 entri.
-- [ ] C4-02 Fuse, PTC, TVS, varistor 6 entri.
-- [ ] C4-03 Spark gap, crowbar, breaker 4 entri.
+- [~] C4-02 Fuse, PTC, TVS, varistor 6 entri.
+  - Fuse dan varistor sudah solver-backed.
+  - Reference vector dan verified belum.
+- [~] C4-03 Spark gap, crowbar, breaker 4 entri.
+  - Breaker memakai fuse; spark gap, crowbar, surge arrester memakai
+    varistor.
+  - Reference vector dan verified belum.
 - [~] C4-04 Mechanical switch 8 entri: SPST, SPDT, DPDT, push, toggle,
   DIP, reed, limit.
 - [~] C4-05 Relay dan solid-state relay 7 entri.
