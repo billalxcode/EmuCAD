@@ -146,6 +146,8 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::Diac
             | DeviceKind::Gto
             | DeviceKind::Scs
+            | DeviceKind::DiodeBridge
+            | DeviceKind::DualDiode
     )
 }
 

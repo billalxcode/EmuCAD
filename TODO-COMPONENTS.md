@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 247 entri dapat
-diinstansiasi lewat registry, dan 253 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 251 entri dapat
+diinstansiasi lewat registry, dan 249 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 247 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 251 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 247 | dapat masuk netlist lewat registry |
+| mapped | 251 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 247 `mapped` bukan 247 model yang benar. Audit menemukan
+Peringatan: 251 `mapped` bukan 251 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -169,7 +169,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C3-01 | 10 | 10 | 2 rectifier benar; 8 butuh model Schottky, Zener, avalanche, tunnel, PIN, varactor. |
 | C3-02 | 8 | 8 | Semua diode generik; tidak ada model optik atau LED. |
 | C3-03 | 8 | 2 | 2 photodiode tanpa photocurrent; 6 optocoupler belum. |
-| C3-04 | 10 | 6 | 6 TVS data salah; 4 bridge dan array belum. |
+| C3-04 | 10 | 10 | 6 TVS memakai diode generik; 4 bridge/array memakai model bridge atau dual diode; verifikasi batch belum. |
 | C3-05 | 4 | 4 | Data `is` salah, default 0.7 A dengan unit V. |
 | C3-06 | 12 | 12 | Ebers-Moll ada; parameter masih default kelas. |
 | C3-07 | 8 | 8 | Semua 3 pin; dual_pnp menjadi NPN; array butuh topologi sendiri. |
@@ -291,7 +291,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 928 test workspace lulus pada audit ini.
+- 934 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -366,7 +366,10 @@ Target: 95 entri.
 - [ ] C3-01 Rectifier, Schottky, Zener 10 entri.
 - [ ] C3-02 LED, laser, IR 8 entri.
 - [ ] C3-03 Photodiode, phototransistor, optocoupler 8 entri.
-- [ ] C3-04 Varactor, PIN, TVS, ESD, bridge, array 10 entri.
+- [~] C3-04 Varactor, PIN, TVS, ESD, bridge, array 10 entri.
+  - TVS, ESD, varactor, dan PIN memakai diode generik.
+  - Bridge dan array memakai model bridge atau dual diode.
+  - Reference vector dan verified belum.
 - [ ] C3-05 Tunnel, avalanche, diac, lainnya 4 entri.
 - [ ] C3-06 BJT NPN dan PNP 12 entri.
 - [ ] C3-07 Darlington, array, digital transistor 8 entri.

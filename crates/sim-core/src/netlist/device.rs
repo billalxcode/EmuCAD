@@ -79,6 +79,10 @@ pub enum DeviceKind {
     Gto,
     /// A silicon controlled switch.
     Scs,
+    /// A four-diode bridge with two AC and two DC pins.
+    DiodeBridge,
+    /// Two independent diodes in one package.
+    DualDiode,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -153,6 +157,8 @@ impl DeviceKind {
             Self::Diac => "diac",
             Self::Gto => "gto",
             Self::Scs => "scs",
+            Self::DiodeBridge => "diode_bridge",
+            Self::DualDiode => "dual_diode",
             Self::Diode => "diode",
             _ => "custom",
         }

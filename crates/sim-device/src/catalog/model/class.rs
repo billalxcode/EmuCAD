@@ -224,6 +224,7 @@ impl ModelClass {
                 | Self::Protection
                 | Self::OtherTransistor
                 | Self::Thyristor
+                | Self::DiodeArray
         )
     }
 

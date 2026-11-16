@@ -173,8 +173,17 @@ add("diode.tvs", "Diode", "Diode", 2, "is", 1e-12, "A", [
     "TVS diode", "ESD protection diode", "bidirectional TVS",
     "snapback ESD device", "tuning varactor", "PIN limiter diode",
 ])
-add("diode.bridge", "DiodeArray", None, 4, "forward_voltage", 0.7, "V", [
-    "diode bridge", "dual diode", "diode array", "Schottky bridge",
+add("diode.bridge", "DiodeArray", "DiodeBridge", 4, "forward_voltage", 0.7, "V", [
+    "diode bridge",
+])
+add("diode.bridge", "DiodeArray", "DualDiode", 4, "forward_voltage", 0.7, "V", [
+    "dual diode",
+])
+add("diode.bridge", "DiodeArray", "DiodeBridge", 4, "forward_voltage", 0.7, "V", [
+    "diode array",
+])
+add("diode.bridge", "DiodeArray", "DiodeBridge", 4, "forward_voltage", 0.3, "V", [
+    "Schottky bridge",
 ])
 add("diode.other", "Diode", "Diode", 2, "is", 1e-12, "A", [
     "backward diode", "Gunn diode", "IMPATT diode", "step recovery diode",

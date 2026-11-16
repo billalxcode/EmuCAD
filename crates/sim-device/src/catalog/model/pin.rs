@@ -121,6 +121,18 @@ const TRIAC: &[PinRole] = &[
     PinRole::MainTerminal1,
 ];
 const DIAC: &[PinRole] = &[PinRole::Terminal1, PinRole::Terminal2];
+const DIODE_BRIDGE: &[PinRole] = &[
+    PinRole::Input1,
+    PinRole::Input2,
+    PinRole::OutputPositive,
+    PinRole::OutputNegative,
+];
+const DUAL_DIODE: &[PinRole] = &[
+    PinRole::Anode,
+    PinRole::Cathode,
+    PinRole::Anode,
+    PinRole::Cathode,
+];
 const GTO: &[PinRole] = &[PinRole::Anode, PinRole::Gate, PinRole::Cathode];
 const SCS: &[PinRole] = &[
     PinRole::Anode,
@@ -224,6 +236,8 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         DeviceKind::Diac => DIAC,
         DeviceKind::Gto => GTO,
         DeviceKind::Scs => SCS,
+        DeviceKind::DiodeBridge => DIODE_BRIDGE,
+        DeviceKind::DualDiode => DUAL_DIODE,
         DeviceKind::Switch => SWITCH,
         DeviceKind::IdealSwitch | DeviceKind::Fuse | DeviceKind::Varistor => TWO_TERMINAL,
         DeviceKind::Relay => RELAY,

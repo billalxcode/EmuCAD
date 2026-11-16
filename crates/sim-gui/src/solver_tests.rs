@@ -844,3 +844,109 @@ fn scs_latches_on_cathode_gate() {
     assert!(on_anode < 1.5, "on={on_anode}");
     assert!(off_anode > 9.0, "off={off_anode}");
 }
+
+fn bridge_circuit(input_voltage: f64, forward_voltage: f64) -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let ac1 = builder.node("ac1").expect("node");
+    let positive = builder.node("pos").expect("node");
+    let negative = builder.node("neg").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", ac1, ground, input_voltage);
+    add_load(&mut builder, "R1", positive, negative);
+    add_bridge(
+        &mut builder,
+        ac1,
+        ground,
+        positive,
+        negative,
+        forward_voltage,
+    );
+    builder.build().expect("circuit")
+}
+
+fn add_bridge(
+    builder: &mut CircuitBuilder,
+    ac1: NodeId,
+    ac2: NodeId,
+    positive: NodeId,
+    negative: NodeId,
+    forward_voltage: f64,
+) {
+    let pins = vec![ac1, ac2, positive, negative];
+    builder
+        .device(
+            "B1",
+            DeviceKind::DiodeBridge,
+            pins,
+            bridge_params(forward_voltage),
+        )
+        .expect("B1");
+}
+
+fn bridge_params(forward_voltage: f64) -> BTreeMap<String, f64> {
+    params(&[
+        ("forward_voltage", forward_voltage),
+        ("n", 1.0),
+        ("rs", 0.01),
+    ])
+}
+
+fn bridge_output(circuit: &Circuit) -> f64 {
+    let result = solve(circuit);
+    let positive = result.solution.voltage(NodeId::new(2)).expect("positive");
+    let negative = result.solution.voltage(NodeId::new(3)).expect("negative");
+    positive - negative
+}
+
+#[test]
+fn bridge_rectifies_both_input_polarities() {
+    let positive = bridge_output(&bridge_circuit(10.0, 0.7));
+    let negative = bridge_output(&bridge_circuit(-10.0, 0.7));
+    assert!(positive > 7.5, "positive={positive}");
+    assert!(negative > 7.5, "negative={negative}");
+}
+
+#[test]
+fn schottky_bridge_has_lower_drop() {
+    let silicon = bridge_output(&bridge_circuit(10.0, 0.7));
+    let schottky = bridge_output(&bridge_circuit(10.0, 0.3));
+    assert!(
+        schottky > silicon + 0.3,
+        "silicon={silicon} schottky={schottky}"
+    );
+}
+
+fn dual_diode_circuit() -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let source1 = builder.node("s1").expect("node");
+    let anode1 = builder.node("a1").expect("node");
+    let source2 = builder.node("s2").expect("node");
+    let anode2 = builder.node("a2").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", source1, ground, 5.0);
+    add_input(&mut builder, "V2", source2, ground, 5.0);
+    add_load(&mut builder, "R1", source1, anode1);
+    add_load(&mut builder, "R2", source2, anode2);
+    add_dual_diode(&mut builder, anode1, ground, anode2, ground);
+    builder.build().expect("circuit")
+}
+
+fn add_dual_diode(builder: &mut CircuitBuilder, a1: NodeId, k1: NodeId, a2: NodeId, k2: NodeId) {
+    builder
+        .device(
+            "D1",
+            DeviceKind::DualDiode,
+            vec![a1, k1, a2, k2],
+            params(&[("forward_voltage", 0.7), ("n", 1.0), ("rs", 0.01)]),
+        )
+        .expect("D1");
+}
+
+#[test]
+fn dual_diode_conducts_on_both_paths() {
+    let result = solve(&dual_diode_circuit());
+    let first = result.solution.voltage(NodeId::new(2)).expect("first");
+    let second = result.solution.voltage(NodeId::new(4)).expect("second");
+    assert!(first > 0.3 && first < 1.0, "first={first}");
+    assert!(second > 0.3 && second < 1.0, "second={second}");
+}

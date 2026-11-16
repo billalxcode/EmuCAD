@@ -5,6 +5,7 @@ use crate::comparator::ComparatorModel;
 use crate::controlled::{CccsModel, CcvsModel, VccsModel, VcvsModel};
 use crate::crystal::CrystalModel;
 use crate::diode::DiodeModel;
+use crate::diode_array::{DiodeBridgeModel, DualDiodeModel};
 use crate::igbt::IgbtModel;
 use crate::jfet::JfetModel;
 use crate::logic::LogicGateModel;
@@ -129,6 +130,8 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         DeviceKind::Regulator => Box::new(RegulatorModel::from_instance(instance)?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),
+        DeviceKind::DiodeBridge => Box::new(DiodeBridgeModel::from_instance(instance)?),
+        DeviceKind::DualDiode => Box::new(DualDiodeModel::from_instance(instance)?),
         _ => return Ok(None),
     };
     Ok(Some(model))

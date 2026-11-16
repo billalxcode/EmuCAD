@@ -172,6 +172,12 @@ const FUSE: &[ParameterSpec] = &[
     ParameterSpec::boolean("reset", false),
 ];
 
+const DIODE_ARRAY: &[ParameterSpec] = &[
+    ParameterSpec::number("forward_voltage", "V", 0.7, 1e-3, 1e6),
+    ParameterSpec::number("n", "ratio", 1.0, 1e-6, 1e3),
+    ParameterSpec::number("rs", "ohm", 0.01, 0.0, 1e12),
+];
+
 const SCR: &[ParameterSpec] = &[
     ParameterSpec::number("vgt", "V", 2.0, -1e6, 1e6),
     ParameterSpec::number("holding_current", "A", 0.01, 0.0, 1e6),
@@ -341,6 +347,7 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::Diac => DIAC,
         DeviceKind::Gto => GTO,
         DeviceKind::Scs => SCS,
+        DeviceKind::DiodeBridge | DeviceKind::DualDiode => DIODE_ARRAY,
         _ => &[],
     }
 }
@@ -396,6 +403,8 @@ mod tests {
         DeviceKind::Diac,
         DeviceKind::Gto,
         DeviceKind::Scs,
+        DeviceKind::DiodeBridge,
+        DeviceKind::DualDiode,
     ];
 
     #[test]
