@@ -50,7 +50,7 @@ use crate::selection::Selection;
 use crate::sim::{self, Event, Sample, SimHandle, Status, Waveform};
 use crate::uart::UartLog;
 use eframe::egui;
-use std::collections::VecDeque;
+use std::collections::{BTreeSet, VecDeque};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant, SystemTime};
@@ -247,6 +247,10 @@ pub struct GuiApp {
     analog_open: bool,
     probes: ProbeSet,
     plot_view: PlotView,
+    transient: Option<crate::transient::TransientTrace>,
+    transient_settings: crate::transient::TransientSettings,
+    transient_selected: BTreeSet<usize>,
+    transient_open: bool,
     uart: UartLog,
     uart_input: String,
     uart_open: bool,

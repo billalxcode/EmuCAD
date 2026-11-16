@@ -9,6 +9,7 @@ impl GuiApp {
         self.analog_window(ui);
         self.uart_window(ui);
         self.log_window(ui);
+        self.transient_window(ui);
         self.show_context_menu(ui);
         self.command_palette(ui);
         self.delete_modal(ui);
@@ -100,7 +101,11 @@ impl GuiApp {
         if ui.add(icon_button("[D]", "DC op")).clicked() {
             self.solve_dc();
         }
+        if ui.add(icon_button("[T]", "Transient")).clicked() {
+            self.run_transient();
+        }
         self.run_buttons(ui);
+        ui.checkbox(&mut self.transient_open, "Transient");
         ui.checkbox(&mut self.waveform_open, "Wave");
         ui.checkbox(&mut self.analog_open, "Analog");
         ui.checkbox(&mut self.uart_open, "UART");

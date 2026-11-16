@@ -208,19 +208,27 @@ dan menghasilkan DC operating point atau error yang jelas.
 
 ## 7. Fase S3 - Transient dan Probe
 
-- [ ] S3-01 Tambahkan konfigurasi transient: dt, steps, gmin, adaptive.
-- [ ] S3-02 Tambahkan sampling hasil solver ke event worker.
-- [ ] S3-03 Tambahkan probe untuk semua net voltage pada full rate.
+- [~] S3-01 Tambahkan konfigurasi transient: dt, steps, gmin, adaptive.
+  - dt, steps, dan use_dc_op sudah ada.
+  - gmin dan adaptive step belum diekspos ke GUI.
+- [~] S3-02 Tambahkan sampling hasil solver ke event worker.
+  - Semua node disampel per langkah ke trace.
+  - Solver masih berjalan sinkron di UI thread.
+- [x] S3-03 Tambahkan probe untuk semua net voltage pada full rate.
+  - Trace menyimpan semua node pada setiap langkah.
+  - Grafik membatasi tampilan ke 8 series.
 - [ ] S3-04 Tambahkan probe branch current.
-- [ ] S3-05 Tambahkan decimation min/max untuk grafik.
+- [~] S3-05 Tambahkan decimation min/max untuk grafik.
+  - Decimation berbasis step sudah ada.
+  - Min/max envelope belum.
 - [ ] S3-06 Tambahkan cursor waktu dan cycle.
-- [ ] S3-07 Batasi buffer 10 detik simulasi untuk semua net full rate.
-- [ ] S3-08 Test transient.
-  - RC charge/discharge.
-  - Diode rectifier.
-  - Pulse source.
-  - BJT switch delay.
-  - Transmission line delay.
+- [~] S3-07 Batasi buffer 10 detik simulasi untuk semua net full rate.
+  - Durasi transient dibatasi 10 detik.
+  - Batas memori sampel belum.
+- [~] S3-08 Test transient.
+  - RC charge dan pengaruh kapasitansi lulus.
+  - Setting tidak valid ditolak.
+  - Diode rectifier, BJT delay, dan transmission line belum.
 
 **Acceptance S3:** pengguna dapat memilih net atau pin, menjalankan
 transient, dan melihat grafik yang deterministik.

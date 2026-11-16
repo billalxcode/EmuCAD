@@ -66,3 +66,27 @@ fn flow_phase_is_optional() {
     let phase = super::flow_phase(true, 1.0).expect("phase");
     assert!((0.0..1000.0).contains(&phase));
 }
+
+#[test]
+fn transient_graph_renders_in_egui_context() {
+    let trace = crate::transient::TransientTrace {
+        times: vec![0.0, 1e-3, 2e-3],
+        nodes: vec!["0".to_string(), "out".to_string()],
+        values: vec![vec![0.0, 0.0], vec![0.0, 2.5], vec![0.0, 5.0]],
+        dt: 1e-3,
+    };
+    let mut selected = std::collections::BTreeSet::from([1]);
+    let context = eframe::egui::Context::default();
+    let input = eframe::egui::RawInput {
+        screen_rect: Some(eframe::egui::Rect::from_min_size(
+            eframe::egui::Pos2::ZERO,
+            eframe::egui::vec2(640.0, 360.0),
+        )),
+        ..Default::default()
+    };
+    let mut output = context.run_ui(input, |ui| {
+        crate::app::show_transient(ui, &trace, &mut selected);
+    });
+    output.textures_delta.clear();
+    assert!(!output.shapes.is_empty());
+}

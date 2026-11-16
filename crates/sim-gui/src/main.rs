@@ -24,6 +24,7 @@ mod selection;
 mod sim;
 mod spatial;
 mod symbols;
+mod transient;
 mod uart;
 
 use app::GuiApp;

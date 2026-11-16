@@ -1,4 +1,5 @@
 use super::*;
+use crate::transient::TransientTrace;
 
 impl GuiApp {
     pub(super) fn check_netlist(&mut self) {
@@ -14,6 +15,22 @@ impl GuiApp {
 
     pub(super) fn solve_dc(&mut self) {
         self.message = self.dc_message();
+    }
+
+    pub(super) fn run_transient(&mut self) {
+        match crate::transient::solve(&self.document, &self.transient_settings) {
+            Ok(trace) => {
+                self.transient_selected = default_transient_selection(&trace);
+                self.message = format!(
+                    "Transient: {} samples, {:.3} ms",
+                    trace.values.len(),
+                    trace.duration() * 1e3
+                );
+                self.transient = Some(trace);
+                self.transient_open = true;
+            }
+            Err(error) => self.message = error,
+        }
     }
 
     fn dc_message(&self) -> String {
@@ -204,6 +221,17 @@ impl GuiApp {
             }
         }
     }
+}
+
+fn default_transient_selection(trace: &TransientTrace) -> BTreeSet<usize> {
+    trace
+        .nodes
+        .iter()
+        .enumerate()
+        .skip(1)
+        .take(3)
+        .map(|(index, _)| index)
+        .collect()
 }
 
 fn format_dc(voltages: &[(String, f64)]) -> String {

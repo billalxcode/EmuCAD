@@ -16,6 +16,26 @@ impl GuiApp {
         }
     }
 
+    pub(crate) fn transient_window(&mut self, ui: &mut egui::Ui) {
+        if !self.transient_open {
+            return;
+        }
+        let mut open = self.transient_open;
+        let trace = self.transient.as_ref();
+        let selected = &mut self.transient_selected;
+        egui::Window::new("Transient")
+            .open(&mut open)
+            .default_size([620.0, 340.0])
+            .show(ui.ctx(), |ui| {
+                if let Some(trace) = trace {
+                    show_transient(ui, trace, selected);
+                } else {
+                    ui.label("Run transient to see node voltages");
+                }
+            });
+        self.transient_open = open;
+    }
+
     pub(crate) fn log_window(&mut self, ui: &mut egui::Ui) {
         if !self.log_open {
             return;
