@@ -2,7 +2,7 @@
 
 Pintu masuk dokumentasi EmuCAD versi 0.1.0.
 
-**Status saat ini:** 960 test lulus, 9 crate, crate simulasi zero external
+**Status saat ini:** 965 test lulus, 9 crate, crate simulasi zero external
 dependency Rust. Dependensi GUI dan binding Python dibatasi pada daftar
 yang disetujui di `AGENTS.md`. Tag `v0.1` tersedia.
 
@@ -68,7 +68,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 59 | [Golden RGBA GUI](59-gui-golden.md) | Status dan prosedur update golden image |
 | 60 | [Katalog komponen](60-component-catalog.md) | Target 500 model, taksonomi, akurasi, dan schema |
 | 61 | [Design system](61-design-system.md) | Token font, warna, spacing, dan aturan tampilan |
-| 62 | [Klasifikasi behavioral](62-behavioral-classification.md) | Kategori dan prioritas 249 entry behavioral |
+| 62 | [Klasifikasi behavioral](62-behavioral-classification.md) | Kategori dan prioritas 243 entry behavioral |
 | 63 | [Fidelity dan benchmark](63-fidelity.md) | Label fidelity, audit 60 kelas, dan hasil benchmark |
 
 ### 3.2 Fondasi
@@ -166,7 +166,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 |---|---|
 | Versi workspace | `0.1.0` |
 | Tag | `v0.1` |
-| Test | 960 lulus |
+| Test | 965 lulus |
 | Crate | 9 |
 | Dependensi eksternal | 0 untuk crate simulasi; `pyo3` hanya di `sim-python` |
 | `unsafe` | Dilarang manual; glue `pyo3` diisolasi di `sim-python` |
@@ -182,15 +182,15 @@ Setiap dokumen muncul satu kali pada peta ini.
 | Crate | Test |
 |---|---|
 | `sim-core` | 62 |
-| `sim-device` | 134 |
+| `sim-device` | 137 |
 | `sim-analysis` | 123 |
 | `sim-cells` | 72 |
 | `sim-avr` | 234 |
 | `sim-board` | 24 |
 | `sim-cli` | 36 |
-| `sim-gui` | 267 |
+| `sim-gui` | 269 |
 | `sim-python` | 8 |
-| **Total** | **960** |
+| **Total** | **965** |
 
 ---
 

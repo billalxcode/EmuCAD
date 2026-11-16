@@ -164,7 +164,7 @@ add("diode.led", "Led", "Diode", 2, "forward_voltage", 2.0, "V", [
 add("diode.photo", "Photodiode", "Diode", 2, "responsivity", 0.5, "A/W", [
     "photodiode", "avalanche photodiode",
 ])
-add("diode.opto", "Optocoupler", None, 4, "current_transfer_ratio", 1.0, "ratio", [
+add("diode.opto", "Optocoupler", "Optocoupler", 4, "current_transfer_ratio", 1.0, "ratio", [
     "phototransistor", "photo Darlington", "optocoupler",
     "photovoltaic isolator", "slotted optical switch",
     "reflective optical sensor",

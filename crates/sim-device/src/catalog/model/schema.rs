@@ -172,6 +172,15 @@ const FUSE: &[ParameterSpec] = &[
     ParameterSpec::boolean("reset", false),
 ];
 
+const OPTOCOUPLER: &[ParameterSpec] = &[
+    ParameterSpec::number("current_transfer_ratio", "ratio", 1.0, 1e-6, 1e3),
+    ParameterSpec::number("forward_voltage", "V", 1.2, 1e-3, 1e6),
+    ParameterSpec::number("rs", "ohm", 10.0, 1e-9, 1e12),
+    ParameterSpec::number("led_leakage", "S", 1e-9, 0.0, 1e9),
+    ParameterSpec::number("vce_sat", "V", 0.2, 1e-9, 1e6),
+    ParameterSpec::number("leakage", "S", 1e-9, 0.0, 1e9),
+];
+
 const DIODE_ARRAY: &[ParameterSpec] = &[
     ParameterSpec::number("forward_voltage", "V", 0.7, 1e-3, 1e6),
     ParameterSpec::number("n", "ratio", 1.0, 1e-6, 1e3),
@@ -348,6 +357,7 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::Gto => GTO,
         DeviceKind::Scs => SCS,
         DeviceKind::DiodeBridge | DeviceKind::DualDiode => DIODE_ARRAY,
+        DeviceKind::Optocoupler => OPTOCOUPLER,
         _ => &[],
     }
 }
@@ -405,6 +415,7 @@ mod tests {
         DeviceKind::Scs,
         DeviceKind::DiodeBridge,
         DeviceKind::DualDiode,
+        DeviceKind::Optocoupler,
     ];
 
     #[test]

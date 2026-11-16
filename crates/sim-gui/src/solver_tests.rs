@@ -950,3 +950,54 @@ fn dual_diode_conducts_on_both_paths() {
     assert!(first > 0.3 && first < 1.0, "first={first}");
     assert!(second > 0.3 && second < 1.0, "second={second}");
 }
+
+fn optocoupler_circuit(input_voltage: f64, ctr: f64) -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let input = builder.node("input").expect("node");
+    let anode = builder.node("anode").expect("node");
+    let supply = builder.node("vcc").expect("node");
+    let collector = builder.node("collector").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", input, ground, input_voltage);
+    add_input(&mut builder, "V2", supply, ground, 5.0);
+    add_load(&mut builder, "R1", input, anode);
+    add_load(&mut builder, "R2", supply, collector);
+    builder
+        .device(
+            "U1",
+            DeviceKind::Optocoupler,
+            vec![anode, ground, collector, ground],
+            params(&[
+                ("current_transfer_ratio", ctr),
+                ("forward_voltage", 1.2),
+                ("rs", 10.0),
+                ("led_leakage", 1e-9),
+                ("vce_sat", 0.2),
+                ("leakage", 1e-9),
+            ]),
+        )
+        .expect("U1");
+    builder.build().expect("circuit")
+}
+
+#[test]
+fn optocoupler_switches_with_led_current() {
+    let on = solve(&optocoupler_circuit(5.0, 1.0));
+    let off = solve(&optocoupler_circuit(0.0, 1.0));
+    let on_collector = on.solution.voltage(NodeId::new(4)).expect("on");
+    let off_collector = off.solution.voltage(NodeId::new(4)).expect("off");
+    assert!(on_collector < 2.5, "on={on_collector}");
+    assert!(off_collector > 4.5, "off={off_collector}");
+}
+
+#[test]
+fn higher_ctr_pulls_collector_lower() {
+    let low = solve(&optocoupler_circuit(5.0, 1.0));
+    let high = solve(&optocoupler_circuit(5.0, 2.0));
+    let low_collector = low.solution.voltage(NodeId::new(4)).expect("low");
+    let high_collector = high.solution.voltage(NodeId::new(4)).expect("high");
+    assert!(
+        high_collector < low_collector,
+        "low={low_collector} high={high_collector}"
+    );
+}

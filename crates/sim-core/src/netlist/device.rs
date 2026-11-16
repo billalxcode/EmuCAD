@@ -83,6 +83,8 @@ pub enum DeviceKind {
     DiodeBridge,
     /// Two independent diodes in one package.
     DualDiode,
+    /// An optically coupled LED and output transistor.
+    Optocoupler,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -159,6 +161,7 @@ impl DeviceKind {
             Self::Scs => "scs",
             Self::DiodeBridge => "diode_bridge",
             Self::DualDiode => "dual_diode",
+            Self::Optocoupler => "optocoupler",
             Self::Diode => "diode",
             _ => "custom",
         }

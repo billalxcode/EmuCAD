@@ -11,6 +11,7 @@ use crate::jfet::JfetModel;
 use crate::logic::LogicGateModel;
 use crate::mosfet::MosfetModel;
 use crate::opamp::OpAmpModel;
+use crate::optocoupler::OptocouplerModel;
 use crate::passive::{CapacitorModel, InductorModel, ResistorModel};
 use crate::protection::{FuseModel, VaristorModel};
 use crate::regulator::RegulatorModel;
@@ -128,6 +129,7 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         DeviceKind::OpAmp => Box::new(OpAmpModel::from_instance(instance)?),
         DeviceKind::Comparator => Box::new(ComparatorModel::from_instance(instance)?),
         DeviceKind::Regulator => Box::new(RegulatorModel::from_instance(instance)?),
+        DeviceKind::Optocoupler => Box::new(OptocouplerModel::from_instance(instance)?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),
         DeviceKind::DiodeBridge => Box::new(DiodeBridgeModel::from_instance(instance)?),

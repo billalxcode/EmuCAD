@@ -148,6 +148,7 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::Scs
             | DeviceKind::DiodeBridge
             | DeviceKind::DualDiode
+            | DeviceKind::Optocoupler
     )
 }
 

@@ -1,6 +1,6 @@
 # 62 - Klasifikasi Entry Behavioral
 
-Dokumen ini mengklasifikasikan 249 entry katalog yang belum memiliki
+Dokumen ini mengklasifikasikan 243 entry katalog yang belum memiliki
 model solver. Tujuannya menentukan model apa yang harus dibuat pada S5
 dan mana yang harus menunggu fase lain.
 
@@ -25,14 +25,14 @@ Data per entry ada di
 | Kategori | Jumlah |
 |---|---:|
 | `digital` | 63 |
-| `behavioral-electrical` | 68 |
+| `behavioral-electrical` | 62 |
 | `multidomain` | 55 |
 | `compact-analog` | 0 |
 | `structural` | 26 |
 | `rf` | 18 |
 | `unsupported` | 14 |
 | `mixed-signal` | 5 |
-| **Total** | **249** |
+| **Total** | **243** |
 
 ## 3. Prioritas
 
@@ -62,8 +62,9 @@ Urutan implementasi yang disarankan:
    - IGBT memakai model IGBT dengan body diode.
    - GaN, SiC, MESFET, dan HEMT memakai JFET atau MOSFET generik.
    - UJT dan PUT memakai model unijunction latching.
-4. Behavioral electrical.
-   - Timer, optocoupler, DC-DC, charge pump, supervisor, motor driver.
+4. Behavioral electrical. Sebagian.
+   - Optocoupler selesai dengan model CTR dan output saturation.
+   - Timer, DC-DC, charge pump, supervisor, dan motor driver belum.
 5. Digital.
    - Gunakan `sim-cells` untuk flip-flop, counter, mux, adder.
 6. Sensor dan actuator.
@@ -85,7 +86,7 @@ P1 compact-analog selesai pada level model. Tidak ada entry
 
 ## 6. Acceptance S5-01
 
-- CSV mencakup tepat 249 entry behavioral.
+- CSV mencakup tepat 243 entry behavioral.
 - Setiap entry punya satu kategori yang valid.
 - Setiap kategori punya fase dan prioritas.
 - Tidak ada entry yang hilang atau duplikat.

@@ -181,6 +181,7 @@ fn supported_active(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::Diode
             | sim_core::DeviceKind::DiodeBridge
             | sim_core::DeviceKind::DualDiode
+            | sim_core::DeviceKind::Optocoupler
             | sim_core::DeviceKind::OpAmp
             | sim_core::DeviceKind::Comparator
             | sim_core::DeviceKind::Regulator
