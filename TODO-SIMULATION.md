@@ -135,11 +135,11 @@ Gerbang kelayakan sebelum implementasi besar:
 
 ## 4. Fase S0 - Kontrak dan Metadata
 
-- [ ] S0-01 Definisikan `PinRole` untuk peran listrik.
-  - Contoh: anode, cathode, base, collector, emitter, gate, drain,
-    source, body, inverting, non-inverting, supply, output, control,
-    common, normally-open, normally-closed.
-  - Setiap definisi komponen wajib memiliki role per pin.
+- [x] S0-01 Definisikan `PinRole` untuk peran listrik.
+  - `PinRole` dan `device_pin_roles` ada di `sim-device`.
+  - Semua device solver-backed punya role dan jumlahnya cocok
+    dengan pin katalog.
+  - Inspector menampilkan role per pin.
 - [~] S0-02 Definisikan `ParameterSpec`.
   - Field name, default, unit, min, max, dan kind sudah ada.
   - Field required dan effect belum.
@@ -255,9 +255,9 @@ transient, dan melihat grafik yang deterministik.
   - Perubahan dokumen menghapus hasil dan mengabaikan event worker lama.
 - [x] S4-05 Migrasi proyek lama tanpa merusak nilai string.
   - Proyek lama memakai analysis default dan parameter kosong.
-- [~] S4-06 Tampilkan nama net dan pin role.
+- [x] S4-06 Tampilkan nama net dan pin role.
   - Nama net tampil di hasil DC dan grafik transient.
-  - Pin role belum, menunggu S0-01.
+  - Pin role tampil di inspector.
 - [x] S4-07 Tampilkan error sebelum simulasi dimulai.
   - Panel simulasi menampilkan status netlist sebelum run.
 - [~] S4-08 Test UI headless.

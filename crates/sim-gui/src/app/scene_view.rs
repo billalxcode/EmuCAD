@@ -163,8 +163,10 @@ pub(crate) fn show_component_simulation(ui: &mut egui::Ui) {
 
 pub(crate) fn show_component_pins(ui: &mut egui::Ui, definition: &ComponentDefinition) {
     ui.label("Pins");
-    for pin in definition.pins {
-        ui.label(format!("{} ({})", pin.name, pin.number));
+    let roles = crate::netlist::pin_roles(definition);
+    for (index, pin) in definition.pins.iter().enumerate() {
+        let role = roles.get(index).map_or("", |role| role.label());
+        ui.label(format!("{} ({}) {}", pin.name, pin.number, role));
     }
 }
 

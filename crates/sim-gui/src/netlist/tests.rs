@@ -286,3 +286,13 @@ fn bjt_common_emitter_saturates() {
     assert!(collector_voltage < 1.0, "collector={collector_voltage}");
     assert!((base_voltage - 0.8).abs() < 0.1, "base={base_voltage}");
 }
+
+#[test]
+fn diode_pin_roles_are_anode_and_cathode() {
+    let definition = library::find("diode.rectifier.rectifier_diode").expect("diode");
+    let roles = super::pin_roles(definition);
+    assert_eq!(
+        roles,
+        &[sim_device::PinRole::Anode, sim_device::PinRole::Cathode]
+    );
+}

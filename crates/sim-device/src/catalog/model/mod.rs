@@ -126,3 +126,6 @@ mod response;
 
 mod schema;
 pub use schema::{ParameterKind, ParameterSpec, device_parameters};
+
+mod pin;
+pub use pin::{PinRole, device_pin_roles};

@@ -4,7 +4,8 @@ use crate::library;
 use crate::model::world_pin;
 use crate::model::{ComponentDefinition, ComponentId, ComponentInstance, Document, GridPos, Wire};
 use sim_device::{
-    ComponentRegistry, ComponentSpec, ModelClass, ParameterKind, ParameterSpec, device_parameters,
+    ComponentRegistry, ComponentSpec, ModelClass, ParameterKind, ParameterSpec, PinRole,
+    device_parameters, device_pin_roles,
 };
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
@@ -76,6 +77,17 @@ pub(crate) fn parameter_fields(definition: &ComponentDefinition) -> Vec<Paramete
             primary: spec.name == catalog.parameter,
         })
         .collect()
+}
+
+/// Returns catalog pin roles for a solver-backed definition.
+pub(crate) fn pin_roles(definition: &ComponentDefinition) -> &'static [PinRole] {
+    let Some(catalog) = catalog_spec(definition) else {
+        return &[];
+    };
+    let Some(device) = catalog.device.as_ref() else {
+        return &[];
+    };
+    device_pin_roles(device)
 }
 
 fn catalog_spec(definition: &ComponentDefinition) -> Option<&'static ComponentSpec> {
