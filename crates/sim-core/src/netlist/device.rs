@@ -69,6 +69,16 @@ pub enum DeviceKind {
     Ujt,
     /// A programmable unijunction transistor.
     Put,
+    /// A silicon controlled rectifier.
+    Scr,
+    /// A bidirectional triode thyristor.
+    Triac,
+    /// A bidirectional trigger diode.
+    Diac,
+    /// A gate turn-off thyristor.
+    Gto,
+    /// A silicon controlled switch.
+    Scs,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -138,6 +148,11 @@ impl DeviceKind {
             Self::Igbt => "igbt",
             Self::Ujt => "ujt",
             Self::Put => "put",
+            Self::Scr => "scr",
+            Self::Triac => "triac",
+            Self::Diac => "diac",
+            Self::Gto => "gto",
+            Self::Scs => "scs",
             Self::Diode => "diode",
             _ => "custom",
         }

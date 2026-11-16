@@ -16,6 +16,10 @@ pub enum PinRole {
     Base1,
     Base2,
     Emitter,
+    MainTerminal1,
+    MainTerminal2,
+    AnodeGate,
+    CathodeGate,
     Gate,
     Drain,
     Source,
@@ -61,6 +65,10 @@ impl PinRole {
             Self::Base1 => "base 1",
             Self::Base2 => "base 2",
             Self::Emitter => "emitter",
+            Self::MainTerminal1 => "MT1",
+            Self::MainTerminal2 => "MT2",
+            Self::AnodeGate => "anode gate",
+            Self::CathodeGate => "cathode gate",
             Self::Gate => "gate",
             Self::Drain => "drain",
             Self::Source => "source",
@@ -106,6 +114,20 @@ const JFET: &[PinRole] = &[PinRole::Drain, PinRole::Gate, PinRole::Source];
 const IGBT: &[PinRole] = &[PinRole::Collector, PinRole::Gate, PinRole::Emitter];
 const UJT: &[PinRole] = &[PinRole::Base1, PinRole::Base2, PinRole::Emitter];
 const PUT: &[PinRole] = &[PinRole::Anode, PinRole::Gate, PinRole::Cathode];
+const SCR: &[PinRole] = &[PinRole::Anode, PinRole::Gate, PinRole::Cathode];
+const TRIAC: &[PinRole] = &[
+    PinRole::MainTerminal2,
+    PinRole::Gate,
+    PinRole::MainTerminal1,
+];
+const DIAC: &[PinRole] = &[PinRole::Terminal1, PinRole::Terminal2];
+const GTO: &[PinRole] = &[PinRole::Anode, PinRole::Gate, PinRole::Cathode];
+const SCS: &[PinRole] = &[
+    PinRole::Anode,
+    PinRole::AnodeGate,
+    PinRole::CathodeGate,
+    PinRole::Cathode,
+];
 const MOSFET: &[PinRole] = &[PinRole::Gate, PinRole::Drain, PinRole::Source];
 const SWITCH: &[PinRole] = &[
     PinRole::SwitchA,
@@ -197,6 +219,11 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         DeviceKind::Igbt => IGBT,
         DeviceKind::Ujt => UJT,
         DeviceKind::Put => PUT,
+        DeviceKind::Scr => SCR,
+        DeviceKind::Triac => TRIAC,
+        DeviceKind::Diac => DIAC,
+        DeviceKind::Gto => GTO,
+        DeviceKind::Scs => SCS,
         DeviceKind::Switch => SWITCH,
         DeviceKind::IdealSwitch | DeviceKind::Fuse | DeviceKind::Varistor => TWO_TERMINAL,
         DeviceKind::Relay => RELAY,

@@ -231,8 +231,26 @@ add("transistor.other", "OtherTransistor", "Put", 3, "vd", 0.7, "V", [
     "PUT",
 ])
 
-add("protection.thyristor", "Thyristor", None, 3, "holding_current", 0.01, "A", [
-    "SCR", "TRIAC", "DIAC", "GTO", "MCT", "SCS", "LASCR", "PUT thyristor",
+add("protection.thyristor", "Thyristor", "Scr", 3, "vgt", 2.0, "V", [
+    "SCR", "LASCR",
+])
+add("protection.thyristor", "Thyristor", "Triac", 3, "vgt", 5.0, "V", [
+    "TRIAC",
+])
+add("protection.thyristor", "Thyristor", "Diac", 2, "vbo", 30.0, "V", [
+    "DIAC",
+])
+add("protection.thyristor", "Thyristor", "Gto", 3, "vgt", 5.0, "V", [
+    "GTO",
+])
+add("protection.thyristor", "Thyristor", "Gto", 3, "vgt_off", 0.0, "V", [
+    "MCT",
+])
+add("protection.thyristor", "Thyristor", "Scs", 4, "vgt", 5.0, "V", [
+    "SCS",
+])
+add("protection.thyristor", "Thyristor", "Put", 3, "vd", 0.7, "V", [
+    "PUT thyristor",
 ])
 add("protection.device", "Protection", "Fuse", 2, "trip_current", 1.0, "A", [
     "fuse", "resettable PTC fuse", "polyfuse", "thermal fuse",

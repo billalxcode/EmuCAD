@@ -172,6 +172,50 @@ const FUSE: &[ParameterSpec] = &[
     ParameterSpec::boolean("reset", false),
 ];
 
+const SCR: &[ParameterSpec] = &[
+    ParameterSpec::number("vgt", "V", 2.0, -1e6, 1e6),
+    ParameterSpec::number("holding_current", "A", 0.01, 0.0, 1e6),
+    ParameterSpec::number("ron", "ohm", 1.0, 1e-9, 1e12),
+    ParameterSpec::number("vd", "V", 0.7, 0.0, 1e6),
+    ParameterSpec::number("leakage", "S", 1e-9, 0.0, 1e9),
+    ParameterSpec::number("photo_current", "A", 0.0, 0.0, 1e6),
+    ParameterSpec::number("photo_trigger", "A", 1e-3, 1e-12, 1e6),
+];
+
+const TRIAC: &[ParameterSpec] = &[
+    ParameterSpec::number("vgt", "V", 5.0, -1e6, 1e6),
+    ParameterSpec::number("holding_current", "A", 0.01, 0.0, 1e6),
+    ParameterSpec::number("ron", "ohm", 1.0, 1e-9, 1e12),
+    ParameterSpec::number("vd", "V", 1.0, 0.0, 1e6),
+    ParameterSpec::number("leakage", "S", 1e-9, 0.0, 1e9),
+];
+
+const DIAC: &[ParameterSpec] = &[
+    ParameterSpec::number("vbo", "V", 30.0, 1e-6, 1e6),
+    ParameterSpec::number("holding_current", "A", 0.01, 0.0, 1e6),
+    ParameterSpec::number("ron", "ohm", 10.0, 1e-9, 1e12),
+    ParameterSpec::number("vd", "V", 1.0, 0.0, 1e6),
+    ParameterSpec::number("leakage", "S", 1e-9, 0.0, 1e9),
+];
+
+const GTO: &[ParameterSpec] = &[
+    ParameterSpec::number("vgt", "V", 5.0, -1e6, 1e6),
+    ParameterSpec::number("vgt_off", "V", -5.0, -1e6, 1e6),
+    ParameterSpec::number("holding_current", "A", 0.01, 0.0, 1e6),
+    ParameterSpec::number("ron", "ohm", 1.0, 1e-9, 1e12),
+    ParameterSpec::number("vd", "V", 0.7, 0.0, 1e6),
+    ParameterSpec::number("leakage", "S", 1e-9, 0.0, 1e9),
+];
+
+const SCS: &[ParameterSpec] = &[
+    ParameterSpec::number("vgt", "V", 5.0, -1e6, 1e6),
+    ParameterSpec::number("vgt_off", "V", 1.0, -1e6, 1e6),
+    ParameterSpec::number("holding_current", "A", 0.01, 0.0, 1e6),
+    ParameterSpec::number("ron", "ohm", 1.0, 1e-9, 1e12),
+    ParameterSpec::number("vd", "V", 0.7, 0.0, 1e6),
+    ParameterSpec::number("leakage", "S", 1e-9, 0.0, 1e9),
+];
+
 const IGBT: &[ParameterSpec] = &[
     ParameterSpec::number("vth", "V", 5.0, -1e6, 1e6),
     ParameterSpec::number("kp", "A/V^2", 1.0, 1e-15, 1e9),
@@ -292,6 +336,11 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::Igbt => IGBT,
         DeviceKind::Ujt => UJT,
         DeviceKind::Put => PUT,
+        DeviceKind::Scr => SCR,
+        DeviceKind::Triac => TRIAC,
+        DeviceKind::Diac => DIAC,
+        DeviceKind::Gto => GTO,
+        DeviceKind::Scs => SCS,
         _ => &[],
     }
 }
@@ -342,6 +391,11 @@ mod tests {
         DeviceKind::Igbt,
         DeviceKind::Ujt,
         DeviceKind::Put,
+        DeviceKind::Scr,
+        DeviceKind::Triac,
+        DeviceKind::Diac,
+        DeviceKind::Gto,
+        DeviceKind::Scs,
     ];
 
     #[test]

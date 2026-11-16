@@ -122,29 +122,50 @@ fn supported_device(device: &sim_core::DeviceKind) -> bool {
 }
 
 fn supported_passive(device: &sim_core::DeviceKind) -> bool {
+    supported_basic(device) || supported_source(device) || supported_switch(device)
+}
+
+fn supported_basic(device: &sim_core::DeviceKind) -> bool {
     matches!(
         device,
         sim_core::DeviceKind::Resistor
             | sim_core::DeviceKind::Capacitor
             | sim_core::DeviceKind::Inductor
-            | sim_core::DeviceKind::VoltageSource
+            | sim_core::DeviceKind::TransmissionLine
+            | sim_core::DeviceKind::Crystal
+            | sim_core::DeviceKind::Transformer
+    )
+}
+
+fn supported_source(device: &sim_core::DeviceKind) -> bool {
+    matches!(
+        device,
+        sim_core::DeviceKind::VoltageSource
             | sim_core::DeviceKind::PulseVoltageSource
             | sim_core::DeviceKind::CurrentSource
             | sim_core::DeviceKind::Vcvs
             | sim_core::DeviceKind::Vccs
             | sim_core::DeviceKind::Cccs
             | sim_core::DeviceKind::Ccvs
-            | sim_core::DeviceKind::Switch
+    )
+}
+
+fn supported_switch(device: &sim_core::DeviceKind) -> bool {
+    matches!(
+        device,
+        sim_core::DeviceKind::Switch
             | sim_core::DeviceKind::IdealSwitch
             | sim_core::DeviceKind::Relay
-            | sim_core::DeviceKind::TransmissionLine
-            | sim_core::DeviceKind::Crystal
-            | sim_core::DeviceKind::Transformer
             | sim_core::DeviceKind::Varistor
             | sim_core::DeviceKind::Fuse
             | sim_core::DeviceKind::Igbt
             | sim_core::DeviceKind::Ujt
             | sim_core::DeviceKind::Put
+            | sim_core::DeviceKind::Scr
+            | sim_core::DeviceKind::Triac
+            | sim_core::DeviceKind::Diac
+            | sim_core::DeviceKind::Gto
+            | sim_core::DeviceKind::Scs
     )
 }
 
@@ -349,4 +370,24 @@ fn registry_rejects_behavioral_model() {
     let request = ComponentRequest::new(entry.id, entry.name, DeviceId::new(0), pins);
     assert!(registry.instantiate(&request).is_err());
     assert!(!registry.is_solver_backed(entry.id));
+}
+
+#[test]
+fn mct_uses_zero_turn_off_threshold() {
+    let entry = catalog()
+        .iter()
+        .find(|entry| entry.id == "protection.thyristor.mct")
+        .expect("mct");
+    let parameters = entry.default_parameters();
+    assert_eq!(parameters.get("vgt_off"), Some(&0.0));
+}
+
+#[test]
+fn put_thyristor_maps_to_put_model() {
+    let entry = catalog()
+        .iter()
+        .find(|entry| entry.id == "protection.thyristor.put_thyristor")
+        .expect("put");
+    assert_eq!(entry.device, Some(sim_core::DeviceKind::Put));
+    assert_eq!(entry.parameter, "vd");
 }

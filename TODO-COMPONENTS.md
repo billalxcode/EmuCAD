@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 239 entri dapat
-diinstansiasi lewat registry, dan 261 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 247 entri dapat
+diinstansiasi lewat registry, dan 253 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 239 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 247 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 239 | dapat masuk netlist lewat registry |
+| mapped | 247 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 239 `mapped` bukan 239 model yang benar. Audit menemukan
+Peringatan: 247 `mapped` bukan 247 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -177,7 +177,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C3-09 | 15 | 15 | 9 single layak; 2 dual dan 2 four-terminal salah pin; 2 depletion salah vto. |
 | C3-10 | 8 | 8 | IGBT memakai model IGBT; GaN dan SiC memakai JFET atau MOSFET generik; verifikasi batch belum. |
 | C3-11 | 4 | 4 | MESFET dan HEMT memakai JFET; UJT dan PUT memakai model unijunction; verifikasi batch belum. |
-| C4-01 | 8 | 0 | Belum ada model thyristor. |
+| C4-01 | 8 | 8 | Model thyristor behavioral; PUT thyristor memakai model PUT; verifikasi batch belum. |
 | C4-02 | 6 | 6 | Fuse atau varistor; TVS memakai clamp varistor; verifikasi batch belum. |
 | C4-03 | 4 | 4 | Circuit breaker memakai fuse; spark gap, crowbar, surge arrester memakai varistor. |
 | C4-04 | 8 | 8 | 5 SPST-like layak; SPDT, DPST, DPDT 2 pin dan tidak bisa changeover. |
@@ -291,7 +291,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 915 test workspace lulus pada audit ini.
+- 928 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -386,7 +386,10 @@ Target: 95 entri.
 
 Target: 43 entri.
 
-- [ ] C4-01 SCR, TRIAC, DIAC, GTO 8 entri.
+- [~] C4-01 SCR, TRIAC, DIAC, GTO 8 entri.
+  - SCR/LASCR, TRIAC, DIAC, GTO/MCT, dan SCS sudah solver-backed.
+  - PUT thyristor memakai model PUT.
+  - Reference vector dan verified belum.
 - [~] C4-02 Fuse, PTC, TVS, varistor 6 entri.
   - Fuse dan varistor sudah solver-backed.
   - Reference vector dan verified belum.

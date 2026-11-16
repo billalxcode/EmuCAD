@@ -647,3 +647,200 @@ fn put_triggers_above_gate_voltage() {
     assert!(on_anode < 1.5, "on={on_anode}");
     assert!(off_anode > 3.5, "off={off_anode}");
 }
+
+const SCR_VALUES: &[(&str, f64)] = &[
+    ("vgt", 2.0),
+    ("holding_current", 0.01),
+    ("ron", 1.0),
+    ("vd", 0.7),
+    ("leakage", 1e-9),
+];
+
+const TRIAC_VALUES: &[(&str, f64)] = &[
+    ("vgt", 5.0),
+    ("holding_current", 0.01),
+    ("ron", 1.0),
+    ("vd", 1.0),
+    ("leakage", 1e-9),
+];
+
+const DIAC_VALUES: &[(&str, f64)] = &[
+    ("vbo", 30.0),
+    ("holding_current", 0.01),
+    ("ron", 10.0),
+    ("vd", 1.0),
+    ("leakage", 1e-9),
+];
+
+const SCS_VALUES: &[(&str, f64)] = &[
+    ("vgt", 5.0),
+    ("vgt_off", 1.0),
+    ("holding_current", 0.01),
+    ("ron", 1.0),
+    ("vd", 0.7),
+    ("leakage", 1e-9),
+];
+
+fn add_thyristor(
+    builder: &mut CircuitBuilder,
+    kind: DeviceKind,
+    pins: Vec<NodeId>,
+    values: &[(&str, f64)],
+) {
+    builder
+        .device("Q1", kind, pins, params(values))
+        .expect("Q1");
+}
+
+fn scr_circuit(gate_voltage: f64) -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let supply = builder.node("vcc").expect("node");
+    let anode = builder.node("anode").expect("node");
+    let gate = builder.node("gate").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", supply, ground, 10.0);
+    add_input(&mut builder, "V2", gate, ground, gate_voltage);
+    add_load(&mut builder, "R1", supply, anode);
+    add_thyristor(
+        &mut builder,
+        DeviceKind::Scr,
+        vec![anode, gate, ground],
+        SCR_VALUES,
+    );
+    builder.build().expect("circuit")
+}
+
+#[test]
+fn scr_latches_on_gate_drive() {
+    let on = solve(&scr_circuit(3.0));
+    let off = solve(&scr_circuit(0.0));
+    let on_anode = on.solution.voltage(NodeId::new(2)).expect("on anode");
+    let off_anode = off.solution.voltage(NodeId::new(2)).expect("off anode");
+    assert!(on_anode < 1.5, "on={on_anode}");
+    assert!(off_anode > 9.0, "off={off_anode}");
+}
+
+fn triac_circuit(gate_voltage: f64) -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let supply = builder.node("vcc").expect("node");
+    let mt2 = builder.node("mt2").expect("node");
+    let gate = builder.node("gate").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", supply, ground, 10.0);
+    add_input(&mut builder, "V2", gate, ground, gate_voltage);
+    add_load(&mut builder, "R1", supply, mt2);
+    add_thyristor(
+        &mut builder,
+        DeviceKind::Triac,
+        vec![mt2, gate, ground],
+        TRIAC_VALUES,
+    );
+    builder.build().expect("circuit")
+}
+
+#[test]
+fn triac_latches_on_either_gate_polarity() {
+    let positive = solve(&triac_circuit(6.0));
+    let negative = solve(&triac_circuit(-6.0));
+    let off = solve(&triac_circuit(0.0));
+    let positive_mt2 = positive.solution.voltage(NodeId::new(2)).expect("positive");
+    let negative_mt2 = negative.solution.voltage(NodeId::new(2)).expect("negative");
+    let off_mt2 = off.solution.voltage(NodeId::new(2)).expect("off");
+    assert!(positive_mt2 < 1.5, "positive={positive_mt2}");
+    assert!(negative_mt2 < 1.5, "negative={negative_mt2}");
+    assert!(off_mt2 > 9.0, "off={off_mt2}");
+}
+
+fn diac_circuit(supply_voltage: f64) -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let supply = builder.node("vcc").expect("node");
+    let first = builder.node("a1").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", supply, ground, supply_voltage);
+    add_load(&mut builder, "R1", supply, first);
+    add_thyristor(
+        &mut builder,
+        DeviceKind::Diac,
+        vec![first, ground],
+        DIAC_VALUES,
+    );
+    builder.build().expect("circuit")
+}
+
+#[test]
+fn diac_breaks_over_above_threshold() {
+    let on = solve(&diac_circuit(40.0));
+    let off = solve(&diac_circuit(20.0));
+    let on_a1 = on.solution.voltage(NodeId::new(2)).expect("on");
+    let off_a1 = off.solution.voltage(NodeId::new(2)).expect("off");
+    assert!(on_a1 < 10.0, "on={on_a1}");
+    assert!(off_a1 > 15.0, "off={off_a1}");
+}
+
+fn gto_circuit(gate_voltage: f64, turn_off: f64) -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let supply = builder.node("vcc").expect("node");
+    let anode = builder.node("anode").expect("node");
+    let gate = builder.node("gate").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", supply, ground, 10.0);
+    add_input(&mut builder, "V2", gate, ground, gate_voltage);
+    add_load(&mut builder, "R1", supply, anode);
+    add_gto(&mut builder, vec![anode, gate, ground], turn_off);
+    builder.build().expect("circuit")
+}
+
+fn add_gto(builder: &mut CircuitBuilder, pins: Vec<NodeId>, turn_off: f64) {
+    let values = [
+        ("vgt", 5.0),
+        ("vgt_off", turn_off),
+        ("holding_current", 0.01),
+        ("ron", 1.0),
+        ("vd", 0.7),
+        ("leakage", 1e-9),
+    ];
+    add_thyristor(builder, DeviceKind::Gto, pins, &values);
+}
+
+#[test]
+fn gto_and_mct_switch_with_gate() {
+    let gto_on = solve(&gto_circuit(6.0, -5.0));
+    let mct_on = solve(&gto_circuit(6.0, 0.0));
+    let mct_off = solve(&gto_circuit(0.0, 0.0));
+    let gto_anode = gto_on.solution.voltage(NodeId::new(2)).expect("gto");
+    let mct_anode = mct_on.solution.voltage(NodeId::new(2)).expect("mct");
+    let mct_off_anode = mct_off.solution.voltage(NodeId::new(2)).expect("mct off");
+    assert!(gto_anode < 1.5, "gto={gto_anode}");
+    assert!(mct_anode < 1.5, "mct={mct_anode}");
+    assert!(mct_off_anode > 9.0, "mct_off={mct_off_anode}");
+}
+
+fn scs_circuit(gate_voltage: f64) -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let supply = builder.node("vcc").expect("node");
+    let anode = builder.node("anode").expect("node");
+    let anode_gate = builder.node("ag").expect("node");
+    let cathode_gate = builder.node("cg").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", supply, ground, 10.0);
+    add_input(&mut builder, "V2", cathode_gate, ground, gate_voltage);
+    add_input(&mut builder, "V3", anode_gate, ground, 0.0);
+    add_load(&mut builder, "R1", supply, anode);
+    add_thyristor(
+        &mut builder,
+        DeviceKind::Scs,
+        vec![anode, anode_gate, cathode_gate, ground],
+        SCS_VALUES,
+    );
+    builder.build().expect("circuit")
+}
+
+#[test]
+fn scs_latches_on_cathode_gate() {
+    let on = solve(&scs_circuit(6.0));
+    let off = solve(&scs_circuit(0.0));
+    let on_anode = on.solution.voltage(NodeId::new(2)).expect("on");
+    let off_anode = off.solution.voltage(NodeId::new(2)).expect("off");
+    assert!(on_anode < 1.5, "on={on_anode}");
+    assert!(off_anode > 9.0, "off={off_anode}");
+}

@@ -141,6 +141,11 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::Igbt
             | DeviceKind::Ujt
             | DeviceKind::Put
+            | DeviceKind::Scr
+            | DeviceKind::Triac
+            | DeviceKind::Diac
+            | DeviceKind::Gto
+            | DeviceKind::Scs
     )
 }
 

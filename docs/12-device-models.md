@@ -3,7 +3,7 @@
 Katalog device yang tersedia di `sim-device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 119.
+dan transmission line sudah diimplementasikan. Total test `sim-device`: 127.
 
 ---
 
@@ -87,6 +87,11 @@ pub fn model_from_instance(
 | IGBT | 3 | Behavioral channel dan body diode | - |
 | UJT | 3 | Latching unijunction | - |
 | PUT | 3 | Programmable unijunction | - |
+| SCR | 3 | Latching thyristor dengan gate | - |
+| TRIAC | 3 | Latching thyristor dua arah | - |
+| DIAC | 2 | Breakover switch dua arah | - |
+| GTO | 3 | Thyristor dengan gate turn-off | - |
+| SCS | 4 | Latching switch dengan dua gate | - |
 | VCVS | 4 | Linear gain | [47](47-controlled-sources.md) |
 | VCCS | 4 | Linear transconductance | [47](47-controlled-sources.md) |
 | CCCS | 4 | Linear current gain | [48](48-cccs-switch.md) |
@@ -333,8 +338,9 @@ Test device mencakup:
 - Crystal BVD.
 - IGBT channel dan body diode.
 - UJT dan PUT latching.
+- SCR, TRIAC, DIAC, GTO, dan SCS latching.
 
-Total test `sim-device`: 114 unit + 5 integration = 119.
+Total test `sim-device`: 122 unit + 5 integration = 127.
 
 ---
 

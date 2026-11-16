@@ -223,6 +223,7 @@ impl ModelClass {
                 | Self::AnalogSwitch
                 | Self::Protection
                 | Self::OtherTransistor
+                | Self::Thyristor
         )
     }
 
