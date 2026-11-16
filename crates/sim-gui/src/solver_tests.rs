@@ -489,3 +489,161 @@ fn fuse_opens_after_sustained_overcurrent() {
     assert!(early > 1.0, "early={early}");
     assert!(late.abs() < 1e-6, "late={late}");
 }
+
+fn igbt_params(body_is: f64) -> BTreeMap<String, f64> {
+    params(&[
+        ("vth", 5.0),
+        ("kp", 1.0),
+        ("lambda", 0.01),
+        ("vce_sat", 0.5),
+        ("is", body_is),
+        ("n", 1.0),
+        ("rs", 0.01),
+    ])
+}
+
+fn add_igbt(
+    builder: &mut CircuitBuilder,
+    collector: NodeId,
+    gate: NodeId,
+    emitter: NodeId,
+    body_is: f64,
+) {
+    builder
+        .device(
+            "Q1",
+            DeviceKind::Igbt,
+            vec![collector, gate, emitter],
+            igbt_params(body_is),
+        )
+        .expect("Q1");
+}
+
+fn igbt_switch(gate_voltage: f64) -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let supply = builder.node("vcc").expect("node");
+    let collector = builder.node("collector").expect("node");
+    let gate = builder.node("gate").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", supply, ground, 10.0);
+    add_input(&mut builder, "V2", gate, ground, gate_voltage);
+    add_load(&mut builder, "R1", supply, collector);
+    add_igbt(&mut builder, collector, gate, ground, 1e-12);
+    builder.build().expect("circuit")
+}
+
+#[test]
+fn igbt_switches_with_gate_voltage() {
+    let on = solve(&igbt_switch(10.0));
+    let off = solve(&igbt_switch(0.0));
+    assert_low(&on, NodeId::new(2));
+    assert_high(&off, NodeId::new(2));
+}
+
+fn igbt_body_diode() -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let emitter = builder.node("emitter").expect("node");
+    let collector = builder.node("collector").expect("node");
+    let gate = builder.node("gate").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", emitter, ground, 5.0);
+    add_input(&mut builder, "V2", gate, ground, 0.0);
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![collector, ground],
+            params(&[("resistance", 100.0)]),
+        )
+        .expect("R1");
+    add_igbt(&mut builder, collector, gate, emitter, 1e-6);
+    builder.build().expect("circuit")
+}
+
+#[test]
+fn igbt_body_diode_conducts_in_reverse() {
+    let result = solve(&igbt_body_diode());
+    let collector = result.solution.voltage(NodeId::new(2)).expect("collector");
+    assert!(collector > 3.5, "collector={collector}");
+}
+
+fn ujt_circuit(emitter_voltage: f64) -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let base2 = builder.node("b2").expect("node");
+    let source = builder.node("e_source").expect("node");
+    let emitter = builder.node("emitter").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", base2, ground, 10.0);
+    add_input(&mut builder, "V2", source, ground, emitter_voltage);
+    add_load(&mut builder, "R1", source, emitter);
+    add_ujt(&mut builder, ground, base2, emitter);
+    builder.build().expect("circuit")
+}
+
+fn add_ujt(builder: &mut CircuitBuilder, base1: NodeId, base2: NodeId, emitter: NodeId) {
+    builder
+        .device(
+            "Q1",
+            DeviceKind::Ujt,
+            vec![base1, base2, emitter],
+            params(&[
+                ("rb", 5000.0),
+                ("eta", 0.6),
+                ("vd", 0.7),
+                ("ron", 10.0),
+                ("iv", 1e-3),
+                ("leakage", 1e-9),
+            ]),
+        )
+        .expect("Q1");
+}
+
+#[test]
+fn ujt_triggers_above_standoff_voltage() {
+    let on = solve(&ujt_circuit(8.0));
+    let off = solve(&ujt_circuit(5.0));
+    let on_emitter = on.solution.voltage(NodeId::new(3)).expect("on emitter");
+    let off_emitter = off.solution.voltage(NodeId::new(3)).expect("off emitter");
+    assert!(on_emitter < 1.5, "on={on_emitter}");
+    assert!(off_emitter > 4.5, "off={off_emitter}");
+}
+
+fn put_circuit(anode_voltage: f64) -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let gate = builder.node("gate").expect("node");
+    let source = builder.node("a_source").expect("node");
+    let anode = builder.node("anode").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", gate, ground, 5.0);
+    add_input(&mut builder, "V2", source, ground, anode_voltage);
+    add_load(&mut builder, "R1", source, anode);
+    add_put(&mut builder, anode, gate, ground);
+    builder.build().expect("circuit")
+}
+
+fn add_put(builder: &mut CircuitBuilder, anode: NodeId, gate: NodeId, cathode: NodeId) {
+    builder
+        .device(
+            "Q1",
+            DeviceKind::Put,
+            vec![anode, gate, cathode],
+            params(&[
+                ("rg", 1e6),
+                ("vd", 0.7),
+                ("ron", 10.0),
+                ("iv", 1e-3),
+                ("leakage", 1e-9),
+            ]),
+        )
+        .expect("Q1");
+}
+
+#[test]
+fn put_triggers_above_gate_voltage() {
+    let on = solve(&put_circuit(8.0));
+    let off = solve(&put_circuit(4.0));
+    let on_anode = on.solution.voltage(NodeId::new(3)).expect("on anode");
+    let off_anode = off.solution.voltage(NodeId::new(3)).expect("off anode");
+    assert!(on_anode < 1.5, "on={on_anode}");
+    assert!(off_anode > 3.5, "off={off_anode}");
+}

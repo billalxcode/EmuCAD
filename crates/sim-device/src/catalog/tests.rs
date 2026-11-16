@@ -142,6 +142,9 @@ fn supported_passive(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::Transformer
             | sim_core::DeviceKind::Varistor
             | sim_core::DeviceKind::Fuse
+            | sim_core::DeviceKind::Igbt
+            | sim_core::DeviceKind::Ujt
+            | sim_core::DeviceKind::Put
     )
 }
 

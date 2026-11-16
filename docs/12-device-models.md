@@ -3,7 +3,7 @@
 Katalog device yang tersedia di `sim-device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 113.
+dan transmission line sudah diimplementasikan. Total test `sim-device`: 119.
 
 ---
 
@@ -84,6 +84,9 @@ pub fn model_from_instance(
 | Fuse | 2 | Overcurrent heat integration | - |
 | Transformer | 4 | Mutual inductance, winding resistance | - |
 | Crystal | 2 | BVD series RLC dan C0 | - |
+| IGBT | 3 | Behavioral channel dan body diode | - |
+| UJT | 3 | Latching unijunction | - |
+| PUT | 3 | Programmable unijunction | - |
 | VCVS | 4 | Linear gain | [47](47-controlled-sources.md) |
 | VCCS | 4 | Linear transconductance | [47](47-controlled-sources.md) |
 | CCCS | 4 | Linear current gain | [48](48-cccs-switch.md) |
@@ -328,8 +331,10 @@ Test device mencakup:
 - Transmission line.
 - Transformer mutual inductance.
 - Crystal BVD.
+- IGBT channel dan body diode.
+- UJT dan PUT latching.
 
-Total test `sim-device`: 104 unit + 5 integration = 109.
+Total test `sim-device`: 114 unit + 5 integration = 119.
 
 ---
 

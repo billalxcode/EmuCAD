@@ -23,16 +23,6 @@ diode.bridge.diode_bridge,diode,DiodeArray,compact-analog,diode array compositio
 diode.bridge.dual_diode,diode,DiodeArray,compact-analog,diode array composition,S5-1,P1
 diode.bridge.diode_array,diode,DiodeArray,compact-analog,diode array composition,S5-1,P1
 diode.bridge.schottky_bridge,diode,DiodeArray,compact-analog,diode array composition,S5-1,P1
-transistor.power_semiconductor.igbt,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
-transistor.power_semiconductor.igbt_with_diode,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
-transistor.power_semiconductor.gan_hemt,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
-transistor.power_semiconductor.sic_mosfet,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
-transistor.power_semiconductor.sic_schottky_fet,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
-transistor.power_semiconductor.cascode_gan,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
-transistor.other.ujt,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
-transistor.other.put,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
-transistor.other.mesfet,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
-transistor.other.hemt,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
 protection.thyristor.scr,protection,Thyristor,compact-analog,protection compact model,S5-1,P1
 protection.thyristor.triac,protection,Thyristor,compact-analog,protection compact model,S5-1,P1
 protection.thyristor.diac,protection,Thyristor,compact-analog,protection compact model,S5-1,P1

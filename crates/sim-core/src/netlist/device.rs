@@ -63,6 +63,12 @@ pub enum DeviceKind {
     Varistor,
     /// A current-triggered fuse or breaker.
     Fuse,
+    /// An insulated-gate bipolar transistor.
+    Igbt,
+    /// A unijunction transistor.
+    Ujt,
+    /// A programmable unijunction transistor.
+    Put,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -129,6 +135,9 @@ impl DeviceKind {
             Self::Transformer => "transformer",
             Self::Varistor => "varistor",
             Self::Fuse => "fuse",
+            Self::Igbt => "igbt",
+            Self::Ujt => "ujt",
+            Self::Put => "put",
             Self::Diode => "diode",
             _ => "custom",
         }

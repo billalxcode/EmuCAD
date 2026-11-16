@@ -8,6 +8,7 @@ mod comparator;
 mod controlled;
 mod crystal;
 mod diode;
+mod igbt;
 mod jfet;
 mod logic;
 mod model;
@@ -21,6 +22,7 @@ mod source;
 mod switch;
 mod transformer;
 mod transmission;
+mod unijunction;
 
 pub use bjt::{BjtModel, bjt_capacitances};
 pub use catalog::{
@@ -32,6 +34,7 @@ pub use comparator::ComparatorModel;
 pub use controlled::{CccsModel, CcvsModel, VccsModel, VcvsModel};
 pub use crystal::CrystalModel;
 pub use diode::{DiodeModel, diode_capacitance};
+pub use igbt::IgbtModel;
 pub use jfet::{JfetModel, jfet_capacitances};
 pub use logic::LogicGateModel;
 pub use model::{DeviceModel, IntegrationMethod, model_from_instance};
@@ -45,3 +48,4 @@ pub use source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
 pub use switch::{IdealSwitchModel, SwitchModel};
 pub use transformer::TransformerModel;
 pub use transmission::TransmissionLineModel;
+pub use unijunction::{UnijunctionMode, UnijunctionModel};

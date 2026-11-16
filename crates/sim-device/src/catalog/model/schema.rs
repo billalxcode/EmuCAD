@@ -172,6 +172,33 @@ const FUSE: &[ParameterSpec] = &[
     ParameterSpec::boolean("reset", false),
 ];
 
+const IGBT: &[ParameterSpec] = &[
+    ParameterSpec::number("vth", "V", 5.0, -1e6, 1e6),
+    ParameterSpec::number("kp", "A/V^2", 1.0, 1e-15, 1e9),
+    ParameterSpec::number("lambda", "1/V", 0.01, 0.0, 1e6),
+    ParameterSpec::number("vce_sat", "V", 0.5, 1e-9, 1e6),
+    ParameterSpec::number("is", "A", 1e-6, 1e-30, 1e6),
+    ParameterSpec::number("n", "ratio", 1.0, 1e-6, 1e3),
+    ParameterSpec::number("rs", "ohm", 0.01, 0.0, 1e12),
+];
+
+const UJT: &[ParameterSpec] = &[
+    ParameterSpec::number("rb", "ohm", 5000.0, 1e-9, 1e12),
+    ParameterSpec::number("eta", "ratio", 0.6, 0.0, 0.999),
+    ParameterSpec::number("vd", "V", 0.7, 0.0, 1e6),
+    ParameterSpec::number("ron", "ohm", 10.0, 1e-9, 1e12),
+    ParameterSpec::number("iv", "A", 1e-3, 0.0, 1e6),
+    ParameterSpec::number("leakage", "S", 1e-9, 0.0, 1e9),
+];
+
+const PUT: &[ParameterSpec] = &[
+    ParameterSpec::number("rg", "ohm", 1e6, 1e-9, 1e15),
+    ParameterSpec::number("vd", "V", 0.7, 0.0, 1e6),
+    ParameterSpec::number("ron", "ohm", 10.0, 1e-9, 1e12),
+    ParameterSpec::number("iv", "A", 1e-3, 0.0, 1e6),
+    ParameterSpec::number("leakage", "S", 1e-9, 0.0, 1e9),
+];
+
 const SWITCH: &[ParameterSpec] = &[
     ParameterSpec::number("vth", "V", 2.5, -1e6, 1e6),
     ParameterSpec::number("ron", "ohm", 1.0, 1e-12, 1e12),
@@ -262,6 +289,9 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::Relay => RELAY,
         DeviceKind::Varistor => VARISTOR,
         DeviceKind::Fuse => FUSE,
+        DeviceKind::Igbt => IGBT,
+        DeviceKind::Ujt => UJT,
+        DeviceKind::Put => PUT,
         _ => &[],
     }
 }
@@ -309,6 +339,9 @@ mod tests {
         DeviceKind::LogicGate,
         DeviceKind::Varistor,
         DeviceKind::Fuse,
+        DeviceKind::Igbt,
+        DeviceKind::Ujt,
+        DeviceKind::Put,
     ];
 
     #[test]

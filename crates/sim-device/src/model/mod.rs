@@ -5,6 +5,7 @@ use crate::comparator::ComparatorModel;
 use crate::controlled::{CccsModel, CcvsModel, VccsModel, VcvsModel};
 use crate::crystal::CrystalModel;
 use crate::diode::DiodeModel;
+use crate::igbt::IgbtModel;
 use crate::jfet::JfetModel;
 use crate::logic::LogicGateModel;
 use crate::mosfet::MosfetModel;
@@ -17,6 +18,7 @@ use crate::source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
 use crate::switch::{IdealSwitchModel, SwitchModel};
 use crate::transformer::TransformerModel;
 use crate::transmission::TransmissionLineModel;
+use crate::unijunction::UnijunctionModel;
 use sim_core::{
     BOLTZMANN, Device, DeviceId, DeviceInstance, DeviceKind, ELEMENTARY_CHARGE, MnaContext,
     NOMINAL_TEMPERATURE, NodeId, SimError, Solution,
@@ -114,6 +116,8 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         DeviceKind::Nmos | DeviceKind::Pmos => Box::new(MosfetModel::from_instance(instance)?),
         DeviceKind::Npn | DeviceKind::Pnp => Box::new(BjtModel::from_instance(instance)?),
         DeviceKind::JfetN | DeviceKind::JfetP => Box::new(JfetModel::from_instance(instance)?),
+        DeviceKind::Igbt => Box::new(IgbtModel::from_instance(instance)?),
+        DeviceKind::Ujt | DeviceKind::Put => Box::new(UnijunctionModel::from_instance(instance)?),
         DeviceKind::OpAmp => Box::new(OpAmpModel::from_instance(instance)?),
         DeviceKind::Comparator => Box::new(ComparatorModel::from_instance(instance)?),
         DeviceKind::Regulator => Box::new(RegulatorModel::from_instance(instance)?),

@@ -212,12 +212,23 @@ add("transistor.mosfet_p", "Mosfet", "Pmos", 3, "threshold", -2.0, "V", [
 add("transistor.power", "Mosfet", "Nmos", 3, "threshold", 2.0, "V", [
     ("power N MOSFET", "Nmos"), ("power P MOSFET", "Pmos"),
 ])
-add("transistor.power_semiconductor", "OtherTransistor", None, 3, "threshold", 5.0, "V", [
-    "IGBT", "IGBT with diode", "GaN HEMT", "SiC MOSFET",
-    "SiC Schottky FET", "cascode GaN",
+add("transistor.power_semiconductor", "OtherTransistor", "Igbt", 3, "vth", 5.0, "V", [
+    "IGBT", "IGBT with diode",
 ])
-add("transistor.other", "OtherTransistor", None, 3, "gain", 10.0, "ratio", [
-    "UJT", "PUT", "MESFET", "HEMT",
+add("transistor.power_semiconductor", "OtherTransistor", "JfetN", 3, "vto", -2.0, "V", [
+    "GaN HEMT", "SiC Schottky FET",
+])
+add("transistor.power_semiconductor", "OtherTransistor", "Nmos", 3, "vto", 2.0, "V", [
+    "SiC MOSFET", "cascode GaN",
+])
+add("transistor.other", "OtherTransistor", "JfetN", 3, "vto", -2.0, "V", [
+    "MESFET", "HEMT",
+])
+add("transistor.other", "OtherTransistor", "Ujt", 3, "eta", 0.6, "ratio", [
+    "UJT",
+])
+add("transistor.other", "OtherTransistor", "Put", 3, "vd", 0.7, "V", [
+    "PUT",
 ])
 
 add("protection.thyristor", "Thyristor", None, 3, "holding_current", 0.01, "A", [

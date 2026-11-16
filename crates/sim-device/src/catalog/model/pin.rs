@@ -13,6 +13,8 @@ pub enum PinRole {
     Cathode,
     Collector,
     Base,
+    Base1,
+    Base2,
     Emitter,
     Gate,
     Drain,
@@ -56,6 +58,8 @@ impl PinRole {
             Self::Cathode => "cathode",
             Self::Collector => "collector",
             Self::Base => "base",
+            Self::Base1 => "base 1",
+            Self::Base2 => "base 2",
             Self::Emitter => "emitter",
             Self::Gate => "gate",
             Self::Drain => "drain",
@@ -99,6 +103,9 @@ const CONTROLLED: &[PinRole] = &[
 const DIODE: &[PinRole] = &[PinRole::Anode, PinRole::Cathode];
 const BJT: &[PinRole] = &[PinRole::Collector, PinRole::Base, PinRole::Emitter];
 const JFET: &[PinRole] = &[PinRole::Drain, PinRole::Gate, PinRole::Source];
+const IGBT: &[PinRole] = &[PinRole::Collector, PinRole::Gate, PinRole::Emitter];
+const UJT: &[PinRole] = &[PinRole::Base1, PinRole::Base2, PinRole::Emitter];
+const PUT: &[PinRole] = &[PinRole::Anode, PinRole::Gate, PinRole::Cathode];
 const MOSFET: &[PinRole] = &[PinRole::Gate, PinRole::Drain, PinRole::Source];
 const SWITCH: &[PinRole] = &[
     PinRole::SwitchA,
@@ -187,6 +194,9 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         DeviceKind::Npn | DeviceKind::Pnp => BJT,
         DeviceKind::JfetN | DeviceKind::JfetP => JFET,
         DeviceKind::Nmos | DeviceKind::Pmos => MOSFET,
+        DeviceKind::Igbt => IGBT,
+        DeviceKind::Ujt => UJT,
+        DeviceKind::Put => PUT,
         DeviceKind::Switch => SWITCH,
         DeviceKind::IdealSwitch | DeviceKind::Fuse | DeviceKind::Varistor => TWO_TERMINAL,
         DeviceKind::Relay => RELAY,
