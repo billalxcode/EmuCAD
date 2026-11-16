@@ -226,3 +226,55 @@ fn open_restores_analysis_state() {
     assert_eq!(app.transient_settings, state.transient);
     let _ = std::fs::remove_dir_all(dir);
 }
+
+fn sample_trace() -> crate::transient::TransientTrace {
+    let mut trace = crate::transient::TransientTrace::empty(crate::transient::TraceMetadata {
+        nodes: vec!["0".to_string(), "out".to_string()],
+        devices: vec![crate::transient::TransientDevice {
+            label: "R1".to_string(),
+            part: "passive.resistor.ideal_resistor".to_string(),
+        }],
+        dt: 1e-6,
+        adaptive: false,
+    });
+    trace.times = vec![1e-6, 2e-6];
+    trace.values = vec![vec![0.0, 2.5], vec![0.0, 5.0]];
+    trace.currents = vec![vec![Some(0.0025)], vec![Some(0.005)]];
+    trace
+}
+
+#[test]
+fn project_save_restores_transient() {
+    let dir = temp_dir("transient-trace");
+    let path = dir.join("project.emu.json");
+    let mut app = dirty_app(&path);
+    let trace = sample_trace();
+    app.transient = Some(trace.clone());
+    app.save_project_now();
+    let json = path.with_file_name("project.emu.json.transient.json");
+    let bin = path.with_file_name("project.emu.json.transient.bin");
+    assert!(json.exists());
+    assert!(bin.exists());
+    let mut loaded = GuiApp {
+        library: crate::library::builtin(),
+        ..GuiApp::default()
+    };
+    loaded.open_path(path);
+    assert_eq!(loaded.transient, Some(trace));
+    let _ = std::fs::remove_dir_all(dir);
+}
+
+#[test]
+fn project_save_removes_stale_transient() {
+    let dir = temp_dir("stale-transient");
+    let path = dir.join("project.emu.json");
+    let mut app = dirty_app(&path);
+    app.transient = Some(sample_trace());
+    app.save_project_now();
+    let json = path.with_file_name("project.emu.json.transient.json");
+    assert!(json.exists());
+    app.transient = None;
+    app.save_project_now();
+    assert!(!json.exists());
+    let _ = std::fs::remove_dir_all(dir);
+}

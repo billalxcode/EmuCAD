@@ -19,6 +19,7 @@ impl GuiApp {
         match persist::load(&path, self.library) {
             Ok(project) => {
                 self.apply_project(project, path.clone());
+                self.load_transient(&path);
                 self.remember_recent(&path);
             }
             Err(error) => self.message = error,
@@ -47,7 +48,13 @@ impl GuiApp {
             self.grid_visible,
             self.analysis_state(),
         ) {
-            Ok(()) => self.after_save(path),
+            Ok(()) => {
+                let warning = self.store_transient(&path);
+                self.after_save(path);
+                if let Some(error) = warning {
+                    self.message = format!("Saved; transient: {error}");
+                }
+            }
             Err(error) => self.message = error,
         }
     }
@@ -169,7 +176,13 @@ impl GuiApp {
             self.grid_visible,
             self.analysis_state(),
         ) {
-            Ok(()) => self.finish_autosave(&path),
+            Ok(()) => {
+                let warning = self.store_transient(&path);
+                self.finish_autosave(&path);
+                if let Some(error) = warning {
+                    self.message = format!("Autosaved; transient: {error}");
+                }
+            }
             Err(error) => self.fail_autosave(now, error),
         }
     }
@@ -248,6 +261,27 @@ impl GuiApp {
 
     pub(super) fn watch_target(&self) -> Option<(PathBuf, FileStamp)> {
         Some((self.current_path.clone()?, self.file_stamp?))
+    }
+
+    fn store_transient(&self, path: &Path) -> Option<String> {
+        let Some(trace) = self.transient.as_ref() else {
+            crate::transient::remove(path);
+            return None;
+        };
+        crate::transient::save(path, trace).err()
+    }
+
+    fn load_transient(&mut self, path: &Path) {
+        match crate::transient::load(path) {
+            Ok(Some(trace)) => {
+                self.transient_selected = super::view::default_transient_selection(&trace);
+                self.transient_selected_currents.clear();
+                self.transient = Some(trace);
+                self.message = "Loaded with transient".to_string();
+            }
+            Ok(None) => self.transient = None,
+            Err(error) => self.message = format!("Loaded; transient: {error}"),
+        }
     }
 
     pub(super) fn apply_project(&mut self, project: persist::Project, path: PathBuf) {

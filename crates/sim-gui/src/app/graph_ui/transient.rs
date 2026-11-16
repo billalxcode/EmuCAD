@@ -659,7 +659,7 @@ mod tests {
         let mut trace = trace();
         trace.devices = vec![crate::transient::TransientDevice {
             label: "R1".to_string(),
-            part: "passive.resistor.ideal_resistor",
+            part: "passive.resistor.ideal_resistor".to_string(),
         }];
         trace.currents = vec![vec![Some(0.0025)]; 100];
         trace

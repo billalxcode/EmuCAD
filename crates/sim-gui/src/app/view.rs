@@ -433,7 +433,7 @@ impl GuiApp {
     }
 }
 
-fn default_transient_selection(trace: &TransientTrace) -> BTreeSet<usize> {
+pub(super) fn default_transient_selection(trace: &TransientTrace) -> BTreeSet<usize> {
     trace
         .nodes
         .iter()

@@ -49,7 +49,7 @@ impl Default for TransientSettings {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct TransientDevice {
     pub label: String,
-    pub part: &'static str,
+    pub part: String,
 }
 
 /// Metadata needed to build an incremental transient trace.
@@ -272,7 +272,7 @@ fn devices(netlist: &Netlist) -> Vec<TransientDevice> {
         .iter()
         .map(|part| TransientDevice {
             label: part.label.clone(),
-            part: part.part,
+            part: part.part.to_string(),
         })
         .collect()
 }
@@ -290,5 +290,7 @@ fn node_values(solution: &Solution, count: usize) -> Vec<f64> {
         .collect()
 }
 
+mod persist;
+pub(crate) use persist::{load, remove, save};
 #[cfg(test)]
 mod tests;

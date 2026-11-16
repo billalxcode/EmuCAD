@@ -381,7 +381,10 @@ simulasi dengan sumber gate-level yang dapat diaudit.
 - [~] S8-06 Perbarui docs, README, dan TODO.
   - Fidelity, benchmark, dan batas real-time sudah diperbarui.
   - Dokumentasi per keluarga behavioral belum lengkap.
-- [ ] S8-07 Simpan hasil transient di JSON + file biner.
+- [x] S8-07 Simpan hasil transient di JSON + file biner.
+  - Metadata JSON dan sampel biner ditulis sebagai sidecar proyek.
+  - Trace dipulihkan saat proyek dibuka; sidecar lama dihapus saat
+    hasil baru tidak ada.
 - [ ] S8-08 Jalankan fmt, clippy, test, ASCII, package, dan CI ngspice.
 
 **Acceptance S8:** semua test lulus, hasil dapat direproduksi, dan
