@@ -129,3 +129,6 @@ pub use schema::{ParameterKind, ParameterSpec, device_parameters};
 
 mod pin;
 pub use pin::{PinRole, device_pin_roles};
+
+mod binding;
+pub use binding::{Fidelity, SimulationBinding, simulation_binding, simulation_bindings};

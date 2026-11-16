@@ -79,6 +79,16 @@ pub(crate) fn parameter_fields(definition: &ComponentDefinition) -> Vec<Paramete
         .collect()
 }
 
+/// Returns the fidelity label for a solver-backed definition.
+pub(crate) fn fidelity_label(definition: &ComponentDefinition) -> Option<&'static str> {
+    let catalog = catalog_spec(definition)?;
+    Some(
+        sim_device::SimulationBinding::of(catalog)?
+            .fidelity()
+            .label(),
+    )
+}
+
 /// Returns catalog pin roles for a solver-backed definition.
 pub(crate) fn pin_roles(definition: &ComponentDefinition) -> &'static [PinRole] {
     let Some(catalog) = catalog_spec(definition) else {

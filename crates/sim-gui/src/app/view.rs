@@ -41,6 +41,14 @@ impl GuiApp {
     }
 
     pub(super) fn run_analysis(&mut self) {
+        if self.simulation_domain != SimulationDomain::Analog {
+            self.message = match self.simulation_domain {
+                SimulationDomain::Avr => "AVR runs from the board controls".to_string(),
+                SimulationDomain::Mixed => "Mixed simulation is not implemented".to_string(),
+                SimulationDomain::Analog => String::new(),
+            };
+            return;
+        }
         match self.analysis_kind {
             AnalysisKind::Dc => self.solve_dc(),
             AnalysisKind::Transient => self.run_transient(),
@@ -49,12 +57,14 @@ impl GuiApp {
 
     pub(super) fn analysis_state(&self) -> AnalysisState {
         AnalysisState {
+            domain: self.simulation_domain,
             kind: self.analysis_kind,
             transient: self.transient_settings,
         }
     }
 
     pub(super) fn apply_analysis_state(&mut self, state: AnalysisState) {
+        self.simulation_domain = state.domain;
         self.analysis_kind = state.kind;
         self.transient_settings = state.transient;
     }

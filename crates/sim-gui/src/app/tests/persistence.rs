@@ -199,6 +199,7 @@ fn component_parameters_round_trip() {
 
 fn analysis_state() -> crate::analysis::AnalysisState {
     crate::analysis::AnalysisState {
+        domain: crate::analysis::SimulationDomain::Avr,
         kind: crate::analysis::AnalysisKind::Transient,
         transient: crate::transient::TransientSettings {
             adaptive: true,
@@ -220,6 +221,7 @@ fn open_restores_analysis_state() {
         ..GuiApp::default()
     };
     app.open_path(path);
+    assert_eq!(app.simulation_domain, state.domain);
     assert_eq!(app.analysis_kind, state.kind);
     assert_eq!(app.transient_settings, state.transient);
     let _ = std::fs::remove_dir_all(dir);

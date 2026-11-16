@@ -411,6 +411,7 @@ mod tests {
     #[test]
     fn analysis_state_round_trips() {
         let state = AnalysisState {
+            domain: crate::analysis::SimulationDomain::Avr,
             kind: crate::analysis::AnalysisKind::Transient,
             transient: crate::transient::TransientSettings {
                 adaptive: true,

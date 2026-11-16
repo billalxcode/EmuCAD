@@ -148,6 +148,8 @@ impl GuiApp {
         let mut run = false;
         let mut open_transient = false;
         let status = self.netlist_status();
+        let previous_domain = self.simulation_domain;
+        let domain = &mut self.simulation_domain;
         let previous = self.analysis_kind;
         let kind = &mut self.analysis_kind;
         let dc = self.analog_dc.as_ref();
@@ -158,6 +160,15 @@ impl GuiApp {
             .default_size([420.0, 320.0])
             .show(ui.ctx(), |ui| {
                 ui.horizontal(|ui| {
+                    for option in [
+                        crate::analysis::SimulationDomain::Analog,
+                        crate::analysis::SimulationDomain::Avr,
+                        crate::analysis::SimulationDomain::Mixed,
+                    ] {
+                        ui.selectable_value(domain, option, option.label());
+                    }
+                });
+                ui.horizontal(|ui| {
                     ui.selectable_value(kind, crate::analysis::AnalysisKind::Dc, "DC");
                     ui.selectable_value(
                         kind,
@@ -165,7 +176,11 @@ impl GuiApp {
                         "Transient",
                     );
                 });
-                ui.label(format!("Selected: {}", kind.label()));
+                ui.label(format!(
+                    "Domain: {}  Analysis: {}",
+                    domain.label(),
+                    kind.label()
+                ));
                 ui.label(status);
                 if busy {
                     ui.label("Solving...");
@@ -180,7 +195,7 @@ impl GuiApp {
                 }
             });
         self.simulation_open = open;
-        if self.analysis_kind != previous {
+        if self.analysis_kind != previous || self.simulation_domain != previous_domain {
             self.mark_dirty();
         }
         if run {

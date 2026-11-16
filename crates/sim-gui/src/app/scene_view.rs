@@ -52,6 +52,9 @@ pub(crate) fn show_component_info(
 ) {
     ui.label(format!("{} {}", component.label, component.value));
     ui.label(format!("Type: {}", definition.name));
+    if let Some(fidelity) = crate::netlist::fidelity_label(definition) {
+        ui.label(format!("Fidelity: {fidelity}"));
+    }
     ui.label(format!(
         "Pos: {}, {}",
         component.position.x, component.position.y

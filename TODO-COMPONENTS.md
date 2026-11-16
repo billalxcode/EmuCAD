@@ -291,7 +291,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 941 test workspace lulus pada audit ini.
+- 949 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 

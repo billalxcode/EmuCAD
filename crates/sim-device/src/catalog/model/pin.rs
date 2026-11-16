@@ -10,7 +10,11 @@ pub enum PinRole {
     Positive,
     Negative,
     Anode,
+    Anode1,
+    Anode2,
     Cathode,
+    Cathode1,
+    Cathode2,
     Collector,
     Base,
     Base1,
@@ -59,7 +63,11 @@ impl PinRole {
             Self::Positive => "positive",
             Self::Negative => "negative",
             Self::Anode => "anode",
+            Self::Anode1 => "anode 1",
+            Self::Anode2 => "anode 2",
             Self::Cathode => "cathode",
+            Self::Cathode1 => "cathode 1",
+            Self::Cathode2 => "cathode 2",
             Self::Collector => "collector",
             Self::Base => "base",
             Self::Base1 => "base 1",
@@ -128,10 +136,10 @@ const DIODE_BRIDGE: &[PinRole] = &[
     PinRole::OutputNegative,
 ];
 const DUAL_DIODE: &[PinRole] = &[
-    PinRole::Anode,
-    PinRole::Cathode,
-    PinRole::Anode,
-    PinRole::Cathode,
+    PinRole::Anode1,
+    PinRole::Cathode1,
+    PinRole::Anode2,
+    PinRole::Cathode2,
 ];
 const GTO: &[PinRole] = &[PinRole::Anode, PinRole::Gate, PinRole::Cathode];
 const SCS: &[PinRole] = &[

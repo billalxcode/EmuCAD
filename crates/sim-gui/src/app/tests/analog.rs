@@ -61,3 +61,34 @@ fn render_simulation(app: &mut GuiApp) -> eframe::egui::FullOutput {
     output.textures_delta.clear();
     output
 }
+
+#[test]
+fn non_analog_domain_does_not_run_analog() {
+    let mut app = worker_app();
+    app.simulation_domain = crate::analysis::SimulationDomain::Avr;
+    app.run_analysis();
+    assert_eq!(app.message, "AVR runs from the board controls");
+    assert!(!app.analog_busy);
+}
+
+#[test]
+fn mixed_domain_is_reported_as_unimplemented() {
+    let mut app = worker_app();
+    app.simulation_domain = crate::analysis::SimulationDomain::Mixed;
+    app.run_analysis();
+    assert_eq!(app.message, "Mixed simulation is not implemented");
+}
+
+#[test]
+fn unsupported_component_panel_renders() {
+    let mut document = Document::default();
+    let mcu = crate::library::find("atmega328p").expect("mcu");
+    document.add(mcu, GridPos::new(0, 0), Rotation::Deg0, Mirror::None);
+    let mut app = GuiApp {
+        document,
+        simulation_open: true,
+        ..GuiApp::default()
+    };
+    let output = render_simulation(&mut app);
+    assert!(!output.shapes.is_empty());
+}

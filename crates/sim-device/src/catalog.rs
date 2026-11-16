@@ -9,8 +9,9 @@ mod registry;
 mod tests;
 
 pub use model::{
-    CatalogError, ComponentSpec, Family, ModelClass, ParameterKind, ParameterSpec, PinRole,
-    device_parameters, device_pin_roles,
+    CatalogError, ComponentSpec, Family, Fidelity, ModelClass, ParameterKind, ParameterSpec,
+    PinRole, SimulationBinding, device_parameters, device_pin_roles, simulation_binding,
+    simulation_bindings,
 };
 pub use records::{CatalogRecord, catalog_records, find_catalog_record};
 pub use registry::{ComponentRegistry, ComponentRequest};

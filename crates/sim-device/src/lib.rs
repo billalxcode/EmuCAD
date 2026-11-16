@@ -29,8 +29,9 @@ mod unijunction;
 pub use bjt::{BjtModel, bjt_capacitances};
 pub use catalog::{
     CatalogError, CatalogRecord, ComponentRegistry, ComponentRequest, ComponentSpec, Family,
-    ModelClass, ParameterKind, ParameterSpec, PinRole, catalog, catalog_records, device_parameters,
-    device_pin_roles, find_catalog_record,
+    Fidelity, ModelClass, ParameterKind, ParameterSpec, PinRole, SimulationBinding, catalog,
+    catalog_records, device_parameters, device_pin_roles, find_catalog_record, simulation_binding,
+    simulation_bindings,
 };
 pub use comparator::ComparatorModel;
 pub use controlled::{CccsModel, CcvsModel, VccsModel, VcvsModel};

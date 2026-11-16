@@ -401,3 +401,11 @@ fn undriven_island_is_rejected() {
         Err(NetlistError::FloatingIsland { .. })
     ));
 }
+
+#[test]
+fn fidelity_labels_follow_catalog_classes() {
+    let resistor = library::find("passive.resistor.ideal_resistor").expect("resistor");
+    let diode = library::find("diode.rectifier.rectifier_diode").expect("diode");
+    assert_eq!(super::fidelity_label(resistor), Some("ideal"));
+    assert_eq!(super::fidelity_label(diode), Some("compact"));
+}

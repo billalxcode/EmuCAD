@@ -144,24 +144,36 @@ Gerbang kelayakan sebelum implementasi besar:
   - Field name, default, unit, min, max, dan kind sudah ada.
   - Field required dan effect belum.
   - Effect test baru untuk resistor dan diode `n`.
-- [ ] S0-03 Definisikan `SimulationBinding`.
-  - Menghubungkan definition ID ke catalog ID, `DeviceKind`, role pin,
-    dan parameter default.
-- [ ] S0-04 Definisikan aturan ground.
-  - Satu net ground yang eksplisit.
-  - Deteksi ground ganda yang tidak terhubung.
-- [ ] S0-05 Definisikan aturan supply.
-  - VCC/GND symbol adalah penanda net.
-  - Sumber tegangan tetap komponen terpisah.
-- [ ] S0-06 Definisikan label fidelity.
-  - `ideal`, `compact`, `behavioral`, `calibrated`, `unsupported`.
-- [ ] S0-07 Audit 61 model class.
-  - Setiap class harus punya role pin, parameter schema, dan status
-    simulasi.
-- [ ] S0-08 Tambahkan test metadata.
-- [ ] S0-09 Benchmark core AVR gate-level pada 16 MHz di desktop.
-- [ ] S0-10 Benchmark SRAM macro gate-level.
-- [ ] S0-11 Jalankan GPIO blink gate-level dan putuskan fallback Q55.
+- [x] S0-03 Definisikan `SimulationBinding`.
+  - `SimulationBinding` menghubungkan catalog ID, `DeviceKind`, role
+    pin, schema parameter, dan label fidelity.
+  - `simulation_binding` dan `simulation_bindings` tersedia di
+    `sim-device`.
+- [x] S0-04 Definisikan aturan ground.
+  - Satu net ground eksplisit; ground ganda tidak terhubung ditolak.
+- [x] S0-05 Definisikan aturan supply.
+  - VCC/GND adalah penanda net; sumber tegangan tetap komponen.
+- [x] S0-06 Definisikan label fidelity.
+  - `Fidelity`: `ideal`, `compact`, `behavioral`, `calibrated`,
+    `unsupported`.
+  - Setiap entry solver-backed punya label; inspector menampilkannya.
+- [~] S0-07 Audit 60 model class.
+  - Audit ada di `docs/63-fidelity.md` dan
+    `docs/data/class-fidelity.csv`.
+  - Setiap class punya family, principle, role, schema, dan label.
+  - Reference vector dan status `calibrated` belum.
+- [x] S0-08 Tambahkan test metadata.
+  - Test binding, role unik, parameter utama, fidelity, dan klasifikasi.
+- [x] S0-09 Benchmark core AVR pada 16 MHz di desktop.
+  - `avr_bench` mencapai 2.1x sampai 4.8x realtime pada sampel.
+  - Core masih hybrid, bukan full-chip gate-level.
+- [x] S0-10 Benchmark memory macro gate-level.
+  - `memory_bench` mengukur register file 32x8, 32x16, dan 32x64.
+  - Hasil ada di `docs/63-fidelity.md`.
+- [~] S0-11 Jalankan GPIO blink gate-level dan putuskan fallback Q55.
+  - Program GPIO pada `avr_bench` berjalan 3.58x realtime.
+  - Memory macro gate-level jauh di atas budget siklus; fallback Q55
+    dipakai sampai model memory lebih cepat.
   - Semua definisi solver-backed punya binding.
   - Tidak ada duplicate role pada satu definition.
   - Semua parameter default valid.
@@ -193,7 +205,10 @@ yang sama dengan referensi manual.
 ## 6. Fase S2 - Integrasi Solver 251 Entri
 
 - [x] S2-01 Tambahkan dependency `sim-analysis` ke `sim-gui`.
-- [ ] S2-02 Tambahkan domain simulasi: `Avr`, `Analog`, `Mixed`.
+- [x] S2-02 Tambahkan domain simulasi: `Avr`, `Analog`, `Mixed`.
+  - Domain disimpan di JSON proyek dan ditampilkan di panel.
+  - Analog menjalankan solver; AVR diarahkan ke board runner; Mixed
+    ditolak dengan pesan belum diimplementasikan.
 - [x] S2-03 Bangun circuit di worker, bukan di UI thread.
   - DC dan transient berjalan di worker analog.
   - Hasil basi diabaikan lewat request ID.
@@ -261,10 +276,10 @@ transient, dan melihat grafik yang deterministik.
   - Pin role tampil di inspector.
 - [x] S4-07 Tampilkan error sebelum simulasi dimulai.
   - Panel simulasi menampilkan status netlist sebelum run.
-- [~] S4-08 Test UI headless.
-  - Panel simulasi, setting transient, dan graph sudah dirender.
-  - Pilihan analisis dan reload proyek sudah dicakup sebagian.
-  - Test komponen unsupported di panel belum.
+- [x] S4-08 Test UI headless.
+  - Panel simulasi, setting transient, dan graph dirender.
+  - Pilihan analisis, domain, reload proyek, dan komponen unsupported
+    di panel sudah diuji.
 - [~] S4-09 Test parameter effect di GUI.
   - Test membuktikan perubahan nilai menandai proyek dirty.
   - Test DC membuktikan resistor dan diode `n` mengubah hasil.
@@ -288,13 +303,19 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
 - [ ] S5-04 Buat model sensor dengan input lingkungan.
 - [ ] S5-05 Buat model actuator dengan output fisik.
 - [ ] S5-06 Buat model display dan RF hanya jika ada data referensi.
-- [ ] S5-07 Tambahkan label fidelity pada setiap model.
+- [~] S5-07 Tambahkan label fidelity pada setiap model.
+  - Setiap entry solver-backed punya label dari `SimulationBinding`.
+  - Inspector menampilkan label fidelity.
+  - Label `calibrated` belum dipakai karena reference vector belum ada.
 - [~] S5-08 Tambahkan test per keluarga.
   - Transformer, crystal, fuse, varistor, IGBT, UJT, PUT, SCR,
     TRIAC, DIAC, GTO, MCT, SCS, bridge, dan dual diode sudah
     punya test.
   - Keluarga behavioral lain belum.
-- [ ] S5-09 Dokumentasikan batas valid setiap model.
+- [~] S5-09 Dokumentasikan batas valid setiap model.
+  - Audit kelas dan fidelity ada di `docs/63-fidelity.md`.
+  - Batas model compact sudah dicatat di `docs/12-device-models.md`.
+  - Batas behavioral per keluarga belum lengkap.
 
 **Acceptance S5:** setiap entri non-MCU yang diklaim simulatable punya
 model, input, output, dan referensi yang jelas.
@@ -356,7 +377,9 @@ simulasi dengan sumber gate-level yang dapat diaudit.
 - [ ] S8-03 Sediakan CI container dengan ngspice dan golden test wajib.
 - [ ] S8-04 Tambahkan instruction suite, peripheral suite, dan timing test.
 - [ ] S8-05 Ukur performa real-time semua MCU di desktop dan akurasi 500 komponen.
-- [ ] S8-06 Perbarui docs, README, dan TODO.
+- [~] S8-06 Perbarui docs, README, dan TODO.
+  - Fidelity, benchmark, dan batas real-time sudah diperbarui.
+  - Dokumentasi per keluarga behavioral belum lengkap.
 - [ ] S8-07 Simpan hasil transient di JSON + file biner.
 - [ ] S8-08 Jalankan fmt, clippy, test, ASCII, package, dan CI ngspice.
 
