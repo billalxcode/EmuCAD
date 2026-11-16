@@ -1,6 +1,33 @@
 use super::*;
 
 impl GuiApp {
+    pub(super) fn check_netlist(&mut self) {
+        self.message = match crate::netlist::extract(&self.document) {
+            Ok(netlist) => format!(
+                "Netlist: {} nodes, {} parts",
+                netlist.nodes.len(),
+                netlist.components.len()
+            ),
+            Err(error) => error.to_string(),
+        };
+    }
+
+    pub(super) fn solve_dc(&mut self) {
+        self.message = self.dc_message();
+    }
+
+    fn dc_message(&self) -> String {
+        let netlist = match crate::netlist::extract(&self.document) {
+            Ok(netlist) => netlist,
+            Err(error) => return error.to_string(),
+        };
+        let result = match crate::netlist::solve_dc(&netlist) {
+            Ok(result) => result,
+            Err(error) => return error,
+        };
+        format_dc(&crate::netlist::node_voltages(&netlist, &result))
+    }
+
     pub(super) fn tool_buttons(&mut self, ui: &mut egui::Ui) {
         let previous = self.tool;
         for tool in Tool::ALL {
@@ -177,4 +204,12 @@ impl GuiApp {
             }
         }
     }
+}
+
+fn format_dc(voltages: &[(String, f64)]) -> String {
+    let mut text = String::from("DC:");
+    for (name, value) in voltages.iter().take(4) {
+        text.push_str(&format!(" {name}={value:.3} V"));
+    }
+    text
 }

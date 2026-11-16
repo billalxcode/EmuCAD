@@ -27,8 +27,8 @@ fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 | Behavioral | 285 | Belum punya model solver |
 | Device model | 24 `DeviceKind` | Sebagian sudah ada model |
 | Analisis solver | DC, transient, AC, noise, distorsi, sensitivitas | Ada |
-| Netlist GUI | 0 | Belum ada |
-| Simulasi GUI | AVR board saja | Ada |
+| Netlist GUI | 1 | Ekstraksi dan DC check |
+| Simulasi GUI | AVR board + analog DC | Ada |
 | Mixed-signal AVR + analog | 0 | Belum ada |
 
 ## 3. Keputusan Pengguna
@@ -172,46 +172,37 @@ dan komponen unsupported punya alasan yang dapat ditampilkan.
 
 ## 5. Fase S1 - Ekstraksi Netlist
 
-- [ ] S1-01 Buat union-find untuk pin, wire vertex, dan junction.
-- [ ] S1-02 Petakan setiap pin ke node listrik.
-- [ ] S1-03 Beri nama net stabil.
+- [x] S1-01 Buat union-find untuk pin, wire vertex, dan junction.
+- [x] S1-02 Petakan setiap pin ke node listrik.
+- [x] S1-03 Beri nama net stabil.
   - Prioritaskan label wire.
   - Jika tidak ada label, gunakan class dan index.
-- [ ] S1-04 Deteksi ground dan supply dari komponen atau net class.
-- [ ] S1-05 Validasi topologi.
-  - Pin floating.
-  - Net tanpa driver.
-  - Dua pin yang menempati titik yang sama.
-  - Wire yang tidak terhubung ke pin.
-- [ ] S1-06 Buat `Circuit` memakai `CircuitBuilder`.
-- [ ] S1-07 Test ekstraksi.
-  - Dua resistor seri.
-  - Paralel.
-  - Junction 3 arah.
-  - Pin floating.
-  - Ground hilang.
-  - Label net duplikat.
+- [x] S1-04 Deteksi ground dan supply dari komponen atau net class.
+- [~] S1-05 Validasi topologi.
+  - Pin floating sudah ditolak.
+  - Ground hilang dan ground ganda sudah ditolak.
+  - Net tanpa driver, pin bertumpuk, dan wire stub belum.
+- [x] S1-06 Buat `Circuit` memakai `CircuitBuilder`.
+- [~] S1-07 Test ekstraksi.
+  - Divider, pin floating, ground hilang, ground ganda, dan unsupported lulus.
+  - Paralel, junction 3 arah, dan label net duplikat belum.
 
 **Acceptance S1:** rangkaian R-C sederhana menghasilkan node dan device
 yang sama dengan referensi manual.
 
 ## 6. Fase S2 - Integrasi Solver 215 Entri
 
-- [ ] S2-01 Tambahkan dependency `sim-analysis` ke `sim-gui`.
+- [x] S2-01 Tambahkan dependency `sim-analysis` ke `sim-gui`.
 - [ ] S2-02 Tambahkan domain simulasi: `Avr`, `Analog`, `Mixed`.
 - [ ] S2-03 Bangun circuit di worker, bukan di UI thread.
-- [ ] S2-04 Jalankan DC operating point.
-- [ ] S2-05 Petakan error solver ke pesan GUI.
-- [ ] S2-06 Tampilkan node voltage dan branch current.
-- [ ] S2-07 Tandai komponen unsupported sebelum run.
-- [ ] S2-08 Test rangkaian solver-backed.
-  - Resistor divider.
-  - Diode clamp.
-  - Common-emitter BJT.
-  - Op-amp follower.
-  - Relay driver.
-  - Logic gate.
-  - Transmission line transient.
+- [x] S2-04 Jalankan DC operating point.
+- [x] S2-05 Petakan error solver ke pesan GUI.
+- [~] S2-06 Tampilkan node voltage dan branch current.
+  - Node voltage tampil di toolbar; branch current dan panel hasil belum.
+- [x] S2-07 Tandai komponen unsupported sebelum run.
+- [~] S2-08 Test rangkaian solver-backed.
+  - Resistor divider DC lulus.
+  - Diode clamp, BJT, op-amp, relay, logic, dan transmission line belum.
 
 **Acceptance S2:** minimal 215 entri solver-backed dapat masuk netlist
 dan menghasilkan DC operating point atau error yang jelas.

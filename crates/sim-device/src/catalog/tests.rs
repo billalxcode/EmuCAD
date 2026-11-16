@@ -197,6 +197,15 @@ fn waveform_sources_map_to_waveform_devices_only() {
 }
 
 #[test]
+fn logic_gate_defaults_include_variant() {
+    let registry = ComponentRegistry::new();
+    let spec = registry.find("logic.gate.xor_gate").expect("gate");
+    let parameters = spec.default_parameters();
+    assert_eq!(parameters.get("gate"), Some(&5.0));
+    assert_eq!(parameters.get("vth"), Some(&2.5));
+}
+
+#[test]
 fn passive_defaults_are_positive() {
     for entry in catalog() {
         if entry.class.family() == Family::Passive {

@@ -1,6 +1,18 @@
 use super::*;
+use std::collections::BTreeMap;
 
 impl ComponentSpec {
+    /// Returns the default solver parameters for this entry.
+    #[must_use]
+    pub fn default_parameters(&self) -> BTreeMap<String, f64> {
+        let mut parameters = BTreeMap::new();
+        parameters.insert(self.parameter.to_string(), self.default);
+        if self.class == ModelClass::LogicGate {
+            parameters.insert("gate".to_string(), f64::from(self.variant));
+        }
+        parameters
+    }
+
     /// Validates catalog invariants for this entry.
     pub fn validate(&self) -> Result<(), CatalogError> {
         self.validate_text()?;

@@ -1,7 +1,7 @@
 //! Registry that resolves catalog entries into solver devices.
 
 use super::catalog;
-use super::model::{ComponentSpec, ModelClass};
+use super::model::ComponentSpec;
 use crate::model::{DeviceModel, model_from_instance};
 use sim_core::{CircuitBuilder, DeviceId, DeviceInstance, DeviceKind, NodeId, SimError};
 use std::collections::BTreeMap;
@@ -150,11 +150,7 @@ fn parameters_for(
     spec: &ComponentSpec,
     overrides: &BTreeMap<String, f64>,
 ) -> BTreeMap<String, f64> {
-    let mut parameters = BTreeMap::new();
-    parameters.insert(spec.parameter.to_string(), spec.default);
-    if spec.class == ModelClass::LogicGate {
-        parameters.insert("gate".to_string(), f64::from(spec.variant));
-    }
+    let mut parameters = spec.default_parameters();
     parameters.extend(overrides.iter().map(|(name, value)| (name.clone(), *value)));
     parameters
 }

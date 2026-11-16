@@ -3052,8 +3052,10 @@ dependencies = [
  "rfd",
  "serde",
  "serde_json",
+ "sim-analysis",
  "sim-avr",
  "sim-board",
+ "sim-core",
  "sim-device",
 ]
 

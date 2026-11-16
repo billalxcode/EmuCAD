@@ -14,6 +14,7 @@ mod layout;
 mod library;
 mod log;
 mod model;
+mod netlist;
 mod palette;
 mod persist;
 mod probe;

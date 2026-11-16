@@ -94,6 +94,12 @@ impl GuiApp {
         if ui.add(icon_button("[H]", "Load HEX")).clicked() {
             self.open_hex();
         }
+        if ui.add(icon_button("[N]", "Check netlist")).clicked() {
+            self.check_netlist();
+        }
+        if ui.add(icon_button("[D]", "DC op")).clicked() {
+            self.solve_dc();
+        }
         self.run_buttons(ui);
         ui.checkbox(&mut self.waveform_open, "Wave");
         ui.checkbox(&mut self.analog_open, "Analog");
