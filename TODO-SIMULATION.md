@@ -230,11 +230,12 @@ transient, dan melihat grafik yang deterministik.
 
 - [ ] S4-01 Panel simulasi dengan analisis, run, pause, step, reset.
 - [ ] S4-02 Tampilkan status domain dan komponen unsupported.
-- [ ] S4-03 Inspector parameter numerik per komponen.
-  - Hanya tampilkan parameter yang punya effect test.
-  - Tampilkan unit, default, min, dan max.
-- [ ] S4-04 Simpan parameter dan pilihan analisis di JSON.
-  - Perubahan parameter menginvalidasi hasil simulasi lama.
+- [~] S4-03 Inspector parameter numerik per komponen.
+  - Parameter utama sudah bisa diedit dan mengubah hasil DC.
+  - Effect test baru untuk resistor; min, max, dan multi-parameter belum.
+- [~] S4-04 Simpan parameter dan pilihan analisis di JSON.
+  - Nilai komponen sudah tersimpan sebagai string.
+  - Pilihan analisis dan hasil terstruktur belum.
 - [ ] S4-05 Migrasi proyek lama tanpa merusak nilai string.
 - [ ] S4-06 Tampilkan nama net dan pin role.
 - [ ] S4-07 Tampilkan error sebelum simulasi dimulai.
@@ -243,9 +244,10 @@ transient, dan melihat grafik yang deterministik.
   - Pilihan analisis.
   - Komponen unsupported.
   - Reload proyek.
-- [ ] S4-09 Test parameter effect di GUI.
-  - Ubah nilai parameter, hasil simulasi berubah sesuai fungsi.
-  - Parameter tanpa efek tidak tampil sebagai editable.
+- [~] S4-09 Test parameter effect di GUI.
+  - Test membuktikan perubahan nilai menandai proyek dirty.
+  - Test DC membuktikan resistor 2 kOhm mengubah divider.
+  - Parameter tanpa efek belum diuji menyeluruh.
 
 **Acceptance S4:** setiap parameter yang dapat diedit mengubah hasil
 simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.

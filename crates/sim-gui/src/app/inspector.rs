@@ -12,6 +12,7 @@ impl GuiApp {
         }
         if let Some((component, definition)) = self.selected_pair() {
             show_component_info(ui, component, definition);
+            show_component_value(ui, component, definition, action);
             show_component_actions(ui, action);
             return;
         }
@@ -288,7 +289,27 @@ impl GuiApp {
             InspectorAction::SetClass(class) => self.set_wire_class(class),
             InspectorAction::SetColor(color) => self.set_wire_color_override(color),
             InspectorAction::SetLabel(label) => self.set_wire_label(label),
+            InspectorAction::SetValue(value) => self.set_component_value(value),
         }
+    }
+
+    pub(super) fn set_component_value(&mut self, value: String) {
+        let Some(id) = self.selection.single_component() else {
+            return;
+        };
+        let Some(component) = self.document.component(id) else {
+            return;
+        };
+        if component.value == value {
+            return;
+        }
+        self.push_undo();
+        let Some(component) = self.document.component_mut(id) else {
+            return;
+        };
+        component.value = value;
+        self.mark_dirty();
+        self.message = "Value updated; rerun DC".to_string();
     }
 
     pub(super) fn set_wire_label(&mut self, label: Option<String>) {

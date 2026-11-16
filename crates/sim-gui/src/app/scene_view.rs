@@ -66,6 +66,23 @@ pub(crate) fn show_component_info(
     show_component_simulation(ui);
 }
 
+pub(crate) fn show_component_value(
+    ui: &mut egui::Ui,
+    component: &ComponentInstance,
+    definition: &ComponentDefinition,
+    action: &mut Option<InspectorAction>,
+) {
+    let Some(info) = crate::netlist::parameter_info(definition) else {
+        return;
+    };
+    ui.separator();
+    ui.label(format!("{} ({})", info.name, info.unit));
+    let mut value = component.value.clone();
+    if ui.text_edit_singleline(&mut value).changed() {
+        *action = Some(InspectorAction::SetValue(value));
+    }
+}
+
 pub(crate) fn show_component_simulation(ui: &mut egui::Ui) {
     ui.separator();
     ui.label("Simulation");

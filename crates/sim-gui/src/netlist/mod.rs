@@ -6,6 +6,7 @@ use crate::model::{ComponentDefinition, ComponentId, ComponentInstance, Document
 use sim_device::{ComponentRegistry, ComponentSpec};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
+use std::sync::OnceLock;
 
 /// Electrical netlist extracted from a schematic document.
 #[derive(Clone, Debug, PartialEq)]
@@ -30,6 +31,42 @@ pub(crate) struct NetlistComponent {
     pub part: &'static str,
     pub pins: Vec<usize>,
     pub parameters: BTreeMap<String, f64>,
+}
+
+/// Parameter metadata shown by the component inspector.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct ParameterInfo {
+    pub name: &'static str,
+    pub unit: &'static str,
+}
+
+/// Returns parameter metadata for a solver-backed definition.
+pub(crate) fn parameter_info(definition: &ComponentDefinition) -> Option<ParameterInfo> {
+    if part_kind(definition) != PartKind::Device {
+        return None;
+    }
+    let part = builtin_part(definition.id).unwrap_or(definition.id);
+    let spec = part_spec(part)?;
+    spec.device.as_ref()?;
+    Some(ParameterInfo {
+        name: spec.parameter,
+        unit: spec.unit,
+    })
+}
+
+static SPECS: OnceLock<BTreeMap<&'static str, &'static ComponentSpec>> = OnceLock::new();
+
+fn part_spec(id: &str) -> Option<&'static ComponentSpec> {
+    SPECS
+        .get_or_init(|| {
+            ComponentRegistry::new()
+                .entries()
+                .iter()
+                .map(|spec| (spec.id, spec))
+                .collect()
+        })
+        .get(id)
+        .copied()
 }
 
 /// Netlist extraction failure.
@@ -184,25 +221,17 @@ pub(crate) fn extract(document: &Document) -> Result<Netlist, NetlistError> {
 }
 
 fn collect_parts(document: &Document) -> Result<Vec<PlacedPart>, NetlistError> {
-    let registry = ComponentRegistry::new();
-    document
-        .components()
-        .iter()
-        .map(|instance| collect_part(instance, &registry))
-        .collect()
+    document.components().iter().map(collect_part).collect()
 }
 
-fn collect_part(
-    instance: &ComponentInstance,
-    registry: &ComponentRegistry,
-) -> Result<PlacedPart, NetlistError> {
+fn collect_part(instance: &ComponentInstance) -> Result<PlacedPart, NetlistError> {
     let definition = library::find(instance.definition)
         .ok_or_else(|| NetlistError::UnknownDefinition(instance.definition.to_string()))?;
     let kind = part_kind(definition);
     if kind != PartKind::Device {
         return Ok(PlacedPart::marker(instance, definition, kind));
     }
-    let spec = device_spec(definition, registry)?;
+    let spec = device_spec(definition)?;
     require_pin_count(instance, definition, spec)?;
     let parameters = parameters_for(instance, spec)?;
     Ok(PlacedPart::device(
@@ -218,16 +247,12 @@ fn part_kind(definition: &ComponentDefinition) -> PartKind {
     }
 }
 
-fn device_spec(
-    definition: &ComponentDefinition,
-    registry: &ComponentRegistry,
-) -> Result<&'static ComponentSpec, NetlistError> {
+fn device_spec(definition: &ComponentDefinition) -> Result<&'static ComponentSpec, NetlistError> {
     if definition.id == "atmega328p" {
         return Err(NetlistError::Unsupported(definition.name.to_string()));
     }
     let part = builtin_part(definition.id).unwrap_or(definition.id);
-    let spec = registry
-        .find(part)
+    let spec = part_spec(part)
         .ok_or_else(|| NetlistError::UnknownDefinition(definition.id.to_string()))?;
     if spec.device.is_none() {
         return Err(NetlistError::Unsupported(definition.name.to_string()));

@@ -123,6 +123,41 @@ fn node_id(index: usize) -> NodeId {
 }
 
 #[test]
+fn changing_resistor_changes_divider() {
+    let mut document = divider();
+    set_value(&mut document, "R2", "2000 ohm");
+    let netlist = extract(&document).expect("netlist");
+    let result = solve_dc(&netlist).expect("dc");
+    let output = find_part(&netlist, "R1").pins[1];
+    let voltage = result
+        .solution
+        .voltage(node_id(output))
+        .expect("output voltage");
+    let expected = 5.0 * 2000.0 / 3000.0;
+    assert!((voltage - expected).abs() < 1e-6, "voltage={voltage}");
+}
+
+#[test]
+fn invalid_value_is_rejected() {
+    let mut document = divider();
+    set_value(&mut document, "R1", "not a number");
+    assert!(matches!(
+        extract(&document),
+        Err(NetlistError::InvalidValue { .. })
+    ));
+}
+
+fn set_value(document: &mut Document, label: &str, value: &str) {
+    let id = document
+        .components()
+        .iter()
+        .find(|part| part.label == label)
+        .expect("component")
+        .id;
+    document.component_mut(id).expect("component").value = value.to_string();
+}
+
+#[test]
 fn numeric_values_are_parsed() {
     assert_eq!(super::parse_value("220"), Some(220.0));
     assert_eq!(super::parse_value("1000 ohm"), Some(1000.0));

@@ -108,6 +108,7 @@ pub(crate) enum InspectorAction {
     SetClass(NetClass),
     SetColor(Option<[u8; 3]>),
     SetLabel(Option<String>),
+    SetValue(String),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

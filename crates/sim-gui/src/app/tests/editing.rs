@@ -140,3 +140,22 @@ fn assert_component_position(app: &GuiApp, id: ComponentId, expected: GridPos) {
         expected
     );
 }
+
+#[test]
+fn component_value_change_marks_dirty() {
+    let library = crate::library::builtin();
+    let resistor = crate::library::find("resistor").expect("resistor");
+    let mut document = Document::new();
+    let id = document.add(resistor, GridPos::new(0, 0), Rotation::Deg0, Mirror::None);
+    let mut app = GuiApp {
+        library,
+        document,
+        ..GuiApp::default()
+    };
+    app.selection.select_component(id);
+    app.set_component_value("330 ohm".to_string());
+    let component = app.document.component(id).expect("component");
+    assert_eq!(component.value, "330 ohm");
+    assert!(app.dirty);
+    assert_eq!(app.message, "Value updated; rerun DC");
+}
