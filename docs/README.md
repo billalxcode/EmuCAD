@@ -70,6 +70,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 61 | [Design system](61-design-system.md) | Token font, warna, spacing, dan aturan tampilan |
 | 62 | [Klasifikasi behavioral](62-behavioral-classification.md) | Kategori dan prioritas 243 entry behavioral |
 | 63 | [Fidelity dan benchmark](63-fidelity.md) | Label fidelity, audit 60 kelas, dan hasil benchmark |
+| 64 | [Gate-level scope](64-gate-level.md) | Definisi, status, benchmark, dan gap S6/S7 |
 
 ### 3.2 Fondasi
 

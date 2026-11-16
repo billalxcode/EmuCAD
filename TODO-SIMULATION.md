@@ -1,6 +1,7 @@
 # TODO - Simulasi Semua Komponen
 
-Status: analisis selesai, implementasi belum dimulai.
+Status: S1-S4 selesai; S0, S5, dan S8 sebagian; S6-S7 terblokir oleh
+model gate-level dan benchmark memory.
 
 Tujuan: membuat komponen di skematik GUI dapat disimulasikan dengan model
 fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
@@ -323,50 +324,78 @@ model, input, output, dan referensi yang jelas.
 
 ## 10. Fase S6 - Gate-Level Memory dan MCU
 
-- [ ] S6-01 Definisikan arti gate-level untuk 11 MCU dan 15 memory.
-  - Netlist gate-level logika.
-  - Memory macro dan peripheral.
-  - Interface dan timing.
-- [ ] S6-02 Tulis gate-level dari nol sebagai komponen Rust.
-  - AVR menjadi MCU pertama.
-  - PIC, 8051, ARM Cortex-M, RISC-V, ESP32, STM32, RP2040 menyusul.
-  - Semua 11 MCU wajib pada akhir roadmap.
+- [x] S6-01 Definisikan arti gate-level untuk 11 MCU dan 15 memory.
+  - Lihat `docs/64-gate-level.md`.
+  - Gate-level berarti gerbang Boolean, DFF, memory macro digital,
+    interface, dan timing.
+  - Bukan transistor-level atau HDL pihak ketiga.
+- [~] S6-02 Tulis gate-level dari nol sebagai komponen Rust.
+  - AVR memakai `sim-cells` untuk datapath dan register, tetapi kontrol
+    dan peripheral masih hybrid.
+  - PIC, 8051, ARM Cortex-M, RISC-V, ESP32, STM32, dan RP2040 belum.
   - Tidak memakai HDL pihak ketiga.
-- [ ] S6-03 Implementasikan memory gate-level.
-  - SRAM menjadi memory pertama.
+- [~] S6-03 Implementasikan memory gate-level.
+  - Register file digital 32x8/16/64 sudah ada dan diukur.
+  - Sel SRAM 6T transistor-level ada sebagai referensi.
   - DRAM, ROM, PROM, EEPROM, Flash, FRAM, MRAM, NVRAM, controller,
-    dan module menyusul.
-  - Semua 15 memory wajib pada akhir roadmap.
-- [ ] S6-04 Gunakan `sim-cells` untuk sel memory dan logic.
-- [ ] S6-05 Tambahkan model interface dan timing.
-- [ ] S6-06 Tambahkan instruction suite, peripheral suite, dan timing
+    dan module belum.
+- [~] S6-04 Gunakan `sim-cells` untuk sel memory dan logic.
+  - AVR datapath, register bank, ALU, dan register file memakai
+    `sim-cells`.
+  - Sel memory digital lain belum.
+- [~] S6-05 Tambahkan model interface dan timing.
+  - Timing digital AVR dan peripheral sudah diuji sebagian.
+  - Interface dan timing 11 MCU belum.
+- [~] S6-06 Tambahkan instruction suite, peripheral suite, dan timing
   test per keluarga.
-- [ ] S6-07 Dokumentasikan batas structural dan performa.
-- [ ] S6-08 Ukur waktu build dan waktu simulasi per MCU dan memory.
+  - Suite AVR sudah ada.
+  - Suite MCU lain belum.
+- [x] S6-07 Dokumentasikan batas structural dan performa.
+  - Lihat `docs/64-gate-level.md` dan `docs/63-fidelity.md`.
+- [~] S6-08 Ukur waktu build dan waktu simulasi per MCU dan memory.
+  - AVR dan register file sudah diukur.
+  - MCU dan memory lain belum ada.
 
 **Acceptance S6:** semua MCU dan memory yang dipilih memiliki model
 gate-level Rust yang dapat diaudit, dengan test dan batas performa.
 
 ## 11. Fase S7 - AVR Structural dan Mixed-Signal
 
-- [ ] S7-01 Definisikan cakupan AVR structural full chip.
-  - Core, register file, ALU, control, flash, SRAM.
-  - Timer, UART, SPI, TWI, ADC, GPIO, dan USB.
-  - Semua peripheral wajib structural.
-- [ ] S7-02 Siapkan model AVR gate-level dari implementasi Rust sendiri.
+- [x] S7-01 Definisikan cakupan AVR structural full chip.
+  - Cakupan ada di `docs/64-gate-level.md`.
+  - Core, register, ALU, timer, UART, SPI, TWI, ADC, GPIO, USB, flash,
+    dan SRAM tercatat.
+  - Status saat ini masih hybrid.
+- [~] S7-02 Siapkan model AVR gate-level dari implementasi Rust sendiri.
+  - Datapath dan register sudah structural.
+  - Kontrol dan peripheral belum full gate-level.
   - Tidak memakai HDL pihak ketiga.
-  - Gunakan datasheet, ISA manual, dan referensi arsitektur.
 - [ ] S7-03 Definisikan scheduler digital-analog.
+  - Belum ada scheduler deterministik AVR + analog.
 - [ ] S7-04 Buat wrapper AVR structural sebagai device digital.
-- [ ] S7-05 Petakan pin AVR ke node netlist.
+  - Belum ada device digital di solver analog.
+- [~] S7-05 Petakan pin AVR ke node netlist.
+  - Board simulation memetakan PB5 dan pin LED.
+  - Pemetaan penuh 32 pin belum.
 - [ ] S7-06 Hubungkan pin electrical sebagai Thevenin.
+  - Belum diimplementasikan untuk semua pin.
 - [ ] S7-07 Tambahkan breakpoint saat pin berubah.
-- [ ] S7-08 Hubungkan ADC, PWM, timer, dan UART.
+  - Belum ada breakpoint pin di co-sim.
+- [~] S7-08 Hubungkan ADC, PWM, timer, dan UART.
+  - Peripheral AVR sudah ada di `sim-avr`.
+  - Koneksi ke solver analog belum.
 - [ ] S7-09 Jaga determinisme urutan event.
-- [ ] S7-10 Test AVR + LED + resistor + voltage source.
-- [ ] S7-11 Jalankan GPIO blink gate-level sebagai vertical slice.
-- [ ] S7-12 Ukur performa dan latency pada desktop CPU.
-- [ ] S7-13 Verifikasi real-time semua MCU atau aktifkan fallback Q55.
+  - Belum ada event queue gabungan digital-analog.
+- [x] S7-10 Test AVR + LED + resistor + voltage source.
+  - Board test dan GUI simulation sudah mencakup LED, resistor, dan PB5.
+- [x] S7-11 Jalankan GPIO blink gate-level sebagai vertical slice.
+  - Program GPIO pada `avr_bench` berjalan 3.58x realtime.
+  - Core masih hybrid; bukan full-chip gate-level.
+- [x] S7-12 Ukur performa dan latency pada desktop CPU.
+  - Hasil ada di `docs/63-fidelity.md`.
+- [~] S7-13 Verifikasi real-time semua MCU atau aktifkan fallback Q55.
+  - AVR dan memory macro diukur.
+  - Semua MCU belum; fallback Q55 dipakai.
 
 **Acceptance S7:** AVR structural dan analog berjalan dalam satu
 simulasi dengan sumber gate-level yang dapat diaudit.
