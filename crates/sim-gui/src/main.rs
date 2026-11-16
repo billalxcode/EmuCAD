@@ -22,6 +22,8 @@ mod provider;
 mod scene;
 mod selection;
 mod sim;
+#[cfg(test)]
+mod solver_tests;
 mod spatial;
 mod symbols;
 mod transient;

@@ -245,27 +245,30 @@ fn numeric_values_are_parsed() {
 
 fn bjt_circuit() -> Document {
     let mut document = Document::default();
-    add(&mut document, "source.independent.dc_voltage_source", 0, 0);
-    add(&mut document, "passive.resistor.ideal_resistor", 8, 0);
-    add(&mut document, "transistor.bjt_npn.npn_small_signal", 8, 6);
-    add(
-        &mut document,
-        "source.independent.dc_voltage_source",
-        14,
-        10,
-    );
-    add(&mut document, "gnd", 8, 14);
+    add_bjt_parts(&mut document);
     set_parameter(&mut document, "V2", "voltage", 0.8);
-    wire(&mut document, &[(0, 1), (0, -2), (8, -2), (8, 1)]);
-    wire(&mut document, &[(4, 1), (4, 14), (8, 14), (9, 14)]);
+    add_bjt_wires(&mut document);
+    document
+}
+
+fn add_bjt_parts(document: &mut Document) {
+    add(document, "source.independent.dc_voltage_source", 0, 0);
+    add(document, "passive.resistor.ideal_resistor", 8, 0);
+    add(document, "transistor.bjt_npn.npn_small_signal", 8, 6);
+    add(document, "source.independent.dc_voltage_source", 14, 10);
+    add(document, "gnd", 8, 14);
+}
+
+fn add_bjt_wires(document: &mut Document) {
+    wire(document, &[(0, 1), (0, -2), (8, -2), (8, 1)]);
+    wire(document, &[(4, 1), (4, 14), (8, 14), (9, 14)]);
     wire(
-        &mut document,
+        document,
         &[(12, 1), (14, 1), (14, 4), (6, 4), (6, 7), (8, 7)],
     );
-    wire(&mut document, &[(14, 11), (14, 8), (12, 8)]);
-    wire(&mut document, &[(8, 9), (8, 12), (8, 14)]);
-    wire(&mut document, &[(18, 11), (18, 12), (8, 12)]);
-    document
+    wire(document, &[(14, 11), (14, 8), (12, 8)]);
+    wire(document, &[(8, 9), (8, 12), (8, 14)]);
+    wire(document, &[(18, 11), (18, 12), (8, 12)]);
 }
 
 #[test]

@@ -121,17 +121,27 @@ fn rectifier_circuit() -> Document {
 
 fn line_circuit() -> Document {
     let mut document = Document::default();
-    add(&mut document, "source.pulse.pulse_voltage_source", 0, 0);
+    add_line_parts(&mut document);
+    set_line_parameters(&mut document);
+    add_line_wires(&mut document);
+    document
+}
+
+fn add_line_parts(document: &mut Document) {
+    add(document, "source.pulse.pulse_voltage_source", 0, 0);
     add(
-        &mut document,
+        document,
         "passive.transmission_line.ideal_transmission_line",
         8,
         0,
     );
-    add(&mut document, "passive.resistor.ideal_resistor", 8, 8);
-    add(&mut document, "gnd", 13, 12);
-    set_pulse_defaults(&mut document);
-    set_parameter(&mut document, "R1", "resistance", 50.0);
+    add(document, "passive.resistor.ideal_resistor", 8, 8);
+    add(document, "gnd", 13, 12);
+}
+
+fn set_line_parameters(document: &mut Document) {
+    set_pulse_defaults(document);
+    set_parameter(document, "R1", "resistance", 50.0);
     let line = document
         .components()
         .iter()
@@ -143,10 +153,13 @@ fn line_circuit() -> Document {
         .expect("line")
         .parameters
         .insert("delay".to_string(), 1e-5);
-    wire(&mut document, &[(0, 1), (0, -2), (8, -2), (8, 1)]);
-    wire(&mut document, &[(4, 1), (4, 12), (13, 12), (14, 12)]);
+}
+
+fn add_line_wires(document: &mut Document) {
+    wire(document, &[(0, 1), (0, -2), (8, -2), (8, 1)]);
+    wire(document, &[(4, 1), (4, 12), (13, 12), (14, 12)]);
     wire(
-        &mut document,
+        document,
         &[
             (12, 1),
             (14, 1),
@@ -157,10 +170,9 @@ fn line_circuit() -> Document {
             (14, 12),
         ],
     );
-    wire(&mut document, &[(12, 3), (14, 3)]);
-    wire(&mut document, &[(8, 3), (8, 9)]);
-    wire(&mut document, &[(12, 9), (13, 9), (13, 12)]);
-    document
+    wire(document, &[(12, 3), (14, 3)]);
+    wire(document, &[(8, 3), (8, 9)]);
+    wire(document, &[(12, 9), (13, 9), (13, 12)]);
 }
 
 fn device_index(trace: &TransientTrace, label: &str) -> usize {
