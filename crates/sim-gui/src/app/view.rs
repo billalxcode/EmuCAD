@@ -40,6 +40,25 @@ impl GuiApp {
         self.message = "Transient running".to_string();
     }
 
+    pub(super) fn run_analysis(&mut self) {
+        match self.analysis_kind {
+            AnalysisKind::Dc => self.solve_dc(),
+            AnalysisKind::Transient => self.run_transient(),
+        }
+    }
+
+    pub(super) fn analysis_state(&self) -> AnalysisState {
+        AnalysisState {
+            kind: self.analysis_kind,
+            transient: self.transient_settings,
+        }
+    }
+
+    pub(super) fn apply_analysis_state(&mut self, state: AnalysisState) {
+        self.analysis_kind = state.kind;
+        self.transient_settings = state.transient;
+    }
+
     #[cfg(test)]
     pub(super) fn wait_analog(&mut self) {
         let Some(worker) = self.analog.as_ref() else {

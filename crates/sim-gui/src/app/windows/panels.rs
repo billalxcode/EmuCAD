@@ -22,6 +22,7 @@ impl GuiApp {
         }
         let mut open = self.transient_open;
         let trace = self.transient.as_ref();
+        let previous = self.transient_settings;
         let settings = &mut self.transient_settings;
         let selected = &mut self.transient_selected;
         let selected_currents = &mut self.transient_selected_currents;
@@ -37,6 +38,9 @@ impl GuiApp {
                 }
             });
         self.transient_open = open;
+        if self.transient_settings != previous {
+            self.mark_dirty();
+        }
     }
 
     pub(crate) fn log_window(&mut self, ui: &mut egui::Ui) {
@@ -132,5 +136,114 @@ impl GuiApp {
                 show_analog_graph(ui, probes, view, status);
             });
         self.analog_open = open;
+    }
+}
+
+impl GuiApp {
+    pub(crate) fn simulation_window(&mut self, ui: &mut egui::Ui) {
+        if !self.simulation_open {
+            return;
+        }
+        let mut open = self.simulation_open;
+        let mut run = false;
+        let mut open_transient = false;
+        let status = self.netlist_status();
+        let previous = self.analysis_kind;
+        let kind = &mut self.analysis_kind;
+        let dc = self.analog_dc.as_ref();
+        let trace = self.transient.as_ref();
+        let busy = self.analog_busy;
+        egui::Window::new("Simulation")
+            .open(&mut open)
+            .default_size([420.0, 320.0])
+            .show(ui.ctx(), |ui| {
+                ui.horizontal(|ui| {
+                    ui.selectable_value(kind, crate::analysis::AnalysisKind::Dc, "DC");
+                    ui.selectable_value(
+                        kind,
+                        crate::analysis::AnalysisKind::Transient,
+                        "Transient",
+                    );
+                });
+                ui.label(format!("Selected: {}", kind.label()));
+                ui.label(status);
+                if busy {
+                    ui.label("Solving...");
+                }
+                if ui.add_enabled(!busy, egui::Button::new("Run")).clicked() {
+                    run = true;
+                }
+                if *kind == crate::analysis::AnalysisKind::Dc {
+                    show_dc_results(ui, dc);
+                } else {
+                    show_transient_summary(ui, trace, &mut open_transient);
+                }
+            });
+        self.simulation_open = open;
+        if self.analysis_kind != previous {
+            self.mark_dirty();
+        }
+        if run {
+            self.run_analysis();
+        }
+        if open_transient {
+            self.transient_open = true;
+        }
+    }
+
+    fn netlist_status(&self) -> String {
+        match crate::netlist::extract(&self.document) {
+            Ok(netlist) => format!(
+                "Netlist OK: {} nodes, {} parts",
+                netlist.nodes.len(),
+                netlist.components.len()
+            ),
+            Err(error) => format!("Netlist error: {error}"),
+        }
+    }
+}
+
+fn show_dc_results(ui: &mut egui::Ui, dc: Option<&crate::analog::DcResultView>) {
+    let Some(dc) = dc else {
+        ui.label("No DC result");
+        return;
+    };
+    ui.label(format!(
+        "DC converged: {} iterations, residual {:.3e}",
+        dc.iterations, dc.residual
+    ));
+    show_dc_grid(ui, &dc.voltages);
+}
+
+fn show_dc_grid(ui: &mut egui::Ui, voltages: &[(String, f64)]) {
+    egui::ScrollArea::vertical()
+        .max_height(180.0)
+        .show(ui, |ui| {
+            egui::Grid::new("dc_results").striped(true).show(ui, |ui| {
+                for (name, value) in voltages {
+                    ui.label(name);
+                    ui.label(format!("{value:.6} V"));
+                    ui.end_row();
+                }
+            });
+        });
+}
+
+fn show_transient_summary(
+    ui: &mut egui::Ui,
+    trace: Option<&crate::transient::TransientTrace>,
+    open: &mut bool,
+) {
+    let Some(trace) = trace else {
+        ui.label("No transient result");
+        return;
+    };
+    ui.label(format!(
+        "Transient: {} samples, duration {:.3} ms",
+        trace.values.len(),
+        trace.duration() * 1e3
+    ));
+    if ui.button("Open graph").clicked() {
+        *open = true;
     }
 }

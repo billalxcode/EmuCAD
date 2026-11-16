@@ -2,6 +2,7 @@
 
 use crate::model::Document;
 use crate::netlist::{self, Netlist};
+use serde::{Deserialize, Serialize};
 use sim_analysis::{
     AdaptiveConfig, TransientConfig, TransientSample, transient as run_transient,
     transient_adaptive,
@@ -12,7 +13,8 @@ const MAX_STEPS: usize = 100_000;
 const MAX_SECONDS: f64 = 10.0;
 
 /// User-facing transient settings.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
 pub(crate) struct TransientSettings {
     pub dt: f64,
     pub steps: usize,

@@ -241,24 +241,29 @@ transient, dan melihat grafik yang deterministik.
 
 ## 8. Fase S4 - UI dan Persistensi
 
-- [ ] S4-01 Panel simulasi dengan analisis, run, pause, step, reset.
-- [ ] S4-02 Tampilkan status domain dan komponen unsupported.
-- [~] S4-03 Inspector parameter numerik per komponen.
+- [~] S4-01 Panel simulasi dengan analisis, run, pause, step, reset.
+  - Panel menampilkan pilihan DC/Transient dan tombol run.
+  - Pause, step, dan reset analog belum.
+- [x] S4-02 Tampilkan status domain dan komponen unsupported.
+  - Panel simulasi menampilkan status netlist dan error unsupported.
+- [x] S4-03 Inspector parameter numerik per komponen.
   - Semua parameter schema tampil dengan min, max, dan unit.
   - Parameter boolean tampil sebagai checkbox.
-  - Effect test baru untuk resistor dan diode `n`.
-- [~] S4-04 Simpan parameter dan pilihan analisis di JSON.
-  - Nilai parameter numerik sudah tersimpan per instance.
-  - Pilihan analisis dan hasil terstruktur belum.
+- [x] S4-04 Simpan parameter dan pilihan analisis di JSON.
+  - Parameter numerik, kind analisis, dan setting transient tersimpan.
+  - Hasil simulasi tidak disimpan.
   - Perubahan dokumen menghapus hasil dan mengabaikan event worker lama.
-- [ ] S4-05 Migrasi proyek lama tanpa merusak nilai string.
-- [ ] S4-06 Tampilkan nama net dan pin role.
-- [ ] S4-07 Tampilkan error sebelum simulasi dimulai.
-- [ ] S4-08 Test UI headless.
-  - Panel render.
-  - Pilihan analisis.
-  - Komponen unsupported.
-  - Reload proyek.
+- [x] S4-05 Migrasi proyek lama tanpa merusak nilai string.
+  - Proyek lama memakai analysis default dan parameter kosong.
+- [~] S4-06 Tampilkan nama net dan pin role.
+  - Nama net tampil di hasil DC dan grafik transient.
+  - Pin role belum, menunggu S0-01.
+- [x] S4-07 Tampilkan error sebelum simulasi dimulai.
+  - Panel simulasi menampilkan status netlist sebelum run.
+- [~] S4-08 Test UI headless.
+  - Panel simulasi, setting transient, dan graph sudah dirender.
+  - Pilihan analisis dan reload proyek sudah dicakup sebagian.
+  - Test komponen unsupported di panel belum.
 - [~] S4-09 Test parameter effect di GUI.
   - Test membuktikan perubahan nilai menandai proyek dirty.
   - Test DC membuktikan resistor dan diode `n` mengubah hasil.

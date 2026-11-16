@@ -9,6 +9,7 @@ impl GuiApp {
         self.analog_window(ui);
         self.uart_window(ui);
         self.log_window(ui);
+        self.simulation_window(ui);
         self.transient_window(ui);
         self.show_context_menu(ui);
         self.command_palette(ui);
@@ -114,6 +115,7 @@ impl GuiApp {
             ui.label("Solving");
         }
         self.run_buttons(ui);
+        ui.checkbox(&mut self.simulation_open, "Sim");
         ui.checkbox(&mut self.transient_open, "Transient");
         ui.checkbox(&mut self.waveform_open, "Wave");
         ui.checkbox(&mut self.analog_open, "Analog");

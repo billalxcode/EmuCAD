@@ -28,6 +28,7 @@ mod toolbar;
 mod view;
 mod windows;
 
+use crate::analysis::{AnalysisKind, AnalysisState};
 use crate::canvas::{self, GridCamera};
 use crate::clipboard::{self, Clipboard};
 use crate::config;
@@ -208,6 +209,8 @@ pub struct GuiApp {
     initialized: bool,
     canvas_focused: bool,
     sample_every: u64,
+    analysis_kind: AnalysisKind,
+    simulation_open: bool,
     library: &'static [ComponentDefinition],
     recent_components: Vec<&'static ComponentDefinition>,
     document: Document,

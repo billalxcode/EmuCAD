@@ -196,3 +196,31 @@ fn component_parameters_round_trip() {
     assert_eq!(component.parameters.get("resistance"), Some(&330.0));
     let _ = std::fs::remove_dir_all(dir);
 }
+
+fn analysis_state() -> crate::analysis::AnalysisState {
+    crate::analysis::AnalysisState {
+        kind: crate::analysis::AnalysisKind::Transient,
+        transient: crate::transient::TransientSettings {
+            adaptive: true,
+            tolerance: 1e-2,
+            ..crate::transient::TransientSettings::default()
+        },
+    }
+}
+
+#[test]
+fn open_restores_analysis_state() {
+    let dir = temp_dir("analysis");
+    let path = dir.join("project.emu.json");
+    let state = analysis_state();
+    persist::save_with_analysis(&path, &Document::new(), &GridCamera::default(), true, state)
+        .expect("save");
+    let mut app = GuiApp {
+        library: crate::library::builtin(),
+        ..GuiApp::default()
+    };
+    app.open_path(path);
+    assert_eq!(app.analysis_kind, state.kind);
+    assert_eq!(app.transient_settings, state.transient);
+    let _ = std::fs::remove_dir_all(dir);
+}

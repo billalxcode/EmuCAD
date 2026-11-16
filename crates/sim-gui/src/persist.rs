@@ -1,5 +1,6 @@
 //! JSON project persistence for the GUI.
 
+use crate::analysis::AnalysisState;
 use crate::canvas::GridCamera;
 use crate::model::{
     ComponentDefinition, ComponentId, ComponentInstance, Document, GridPos, Mirror, NetClass,
@@ -19,6 +20,7 @@ pub struct Project {
     pub document: Document,
     pub camera: GridCamera,
     pub grid_visible: bool,
+    pub analysis: AnalysisState,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -29,6 +31,8 @@ struct ProjectFile {
     view: ViewFile,
     components: Vec<ComponentFile>,
     wires: Vec<WireFile>,
+    #[serde(default)]
+    analysis: AnalysisState,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -65,17 +69,33 @@ struct WireFile {
     label: Option<String>,
 }
 
-/// Serializes the project to pretty JSON.
+/// Serializes the project to pretty JSON with default analysis.
+#[cfg(test)]
 pub fn to_json(
     document: &Document,
     camera: &GridCamera,
     grid_visible: bool,
 ) -> Result<String, String> {
-    let file = project_file(document, camera, grid_visible);
+    to_json_with_analysis(document, camera, grid_visible, AnalysisState::default())
+}
+
+/// Serializes the project with explicit analysis settings.
+pub fn to_json_with_analysis(
+    document: &Document,
+    camera: &GridCamera,
+    grid_visible: bool,
+    analysis: AnalysisState,
+) -> Result<String, String> {
+    let file = project_file(document, camera, grid_visible, analysis);
     serde_json::to_string_pretty(&file).map_err(|error| error.to_string())
 }
 
-fn project_file(document: &Document, camera: &GridCamera, grid_visible: bool) -> ProjectFile {
+fn project_file(
+    document: &Document,
+    camera: &GridCamera,
+    grid_visible: bool,
+    analysis: AnalysisState,
+) -> ProjectFile {
     ProjectFile {
         format: FORMAT.to_string(),
         version: VERSION,
@@ -86,6 +106,7 @@ fn project_file(document: &Document, camera: &GridCamera, grid_visible: bool) ->
         },
         components: component_files(document),
         wires: wire_files(document),
+        analysis,
     }
 }
 
@@ -118,17 +139,36 @@ pub fn from_json(text: &str, library: &[ComponentDefinition]) -> Result<Project,
         document,
         camera: file.view.camera(),
         grid_visible: file.view.grid_visible,
+        analysis: file.analysis,
     })
 }
 
-/// Saves a project atomically to a JSON file.
+/// Saves a project atomically with default analysis.
+#[cfg(test)]
 pub fn save(
     path: &Path,
     document: &Document,
     camera: &GridCamera,
     grid_visible: bool,
 ) -> Result<(), String> {
-    let text = to_json(document, camera, grid_visible)?;
+    save_with_analysis(
+        path,
+        document,
+        camera,
+        grid_visible,
+        AnalysisState::default(),
+    )
+}
+
+/// Saves a project with explicit analysis settings.
+pub fn save_with_analysis(
+    path: &Path,
+    document: &Document,
+    camera: &GridCamera,
+    grid_visible: bool,
+    analysis: AnalysisState,
+) -> Result<(), String> {
+    let text = to_json_with_analysis(document, camera, grid_visible, analysis)?;
     backup(path)?;
     write_atomic(path, &text)
 }
@@ -309,7 +349,8 @@ fn parse_class(value: &str) -> Result<NetClass, String> {
 
 #[cfg(test)]
 mod tests {
-    use super::{backup_path, from_json, save, to_json};
+    use super::{backup_path, from_json, save, to_json, to_json_with_analysis};
+    use crate::analysis::AnalysisState;
     use crate::canvas::GridCamera;
     use crate::library;
     use crate::model::{Document, GridPos, Mirror, NetClass, Rotation};
@@ -365,6 +406,22 @@ mod tests {
         let backup = std::fs::read_to_string(backup_path(&path)).expect("backup");
         assert_eq!(backup, first);
         let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn analysis_state_round_trips() {
+        let state = AnalysisState {
+            kind: crate::analysis::AnalysisKind::Transient,
+            transient: crate::transient::TransientSettings {
+                adaptive: true,
+                tolerance: 1e-2,
+                ..crate::transient::TransientSettings::default()
+            },
+        };
+        let text = to_json_with_analysis(&Document::new(), &GridCamera::default(), true, state)
+            .expect("json");
+        let project = from_json(&text, library::builtin()).expect("load");
+        assert_eq!(project.analysis, state);
     }
 
     #[test]

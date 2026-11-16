@@ -40,7 +40,13 @@ impl GuiApp {
             self.message = "Save cancelled".to_string();
             return;
         };
-        match persist::save(&path, &self.document, &self.camera, self.grid_visible) {
+        match persist::save_with_analysis(
+            &path,
+            &self.document,
+            &self.camera,
+            self.grid_visible,
+            self.analysis_state(),
+        ) {
             Ok(()) => self.after_save(path),
             Err(error) => self.message = error,
         }
@@ -156,7 +162,13 @@ impl GuiApp {
             self.message = "File changed on disk".to_string();
             return;
         }
-        match persist::save(&path, &self.document, &self.camera, self.grid_visible) {
+        match persist::save_with_analysis(
+            &path,
+            &self.document,
+            &self.camera,
+            self.grid_visible,
+            self.analysis_state(),
+        ) {
             Ok(()) => self.finish_autosave(&path),
             Err(error) => self.fail_autosave(now, error),
         }
@@ -241,6 +253,7 @@ impl GuiApp {
         self.document = project.document;
         self.camera = project.camera;
         self.grid_visible = project.grid_visible;
+        self.apply_analysis_state(project.analysis);
         self.reset_transient();
         self.history.clear();
         self.initialized = true;
