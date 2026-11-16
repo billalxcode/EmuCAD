@@ -226,7 +226,8 @@ dan menghasilkan DC operating point atau error yang jelas.
   - Durasi transient dibatasi 10 detik.
   - Batas memori sampel belum.
 - [~] S3-08 Test transient.
-  - RC charge dan pengaruh kapasitansi lulus.
+  - RC charge, kapasitansi, induktansi, diode `cj0`, pulse width,
+    dan rise lulus.
   - Setting tidak valid ditolak.
   - Diode rectifier, BJT delay, dan transmission line belum.
 
@@ -255,7 +256,8 @@ transient, dan melihat grafik yang deterministik.
 - [~] S4-09 Test parameter effect di GUI.
   - Test membuktikan perubahan nilai menandai proyek dirty.
   - Test DC membuktikan resistor dan diode `n` mengubah hasil.
-  - Parameter transient dan AC belum diuji.
+  - Test transient membuktikan C, L, `cj0`, pulse width, dan rise.
+  - Parameter AC belum diuji.
 
 **Acceptance S4:** setiap parameter yang dapat diedit mengubah hasil
 simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.

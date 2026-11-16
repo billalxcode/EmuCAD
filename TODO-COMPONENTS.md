@@ -323,8 +323,10 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
   dipengaruhinya.
 - [~] C1-32 Buat parameter effect test untuk setiap parameter yang
   dipakai model.
-  - Resistor dan diode `n` sudah punya effect test DC.
-  - Parameter transient, AC, dan model lain belum.
+  - Resistor dan diode `n` punya effect test DC.
+  - Kapasitansi, induktansi, diode `cj0`, pulse width, dan rise punya
+    effect test transient.
+  - Parameter AC dan model lain belum.
 - [x] C1-33 Sembunyikan atau hapus parameter yang belum berfungsi
   dari inspector.
   - Inspector hanya menampilkan parameter dari schema device.
