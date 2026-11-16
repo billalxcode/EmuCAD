@@ -196,6 +196,8 @@ impl ModelClass {
             Self::Resistor
                 | Self::Capacitor
                 | Self::Inductor
+                | Self::Transformer
+                | Self::Crystal
                 | Self::TransmissionLine
                 | Self::VoltageSource
                 | Self::CurrentSource

@@ -1,15 +1,4 @@
 id,family,model_class,category,model,phase,priority
-passive.transformer.ideal_transformer,passive,Transformer,compact-analog,mutual inductance,S5-1,P1
-passive.transformer.center_tap_transformer,passive,Transformer,compact-analog,mutual inductance,S5-1,P1
-passive.transformer.autotransformer,passive,Transformer,compact-analog,mutual inductance,S5-1,P1
-passive.transformer.isolation_transformer,passive,Transformer,compact-analog,mutual inductance,S5-1,P1
-passive.transformer.pulse_transformer,passive,Transformer,compact-analog,mutual inductance,S5-1,P1
-passive.transformer.current_sense_transformer,passive,Transformer,compact-analog,mutual inductance,S5-1,P1
-passive.crystal.quartz_crystal,passive,Crystal,compact-analog,BVD resonator,S5-1,P1
-passive.crystal.ceramic_resonator,passive,Crystal,compact-analog,BVD resonator,S5-1,P1
-passive.crystal.tuning_fork_crystal,passive,Crystal,compact-analog,BVD resonator,S5-1,P1
-passive.crystal.tcxo,passive,Crystal,compact-analog,BVD resonator,S5-1,P1
-passive.crystal.vcxo,passive,Crystal,compact-analog,BVD resonator,S5-1,P1
 source.independent.sine_voltage_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
 source.independent.sine_current_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
 source.pulse.pwl_voltage_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2

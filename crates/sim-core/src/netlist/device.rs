@@ -55,6 +55,10 @@ pub enum DeviceKind {
     JfetP,
     /// A lossless transmission line.
     TransmissionLine,
+    /// A piezoelectric crystal with a BVD model.
+    Crystal,
+    /// A two-winding transformer with mutual inductance.
+    Transformer,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -117,6 +121,8 @@ impl DeviceKind {
             Self::JfetN => "jfet_n",
             Self::JfetP => "jfet_p",
             Self::TransmissionLine => "transmission_line",
+            Self::Crystal => "crystal",
+            Self::Transformer => "transformer",
             Self::Diode => "diode",
             _ => "custom",
         }

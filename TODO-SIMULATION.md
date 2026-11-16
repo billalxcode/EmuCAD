@@ -23,8 +23,8 @@ fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 | Item | Jumlah | Status |
 |---|---:|---|
 | Entri katalog | 500 | Ada |
-| Solver-backed | 215 | Ada model device |
-| Behavioral | 292 | Belum punya model solver |
+| Solver-backed | 219 | Ada model device |
+| Behavioral | 281 | Belum punya model solver |
 | Device model | 24 `DeviceKind` | Sebagian sudah ada model |
 | Analisis solver | DC, transient, AC, noise, distorsi, sensitivitas | Ada |
 | Netlist GUI | 1 | Ekstraksi dan DC check |
@@ -35,7 +35,7 @@ fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 
 | ID | Keputusan |
 |---|---|
-| Q01 | 500 entri bertahap; milestone pertama 215 solver-backed |
+| Q01 | 500 entri bertahap; milestone pertama 219 solver-backed |
 | Q02 | Compact model dengan parameter default per kelas |
 | Q03 | Model behavioral boleh dipakai dengan label fidelity |
 | Q04 | Co-sim AVR dan analog dikerjakan paling akhir |
@@ -62,7 +62,7 @@ fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 | Q25 | Hasil simulasi wajib deterministik |
 | Q26 | Structural penuh berarti gate-level untuk semua MCU dan memory |
 | Q27 | ngspice diinstal lokal |
-| Q28 | Passive dan source menjadi prioritas pertama setelah 215 |
+| Q28 | Passive dan source menjadi prioritas pertama setelah 219 |
 | Q29 | Board, enclosure, mounting, dan module boleh unsupported |
 | Q30 | Semua net diprobe pada full rate |
 | Q31 | AVR memakai structural penuh |
@@ -189,7 +189,7 @@ dan komponen unsupported punya alasan yang dapat ditampilkan.
 **Acceptance S1:** rangkaian R-C sederhana menghasilkan node dan device
 yang sama dengan referensi manual.
 
-## 6. Fase S2 - Integrasi Solver 215 Entri
+## 6. Fase S2 - Integrasi Solver 219 Entri
 
 - [x] S2-01 Tambahkan dependency `sim-analysis` ke `sim-gui`.
 - [ ] S2-02 Tambahkan domain simulasi: `Avr`, `Analog`, `Mixed`.
@@ -207,7 +207,7 @@ yang sama dengan referensi manual.
     logic gate, dan transmission line lulus.
   - Relay dan logic diuji lewat `CircuitBuilder` langsung.
 
-**Acceptance S2:** minimal 215 entri solver-backed dapat masuk netlist
+**Acceptance S2:** minimal 219 entri solver-backed dapat masuk netlist
 dan menghasilkan DC operating point atau error yang jelas.
 
 ## 7. Fase S3 - Transient dan Probe
@@ -275,7 +275,7 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
 
 ## 9. Fase S5 - Model Compact dan Behavioral Non-MCU
 
-- [x] S5-01 Klasifikasikan 292 entri.
+- [x] S5-01 Klasifikasikan 281 entri.
   - Lihat `docs/62-behavioral-classification.md`.
   - Data per entry ada di `docs/data/behavioral-classification.csv`.
   - Kategori: compact, behavioral, digital, mixed-signal,
@@ -388,7 +388,7 @@ dokumentasi menyebut batas fidelity.
 
 ## 15. Definition of Done
 
-- [ ] Minimal 215 entri solver-backed dapat disimulasikan pada milestone
+- [ ] Minimal 219 entri solver-backed dapat disimulasikan pada milestone
   pertama.
 - [ ] Seluruh 500 entri memiliki status simulasi yang jelas.
 - [ ] Netlist GUI tervalidasi.

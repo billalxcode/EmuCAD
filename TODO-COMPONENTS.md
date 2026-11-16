@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 208 entri dapat
-diinstansiasi lewat registry, dan 292 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 219 entri dapat
+diinstansiasi lewat registry, dan 281 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 208 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 219 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 208 | dapat masuk netlist lewat registry |
+| mapped | 219 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 208 `mapped` bukan 208 model yang benar. Audit menemukan
+Peringatan: 219 `mapped` bukan 219 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -160,8 +160,8 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C2-01 | 12 | 12 | 1 ideal benar; 11 butuh model khusus; potensiometer dan digital pot butuh pin kontrol. |
 | C2-02 | 13 | 13 | 1 ideal; 12 butuh ESR, ESL, C(V), atau kontrol. |
 | C2-03 | 10 | 10 | Ideal dan konstruksi dasar layak; coupled, current transformer, flyback, choke butuh 4 pin dan mutual. |
-| C2-04 | 6 | 0 | Belum ada model mutual inductance. |
-| C2-05 | 5 | 0 | Belum ada model BVD. |
+| C2-04 | 6 | 6 | Model mutual inductance ada; verifikasi batch belum. |
+| C2-05 | 5 | 5 | Model BVD ada; verifikasi batch belum. |
 | C2-06 | 9 | 9 | 1 ideal; lossy butuh loss; attenuator, splitter, coupler bukan transmission line. |
 | C2-07 | 12 | 5 | 4 DC dan AC serta 1 pulse benar; 7 waveform lain ditandai unsupported. |
 | C2-08 | 8 | 4 | 4 controlled benar; 4 behavioral belum. |
@@ -291,7 +291,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 829 test workspace lulus pada baseline audit ini.
+- 899 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -343,10 +343,12 @@ Target: 80 entri.
   dependent.
 - [ ] C2-03 Induktor 10 entri: ideal, lossy, saturable, coupled, air core,
   ferrite core, toroid, current transformer, flyback, common mode choke.
-- [ ] C2-04 Transformer 6 entri: ideal, center tap, autotransformer,
+- [~] C2-04 Transformer 6 entri: ideal, center tap, autotransformer,
   isolation, pulse, current sense.
-- [ ] C2-05 Crystal dan resonator 5 entri: quartz, ceramic, tuning fork,
+  - Model mutual inductance ada; reference vector dan verified belum.
+- [~] C2-05 Crystal dan resonator 5 entri: quartz, ceramic, tuning fork,
   TCXO, VCXO.
+  - Model BVD ada; reference vector dan verified belum.
 - [ ] C2-06 Transmission line dan RF passive 9 entri: ideal line, lossy
   line, coax, microstrip, stripline, stub, attenuator, splitter,
   directional coupler.

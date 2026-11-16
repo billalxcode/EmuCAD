@@ -72,6 +72,21 @@ const CAPACITOR: &[ParameterSpec] = &[ParameterSpec::number("capacitance", "F", 
 
 const INDUCTOR: &[ParameterSpec] = &[ParameterSpec::number("inductance", "H", 1e-3, 1e-15, 1e6)];
 
+const TRANSFORMER: &[ParameterSpec] = &[
+    ParameterSpec::number("turns_ratio", "ratio", 1.0, 1e-6, 1e6),
+    ParameterSpec::number("inductance", "H", 1e-3, 1e-12, 1e6),
+    ParameterSpec::number("coupling", "ratio", 0.99, 0.0, 1.0),
+    ParameterSpec::number("rp", "ohm", 0.1, 0.0, 1e6),
+    ParameterSpec::number("rs", "ohm", 0.1, 0.0, 1e6),
+];
+
+const CRYSTAL: &[ParameterSpec] = &[
+    ParameterSpec::number("frequency", "Hz", 1e6, 1e-3, 1e12),
+    ParameterSpec::number("capacitance", "F", 1e-14, 1e-18, 1e6),
+    ParameterSpec::number("resistance", "ohm", 50.0, 1e-9, 1e12),
+    ParameterSpec::number("c0", "F", 1e-12, 0.0, 1e6),
+];
+
 const TRANSMISSION_LINE: &[ParameterSpec] = &[
     ParameterSpec::number("z0", "ohm", 50.0, 1e-9, 1e12),
     ParameterSpec::number("delay", "s", 1e-9, 1e-15, 1e6),
@@ -202,6 +217,8 @@ const fn passive_parameters(device: &DeviceKind) -> &'static [ParameterSpec] {
         DeviceKind::Resistor => RESISTOR,
         DeviceKind::Capacitor => CAPACITOR,
         DeviceKind::Inductor => INDUCTOR,
+        DeviceKind::Transformer => TRANSFORMER,
+        DeviceKind::Crystal => CRYSTAL,
         DeviceKind::TransmissionLine => TRANSMISSION_LINE,
         _ => &[],
     }

@@ -3,6 +3,7 @@
 use crate::bjt::BjtModel;
 use crate::comparator::ComparatorModel;
 use crate::controlled::{CccsModel, CcvsModel, VccsModel, VcvsModel};
+use crate::crystal::CrystalModel;
 use crate::diode::DiodeModel;
 use crate::jfet::JfetModel;
 use crate::logic::LogicGateModel;
@@ -13,6 +14,7 @@ use crate::regulator::RegulatorModel;
 use crate::relay::RelayModel;
 use crate::source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
 use crate::switch::{IdealSwitchModel, SwitchModel};
+use crate::transformer::TransformerModel;
 use crate::transmission::TransmissionLineModel;
 use sim_core::{
     BOLTZMANN, Device, DeviceId, DeviceInstance, DeviceKind, ELEMENTARY_CHARGE, MnaContext,
@@ -97,6 +99,8 @@ fn passive_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel
         DeviceKind::IdealSwitch => Box::new(IdealSwitchModel::from_instance(instance)?),
         DeviceKind::Relay => Box::new(RelayModel::from_instance(instance)?),
         DeviceKind::TransmissionLine => Box::new(TransmissionLineModel::from_instance(instance)?),
+        DeviceKind::Crystal => Box::new(CrystalModel::from_instance(instance)?),
+        DeviceKind::Transformer => Box::new(TransformerModel::from_instance(instance)?),
         _ => return Ok(None),
     };
     Ok(Some(model))

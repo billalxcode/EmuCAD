@@ -232,3 +232,148 @@ fn bjt_switch_transient_toggles_collector() {
     assert!(high < 1.0, "collector high={high}");
     assert!(low > 4.0, "collector low={low}");
 }
+
+fn transformer_circuit(ratio: f64) -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let source = builder.node("source").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_transformer_source(&mut builder, source, ground);
+    add_transformer(&mut builder, source, ground, output, ratio);
+    add_load(&mut builder, "R1", output, ground);
+    builder.build().expect("circuit")
+}
+
+fn add_transformer_source(builder: &mut CircuitBuilder, source: NodeId, ground: NodeId) {
+    builder
+        .device(
+            "V1",
+            DeviceKind::PulseVoltageSource,
+            vec![source, ground],
+            params(&[
+                ("v1", 0.0),
+                ("v2", 10.0),
+                ("delay", 0.0),
+                ("rise", 1e-6),
+                ("fall", 1e-6),
+                ("width", 1.0),
+                ("period", 2.0),
+            ]),
+        )
+        .expect("V1");
+}
+
+fn add_transformer(
+    builder: &mut CircuitBuilder,
+    source: NodeId,
+    ground: NodeId,
+    output: NodeId,
+    ratio: f64,
+) {
+    builder
+        .device(
+            "T1",
+            DeviceKind::Transformer,
+            vec![source, ground, output, ground],
+            transformer_params(ratio),
+        )
+        .expect("T1");
+}
+
+fn transformer_params(ratio: f64) -> BTreeMap<String, f64> {
+    params(&[
+        ("turns_ratio", ratio),
+        ("inductance", 1.0),
+        ("coupling", 0.999),
+        ("rp", 0.1),
+        ("rs", 0.4),
+    ])
+}
+
+#[test]
+fn transformer_scales_secondary_voltage() {
+    let circuit = transformer_circuit(2.0);
+    let config = sim_analysis::TransientConfig {
+        dt: 1e-5,
+        steps: 1000,
+        ..sim_analysis::TransientConfig::default()
+    };
+    let samples = sim_analysis::transient(&circuit, &config).expect("transient");
+    let output = NodeId::new(2);
+    let voltage = samples[500].solution.voltage(output).expect("output");
+    assert!(voltage > 15.0, "output={voltage}");
+}
+
+fn crystal_circuit(frequency: f64) -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let drive = builder.node("drive").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_crystal_source(&mut builder, drive, ground);
+    add_load(&mut builder, "R1", drive, output);
+    add_crystal(&mut builder, output, ground, frequency);
+    builder.build().expect("circuit")
+}
+
+fn add_crystal_source(builder: &mut CircuitBuilder, drive: NodeId, ground: NodeId) {
+    builder
+        .device(
+            "V1",
+            DeviceKind::PulseVoltageSource,
+            vec![drive, ground],
+            params(&[
+                ("v1", 0.0),
+                ("v2", 1.0),
+                ("delay", 0.0),
+                ("rise", 1e-9),
+                ("fall", 1e-9),
+                ("width", 1e-6),
+                ("period", 2e-6),
+            ]),
+        )
+        .expect("V1");
+}
+
+fn add_crystal(builder: &mut CircuitBuilder, output: NodeId, ground: NodeId, frequency: f64) {
+    builder
+        .device(
+            "X1",
+            DeviceKind::Crystal,
+            vec![output, ground],
+            params(&[
+                ("frequency", frequency),
+                ("capacitance", 1e-14),
+                ("resistance", 50.0),
+                ("c0", 1e-12),
+            ]),
+        )
+        .expect("X1");
+}
+
+fn crystal_crossings(frequency: f64) -> usize {
+    let circuit = crystal_circuit(frequency);
+    let config = sim_analysis::TransientConfig {
+        dt: 1e-8,
+        steps: 500,
+        ..sim_analysis::TransientConfig::default()
+    };
+    let samples = sim_analysis::transient(&circuit, &config).expect("transient");
+    let mut count = 0;
+    let mut previous = samples[0].device_currents[2].unwrap_or(0.0);
+    for sample in samples.iter().skip(1) {
+        let value = sample.device_currents[2].unwrap_or(0.0);
+        if (previous < 0.0 && value >= 0.0) || (previous > 0.0 && value <= 0.0) {
+            count += 1;
+        }
+        previous = value;
+    }
+    count
+}
+
+#[test]
+fn crystal_oscillates_near_its_frequency() {
+    let slow = crystal_crossings(1e6);
+    let fast = crystal_crossings(2e6);
+    assert!(slow >= 4, "slow={slow}");
+    assert!(fast > slow, "slow={slow} fast={fast}");
+}

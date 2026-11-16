@@ -138,6 +138,8 @@ fn supported_passive(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::IdealSwitch
             | sim_core::DeviceKind::Relay
             | sim_core::DeviceKind::TransmissionLine
+            | sim_core::DeviceKind::Crystal
+            | sim_core::DeviceKind::Transformer
     )
 }
 

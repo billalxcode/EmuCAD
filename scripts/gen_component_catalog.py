@@ -77,11 +77,11 @@ add("passive.inductor", "Inductor", "Inductor", 2, "inductance", 1e-3, "H", [
     "toroidal inductor", "current transformer", "flyback transformer",
     "common mode choke",
 ])
-add("passive.transformer", "Transformer", None, 4, "turns_ratio", 1.0, "ratio", [
+add("passive.transformer", "Transformer", "Transformer", 4, "turns_ratio", 1.0, "ratio", [
     "ideal transformer", "center tap transformer", "autotransformer",
     "isolation transformer", "pulse transformer", "current sense transformer",
 ])
-add("passive.crystal", "Crystal", None, 2, "frequency", 1e6, "Hz", [
+add("passive.crystal", "Crystal", "Crystal", 2, "frequency", 1e6, "Hz", [
     "quartz crystal", "ceramic resonator", "tuning fork crystal", "TCXO",
     "VCXO",
 ])

@@ -3,7 +3,7 @@
 Katalog device yang tersedia di `sim-device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 86.
+dan transmission line sudah diimplementasikan. Total test `sim-device`: 109.
 
 ---
 
@@ -80,6 +80,8 @@ pub fn model_from_instance(
 | BJT | 3 | Ebers-Moll, junction dan diffusion capacitance | [35](35-bjt.md) |
 | JFET | 3 | Shichman-Hodges, kapasitansi konstan | [36](36-jfet.md) |
 | Transmission line | 4 | Lossless, constant step | [37](37-transmission-line.md) |
+| Transformer | 4 | Mutual inductance, winding resistance | - |
+| Crystal | 2 | BVD series RLC dan C0 | - |
 | VCVS | 4 | Linear gain | [47](47-controlled-sources.md) |
 | VCCS | 4 | Linear transconductance | [47](47-controlled-sources.md) |
 | CCCS | 4 | Linear current gain | [48](48-cccs-switch.md) |
@@ -322,8 +324,10 @@ Test device mencakup:
 - JFET arus, tanda P, dan kapasitansi.
 - Controlled source dan switch.
 - Transmission line.
+- Transformer mutual inductance.
+- Crystal BVD.
 
-Total test `sim-device`: 48 unit + 5 integration = 48.
+Total test `sim-device`: 104 unit + 5 integration = 109.
 
 ---
 

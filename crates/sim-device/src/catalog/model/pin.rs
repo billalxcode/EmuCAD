@@ -128,6 +128,13 @@ const LOGIC: &[PinRole] = &[
     PinRole::NegativeSupply,
     PinRole::Output,
 ];
+const CRYSTAL: &[PinRole] = &[PinRole::Terminal1, PinRole::Terminal2];
+const TRANSFORMER: &[PinRole] = &[
+    PinRole::Port1Positive,
+    PinRole::Port1Negative,
+    PinRole::Port2Positive,
+    PinRole::Port2Negative,
+];
 const LINE: &[PinRole] = &[
     PinRole::Port1Positive,
     PinRole::Port1Negative,
@@ -157,6 +164,8 @@ const fn first_non_empty(
 const fn passive_roles(device: &DeviceKind) -> &'static [PinRole] {
     match device {
         DeviceKind::Resistor | DeviceKind::Capacitor | DeviceKind::Inductor => TWO_TERMINAL,
+        DeviceKind::Crystal => CRYSTAL,
+        DeviceKind::Transformer => TRANSFORMER,
         DeviceKind::TransmissionLine => LINE,
         _ => &[],
     }

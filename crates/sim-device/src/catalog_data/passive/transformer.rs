@@ -1,13 +1,14 @@
 //! Generated passive transformer component catalog data.
 
 use crate::catalog::{ComponentSpec, ModelClass};
+use sim_core::DeviceKind;
 
 pub(crate) const ENTRIES: &[ComponentSpec] = &[
     ComponentSpec {
         id: "passive.transformer.ideal_transformer",
         name: "ideal transformer",
         class: ModelClass::Transformer,
-        device: None,
+        device: Some(DeviceKind::Transformer),
         pins: 4,
         parameter: "turns_ratio",
         default: 1.0,
@@ -18,7 +19,7 @@ pub(crate) const ENTRIES: &[ComponentSpec] = &[
         id: "passive.transformer.center_tap_transformer",
         name: "center tap transformer",
         class: ModelClass::Transformer,
-        device: None,
+        device: Some(DeviceKind::Transformer),
         pins: 4,
         parameter: "turns_ratio",
         default: 1.0,
@@ -29,7 +30,7 @@ pub(crate) const ENTRIES: &[ComponentSpec] = &[
         id: "passive.transformer.autotransformer",
         name: "autotransformer",
         class: ModelClass::Transformer,
-        device: None,
+        device: Some(DeviceKind::Transformer),
         pins: 4,
         parameter: "turns_ratio",
         default: 1.0,
@@ -40,7 +41,7 @@ pub(crate) const ENTRIES: &[ComponentSpec] = &[
         id: "passive.transformer.isolation_transformer",
         name: "isolation transformer",
         class: ModelClass::Transformer,
-        device: None,
+        device: Some(DeviceKind::Transformer),
         pins: 4,
         parameter: "turns_ratio",
         default: 1.0,
@@ -51,7 +52,7 @@ pub(crate) const ENTRIES: &[ComponentSpec] = &[
         id: "passive.transformer.pulse_transformer",
         name: "pulse transformer",
         class: ModelClass::Transformer,
-        device: None,
+        device: Some(DeviceKind::Transformer),
         pins: 4,
         parameter: "turns_ratio",
         default: 1.0,
@@ -62,7 +63,7 @@ pub(crate) const ENTRIES: &[ComponentSpec] = &[
         id: "passive.transformer.current_sense_transformer",
         name: "current sense transformer",
         class: ModelClass::Transformer,
-        device: None,
+        device: Some(DeviceKind::Transformer),
         pins: 4,
         parameter: "turns_ratio",
         default: 1.0,

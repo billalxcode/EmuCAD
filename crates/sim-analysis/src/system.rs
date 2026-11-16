@@ -177,7 +177,7 @@ pub(crate) fn build_branch_map(circuit: &Circuit) -> (Vec<Option<usize>>, usize)
 
 fn branch_slots(kind: &DeviceKind) -> usize {
     match kind {
-        DeviceKind::Ccvs => 2,
+        DeviceKind::Ccvs | DeviceKind::Transformer => 2,
         DeviceKind::VoltageSource
         | DeviceKind::PulseVoltageSource
         | DeviceKind::Vcvs
