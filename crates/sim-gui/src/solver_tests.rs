@@ -80,24 +80,27 @@ fn add_input(
 
 fn relay_driver(coil_voltage: f64) -> Circuit {
     let mut builder = CircuitBuilder::new();
+    let nodes = relay_nodes(&mut builder);
+    add_input(&mut builder, "V1", nodes.0, nodes.4, coil_voltage);
+    add_input(&mut builder, "V2", nodes.1, nodes.4, 5.0);
+    add_load(&mut builder, "R1", nodes.2, nodes.4);
+    add_load(&mut builder, "R2", nodes.3, nodes.4);
+    add_relay(&mut builder, nodes.0, nodes.4, nodes.1, nodes.2, nodes.3);
+    builder.build().expect("circuit")
+}
+
+fn relay_nodes(builder: &mut CircuitBuilder) -> (NodeId, NodeId, NodeId, NodeId, NodeId) {
     let coil = builder.node("coil").expect("node");
     let supply = builder.node("vcc").expect("node");
     let normally_open = builder.node("no").expect("node");
     let normally_closed = builder.node("nc").expect("node");
-    let ground = builder.ground();
-    add_input(&mut builder, "V1", coil, ground, coil_voltage);
-    add_input(&mut builder, "V2", supply, ground, 5.0);
-    add_load(&mut builder, "R1", normally_open, ground);
-    add_load(&mut builder, "R2", normally_closed, ground);
-    add_relay(
-        &mut builder,
+    (
         coil,
-        ground,
         supply,
         normally_open,
         normally_closed,
-    );
-    builder.build().expect("circuit")
+        builder.ground(),
+    )
 }
 
 fn add_relay(
@@ -166,4 +169,66 @@ fn assert_high(result: &sim_analysis::DcResult, node: NodeId) {
 fn assert_low(result: &sim_analysis::DcResult, node: NodeId) {
     let value = result.solution.voltage(node).expect("voltage");
     assert!(value < 0.5, "voltage={value}");
+}
+
+fn bjt_switch() -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let (drive, base, collector, supply, ground) = bjt_nodes(&mut builder);
+    add_pulse_source(&mut builder, drive, ground);
+    add_load(&mut builder, "R1", drive, base);
+    add_load(&mut builder, "R2", supply, collector);
+    add_input(&mut builder, "V2", supply, ground, 5.0);
+    builder
+        .device(
+            "Q1",
+            DeviceKind::Npn,
+            vec![collector, base, ground],
+            params(&[("bf", 100.0)]),
+        )
+        .expect("Q1");
+    builder.build().expect("circuit")
+}
+
+fn bjt_nodes(builder: &mut CircuitBuilder) -> (NodeId, NodeId, NodeId, NodeId, NodeId) {
+    let drive = builder.node("drive").expect("node");
+    let base = builder.node("base").expect("node");
+    let collector = builder.node("collector").expect("node");
+    let supply = builder.node("vcc").expect("node");
+    (drive, base, collector, supply, builder.ground())
+}
+
+fn add_pulse_source(builder: &mut CircuitBuilder, positive: NodeId, negative: NodeId) {
+    builder
+        .device(
+            "V1",
+            DeviceKind::PulseVoltageSource,
+            vec![positive, negative],
+            params(&[
+                ("v1", 0.0),
+                ("v2", 5.0),
+                ("delay", 0.0),
+                ("rise", 1e-3),
+                ("fall", 1e-3),
+                ("width", 0.5),
+                ("period", 1.0),
+            ]),
+        )
+        .expect("V1");
+}
+
+#[test]
+fn bjt_switch_transient_toggles_collector() {
+    let circuit = bjt_switch();
+    let config = sim_analysis::TransientConfig {
+        dt: 1e-4,
+        steps: 10_000,
+        use_dc_op: true,
+        ..sim_analysis::TransientConfig::default()
+    };
+    let samples = sim_analysis::transient(&circuit, &config).expect("transient");
+    let collector = NodeId::new(3);
+    let high = samples[2500].solution.voltage(collector).expect("high");
+    let low = samples[7500].solution.voltage(collector).expect("low");
+    assert!(high < 1.0, "collector high={high}");
+    assert!(low > 4.0, "collector low={low}");
 }

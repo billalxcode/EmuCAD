@@ -230,13 +230,10 @@ dan menghasilkan DC operating point atau error yang jelas.
 - [~] S3-07 Batasi buffer 10 detik simulasi untuk semua net full rate.
   - Durasi transient dibatasi 10 detik.
   - Batas memori sampel belum.
-- [~] S3-08 Test transient.
-  - RC charge, kapasitansi, induktansi, diode `cj0`, pulse width,
-    dan rise lulus.
-  - Setting tidak valid ditolak.
+- [x] S3-08 Test transient.
+  - RC, RL, C, L, diode `cj0`, pulse width/rise, dan rise lulus.
   - Arus resistor, source, induktor, kapasitor, dan diode lulus.
-  - Diode rectifier dan transmission line delay lulus.
-  - BJT switching transient belum.
+  - Diode rectifier, transmission line delay, dan BJT switching lulus.
 
 **Acceptance S3:** pengguna dapat memilih net atau pin, menjalankan
 transient, dan melihat grafik yang deterministik.
