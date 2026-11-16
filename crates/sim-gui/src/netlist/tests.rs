@@ -9,10 +9,10 @@ fn add(document: &mut Document, id: &str, x: i32, y: i32) -> ComponentId {
 }
 
 fn wire(document: &mut Document, points: &[(i32, i32)]) -> WireId {
-    let points = points.iter().map(|&(x, y)| GridPos::new(x, y)).collect();
-    document
-        .add_wire(library::builtin(), points, NetClass::Power)
-        .expect("wire")
+    let points: Vec<_> = points.iter().map(|&(x, y)| GridPos::new(x, y)).collect();
+    let id = document.add_wire(library::builtin(), points.clone(), NetClass::Power);
+    assert!(id.is_some(), "wire {points:?}");
+    id.expect("wire")
 }
 
 fn divider() -> Document {
@@ -241,4 +241,45 @@ fn numeric_values_are_parsed() {
     assert_eq!(super::parse_value("1000 ohm"), Some(1000.0));
     assert_eq!(super::parse_value("1e-6 F"), Some(1e-6));
     assert_eq!(super::parse_value("LED"), None);
+}
+
+fn bjt_circuit() -> Document {
+    let mut document = Document::default();
+    add(&mut document, "source.independent.dc_voltage_source", 0, 0);
+    add(&mut document, "passive.resistor.ideal_resistor", 8, 0);
+    add(&mut document, "transistor.bjt_npn.npn_small_signal", 8, 6);
+    add(
+        &mut document,
+        "source.independent.dc_voltage_source",
+        14,
+        10,
+    );
+    add(&mut document, "gnd", 8, 14);
+    set_parameter(&mut document, "V2", "voltage", 0.8);
+    wire(&mut document, &[(0, 1), (0, -2), (8, -2), (8, 1)]);
+    wire(&mut document, &[(4, 1), (4, 14), (8, 14), (9, 14)]);
+    wire(
+        &mut document,
+        &[(12, 1), (14, 1), (14, 4), (6, 4), (6, 7), (8, 7)],
+    );
+    wire(&mut document, &[(14, 11), (14, 8), (12, 8)]);
+    wire(&mut document, &[(8, 9), (8, 12), (8, 14)]);
+    wire(&mut document, &[(18, 11), (18, 12), (8, 12)]);
+    document
+}
+
+#[test]
+fn bjt_common_emitter_saturates() {
+    let document = bjt_circuit();
+    let netlist = extract(&document).expect("netlist");
+    let collector = find_part(&netlist, "Q1").pins[0];
+    let base = find_part(&netlist, "Q1").pins[1];
+    let result = solve_dc(&netlist).expect("dc");
+    let collector_voltage = result
+        .solution
+        .voltage(node_id(collector))
+        .expect("collector");
+    let base_voltage = result.solution.voltage(node_id(base)).expect("base");
+    assert!(collector_voltage < 1.0, "collector={collector_voltage}");
+    assert!((base_voltage - 0.8).abs() < 0.1, "base={base_voltage}");
 }

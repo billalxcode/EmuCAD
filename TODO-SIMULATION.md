@@ -200,8 +200,9 @@ yang sama dengan referensi manual.
   - Node voltage tampil di toolbar; branch current dan panel hasil belum.
 - [x] S2-07 Tandai komponen unsupported sebelum run.
 - [~] S2-08 Test rangkaian solver-backed.
-  - Resistor divider DC lulus.
-  - Diode clamp, BJT, op-amp, relay, logic, dan transmission line belum.
+  - Resistor divider, diode clamp/rectifier, common-emitter BJT,
+    dan transmission line lulus.
+  - Op-amp follower, relay driver, dan logic gate belum.
 
 **Acceptance S2:** minimal 215 entri solver-backed dapat masuk netlist
 dan menghasilkan DC operating point atau error yang jelas.
@@ -234,7 +235,8 @@ dan menghasilkan DC operating point atau error yang jelas.
     dan rise lulus.
   - Setting tidak valid ditolak.
   - Arus resistor, source, induktor, kapasitor, dan diode lulus.
-  - Diode rectifier, BJT delay, dan transmission line belum.
+  - Diode rectifier dan transmission line delay lulus.
+  - BJT switching transient, op-amp, relay, dan logic gate belum.
 
 **Acceptance S3:** pengguna dapat memilih net atau pin, menjalankan
 transient, dan melihat grafik yang deterministik.

@@ -9,10 +9,10 @@ fn add(document: &mut Document, id: &str, x: i32, y: i32) -> ComponentId {
 }
 
 fn wire(document: &mut Document, points: &[(i32, i32)]) -> WireId {
-    let points = points.iter().map(|&(x, y)| GridPos::new(x, y)).collect();
-    document
-        .add_wire(library::builtin(), points, NetClass::Power)
-        .expect("wire")
+    let points: Vec<_> = points.iter().map(|&(x, y)| GridPos::new(x, y)).collect();
+    let id = document.add_wire(library::builtin(), points.clone(), NetClass::Power);
+    assert!(id.is_some(), "wire {points:?}");
+    id.expect("wire")
 }
 
 fn circuit(second: &str) -> Document {
@@ -90,13 +90,77 @@ fn set_parameter(document: &mut Document, label: &str, name: &str, value: f64) {
 }
 
 fn output_node(document: &Document) -> usize {
+    node_of(document, "R1", 1)
+}
+
+fn node_of(document: &Document, label: &str, pin: usize) -> usize {
     let netlist = netlist::extract(document).expect("netlist");
-    let resistor = netlist
+    let component = netlist
         .components
         .iter()
-        .find(|part| part.label == "R1")
-        .expect("R1");
-    resistor.pins[1]
+        .find(|part| part.label == label)
+        .expect("component");
+    component.pins[pin]
+}
+
+fn value_at(trace: &TransientTrace, node: usize, time: f64) -> f64 {
+    let index = trace.index_at(time).expect("time");
+    trace.values[index][node]
+}
+
+fn rectifier_circuit() -> Document {
+    let mut document = Document::default();
+    add(&mut document, "source.pulse.pulse_voltage_source", 0, 0);
+    add(&mut document, "diode.rectifier.rectifier_diode", 8, 0);
+    add(&mut document, "passive.resistor.ideal_resistor", 8, 6);
+    add(&mut document, "gnd", 10, 10);
+    set_pulse_defaults(&mut document);
+    add_wires(&mut document);
+    document
+}
+
+fn line_circuit() -> Document {
+    let mut document = Document::default();
+    add(&mut document, "source.pulse.pulse_voltage_source", 0, 0);
+    add(
+        &mut document,
+        "passive.transmission_line.ideal_transmission_line",
+        8,
+        0,
+    );
+    add(&mut document, "passive.resistor.ideal_resistor", 8, 8);
+    add(&mut document, "gnd", 13, 12);
+    set_pulse_defaults(&mut document);
+    set_parameter(&mut document, "R1", "resistance", 50.0);
+    let line = document
+        .components()
+        .iter()
+        .find(|part| part.definition.contains("transmission_line"))
+        .expect("line")
+        .id;
+    document
+        .component_mut(line)
+        .expect("line")
+        .parameters
+        .insert("delay".to_string(), 1e-5);
+    wire(&mut document, &[(0, 1), (0, -2), (8, -2), (8, 1)]);
+    wire(&mut document, &[(4, 1), (4, 12), (13, 12), (14, 12)]);
+    wire(
+        &mut document,
+        &[
+            (12, 1),
+            (14, 1),
+            (14, 3),
+            (14, 6),
+            (18, 6),
+            (18, 12),
+            (14, 12),
+        ],
+    );
+    wire(&mut document, &[(12, 3), (14, 3)]);
+    wire(&mut document, &[(8, 3), (8, 9)]);
+    wire(&mut document, &[(12, 9), (13, 9), (13, 12)]);
+    document
 }
 
 fn device_index(trace: &TransientTrace, label: &str) -> usize {
@@ -242,6 +306,33 @@ fn diode_current_is_forward() {
     let trace = solve(&document, &transient_settings(1e-5, 100)).expect("trace");
     let current = current_at(&trace, "D1", 1e-3);
     assert!(current > 1e-3, "current={current}");
+}
+
+#[test]
+fn diode_rectifier_passes_positive_half() {
+    let document = rectifier_circuit();
+    let output = node_of(&document, "R1", 0);
+    let trace = solve(&document, &transient_settings(1e-3, 2000)).expect("trace");
+    let high = value_at(&trace, output, 0.5);
+    let low = value_at(&trace, output, 1.5);
+    assert!(high > 4.0, "high={high}");
+    assert!(low < 0.1, "low={low}");
+}
+
+#[test]
+fn transmission_line_delays_pulse() {
+    let document = line_circuit();
+    let output = node_of(&document, "R1", 0);
+    let settings = TransientSettings {
+        dt: 1e-6,
+        steps: 100,
+        use_dc_op: false,
+    };
+    let trace = solve(&document, &settings).expect("trace");
+    let before = value_at(&trace, output, 5e-6);
+    let after = value_at(&trace, output, 15e-6);
+    assert!(before < 0.5, "before={before}");
+    assert!(after > 2.0, "after={after}");
 }
 
 #[test]
