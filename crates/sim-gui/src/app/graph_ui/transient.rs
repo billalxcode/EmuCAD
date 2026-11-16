@@ -1,4 +1,5 @@
 use super::*;
+use crate::transient::TransientSettings;
 
 const SERIES_COLORS: [egui::Color32; 8] = [
     egui::Color32::from_rgb(86, 129, 255),
@@ -14,9 +15,11 @@ const SERIES_COLORS: [egui::Color32; 8] = [
 pub(crate) fn show_transient(
     ui: &mut egui::Ui,
     trace: &crate::transient::TransientTrace,
+    settings: &mut TransientSettings,
     selected: &mut BTreeSet<usize>,
     selected_currents: &mut BTreeSet<usize>,
 ) {
+    show_transient_settings(ui, settings);
     ui.label(transient_header(trace, selected.len()));
     select_nets(ui, trace, selected);
     let width = ui.available_width().max(320.0);
@@ -125,13 +128,108 @@ fn time_at(plot: egui::Rect, duration: f64, x: f32) -> f64 {
 }
 
 fn transient_header(trace: &crate::transient::TransientTrace, selected: usize) -> String {
+    let step = if trace.adaptive {
+        "adaptive".to_string()
+    } else {
+        format!("dt {:.3} ms", trace.dt * 1e3)
+    };
     format!(
-        "{} samples  dt {:.3} ms  duration {:.3} ms  {} nets",
+        "{} samples  {}  duration {:.3} ms  {} nets",
         trace.values.len(),
-        trace.dt * 1e3,
+        step,
         trace.duration() * 1e3,
         selected
     )
+}
+
+pub(crate) fn show_transient_settings(ui: &mut egui::Ui, settings: &mut TransientSettings) {
+    ui.collapsing("Settings", |ui| {
+        ui.checkbox(&mut settings.use_dc_op, "Start from DC op");
+        ui.checkbox(&mut settings.adaptive, "Adaptive step");
+        if settings.adaptive {
+            show_adaptive_settings(ui, settings);
+        } else {
+            show_fixed_settings(ui, settings);
+        }
+    });
+}
+
+fn show_fixed_settings(ui: &mut egui::Ui, settings: &mut TransientSettings) {
+    show_number(ui, "dt", &mut settings.dt, 1e-12, 1.0, 1e-6, " s");
+    show_integer(
+        ui,
+        "steps",
+        &mut settings.steps,
+        1,
+        settings.max_samples.max(1),
+    );
+    show_gmin(ui, settings);
+    show_max_samples(ui, settings);
+}
+
+fn show_adaptive_settings(ui: &mut egui::Ui, settings: &mut TransientSettings) {
+    show_adaptive_times(ui, settings);
+    show_number(
+        ui,
+        "tolerance",
+        &mut settings.tolerance,
+        1e-9,
+        1e-1,
+        1e-6,
+        "",
+    );
+    show_gmin(ui, settings);
+    show_max_samples(ui, settings);
+}
+
+fn show_adaptive_times(ui: &mut egui::Ui, settings: &mut TransientSettings) {
+    show_number(
+        ui,
+        "init dt",
+        &mut settings.initial_dt,
+        1e-12,
+        1.0,
+        1e-6,
+        "s",
+    );
+    show_number(ui, "min dt", &mut settings.min_dt, 1e-15, 1.0, 1e-9, "s");
+    show_number(ui, "max dt", &mut settings.max_dt, 1e-12, 1.0, 1e-6, "s");
+}
+
+fn show_gmin(ui: &mut egui::Ui, settings: &mut TransientSettings) {
+    show_number(ui, "gmin", &mut settings.gmin, 0.0, 1e-3, 1e-15, " S");
+}
+
+fn show_max_samples(ui: &mut egui::Ui, settings: &mut TransientSettings) {
+    let max = settings.max_samples.max(1);
+    show_integer(ui, "max samples", &mut settings.max_samples, 1, max);
+}
+
+fn show_number(
+    ui: &mut egui::Ui,
+    label: &str,
+    value: &mut f64,
+    min: f64,
+    max: f64,
+    speed: f64,
+    suffix: &str,
+) {
+    ui.horizontal(|ui| {
+        ui.label(label);
+        ui.add(
+            egui::DragValue::new(value)
+                .range(min..=max)
+                .speed(speed)
+                .suffix(suffix),
+        );
+    });
+}
+
+fn show_integer(ui: &mut egui::Ui, label: &str, value: &mut usize, min: usize, max: usize) {
+    ui.horizontal(|ui| {
+        ui.label(label);
+        ui.add(egui::DragValue::new(value).range(min..=max));
+    });
 }
 
 fn select_nets(
@@ -515,6 +613,7 @@ mod tests {
             devices: Vec::new(),
             currents: vec![Vec::new(); 100],
             dt: 1e-3,
+            adaptive: false,
         }
     }
 
@@ -524,6 +623,30 @@ mod tests {
         let plot = egui::Rect::from_min_size(egui::pos2(0.0, 0.0), egui::vec2(20.0, 100.0));
         let points = series_points(plot, &trace, 1, (0.0, 5.0));
         assert!(points.iter().any(|point| point.y <= plot.top() + 1.0));
+    }
+
+    #[test]
+    fn transient_settings_render_fixed_and_adaptive() {
+        let mut settings = TransientSettings::default();
+        let context = egui::Context::default();
+        let input = egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(640.0, 360.0),
+            )),
+            ..Default::default()
+        };
+        let mut output = context.run_ui(input.clone(), |ui| {
+            show_transient_settings(ui, &mut settings);
+        });
+        output.textures_delta.clear();
+        assert!(!output.shapes.is_empty());
+        settings.adaptive = true;
+        let mut output = context.run_ui(input, |ui| {
+            show_transient_settings(ui, &mut settings);
+        });
+        output.textures_delta.clear();
+        assert!(!output.shapes.is_empty());
     }
 
     #[test]

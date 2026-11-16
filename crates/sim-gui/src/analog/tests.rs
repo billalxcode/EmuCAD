@@ -45,6 +45,7 @@ fn transient_worker_returns_trace() {
         dt: 1e-6,
         steps: 2,
         use_dc_op: true,
+        ..TransientSettings::default()
     };
     let request = worker.request_transient(test_document(), settings);
     let Event::Transient {

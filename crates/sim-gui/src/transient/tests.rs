@@ -194,6 +194,7 @@ fn transient_settings(dt: f64, steps: usize) -> TransientSettings {
         dt,
         steps,
         use_dc_op: true,
+        ..TransientSettings::default()
     }
 }
 
@@ -339,12 +340,56 @@ fn transmission_line_delays_pulse() {
         dt: 1e-6,
         steps: 100,
         use_dc_op: false,
+        ..TransientSettings::default()
     };
     let trace = solve(&document, &settings).expect("trace");
     let before = value_at(&trace, output, 5e-6);
     let after = value_at(&trace, output, 15e-6);
     assert!(before < 0.5, "before={before}");
     assert!(after > 2.0, "after={after}");
+}
+
+#[test]
+fn adaptive_transient_uses_variable_steps() {
+    let document = rc_circuit(1e-6);
+    let output = output_node(&document);
+    let settings = TransientSettings {
+        adaptive: true,
+        initial_dt: 1e-6,
+        max_dt: 1e-3,
+        tolerance: 1e-3,
+        max_samples: 1000,
+        ..TransientSettings::default()
+    };
+    let trace = solve(&document, &settings).expect("adaptive");
+    assert!(trace.adaptive);
+    assert!(trace.values.len() > 1);
+    assert!(trace.duration() > 1e-3);
+    let last = trace.values.last().expect("last");
+    assert!(last[output] > 4.0, "voltage={}", last[output]);
+}
+
+#[test]
+fn sample_limit_rejects_oversized_fixed_run() {
+    let document = rc_circuit(1e-6);
+    let settings = TransientSettings {
+        dt: 1e-6,
+        steps: 1000,
+        max_samples: 100,
+        ..TransientSettings::default()
+    };
+    assert!(solve(&document, &settings).is_err());
+}
+
+#[test]
+fn adaptive_rejects_bad_tolerance() {
+    let document = rc_circuit(1e-6);
+    let settings = TransientSettings {
+        adaptive: true,
+        tolerance: 0.0,
+        ..TransientSettings::default()
+    };
+    assert!(solve(&document, &settings).is_err());
 }
 
 #[test]
@@ -359,6 +404,7 @@ fn invalid_settings_are_rejected() {
         dt: 1.0,
         steps: 11,
         use_dc_op: true,
+        ..TransientSettings::default()
     };
     assert!(solve(&document, &too_long).is_err());
 }
