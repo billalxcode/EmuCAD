@@ -296,3 +296,108 @@ fn diode_pin_roles_are_anode_and_cathode() {
         &[sim_device::PinRole::Anode, sim_device::PinRole::Cathode]
     );
 }
+
+fn parallel_resistors() -> Document {
+    let mut document = Document::default();
+    add(&mut document, "source.independent.dc_voltage_source", 0, 0);
+    add(&mut document, "passive.resistor.ideal_resistor", 8, 0);
+    add(&mut document, "passive.resistor.ideal_resistor", 20, 0);
+    add(&mut document, "passive.resistor.ideal_resistor", 20, 6);
+    add(&mut document, "gnd", 10, 20);
+    wire(&mut document, &[(0, 1), (0, -4), (8, -4), (8, 1)]);
+    wire(&mut document, &[(8, -4), (8, -8), (20, -8), (20, 1)]);
+    wire(&mut document, &[(20, 1), (20, 7)]);
+    wire(
+        &mut document,
+        &[(4, 1), (4, 22), (14, 22), (14, 20), (11, 20)],
+    );
+    wire(&mut document, &[(12, 1), (16, 1), (16, 22), (14, 22)]);
+    wire(
+        &mut document,
+        &[(24, 1), (27, 1), (27, 10), (27, 22), (16, 22)],
+    );
+    wire(&mut document, &[(24, 7), (26, 7), (26, 10), (27, 10)]);
+    document
+}
+
+#[test]
+fn parallel_resistors_share_both_nets() {
+    let netlist = extract(&parallel_resistors()).expect("netlist");
+    let source = find_part(&netlist, "V1");
+    let r1 = find_part(&netlist, "R1");
+    let r2 = find_part(&netlist, "R2");
+    let r3 = find_part(&netlist, "R3");
+    assert_eq!(r1.pins[0], r2.pins[0]);
+    assert_eq!(r2.pins[0], r3.pins[0]);
+    assert_eq!(r1.pins[0], source.pins[0]);
+    assert_eq!(r1.pins[1], r2.pins[1]);
+    assert_eq!(r2.pins[1], r3.pins[1]);
+    assert_eq!(r1.pins[1], netlist.ground);
+}
+
+#[test]
+fn three_way_wire_junction_merges_nets() {
+    let netlist = extract(&parallel_resistors()).expect("netlist");
+    let r1 = find_part(&netlist, "R1");
+    let r2 = find_part(&netlist, "R2");
+    assert_eq!(r1.pins[0], r2.pins[0]);
+}
+
+#[test]
+fn duplicate_labels_do_not_conflict() {
+    let mut document = parallel_resistors();
+    let first = document.wires()[0].id;
+    let second = document.wires()[1].id;
+    document.set_wire_label(first, Some("SIG".to_string()));
+    document.set_wire_label(second, Some("SIG".to_string()));
+    let netlist = extract(&document).expect("netlist");
+    assert!(netlist.nodes.iter().any(|node| node.name == "SIG"));
+}
+
+#[test]
+fn conflicting_labels_are_rejected() {
+    let mut document = parallel_resistors();
+    let first = document.wires()[0].id;
+    let second = document.wires()[1].id;
+    document.set_wire_label(first, Some("A".to_string()));
+    document.set_wire_label(second, Some("B".to_string()));
+    assert!(matches!(
+        extract(&document),
+        Err(NetlistError::LabelConflict { .. })
+    ));
+}
+
+#[test]
+fn overlapping_pins_are_rejected() {
+    let mut document = Document::default();
+    add(&mut document, "passive.resistor.ideal_resistor", 0, 0);
+    add(&mut document, "passive.resistor.ideal_resistor", 0, 0);
+    assert!(matches!(
+        extract(&document),
+        Err(NetlistError::OverlappingPins { .. })
+    ));
+}
+
+#[test]
+fn dangling_wire_endpoint_is_rejected() {
+    let mut document = Document::default();
+    add(&mut document, "passive.resistor.ideal_resistor", 0, 0);
+    let ground = add(&mut document, "gnd", 0, 2);
+    wire(&mut document, &[(0, 1), (0, 2), (1, 2)]);
+    document.remove(ground);
+    assert!(matches!(
+        extract(&document),
+        Err(NetlistError::WireStub { .. })
+    ));
+}
+
+#[test]
+fn undriven_island_is_rejected() {
+    let mut document = parallel_resistors();
+    add(&mut document, "passive.resistor.ideal_resistor", 34, 0);
+    wire(&mut document, &[(34, 1), (34, -2), (38, -2), (38, 1)]);
+    assert!(matches!(
+        extract(&document),
+        Err(NetlistError::FloatingIsland { .. })
+    ));
+}

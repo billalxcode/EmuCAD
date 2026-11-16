@@ -154,6 +154,16 @@ pub(crate) enum NetlistError {
         name: String,
         value: f64,
     },
+    OverlappingPins {
+        first: String,
+        second: String,
+    },
+    WireStub {
+        point: GridPos,
+    },
+    FloatingIsland {
+        net: String,
+    },
 }
 
 impl fmt::Display for NetlistError {
@@ -181,6 +191,29 @@ impl NetlistError {
             Self::UnknownParameter { .. } | Self::ParameterOutOfRange { .. } => {
                 self.parameter_message()
             }
+            Self::OverlappingPins { .. } => self.layout_message(),
+            Self::WireStub { .. } | Self::FloatingIsland { .. } => self.net_message(),
+        }
+    }
+
+    fn layout_message(&self) -> String {
+        match self {
+            Self::OverlappingPins { first, second } => {
+                format!("pins overlap: {first} and {second}")
+            }
+            _ => String::new(),
+        }
+    }
+
+    fn net_message(&self) -> String {
+        match self {
+            Self::WireStub { point } => {
+                format!("wire endpoint has no connection at {}", point_text(*point))
+            }
+            Self::FloatingIsland { net } => {
+                format!("net {net} has no source or ground")
+            }
+            _ => String::new(),
         }
     }
 
@@ -280,6 +313,8 @@ impl PlacedPart {
 /// Extracts an electrical netlist from a schematic document.
 pub(crate) fn extract(document: &Document) -> Result<Netlist, NetlistError> {
     let parts = collect_parts(document)?;
+    validate_pin_positions(&parts)?;
+    validate_wire_endpoints(document, &parts)?;
     let points = collect_points(document, &parts);
     let index = PointIndex::new(points);
     let mut set = DisjointSet::new(index.len());
@@ -289,12 +324,121 @@ pub(crate) fn extract(document: &Document) -> Result<Netlist, NetlistError> {
     let ground = ground_root(&parts, &index, &mut set)?;
     let table = build_nodes(document, &parts, &index, &mut set, ground)?;
     validate_connections(&parts, &index, &mut set)?;
+    validate_driver_islands(&parts, &index, &mut set, &table)?;
     let components = build_components(&parts, &index, &mut set, &table);
     Ok(Netlist {
         nodes: table.nodes,
         ground: 0,
         components,
     })
+}
+
+fn point_text(point: GridPos) -> String {
+    format!("({}, {})", point.x, point.y)
+}
+
+fn validate_pin_positions(parts: &[PlacedPart]) -> Result<(), NetlistError> {
+    let mut seen: BTreeMap<GridPos, String> = BTreeMap::new();
+    for part in parts {
+        for pin in &part.pins {
+            let name = format!("{}.{}", part.label, pin.name);
+            if let Some(existing) = seen.insert(pin.point, name.clone()) {
+                return Err(NetlistError::OverlappingPins {
+                    first: existing,
+                    second: name,
+                });
+            }
+        }
+    }
+    Ok(())
+}
+
+fn validate_wire_endpoints(document: &Document, parts: &[PlacedPart]) -> Result<(), NetlistError> {
+    let pins: BTreeSet<GridPos> = parts
+        .iter()
+        .flat_map(|part| part.pins.iter().map(|pin| pin.point))
+        .collect();
+    let junctions: BTreeSet<GridPos> = document.junctions().into_iter().collect();
+    let mut endpoints: BTreeMap<GridPos, usize> = BTreeMap::new();
+    for wire in document.wires() {
+        count_endpoint(&mut endpoints, wire.points.first());
+        count_endpoint(&mut endpoints, wire.points.last());
+    }
+    for (point, count) in endpoints {
+        if count >= 2 || pins.contains(&point) || junctions.contains(&point) {
+            continue;
+        }
+        return Err(NetlistError::WireStub { point });
+    }
+    Ok(())
+}
+
+fn count_endpoint(endpoints: &mut BTreeMap<GridPos, usize>, point: Option<&GridPos>) {
+    if let Some(point) = point {
+        *endpoints.entry(*point).or_default() += 1;
+    }
+}
+
+fn is_source(part: &str) -> bool {
+    part.contains("voltage_source") || part.contains("current_source") || part.contains("battery")
+}
+
+fn validate_driver_islands(
+    parts: &[PlacedPart],
+    index: &PointIndex,
+    set: &mut DisjointSet,
+    table: &NodeTable,
+) -> Result<(), NetlistError> {
+    let mut islands = DisjointSet::new(table.nodes.len());
+    let mut driven = vec![false; table.nodes.len()];
+    driven[0] = true;
+    for part in parts {
+        let nets = part_nets(part, index, set, table);
+        union_nets(&mut islands, &nets);
+        if part.kind == PartKind::Gnd || is_source(part.part) {
+            for &net in &nets {
+                driven[net] = true;
+            }
+        }
+    }
+    let mut roots = vec![false; table.nodes.len()];
+    for (net, is_driven) in driven.iter().enumerate() {
+        if *is_driven {
+            roots[islands.find(net)] = true;
+        }
+    }
+    for (index, node) in table.nodes.iter().enumerate() {
+        if !roots[islands.find(index)] {
+            return Err(NetlistError::FloatingIsland {
+                net: node.name.clone(),
+            });
+        }
+    }
+    Ok(())
+}
+
+fn part_nets(
+    part: &PlacedPart,
+    index: &PointIndex,
+    set: &mut DisjointSet,
+    table: &NodeTable,
+) -> Vec<usize> {
+    part.pins
+        .iter()
+        .map(|pin| {
+            let root = set.find(index.get(pin.point));
+            *table.by_root.get(&root).expect("pin root has node")
+        })
+        .collect()
+}
+
+fn union_nets(islands: &mut DisjointSet, nets: &[usize]) {
+    let Some((&first, rest)) = nets.split_first() else {
+        return;
+    };
+    for &net in rest {
+        islands.union(first, net);
+    }
 }
 
 fn collect_parts(document: &Document) -> Result<Vec<PlacedPart>, NetlistError> {

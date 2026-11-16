@@ -177,14 +177,15 @@ dan komponen unsupported punya alasan yang dapat ditampilkan.
   - Prioritaskan label wire.
   - Jika tidak ada label, gunakan class dan index.
 - [x] S1-04 Deteksi ground dan supply dari komponen atau net class.
-- [~] S1-05 Validasi topologi.
-  - Pin floating sudah ditolak.
-  - Ground hilang dan ground ganda sudah ditolak.
-  - Net tanpa driver, pin bertumpuk, dan wire stub belum.
+- [x] S1-05 Validasi topologi.
+  - Pin floating, ground hilang, dan ground ganda ditolak.
+  - Pin bertumpuk, wire stub, dan island tanpa driver ditolak.
+  - Label net duplikat digabung; label berbeda pada satu net ditolak.
 - [x] S1-06 Buat `Circuit` memakai `CircuitBuilder`.
-- [~] S1-07 Test ekstraksi.
+- [x] S1-07 Test ekstraksi.
   - Divider, pin floating, ground hilang, ground ganda, dan unsupported lulus.
-  - Paralel, junction 3 arah, dan label net duplikat belum.
+  - Paralel, junction 3 arah, label duplikat, pin bertumpuk, wire stub,
+    dan island tanpa driver lulus.
 
 **Acceptance S1:** rangkaian R-C sederhana menghasilkan node dan device
 yang sama dengan referensi manual.
