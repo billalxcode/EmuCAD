@@ -14,7 +14,7 @@ pub(super) fn run_steps(
     for _ in 0..config.steps {
         let (next, residual, iterations) = step_sample(system, &current, config, method, newton)?;
         time = next_time(time, step)?;
-        samples.push(sample(time, &next, residual, iterations));
+        samples.push(sample(system, time, &next, residual, iterations));
         current = next;
     }
     Ok(samples)
@@ -79,10 +79,17 @@ fn next_time(time: Time, step: Time) -> Result<Time, SimError> {
         .ok_or_else(|| SimError::Internal("transient time overflow".to_string()))
 }
 
-fn sample(time: Time, solution: &Solution, residual: f64, iterations: usize) -> TransientSample {
+fn sample(
+    system: &SimulationSystem,
+    time: Time,
+    solution: &Solution,
+    residual: f64,
+    iterations: usize,
+) -> TransientSample {
     TransientSample {
         time,
         solution: solution.clone(),
+        device_currents: system.currents(solution),
         residual,
         iterations,
     }

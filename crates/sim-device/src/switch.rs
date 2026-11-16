@@ -57,6 +57,12 @@ impl DeviceModel for SwitchModel {
     fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
         Ok(())
     }
+
+    fn terminal_current(&self, solution: &Solution) -> Option<f64> {
+        let control = solution.voltage(self.pins[2])? - solution.voltage(self.pins[3])?;
+        let voltage = solution.voltage(self.pins[0])? - solution.voltage(self.pins[1])?;
+        Some(self.conductance(control) * voltage)
+    }
 }
 
 /// A two-terminal switch with a fixed closed or open state.
@@ -95,6 +101,11 @@ impl DeviceModel for IdealSwitchModel {
 
     fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
         Ok(())
+    }
+
+    fn terminal_current(&self, solution: &Solution) -> Option<f64> {
+        let voltage = solution.voltage(self.pins[0])? - solution.voltage(self.pins[1])?;
+        Some(self.conductance * voltage)
     }
 }
 

@@ -250,6 +250,7 @@ pub struct GuiApp {
     transient: Option<crate::transient::TransientTrace>,
     transient_settings: crate::transient::TransientSettings,
     transient_selected: BTreeSet<usize>,
+    transient_selected_currents: BTreeSet<usize>,
     transient_open: bool,
     uart: UartLog,
     uart_input: String,

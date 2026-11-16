@@ -182,6 +182,10 @@ impl DeviceModel for DiodeModel {
         self.cap_voltage_prev = first - second;
         Ok(())
     }
+
+    fn terminal_current(&self, _solution: &Solution) -> Option<f64> {
+        Some(self.current(self.junction_voltage))
+    }
 }
 
 #[cfg(test)]

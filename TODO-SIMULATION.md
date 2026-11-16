@@ -217,9 +217,11 @@ dan menghasilkan DC operating point atau error yang jelas.
 - [x] S3-03 Tambahkan probe untuk semua net voltage pada full rate.
   - Trace menyimpan semua node pada setiap langkah.
   - Grafik membatasi tampilan ke 8 series.
-- [ ] S3-04 Tambahkan probe branch current.
-  - `Solution` menyimpan branch current per indeks MNA, bukan per komponen.
-  - Butuh API current per device sebelum probe arus aman.
+- [x] S3-04 Tambahkan probe branch current.
+  - API terminal current tersedia untuk R, C, L, source, switch,
+    relay coil, dan diode.
+  - Nilai arus tampil di tabel probe pada waktu cursor.
+  - Grafik arus terpisah belum.
 - [x] S3-05 Tambahkan decimation min/max untuk grafik.
   - Bucket min/max menjaga spike tetap terlihat.
 - [x] S3-06 Tambahkan cursor waktu dan cycle.
@@ -231,6 +233,7 @@ dan menghasilkan DC operating point atau error yang jelas.
   - RC charge, kapasitansi, induktansi, diode `cj0`, pulse width,
     dan rise lulus.
   - Setting tidak valid ditolak.
+  - Arus resistor, source, induktor, kapasitor, dan diode lulus.
   - Diode rectifier, BJT delay, dan transmission line belum.
 
 **Acceptance S3:** pengguna dapat memilih net atau pin, menjalankan

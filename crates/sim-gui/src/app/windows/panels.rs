@@ -23,12 +23,13 @@ impl GuiApp {
         let mut open = self.transient_open;
         let trace = self.transient.as_ref();
         let selected = &mut self.transient_selected;
+        let selected_currents = &mut self.transient_selected_currents;
         egui::Window::new("Transient")
             .open(&mut open)
             .default_size([620.0, 340.0])
             .show(ui.ctx(), |ui| {
                 if let Some(trace) = trace {
-                    show_transient(ui, trace, selected);
+                    show_transient(ui, trace, selected, selected_currents);
                 } else {
                     ui.label("Run transient to see node voltages");
                 }

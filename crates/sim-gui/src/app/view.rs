@@ -21,6 +21,7 @@ impl GuiApp {
         match crate::transient::solve(&self.document, &self.transient_settings) {
             Ok(trace) => {
                 self.transient_selected = default_transient_selection(&trace);
+                self.transient_selected_currents.clear();
                 self.message = format!(
                     "Transient: {} samples, {:.3} ms",
                     trace.values.len(),

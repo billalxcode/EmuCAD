@@ -79,6 +79,12 @@ impl DeviceModel for RelayModel {
     fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
         Ok(())
     }
+
+    fn terminal_current(&self, solution: &Solution) -> Option<f64> {
+        let positive = solution.voltage(self.coil[0])?;
+        let negative = solution.voltage(self.coil[1])?;
+        Some((positive - negative) / self.coil_resistance)
+    }
 }
 
 #[cfg(test)]

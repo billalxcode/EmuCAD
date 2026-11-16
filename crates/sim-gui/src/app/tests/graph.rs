@@ -73,9 +73,12 @@ fn transient_graph_renders_in_egui_context() {
         times: vec![0.0, 1e-3, 2e-3],
         nodes: vec!["0".to_string(), "out".to_string()],
         values: vec![vec![0.0, 0.0], vec![0.0, 2.5], vec![0.0, 5.0]],
+        devices: Vec::new(),
+        currents: vec![Vec::new(); 3],
         dt: 1e-3,
     };
     let mut selected = std::collections::BTreeSet::from([1]);
+    let mut selected_currents = std::collections::BTreeSet::new();
     let context = eframe::egui::Context::default();
     let input = eframe::egui::RawInput {
         screen_rect: Some(eframe::egui::Rect::from_min_size(
@@ -85,7 +88,7 @@ fn transient_graph_renders_in_egui_context() {
         ..Default::default()
     };
     let mut output = context.run_ui(input, |ui| {
-        crate::app::show_transient(ui, &trace, &mut selected);
+        crate::app::show_transient(ui, &trace, &mut selected, &mut selected_currents);
     });
     output.textures_delta.clear();
     assert!(!output.shapes.is_empty());

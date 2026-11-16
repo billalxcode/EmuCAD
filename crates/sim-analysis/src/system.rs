@@ -88,6 +88,15 @@ impl SimulationSystem {
         Ok(context)
     }
 
+    /// Returns one terminal-current probe per circuit device.
+    #[must_use]
+    pub(crate) fn currents(&self, solution: &Solution) -> Vec<Option<f64>> {
+        self.models
+            .iter()
+            .map(|model| model.terminal_current(solution))
+            .collect()
+    }
+
     /// Updates all model states after convergence.
     pub(crate) fn update(&mut self, solution: &Solution) -> Result<(), SimError> {
         for model in &mut self.models {

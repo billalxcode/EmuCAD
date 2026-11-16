@@ -39,6 +39,8 @@ pub struct TransientSample {
     pub time: Time,
     /// Solution at this time.
     pub solution: Solution,
+    /// Terminal current probes for each circuit device.
+    pub device_currents: Vec<Option<f64>>,
     /// Maximum node-voltage change at convergence.
     pub residual: f64,
     /// Newton iterations used for this step.

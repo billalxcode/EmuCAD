@@ -1,4 +1,4 @@
-use super::{TransientSettings, solve};
+use super::{TransientSettings, TransientTrace, solve};
 use crate::library;
 use crate::model::{ComponentId, Document, GridPos, Mirror, NetClass, Rotation, WireId};
 use crate::netlist;
@@ -99,6 +99,20 @@ fn output_node(document: &Document) -> usize {
     resistor.pins[1]
 }
 
+fn device_index(trace: &TransientTrace, label: &str) -> usize {
+    trace
+        .devices
+        .iter()
+        .position(|device| device.label == label)
+        .expect("device")
+}
+
+fn current_at(trace: &TransientTrace, label: &str, time: f64) -> f64 {
+    let index = trace.index_at(time).expect("time");
+    let device = device_index(trace, label);
+    trace.currents[index][device].expect("current")
+}
+
 fn transient_settings(dt: f64, steps: usize) -> TransientSettings {
     TransientSettings {
         dt,
@@ -186,6 +200,48 @@ fn pulse_rise_changes_edge_speed() {
     let slow_trace = solve(&slow, &settings).expect("slow");
     let index = fast_trace.index_at(0.5e-3).expect("time");
     assert!(fast_trace.values[index][fast_node] > slow_trace.values[index][slow_node] + 0.5);
+}
+
+#[test]
+fn resistor_current_matches_ohm_law() {
+    let document = pulse_resistor_circuit(0.5);
+    let trace = solve(&document, &transient_settings(1e-3, 1000)).expect("trace");
+    let resistor = current_at(&trace, "R1", 0.3);
+    assert!((resistor - 2.5e-3).abs() < 1e-5, "current={resistor}");
+    let source = current_at(&trace, "V1", 0.3);
+    assert!((source.abs() - 2.5e-3).abs() < 1e-5, "current={source}");
+}
+
+#[test]
+fn inductor_current_rises_slower_with_larger_l() {
+    let small = rl_circuit(1e-3);
+    let large = rl_circuit(2e-3);
+    let settings = transient_settings(1e-6, 100);
+    let small_trace = solve(&small, &settings).expect("small");
+    let large_trace = solve(&large, &settings).expect("large");
+    let small_current = current_at(&small_trace, "L1", 20e-6);
+    let large_current = current_at(&large_trace, "L1", 20e-6);
+    assert!(
+        (small_current - 0.043).abs() < 0.01,
+        "current={small_current}"
+    );
+    assert!(small_current > large_current + 0.005);
+}
+
+#[test]
+fn capacitor_current_is_positive_while_charging() {
+    let document = rc_circuit(1e-6);
+    let trace = solve(&document, &TransientSettings::default()).expect("trace");
+    let current = current_at(&trace, "C1", 1e-3);
+    assert!(current > 1e-3 && current < 3e-3, "current={current}");
+}
+
+#[test]
+fn diode_current_is_forward() {
+    let document = diode_circuit(0.0);
+    let trace = solve(&document, &transient_settings(1e-5, 100)).expect("trace");
+    let current = current_at(&trace, "D1", 1e-3);
+    assert!(current > 1e-3, "current={current}");
 }
 
 #[test]

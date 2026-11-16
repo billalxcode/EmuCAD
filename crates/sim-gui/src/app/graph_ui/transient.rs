@@ -15,6 +15,7 @@ pub(crate) fn show_transient(
     ui: &mut egui::Ui,
     trace: &crate::transient::TransientTrace,
     selected: &mut BTreeSet<usize>,
+    selected_currents: &mut BTreeSet<usize>,
 ) {
     ui.label(transient_header(trace, selected.len()));
     select_nets(ui, trace, selected);
@@ -27,6 +28,95 @@ pub(crate) fn show_transient(
         .filter(|position| plot.contains(*position))
         .map(|position| time_at(plot, trace.duration(), position.x));
     paint_transient(&painter, response.rect, plot, trace, selected, cursor);
+    let time = cursor.unwrap_or_else(|| trace.duration());
+    show_currents(ui, trace, selected_currents, time);
+}
+
+fn show_currents(
+    ui: &mut egui::Ui,
+    trace: &crate::transient::TransientTrace,
+    selected: &mut BTreeSet<usize>,
+    time: f64,
+) {
+    ui.separator();
+    ui.label("Current probes");
+    select_currents(ui, trace, selected);
+    show_current_values(ui, trace, selected, time);
+}
+
+fn show_current_values(
+    ui: &mut egui::Ui,
+    trace: &crate::transient::TransientTrace,
+    selected: &BTreeSet<usize>,
+    time: f64,
+) {
+    let Some(index) = trace
+        .index_at(time)
+        .or_else(|| trace.times.len().checked_sub(1))
+    else {
+        return;
+    };
+    for &device in selected.iter() {
+        show_current_value(ui, trace, index, device);
+    }
+}
+
+fn show_current_value(
+    ui: &mut egui::Ui,
+    trace: &crate::transient::TransientTrace,
+    index: usize,
+    device: usize,
+) {
+    let Some(value) = trace.currents[index].get(device).copied().flatten() else {
+        return;
+    };
+    ui.label(format!(
+        "{}: {}",
+        trace.devices[device].label,
+        format_current(value)
+    ));
+}
+
+fn select_currents(
+    ui: &mut egui::Ui,
+    trace: &crate::transient::TransientTrace,
+    selected: &mut BTreeSet<usize>,
+) {
+    ui.horizontal_wrapped(|ui| {
+        for (index, device) in trace.devices.iter().enumerate() {
+            if !has_current(trace, index) {
+                continue;
+            }
+            let mut checked = selected.contains(&index);
+            if ui.checkbox(&mut checked, &device.label).changed() {
+                toggle_current(selected, index, checked);
+            }
+        }
+    });
+}
+
+fn toggle_current(selected: &mut BTreeSet<usize>, index: usize, checked: bool) {
+    if !checked {
+        selected.remove(&index);
+        return;
+    }
+    if selected.len() < 4 {
+        selected.insert(index);
+    }
+}
+
+fn has_current(trace: &crate::transient::TransientTrace, device: usize) -> bool {
+    trace
+        .currents
+        .iter()
+        .any(|sample| sample.get(device).copied().flatten().is_some())
+}
+
+fn format_current(value: f64) -> String {
+    if value.abs() < 1.0 {
+        return format!("{:.3} mA", value * 1e3);
+    }
+    format!("{value:.3} A")
 }
 
 fn time_at(plot: egui::Rect, duration: f64, x: f32) -> f64 {
@@ -422,6 +512,8 @@ mod tests {
             times: (0..100).map(|index| index as f64 * 1e-3).collect(),
             nodes: vec!["0".to_string(), "out".to_string()],
             values,
+            devices: Vec::new(),
+            currents: vec![Vec::new(); 100],
             dt: 1e-3,
         }
     }
@@ -432,6 +524,41 @@ mod tests {
         let plot = egui::Rect::from_min_size(egui::pos2(0.0, 0.0), egui::vec2(20.0, 100.0));
         let points = series_points(plot, &trace, 1, (0.0, 5.0));
         assert!(points.iter().any(|point| point.y <= plot.top() + 1.0));
+    }
+
+    #[test]
+    fn current_format_uses_milliamp_below_one() {
+        assert_eq!(format_current(0.0025), "2.500 mA");
+        assert_eq!(format_current(2.0), "2.000 A");
+    }
+
+    fn current_trace() -> crate::transient::TransientTrace {
+        let mut trace = trace();
+        trace.devices = vec![crate::transient::TransientDevice {
+            label: "R1".to_string(),
+            part: "passive.resistor.ideal_resistor",
+        }];
+        trace.currents = vec![vec![Some(0.0025)]; 100];
+        trace
+    }
+
+    #[test]
+    fn current_probe_table_renders() {
+        let trace = current_trace();
+        let mut selected = std::collections::BTreeSet::from([0]);
+        let context = egui::Context::default();
+        let input = egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(640.0, 360.0),
+            )),
+            ..Default::default()
+        };
+        let mut output = context.run_ui(input, |ui| {
+            show_currents(ui, &trace, &mut selected, 0.050);
+        });
+        output.textures_delta.clear();
+        assert!(!output.shapes.is_empty());
     }
 
     #[test]

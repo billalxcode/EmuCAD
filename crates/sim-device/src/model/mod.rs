@@ -61,6 +61,11 @@ pub trait DeviceModel {
 
     /// Updates internal state after a converged solution.
     fn update(&mut self, solution: &Solution) -> Result<(), SimError>;
+
+    /// Returns the device current for probes when available.
+    fn terminal_current(&self, _solution: &Solution) -> Option<f64> {
+        None
+    }
 }
 
 /// Builds a model from a structural device instance.

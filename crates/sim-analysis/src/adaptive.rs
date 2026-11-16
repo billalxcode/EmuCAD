@@ -126,9 +126,11 @@ fn accept_adaptive(
     system.update(&trial.solution)?;
     state.solution = trial.solution;
     state.time = next_time(state.time, state.dt)?;
+    let device_currents = system.currents(&state.solution);
     state.samples.push(TransientSample {
         time: state.time,
         solution: state.solution.clone(),
+        device_currents,
         residual: trial.residual,
         iterations: trial.iterations,
     });

@@ -1,7 +1,7 @@
 //! Independent source models.
 
 use crate::model::{
-    DeviceModel, non_negative_parameter, parameter, pins_exact, positive_parameter,
+    DeviceModel, branch_index, non_negative_parameter, parameter, pins_exact, positive_parameter,
     stamp_current_source, stamp_voltage_branch,
 };
 use sim_core::{Device, DeviceId, DeviceInstance, MnaContext, NodeId, SimError, Solution};
@@ -10,6 +10,7 @@ use sim_core::{Device, DeviceId, DeviceInstance, MnaContext, NodeId, SimError, S
 pub struct VoltageSourceModel {
     id: DeviceId,
     voltage: f64,
+    branch: Option<usize>,
     pins: [NodeId; 2],
 }
 
@@ -20,6 +21,7 @@ impl VoltageSourceModel {
         Ok(Self {
             id: instance.id(),
             voltage,
+            branch: None,
             pins: [pins[0], pins[1]],
         })
     }
@@ -32,11 +34,16 @@ impl DeviceModel for VoltageSourceModel {
         _solution: &Solution,
         _dt: Option<f64>,
     ) -> Result<(), SimError> {
+        self.branch = Some(branch_index(ctx, self.id)?);
         stamp_voltage_branch(ctx, self.id, self.pins[0], self.pins[1], self.voltage)
     }
 
     fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
         Ok(())
+    }
+
+    fn terminal_current(&self, solution: &Solution) -> Option<f64> {
+        solution.branch_current(self.branch?)
     }
 }
 
@@ -48,6 +55,7 @@ pub struct PulseSourceModel {
     timing: PulseTiming,
     time: f64,
     step: Option<f64>,
+    branch: Option<usize>,
     pins: [NodeId; 2],
 }
 
@@ -74,6 +82,7 @@ impl PulseSourceModel {
             timing,
             time: 0.0,
             step: None,
+            branch: None,
             pins: [pins[0], pins[1]],
         })
     }
@@ -122,6 +131,7 @@ impl DeviceModel for PulseSourceModel {
             }
         }
         let voltage = self.value_at(self.time);
+        self.branch = Some(branch_index(ctx, self.id)?);
         stamp_voltage_branch(ctx, self.id, self.pins[0], self.pins[1], voltage)
     }
 
@@ -130,6 +140,10 @@ impl DeviceModel for PulseSourceModel {
             self.time += dt;
         }
         Ok(())
+    }
+
+    fn terminal_current(&self, solution: &Solution) -> Option<f64> {
+        solution.branch_current(self.branch?)
     }
 }
 
@@ -163,6 +177,10 @@ impl DeviceModel for CurrentSourceModel {
     fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
         Ok(())
     }
+
+    fn terminal_current(&self, _solution: &Solution) -> Option<f64> {
+        Some(self.current)
+    }
 }
 
 #[cfg(test)]
@@ -185,6 +203,7 @@ mod tests {
             },
             time: 0.0,
             step: None,
+            branch: None,
             pins: [NodeId::new(1), NodeId::GROUND],
         }
     }

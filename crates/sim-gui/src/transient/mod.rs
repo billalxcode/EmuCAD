@@ -26,12 +26,21 @@ impl Default for TransientSettings {
     }
 }
 
-/// Sampled node voltages over time.
+/// One device that can expose a terminal current probe.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct TransientDevice {
+    pub label: String,
+    pub part: &'static str,
+}
+
+/// Sampled node voltages and device currents over time.
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct TransientTrace {
     pub times: Vec<f64>,
     pub nodes: Vec<String>,
     pub values: Vec<Vec<f64>>,
+    pub devices: Vec<TransientDevice>,
+    pub currents: Vec<Vec<Option<f64>>>,
     pub dt: f64,
 }
 
@@ -97,8 +106,28 @@ fn trace(netlist: &Netlist, samples: &[TransientSample], dt: f64) -> TransientTr
         times,
         nodes: netlist.nodes.iter().map(|node| node.name.clone()).collect(),
         values,
+        devices: devices(netlist),
+        currents: currents(samples),
         dt,
     }
+}
+
+fn devices(netlist: &Netlist) -> Vec<TransientDevice> {
+    netlist
+        .components
+        .iter()
+        .map(|part| TransientDevice {
+            label: part.label.clone(),
+            part: part.part,
+        })
+        .collect()
+}
+
+fn currents(samples: &[TransientSample]) -> Vec<Vec<Option<f64>>> {
+    samples
+        .iter()
+        .map(|sample| sample.device_currents.clone())
+        .collect()
 }
 
 fn sample_time(sample: &TransientSample) -> f64 {

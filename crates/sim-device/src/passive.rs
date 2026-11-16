@@ -54,6 +54,12 @@ impl DeviceModel for ResistorModel {
     fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
         Ok(())
     }
+
+    fn terminal_current(&self, solution: &Solution) -> Option<f64> {
+        let first = solution.voltage(self.pins[0])?;
+        let second = solution.voltage(self.pins[1])?;
+        Some((first - second) / self.resistance)
+    }
 }
 
 /// An ideal capacitor using backward Euler.
@@ -122,6 +128,10 @@ impl DeviceModel for CapacitorModel {
         self.voltage_prev = voltage;
         self.current_prev = current;
         Ok(())
+    }
+
+    fn terminal_current(&self, _solution: &Solution) -> Option<f64> {
+        Some(self.current_prev)
     }
 }
 
@@ -274,5 +284,9 @@ impl DeviceModel for InductorModel {
             self.voltage_prev = first - second;
         }
         Ok(())
+    }
+
+    fn terminal_current(&self, solution: &Solution) -> Option<f64> {
+        solution.branch_current(self.branch?)
     }
 }
