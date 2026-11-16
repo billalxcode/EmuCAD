@@ -184,6 +184,10 @@ impl GuiApp {
     pub(super) fn mark_dirty(&mut self) {
         self.dirty = true;
         self.last_edit = Some(Instant::now());
+        self.transient = None;
+        self.analog_dc = None;
+        self.analog_request = None;
+        self.analog_busy = false;
     }
 
     pub(super) fn flush_autosave(&mut self) -> bool {

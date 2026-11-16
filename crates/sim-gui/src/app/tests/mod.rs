@@ -62,6 +62,7 @@ fn click_state(x: f32, y: f32) -> crate::canvas::CanvasState {
     }
 }
 
+mod analog;
 mod context;
 mod editing;
 mod geometry;

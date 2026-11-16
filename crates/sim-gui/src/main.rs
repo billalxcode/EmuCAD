@@ -1,5 +1,6 @@
 //! `emucad-gui` native desktop entry point.
 
+mod analog;
 mod app;
 mod canvas;
 mod clipboard;

@@ -252,6 +252,10 @@ pub struct GuiApp {
     transient_selected: BTreeSet<usize>,
     transient_selected_currents: BTreeSet<usize>,
     transient_open: bool,
+    analog: Option<crate::analog::AnalogHandle>,
+    analog_request: Option<u64>,
+    analog_busy: bool,
+    analog_dc: Option<crate::analog::DcResultView>,
     uart: UartLog,
     uart_input: String,
     uart_open: bool,
@@ -275,6 +279,7 @@ impl GuiApp {
             grid_visible: true,
             inspector_open: true,
             sim: Some(SimHandle::spawn()),
+            analog: Some(crate::analog::AnalogHandle::spawn()),
             config_path,
             config,
             ..Self::default()
@@ -289,6 +294,7 @@ impl eframe::App for GuiApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         self.palette_shortcut(ui);
         self.poll_sim();
+        self.poll_analog();
         self.watch_file(ui.ctx());
         self.autosave(ui.ctx());
         self.poll_png();

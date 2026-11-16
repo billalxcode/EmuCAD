@@ -98,11 +98,20 @@ impl GuiApp {
         if ui.add(icon_button("[N]", "Check netlist")).clicked() {
             self.check_netlist();
         }
-        if ui.add(icon_button("[D]", "DC op")).clicked() {
+        if ui
+            .add_enabled(!self.analog_busy, icon_button("[D]", "DC op"))
+            .clicked()
+        {
             self.solve_dc();
         }
-        if ui.add(icon_button("[T]", "Transient")).clicked() {
+        if ui
+            .add_enabled(!self.analog_busy, icon_button("[T]", "Transient"))
+            .clicked()
+        {
             self.run_transient();
+        }
+        if self.analog_busy {
+            ui.label("Solving");
         }
         self.run_buttons(ui);
         ui.checkbox(&mut self.transient_open, "Transient");

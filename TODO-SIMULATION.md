@@ -193,7 +193,10 @@ yang sama dengan referensi manual.
 
 - [x] S2-01 Tambahkan dependency `sim-analysis` ke `sim-gui`.
 - [ ] S2-02 Tambahkan domain simulasi: `Avr`, `Analog`, `Mixed`.
-- [ ] S2-03 Bangun circuit di worker, bukan di UI thread.
+- [x] S2-03 Bangun circuit di worker, bukan di UI thread.
+  - DC dan transient berjalan di worker analog.
+  - Hasil basi diabaikan lewat request ID.
+  - Solve yang sedang berjalan belum bisa diinterupsi paksa.
 - [x] S2-04 Jalankan DC operating point.
 - [x] S2-05 Petakan error solver ke pesan GUI.
 - [~] S2-06 Tampilkan node voltage dan branch current.
@@ -212,9 +215,8 @@ dan menghasilkan DC operating point atau error yang jelas.
 - [~] S3-01 Tambahkan konfigurasi transient: dt, steps, gmin, adaptive.
   - dt, steps, dan use_dc_op sudah ada.
   - gmin dan adaptive step belum diekspos ke GUI.
-- [~] S3-02 Tambahkan sampling hasil solver ke event worker.
-  - Semua node disampel per langkah ke trace.
-  - Solver masih berjalan sinkron di UI thread.
+- [x] S3-02 Tambahkan sampling hasil solver ke event worker.
+  - Trace transient dikirim dari worker ke UI.
 - [x] S3-03 Tambahkan probe untuk semua net voltage pada full rate.
   - Trace menyimpan semua node pada setiap langkah.
   - Grafik membatasi tampilan ke 8 series.
@@ -249,6 +251,7 @@ transient, dan melihat grafik yang deterministik.
 - [~] S4-04 Simpan parameter dan pilihan analisis di JSON.
   - Nilai parameter numerik sudah tersimpan per instance.
   - Pilihan analisis dan hasil terstruktur belum.
+  - Perubahan dokumen menghapus hasil dan mengabaikan event worker lama.
 - [ ] S4-05 Migrasi proyek lama tanpa merusak nilai string.
 - [ ] S4-06 Tampilkan nama net dan pin role.
 - [ ] S4-07 Tampilkan error sebelum simulasi dimulai.

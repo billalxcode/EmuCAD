@@ -14,36 +14,95 @@ impl GuiApp {
     }
 
     pub(super) fn solve_dc(&mut self) {
-        self.message = self.dc_message();
+        if self.analog_busy {
+            return;
+        }
+        let Some(worker) = self.analog.as_mut() else {
+            self.message = "Analog worker unavailable".to_string();
+            return;
+        };
+        self.analog_request = Some(worker.request_dc(self.document.clone()));
+        self.analog_busy = true;
+        self.message = "DC running".to_string();
     }
 
     pub(super) fn run_transient(&mut self) {
-        match crate::transient::solve(&self.document, &self.transient_settings) {
-            Ok(trace) => {
-                self.transient_selected = default_transient_selection(&trace);
-                self.transient_selected_currents.clear();
-                self.message = format!(
-                    "Transient: {} samples, {:.3} ms",
-                    trace.values.len(),
-                    trace.duration() * 1e3
-                );
-                self.transient = Some(trace);
-                self.transient_open = true;
+        if self.analog_busy {
+            return;
+        }
+        let Some(worker) = self.analog.as_mut() else {
+            self.message = "Analog worker unavailable".to_string();
+            return;
+        };
+        let request = worker.request_transient(self.document.clone(), self.transient_settings);
+        self.analog_request = Some(request);
+        self.analog_busy = true;
+        self.message = "Transient running".to_string();
+    }
+
+    #[cfg(test)]
+    pub(super) fn wait_analog(&mut self) {
+        let Some(worker) = self.analog.as_ref() else {
+            return;
+        };
+        let event = worker.wait();
+        self.apply_analog_event(event);
+    }
+
+    pub(super) fn poll_analog(&mut self) {
+        let Some(worker) = self.analog.as_ref() else {
+            return;
+        };
+        let events = worker.poll();
+        for event in events {
+            self.apply_analog_event(event);
+        }
+    }
+
+    fn apply_analog_event(&mut self, event: crate::analog::Event) {
+        match event {
+            crate::analog::Event::Dc { request, result } => self.apply_dc(request, result),
+            crate::analog::Event::Transient { request, result } => {
+                self.apply_transient(request, result);
+            }
+        }
+    }
+
+    fn apply_dc(&mut self, request: u64, result: Result<crate::analog::DcResultView, String>) {
+        if Some(request) != self.analog_request {
+            return;
+        }
+        self.analog_busy = false;
+        match result {
+            Ok(dc) => {
+                self.message = format_dc(&dc.voltages);
+                self.analog_dc = Some(dc);
             }
             Err(error) => self.message = error,
         }
     }
 
-    fn dc_message(&self) -> String {
-        let netlist = match crate::netlist::extract(&self.document) {
-            Ok(netlist) => netlist,
-            Err(error) => return error.to_string(),
-        };
-        let result = match crate::netlist::solve_dc(&netlist) {
-            Ok(result) => result,
-            Err(error) => return error,
-        };
-        format_dc(&crate::netlist::node_voltages(&netlist, &result))
+    fn apply_transient(&mut self, request: u64, result: Result<TransientTrace, String>) {
+        if Some(request) != self.analog_request {
+            return;
+        }
+        self.analog_busy = false;
+        match result {
+            Ok(trace) => self.install_transient(trace),
+            Err(error) => self.message = error,
+        }
+    }
+
+    fn install_transient(&mut self, trace: TransientTrace) {
+        self.transient_selected = default_transient_selection(&trace);
+        self.transient_selected_currents.clear();
+        self.message = format!(
+            "Transient: {} samples, {:.3} ms",
+            trace.values.len(),
+            trace.duration() * 1e3
+        );
+        self.transient = Some(trace);
+        self.transient_open = true;
     }
 
     pub(super) fn tool_buttons(&mut self, ui: &mut egui::Ui) {
