@@ -24,7 +24,7 @@ fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 |---|---:|---|
 | Entri katalog | 500 | Ada |
 | Solver-backed | 215 | Ada model device |
-| Behavioral | 285 | Belum punya model solver |
+| Behavioral | 292 | Belum punya model solver |
 | Device model | 24 `DeviceKind` | Sebagian sudah ada model |
 | Analisis solver | DC, transient, AC, noise, distorsi, sensitivitas | Ada |
 | Netlist GUI | 1 | Ekstraksi dan DC check |
@@ -275,11 +275,11 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
 
 ## 9. Fase S5 - Model Compact dan Behavioral Non-MCU
 
-- [ ] S5-01 Klasifikasikan 285 entri.
-  - Dapat dimodelkan dengan compact model.
-  - Perlu model digital.
-  - Perlu model multidomain.
-  - Tidak dapat disimulasikan dengan data saat ini.
+- [x] S5-01 Klasifikasikan 292 entri.
+  - Lihat `docs/62-behavioral-classification.md`.
+  - Data per entry ada di `docs/data/behavioral-classification.csv`.
+  - Kategori: compact, behavioral, digital, mixed-signal,
+    structural, multidomain, RF, dan unsupported.
 - [ ] S5-02 Gunakan `sim-cells` untuk logic, flip-flop, counter, dan
   multiplexer bila cocok.
 - [ ] S5-03 Tunda MCU dan memory ke fase S6; jangan membuat model

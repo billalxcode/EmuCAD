@@ -1,0 +1,293 @@
+id,family,model_class,category,model,phase,priority
+passive.transformer.ideal_transformer,passive,Transformer,compact-analog,mutual inductance,S5-1,P1
+passive.transformer.center_tap_transformer,passive,Transformer,compact-analog,mutual inductance,S5-1,P1
+passive.transformer.autotransformer,passive,Transformer,compact-analog,mutual inductance,S5-1,P1
+passive.transformer.isolation_transformer,passive,Transformer,compact-analog,mutual inductance,S5-1,P1
+passive.transformer.pulse_transformer,passive,Transformer,compact-analog,mutual inductance,S5-1,P1
+passive.transformer.current_sense_transformer,passive,Transformer,compact-analog,mutual inductance,S5-1,P1
+passive.crystal.quartz_crystal,passive,Crystal,compact-analog,BVD resonator,S5-1,P1
+passive.crystal.ceramic_resonator,passive,Crystal,compact-analog,BVD resonator,S5-1,P1
+passive.crystal.tuning_fork_crystal,passive,Crystal,compact-analog,BVD resonator,S5-1,P1
+passive.crystal.tcxo,passive,Crystal,compact-analog,BVD resonator,S5-1,P1
+passive.crystal.vcxo,passive,Crystal,compact-analog,BVD resonator,S5-1,P1
+source.independent.sine_voltage_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
+source.independent.sine_current_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
+source.pulse.pwl_voltage_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
+source.pulse.exponential_voltage_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
+source.pulse.voltage_noise_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
+source.pulse.current_noise_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
+source.pulse.pulse_current_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
+source.behavioral.behavioral_voltage_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
+source.behavioral.behavioral_current_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
+source.behavioral.polynomial_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
+source.behavioral.table_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
+source.digital.digital_clock_source,source,DigitalSource,digital,digital pattern,S5-3,P3
+source.digital.digital_pattern_source,source,DigitalSource,digital,digital pattern,S5-3,P3
+source.digital.prbs_source,source,DigitalSource,digital,digital pattern,S5-3,P3
+diode.opto.phototransistor,diode,Optocoupler,behavioral-electrical,CTR isolation,S5-2,P2
+diode.opto.photo_darlington,diode,Optocoupler,behavioral-electrical,CTR isolation,S5-2,P2
+diode.opto.optocoupler,diode,Optocoupler,behavioral-electrical,CTR isolation,S5-2,P2
+diode.opto.photovoltaic_isolator,diode,Optocoupler,behavioral-electrical,CTR isolation,S5-2,P2
+diode.opto.slotted_optical_switch,diode,Optocoupler,behavioral-electrical,CTR isolation,S5-2,P2
+diode.opto.reflective_optical_sensor,diode,Optocoupler,behavioral-electrical,CTR isolation,S5-2,P2
+diode.bridge.diode_bridge,diode,DiodeArray,compact-analog,diode array composition,S5-1,P1
+diode.bridge.dual_diode,diode,DiodeArray,compact-analog,diode array composition,S5-1,P1
+diode.bridge.diode_array,diode,DiodeArray,compact-analog,diode array composition,S5-1,P1
+diode.bridge.schottky_bridge,diode,DiodeArray,compact-analog,diode array composition,S5-1,P1
+transistor.power_semiconductor.igbt,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
+transistor.power_semiconductor.igbt_with_diode,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
+transistor.power_semiconductor.gan_hemt,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
+transistor.power_semiconductor.sic_mosfet,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
+transistor.power_semiconductor.sic_schottky_fet,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
+transistor.power_semiconductor.cascode_gan,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
+transistor.other.ujt,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
+transistor.other.put,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
+transistor.other.mesfet,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
+transistor.other.hemt,transistor,OtherTransistor,compact-analog,power transistor compact,S5-1,P1
+protection.thyristor.scr,protection,Thyristor,compact-analog,protection compact model,S5-1,P1
+protection.thyristor.triac,protection,Thyristor,compact-analog,protection compact model,S5-1,P1
+protection.thyristor.diac,protection,Thyristor,compact-analog,protection compact model,S5-1,P1
+protection.thyristor.gto,protection,Thyristor,compact-analog,protection compact model,S5-1,P1
+protection.thyristor.mct,protection,Thyristor,compact-analog,protection compact model,S5-1,P1
+protection.thyristor.scs,protection,Thyristor,compact-analog,protection compact model,S5-1,P1
+protection.thyristor.lascr,protection,Thyristor,compact-analog,protection compact model,S5-1,P1
+protection.thyristor.put_thyristor,protection,Thyristor,compact-analog,protection compact model,S5-1,P1
+protection.device.fuse,protection,Protection,compact-analog,protection compact model,S5-1,P1
+protection.device.resettable_ptc_fuse,protection,Protection,compact-analog,protection compact model,S5-1,P1
+protection.device.tvs_diode,protection,Protection,compact-analog,protection compact model,S5-1,P1
+protection.device.metal_oxide_varistor,protection,Protection,compact-analog,protection compact model,S5-1,P1
+protection.device.polyfuse,protection,Protection,compact-analog,protection compact model,S5-1,P1
+protection.device.thermal_fuse,protection,Protection,compact-analog,protection compact model,S5-1,P1
+protection.breaker.spark_gap,protection,Protection,compact-analog,protection compact model,S5-1,P1
+protection.breaker.crowbar,protection,Protection,compact-analog,protection compact model,S5-1,P1
+protection.breaker.circuit_breaker,protection,Protection,compact-analog,protection compact model,S5-1,P1
+protection.breaker.surge_arrester,protection,Protection,compact-analog,protection compact model,S5-1,P1
+analog.timer.555_timer,analog,Timer,behavioral-electrical,timer macromodel,S5-2,P2
+analog.timer.monostable_multivibrator,analog,Timer,behavioral-electrical,timer macromodel,S5-2,P2
+analog.timer.astable_multivibrator,analog,Timer,behavioral-electrical,timer macromodel,S5-2,P2
+analog.timer.voltage_controlled_oscillator,analog,Timer,behavioral-electrical,timer macromodel,S5-2,P2
+analog.timer.pll,analog,Timer,behavioral-electrical,timer macromodel,S5-2,P2
+logic.gate_special.open_drain_buffer,logic,LogicGateSpecial,digital,sim-cells digital,S5-3,P3
+logic.gate_special.tristate_buffer,logic,LogicGateSpecial,digital,sim-cells digital,S5-3,P3
+logic.gate_special.transmission_gate,logic,LogicGateSpecial,digital,sim-cells digital,S5-3,P3
+logic.flipflop.sr_latch,logic,FlipFlop,digital,sim-cells digital,S5-3,P3
+logic.flipflop.d_latch,logic,FlipFlop,digital,sim-cells digital,S5-3,P3
+logic.flipflop.d_flipflop,logic,FlipFlop,digital,sim-cells digital,S5-3,P3
+logic.flipflop.jk_flipflop,logic,FlipFlop,digital,sim-cells digital,S5-3,P3
+logic.flipflop.t_flipflop,logic,FlipFlop,digital,sim-cells digital,S5-3,P3
+logic.flipflop.edge_triggered_d_flipflop,logic,FlipFlop,digital,sim-cells digital,S5-3,P3
+logic.flipflop.master_slave_jk,logic,FlipFlop,digital,sim-cells digital,S5-3,P3
+logic.flipflop.dual_d_flipflop,logic,FlipFlop,digital,sim-cells digital,S5-3,P3
+logic.flipflop.quad_d_flipflop,logic,FlipFlop,digital,sim-cells digital,S5-3,P3
+logic.flipflop.octal_latch,logic,FlipFlop,digital,sim-cells digital,S5-3,P3
+logic.counter.4bit_counter,logic,Counter,digital,sim-cells digital,S5-3,P3
+logic.counter.8bit_counter,logic,Counter,digital,sim-cells digital,S5-3,P3
+logic.counter.decade_counter,logic,Counter,digital,sim-cells digital,S5-3,P3
+logic.counter.up_down_counter,logic,Counter,digital,sim-cells digital,S5-3,P3
+logic.counter.ripple_counter,logic,Counter,digital,sim-cells digital,S5-3,P3
+logic.counter.johnson_counter,logic,Counter,digital,sim-cells digital,S5-3,P3
+logic.counter.4bit_shift_register,logic,Counter,digital,sim-cells digital,S5-3,P3
+logic.counter.8bit_shift_register,logic,Counter,digital,sim-cells digital,S5-3,P3
+logic.counter.serial_in_parallel_out,logic,Counter,digital,sim-cells digital,S5-3,P3
+logic.counter.parallel_in_serial_out,logic,Counter,digital,sim-cells digital,S5-3,P3
+logic.mux.2_to_1_multiplexer,logic,Multiplexer,digital,sim-cells digital,S5-3,P3
+logic.mux.4_to_1_multiplexer,logic,Multiplexer,digital,sim-cells digital,S5-3,P3
+logic.mux.8_to_1_multiplexer,logic,Multiplexer,digital,sim-cells digital,S5-3,P3
+logic.mux.1_to_2_demultiplexer,logic,Multiplexer,digital,sim-cells digital,S5-3,P3
+logic.mux.2_to_4_decoder,logic,Multiplexer,digital,sim-cells digital,S5-3,P3
+logic.mux.3_to_8_decoder,logic,Multiplexer,digital,sim-cells digital,S5-3,P3
+logic.mux.8_to_3_encoder,logic,Multiplexer,digital,sim-cells digital,S5-3,P3
+logic.mux.priority_encoder,logic,Multiplexer,digital,sim-cells digital,S5-3,P3
+logic.adder.half_adder,logic,Adder,digital,sim-cells digital,S5-3,P3
+logic.adder.full_adder,logic,Adder,digital,sim-cells digital,S5-3,P3
+logic.adder.4bit_adder,logic,Adder,digital,sim-cells digital,S5-3,P3
+logic.adder.magnitude_comparator,logic,Adder,digital,sim-cells digital,S5-3,P3
+logic.adder.parity_generator,logic,Adder,digital,sim-cells digital,S5-3,P3
+logic.adder.parity_checker,logic,Adder,digital,sim-cells digital,S5-3,P3
+logic.adder.bus_buffer,logic,Adder,digital,sim-cells digital,S5-3,P3
+logic.adder.bidirectional_buffer,logic,Adder,digital,sim-cells digital,S5-3,P3
+logic.level.logic_level_shifter,logic,LevelShifter,digital,sim-cells digital,S5-3,P3
+logic.level.bidirectional_level_shifter,logic,LevelShifter,digital,sim-cells digital,S5-3,P3
+logic.level.open_drain_level_shifter,logic,LevelShifter,digital,sim-cells digital,S5-3,P3
+logic.level.line_driver,logic,LevelShifter,digital,sim-cells digital,S5-3,P3
+logic.level.line_receiver,logic,LevelShifter,digital,sim-cells digital,S5-3,P3
+logic.level.optocoupler_interface,logic,LevelShifter,digital,sim-cells digital,S5-3,P3
+logic.programmable.pal,logic,ProgrammableLogic,digital,sim-cells digital,S5-3,P3
+logic.programmable.gal,logic,ProgrammableLogic,digital,sim-cells digital,S5-3,P3
+logic.programmable.cpld,logic,ProgrammableLogic,digital,sim-cells digital,S5-3,P3
+logic.programmable.fpga_logic_block,logic,ProgrammableLogic,digital,sim-cells digital,S5-3,P3
+logic.programmable.finite_state_machine,logic,ProgrammableLogic,digital,sim-cells digital,S5-3,P3
+logic.programmable.lookup_table,logic,ProgrammableLogic,digital,sim-cells digital,S5-3,P3
+memory.device.sram_cell,memory,Memory,structural,gate-level memory,S6,P6
+memory.device.sram_array,memory,Memory,structural,gate-level memory,S6,P6
+memory.device.dram_cell,memory,Memory,structural,gate-level memory,S6,P6
+memory.device.rom,memory,Memory,structural,gate-level memory,S6,P6
+memory.device.prom,memory,Memory,structural,gate-level memory,S6,P6
+memory.device.eeprom,memory,Memory,structural,gate-level memory,S6,P6
+memory.device.flash,memory,Memory,structural,gate-level memory,S6,P6
+memory.device.fram,memory,Memory,structural,gate-level memory,S6,P6
+memory.device.mram,memory,Memory,structural,gate-level memory,S6,P6
+memory.device.nvram,memory,Memory,structural,gate-level memory,S6,P6
+memory.device.memory_controller,memory,Memory,structural,gate-level memory,S6,P6
+memory.device.spi_flash,memory,Memory,structural,gate-level memory,S6,P6
+memory.device.i2c_eeprom,memory,Memory,structural,gate-level memory,S6,P6
+memory.device.sd_card,memory,Memory,structural,gate-level memory,S6,P6
+memory.device.memory_module,memory,Memory,structural,gate-level memory,S6,P6
+mcu.core8.avr_mcu,mcu,Mcu,structural,gate-level core,S6,P6
+mcu.core8.atmega328p,mcu,Mcu,structural,gate-level core,S6,P6
+mcu.core8.pic_mcu,mcu,Mcu,structural,gate-level core,S6,P6
+mcu.core8.8051_mcu,mcu,Mcu,structural,gate-level core,S6,P6
+mcu.core8.avr_peripheral_block,mcu,Mcu,structural,gate-level core,S6,P6
+mcu.core32.arm_cortexm,mcu,Mcu,structural,gate-level core,S6,P6
+mcu.core32.riscv_mcu,mcu,Mcu,structural,gate-level core,S6,P6
+mcu.core32.esp32,mcu,Mcu,structural,gate-level core,S6,P6
+mcu.core32.stm32,mcu,Mcu,structural,gate-level core,S6,P6
+mcu.core32.rp2040,mcu,Mcu,structural,gate-level core,S6,P6
+mcu.core32.generic_32bit_mcu,mcu,Mcu,structural,gate-level core,S6,P6
+mcu.converter.sar_adc,mcu,Adc,mixed-signal,behavioral ADC,S5-4,P4
+mcu.converter.deltasigma_adc,mcu,Adc,mixed-signal,behavioral ADC,S5-4,P4
+mcu.converter.flash_adc,mcu,Adc,mixed-signal,behavioral ADC,S5-4,P4
+mcu.converter.r2r_dac,mcu,Adc,mixed-signal,behavioral ADC,S5-4,P4
+mcu.converter.pwm_generator,mcu,Adc,mixed-signal,behavioral ADC,S5-4,P4
+mcu.serial.uart,mcu,SerialInterface,digital,digital peripheral,S5-3,P3
+mcu.serial.spi,mcu,SerialInterface,digital,digital peripheral,S5-3,P3
+mcu.serial.i2c,mcu,SerialInterface,digital,digital peripheral,S5-3,P3
+mcu.serial.can,mcu,SerialInterface,digital,digital peripheral,S5-3,P3
+mcu.serial.usb,mcu,SerialInterface,digital,digital peripheral,S5-3,P3
+mcu.serial.ethernet,mcu,SerialInterface,digital,digital peripheral,S5-3,P3
+mcu.timer.timer,mcu,TimerPeripheral,digital,digital peripheral,S5-3,P3
+mcu.timer.rtc,mcu,TimerPeripheral,digital,digital peripheral,S5-3,P3
+mcu.timer.watchdog,mcu,TimerPeripheral,digital,digital peripheral,S5-3,P3
+power.dcdc.buck_converter,power,DcDc,behavioral-electrical,power macromodel,S5-2,P2
+power.dcdc.boost_converter,power,DcDc,behavioral-electrical,power macromodel,S5-2,P2
+power.dcdc.buckboost_converter,power,DcDc,behavioral-electrical,power macromodel,S5-2,P2
+power.dcdc.cuk_converter,power,DcDc,behavioral-electrical,power macromodel,S5-2,P2
+power.dcdc.sepic_converter,power,DcDc,behavioral-electrical,power macromodel,S5-2,P2
+power.dcdc.flyback_converter,power,DcDc,behavioral-electrical,power macromodel,S5-2,P2
+power.dcdc.forward_converter,power,DcDc,behavioral-electrical,power macromodel,S5-2,P2
+power.dcdc.pushpull_converter,power,DcDc,behavioral-electrical,power macromodel,S5-2,P2
+power.charge.charge_pump,power,ChargePump,behavioral-electrical,power macromodel,S5-2,P2
+power.charge.inverting_charge_pump,power,ChargePump,behavioral-electrical,power macromodel,S5-2,P2
+power.charge.linear_charger,power,ChargePump,behavioral-electrical,power macromodel,S5-2,P2
+power.charge.switching_charger,power,ChargePump,behavioral-electrical,power macromodel,S5-2,P2
+power.charge.solar_charger,power,ChargePump,behavioral-electrical,power macromodel,S5-2,P2
+power.supervisor.voltage_reference,power,Supervisor,behavioral-electrical,power macromodel,S5-2,P2
+power.supervisor.current_reference,power,Supervisor,behavioral-electrical,power macromodel,S5-2,P2
+power.supervisor.voltage_supervisor,power,Supervisor,behavioral-electrical,power macromodel,S5-2,P2
+power.supervisor.reset_supervisor,power,Supervisor,behavioral-electrical,power macromodel,S5-2,P2
+power.supervisor.power_monitor,power,Supervisor,behavioral-electrical,power macromodel,S5-2,P2
+power.motor.hbridge,power,MotorDriver,behavioral-electrical,power macromodel,S5-2,P2
+power.motor.halfbridge,power,MotorDriver,behavioral-electrical,power macromodel,S5-2,P2
+power.motor.stepper_driver,power,MotorDriver,behavioral-electrical,power macromodel,S5-2,P2
+sensor.temperature.ntc_thermistor_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.temperature.ptc_thermistor_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.temperature.rtd,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.temperature.thermocouple,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.temperature.semiconductor_temperature_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.temperature.thermal_switch,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.light.photoresistor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.light.photodiode_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.light.phototransistor_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.light.ambient_light_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.light.color_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.magnetic.hall_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.magnetic.linear_hall_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.magnetic.reed_switch_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.magnetic.magnetoresistive_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.magnetic.fluxgate_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.motion.accelerometer,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.motion.gyroscope,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.motion.imu,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.motion.tilt_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.motion.vibration_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.pressure.strain_gauge_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.pressure.load_cell,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.pressure.pressure_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.pressure.force_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.humidity.humidity_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.humidity.gas_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.humidity.ph_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.humidity.electrochemical_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.current.current_sense_resistor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.current.hall_current_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.current.voltage_divider_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.proximity.inductive_proximity_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.proximity.capacitive_touch_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+sensor.proximity.ultrasonic_distance_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
+actuator.led.led,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+actuator.led.rgb_led,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+actuator.led.incandescent_lamp,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+actuator.led.neon_lamp,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+actuator.buzzer.buzzer,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+actuator.buzzer.speaker,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+actuator.buzzer.piezo_transducer,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+actuator.buzzer.piezo_buzzer,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+actuator.motor.dc_motor,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+actuator.motor.brushless_dc_motor,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+actuator.motor.servo_motor,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+actuator.motor.stepper_motor,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+actuator.motor.solenoid,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+actuator.display.lcd_character_display,actuator,Display,multidomain,multidomain actuator,S5-5,P5
+actuator.display.lcd_graphic_display,actuator,Display,multidomain,multidomain actuator,S5-5,P5
+actuator.display.oled_display,actuator,Display,multidomain,multidomain actuator,S5-5,P5
+actuator.display.eink_display,actuator,Display,multidomain,multidomain actuator,S5-5,P5
+actuator.heater.resistive_heater,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+actuator.heater.peltier_cooler,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+actuator.heater.thermoelectric_generator,actuator,Actuator,multidomain,multidomain actuator,S5-5,P5
+rf.amplifier.rf_amplifier,rf,RfBlock,rf,RF block,S5-6,P7
+rf.amplifier.low_noise_amplifier,rf,RfBlock,rf,RF block,S5-6,P7
+rf.amplifier.power_amplifier,rf,RfBlock,rf,RF block,S5-6,P7
+rf.amplifier.variable_gain_amplifier,rf,RfBlock,rf,RF block,S5-6,P7
+rf.mixer.rf_mixer,rf,RfBlock,rf,RF block,S5-6,P7
+rf.mixer.amplitude_modulator,rf,RfBlock,rf,RF block,S5-6,P7
+rf.mixer.frequency_modulator,rf,RfBlock,rf,RF block,S5-6,P7
+rf.mixer.phase_modulator,rf,RfBlock,rf,RF block,S5-6,P7
+rf.filter.low_pass_filter,rf,RfBlock,rf,RF block,S5-6,P7
+rf.filter.high_pass_filter,rf,RfBlock,rf,RF block,S5-6,P7
+rf.filter.band_pass_filter,rf,RfBlock,rf,RF block,S5-6,P7
+rf.filter.band_stop_filter,rf,RfBlock,rf,RF block,S5-6,P7
+rf.antenna.dipole_antenna,rf,RfBlock,rf,RF block,S5-6,P7
+rf.antenna.monopole_antenna,rf,RfBlock,rf,RF block,S5-6,P7
+rf.antenna.loop_antenna,rf,RfBlock,rf,RF block,S5-6,P7
+rf.coupler.directional_coupler,rf,RfBlock,rf,RF block,S5-6,P7
+rf.coupler.power_splitter,rf,RfBlock,rf,RF block,S5-6,P7
+rf.coupler.isolator,rf,RfBlock,rf,RF block,S5-6,P7
+behavioral.filter.integrator,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.filter.differentiator,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.filter.first_order_low_pass,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.filter.first_order_high_pass,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.filter.state_variable_filter,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.math.multiplier,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.math.divider,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.math.logarithmic_amplifier,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.math.antilog_amplifier,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.math.rms_converter,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.detector.behavioral_comparator,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.detector.schmitt_trigger,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.detector.peak_detector,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.detector.track_and_hold,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.detector.precision_rectifier,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.oscillator.vco,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.oscillator.pll,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.oscillator.amplitude_modulator,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.oscillator.frequency_modulator,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.oscillator.pulse_width_modulator,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.converter.sample_and_hold,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.converter.sar_adc_behavioral,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.converter.delta_sigma_adc_behavioral,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.converter.r2r_dac_behavioral,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+behavioral.converter.pwm_dac,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
+board.arduino.arduino_uno_board,board,BoardModule,unsupported,unsupported board,none,P0
+board.arduino.breadboard_power_board,board,BoardModule,unsupported,unsupported board,none,P0
+board.arduino.generic_mcu_board,board,BoardModule,unsupported,unsupported board,none,P0
+board.breadboard.breadboard,board,BoardModule,unsupported,unsupported board,none,P0
+board.breadboard.jumper_wire,board,BoardModule,unsupported,unsupported board,none,P0
+board.breadboard.jumper_header,board,BoardModule,unsupported,unsupported board,none,P0
+board.power.usb_power_module,board,BoardModule,unsupported,unsupported board,none,P0
+board.power.dcdc_module,board,BoardModule,unsupported,unsupported board,none,P0
+board.power.battery_holder,board,BoardModule,unsupported,unsupported board,none,P0
+board.module.oled_module,board,BoardModule,unsupported,unsupported board,none,P0
+board.module.sensor_module,board,BoardModule,unsupported,unsupported board,none,P0
+board.module.relay_module,board,BoardModule,unsupported,unsupported board,none,P0
+board.mechanical.enclosure,board,BoardModule,unsupported,unsupported board,none,P0
+board.mechanical.mounting_hardware,board,BoardModule,unsupported,unsupported board,none,P0

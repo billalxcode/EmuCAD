@@ -206,6 +206,41 @@ fn logic_gate_defaults_include_variant() {
 }
 
 #[test]
+fn behavioral_classification_covers_catalog() {
+    let csv = include_str!("../../../../docs/data/behavioral-classification.csv");
+    let ids: BTreeSet<_> = csv
+        .lines()
+        .skip(1)
+        .map(|line| line.split(',').next().expect("id"))
+        .collect();
+    let expected: BTreeSet<_> = catalog()
+        .iter()
+        .filter(|entry| entry.device.is_none())
+        .map(|entry| entry.id)
+        .collect();
+    assert_eq!(ids, expected);
+}
+
+#[test]
+fn behavioral_classification_categories_are_valid() {
+    let csv = include_str!("../../../../docs/data/behavioral-classification.csv");
+    let allowed = [
+        "compact-analog",
+        "behavioral-electrical",
+        "digital",
+        "mixed-signal",
+        "structural",
+        "multidomain",
+        "rf",
+        "unsupported",
+    ];
+    for line in csv.lines().skip(1) {
+        let category = line.split(',').nth(3).expect("category");
+        assert!(allowed.contains(&category), "{line}");
+    }
+}
+
+#[test]
 fn passive_defaults_are_positive() {
     for entry in catalog() {
         if entry.class.family() == Family::Passive {

@@ -68,6 +68,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 59 | [Golden RGBA GUI](59-gui-golden.md) | Status dan prosedur update golden image |
 | 60 | [Katalog komponen](60-component-catalog.md) | Target 500 model, taksonomi, akurasi, dan schema |
 | 61 | [Design system](61-design-system.md) | Token font, warna, spacing, dan aturan tampilan |
+| 62 | [Klasifikasi behavioral](62-behavioral-classification.md) | Kategori dan prioritas 292 entry behavioral |
 
 ### 3.2 Fondasi
 
