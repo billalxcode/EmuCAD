@@ -34,10 +34,41 @@ impl GuiApp {
             self.message = "Analog worker unavailable".to_string();
             return;
         };
-        let request = worker.request_transient(self.document.clone(), self.transient_settings);
+        self.analog_paused = false;
+        let request = if self.transient_settings.adaptive {
+            worker.request_transient(self.document.clone(), self.transient_settings)
+        } else {
+            self.transient = None;
+            worker.start_transient(self.document.clone(), self.transient_settings)
+        };
         self.analog_request = Some(request);
         self.analog_busy = true;
         self.message = "Transient running".to_string();
+    }
+
+    pub(super) fn pause_transient(&mut self) {
+        if !self.analog_busy || self.analog_paused {
+            return;
+        }
+        if let Some(worker) = self.analog.as_ref() {
+            worker.pause();
+        }
+    }
+
+    pub(super) fn step_transient(&mut self) {
+        if !self.analog_busy || !self.analog_paused {
+            return;
+        }
+        if let Some(worker) = self.analog.as_ref() {
+            worker.step();
+        }
+    }
+
+    pub(super) fn reset_transient_session(&mut self) {
+        if let Some(worker) = self.analog.as_ref() {
+            worker.reset();
+        }
+        self.analog_paused = true;
     }
 
     pub(super) fn run_analysis(&mut self) {
@@ -71,6 +102,13 @@ impl GuiApp {
 
     #[cfg(test)]
     pub(super) fn wait_analog(&mut self) {
+        while self.analog_busy {
+            self.wait_one_analog();
+        }
+    }
+
+    #[cfg(test)]
+    pub(super) fn wait_one_analog(&mut self) {
         let Some(worker) = self.analog.as_ref() else {
             return;
         };
@@ -94,7 +132,89 @@ impl GuiApp {
             crate::analog::Event::Transient { request, result } => {
                 self.apply_transient(request, result);
             }
+            crate::analog::Event::TransientStarted { request, metadata } => {
+                self.apply_transient_started(request, metadata);
+            }
+            crate::analog::Event::TransientSamples { request, samples } => {
+                self.apply_transient_samples(request, &samples);
+            }
+            crate::analog::Event::TransientPaused { request } => {
+                self.apply_transient_paused(request);
+            }
+            crate::analog::Event::TransientFinished { request } => {
+                self.apply_transient_finished(request);
+            }
+            crate::analog::Event::TransientReset { request } => {
+                self.apply_transient_reset(request);
+            }
+            crate::analog::Event::TransientError { request, error } => {
+                self.apply_transient_error(request, error);
+            }
         }
+    }
+
+    fn apply_transient_started(&mut self, request: u64, metadata: crate::transient::TraceMetadata) {
+        if Some(request) != self.analog_request {
+            return;
+        }
+        let trace = TransientTrace::empty(metadata);
+        self.transient_selected = default_transient_selection(&trace);
+        self.transient_selected_currents.clear();
+        self.transient = Some(trace);
+        self.transient_open = true;
+        self.analog_busy = true;
+        self.analog_paused = false;
+        self.message = "Transient running".to_string();
+    }
+
+    fn apply_transient_samples(&mut self, request: u64, samples: &[sim_analysis::TransientSample]) {
+        if Some(request) != self.analog_request {
+            return;
+        }
+        let Some(trace) = self.transient.as_mut() else {
+            return;
+        };
+        for sample in samples {
+            trace.push(sample);
+        }
+        self.message = format!("Transient: {} samples", trace.values.len());
+    }
+
+    fn apply_transient_paused(&mut self, request: u64) {
+        if Some(request) != self.analog_request {
+            return;
+        }
+        self.analog_paused = true;
+        self.message = "Transient paused".to_string();
+    }
+
+    fn apply_transient_finished(&mut self, request: u64) {
+        if Some(request) != self.analog_request {
+            return;
+        }
+        self.analog_busy = false;
+        self.analog_paused = false;
+        self.message = "Transient complete".to_string();
+    }
+
+    fn apply_transient_reset(&mut self, request: u64) {
+        if Some(request) != self.analog_request {
+            return;
+        }
+        if let Some(trace) = self.transient.as_mut() {
+            trace.clear_samples();
+        }
+        self.analog_paused = true;
+        self.message = "Transient reset".to_string();
+    }
+
+    fn apply_transient_error(&mut self, request: u64, error: String) {
+        if Some(request) != self.analog_request {
+            return;
+        }
+        self.analog_busy = false;
+        self.analog_paused = false;
+        self.message = error;
     }
 
     fn apply_dc(&mut self, request: u64, result: Result<crate::analog::DcResultView, String>) {
@@ -102,6 +222,7 @@ impl GuiApp {
             return;
         }
         self.analog_busy = false;
+        self.analog_paused = false;
         match result {
             Ok(dc) => {
                 self.message = format_dc(&dc.voltages);

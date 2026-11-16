@@ -104,11 +104,13 @@ fn apply_initial_voltages(mut solution: Solution, overrides: &[(NodeId, f64)]) -
     solution
 }
 
+mod session;
 mod steps;
 #[cfg(test)]
 mod tests;
 mod validation;
 
+pub use session::TransientSession;
 use steps::run_steps;
 pub(crate) use steps::solve_step;
 use validation::validate_config;

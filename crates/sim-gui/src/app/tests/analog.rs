@@ -92,3 +92,29 @@ fn unsupported_component_panel_renders() {
     let output = render_simulation(&mut app);
     assert!(!output.shapes.is_empty());
 }
+
+#[test]
+fn transient_session_pauses_steps_and_resets() {
+    let mut app = worker_app();
+    app.transient_settings.steps = 100_000;
+    app.transient_settings.dt = 1e-9;
+    app.run_transient();
+    while app.transient.is_none() {
+        app.wait_one_analog();
+    }
+    app.pause_transient();
+    while !app.analog_paused {
+        assert!(app.analog_busy, "session finished before pause");
+        app.wait_one_analog();
+    }
+    let before = app.transient.as_ref().expect("trace").values.len();
+    app.step_transient();
+    while app.transient.as_ref().expect("trace").values.len() == before {
+        app.wait_one_analog();
+    }
+    app.reset_transient_session();
+    while !app.transient.as_ref().expect("trace").values.is_empty() {
+        app.wait_one_analog();
+    }
+    assert!(app.analog_busy);
+}

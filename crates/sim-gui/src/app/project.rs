@@ -200,6 +200,7 @@ impl GuiApp {
         self.analog_dc = None;
         self.analog_request = None;
         self.analog_busy = false;
+        self.analog_paused = false;
     }
 
     pub(super) fn flush_autosave(&mut self) -> bool {

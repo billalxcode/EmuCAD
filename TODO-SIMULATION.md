@@ -257,9 +257,10 @@ transient, dan melihat grafik yang deterministik.
 
 ## 8. Fase S4 - UI dan Persistensi
 
-- [~] S4-01 Panel simulasi dengan analisis, run, pause, step, reset.
-  - Panel menampilkan pilihan DC/Transient dan tombol run.
-  - Pause, step, dan reset analog belum.
+- [x] S4-01 Panel simulasi dengan analisis, run, pause, step, reset.
+  - Panel menampilkan domain, DC/Transient, run, pause, step, dan reset.
+  - Transient fixed-step memakai `TransientSession` bertahap.
+  - Transient adaptive masih berjalan penuh tanpa pause/step.
 - [x] S4-02 Tampilkan status domain dan komponen unsupported.
   - Panel simulasi menampilkan status netlist dan error unsupported.
 - [x] S4-03 Inspector parameter numerik per komponen.

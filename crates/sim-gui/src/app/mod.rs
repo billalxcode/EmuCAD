@@ -259,6 +259,7 @@ pub struct GuiApp {
     analog: Option<crate::analog::AnalogHandle>,
     analog_request: Option<u64>,
     analog_busy: bool,
+    analog_paused: bool,
     analog_dc: Option<crate::analog::DcResultView>,
     uart: UartLog,
     uart_input: String,

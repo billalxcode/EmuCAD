@@ -36,5 +36,6 @@ pub use sensitivity::{DEFAULT_RELATIVE_STEP, DcSensitivity, dc_sensitivity};
 pub use sim_device::IntegrationMethod;
 pub use system::SimulationSystem;
 pub use transient::{
-    TransientConfig, TransientSample, transient, transient_with_method, transient_with_solver,
+    TransientConfig, TransientSample, TransientSession, transient, transient_with_method,
+    transient_with_solver,
 };

@@ -52,6 +52,15 @@ pub(crate) struct TransientDevice {
     pub part: &'static str,
 }
 
+/// Metadata needed to build an incremental transient trace.
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct TraceMetadata {
+    pub nodes: Vec<String>,
+    pub devices: Vec<TransientDevice>,
+    pub dt: f64,
+    pub adaptive: bool,
+}
+
 /// Sampled node voltages and device currents over time.
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct TransientTrace {
@@ -65,6 +74,35 @@ pub(crate) struct TransientTrace {
 }
 
 impl TransientTrace {
+    /// Creates an empty trace with the given metadata.
+    #[must_use]
+    pub fn empty(metadata: TraceMetadata) -> Self {
+        Self {
+            times: Vec::new(),
+            nodes: metadata.nodes,
+            values: Vec::new(),
+            devices: metadata.devices,
+            currents: Vec::new(),
+            dt: metadata.dt,
+            adaptive: metadata.adaptive,
+        }
+    }
+
+    /// Appends one sample.
+    pub fn push(&mut self, sample: &TransientSample) {
+        self.times.push(sample_time(sample));
+        self.values
+            .push(node_values(&sample.solution, self.nodes.len()));
+        self.currents.push(sample.device_currents.clone());
+    }
+
+    /// Removes all samples while keeping metadata.
+    pub fn clear_samples(&mut self) {
+        self.times.clear();
+        self.values.clear();
+        self.currents.clear();
+    }
+
     /// Returns the sample index nearest to the requested time.
     #[must_use]
     pub fn index_at(&self, time: f64) -> Option<usize> {
@@ -189,20 +227,36 @@ fn trace(
     samples: &[TransientSample],
     settings: &TransientSettings,
 ) -> TransientTrace {
-    let times = samples.iter().map(sample_time).collect();
-    let values = samples
-        .iter()
-        .map(|sample| node_values(&sample.solution, netlist.nodes.len()))
-        .collect();
-    TransientTrace {
-        times,
+    let mut trace = TransientTrace::empty(metadata(netlist, settings));
+    for sample in samples {
+        trace.push(sample);
+    }
+    trace
+}
+
+/// Returns trace metadata for a netlist and transient settings.
+pub(crate) fn metadata(netlist: &Netlist, settings: &TransientSettings) -> TraceMetadata {
+    TraceMetadata {
         nodes: netlist.nodes.iter().map(|node| node.name.clone()).collect(),
-        values,
         devices: devices(netlist),
-        currents: currents(samples),
         dt: trace_dt(settings),
         adaptive: settings.adaptive,
     }
+}
+
+/// Builds a fixed-step config for an incremental session.
+pub(crate) fn fixed_config(settings: &TransientSettings) -> Result<TransientConfig, String> {
+    if settings.adaptive {
+        return Err("pause and step require fixed step".to_string());
+    }
+    validate_fixed(settings)?;
+    Ok(TransientConfig {
+        dt: settings.dt,
+        steps: settings.steps,
+        gmin: settings.gmin,
+        use_dc_op: settings.use_dc_op,
+        ..TransientConfig::default()
+    })
 }
 
 fn trace_dt(settings: &TransientSettings) -> f64 {
@@ -220,13 +274,6 @@ fn devices(netlist: &Netlist) -> Vec<TransientDevice> {
             label: part.label.clone(),
             part: part.part,
         })
-        .collect()
-}
-
-fn currents(samples: &[TransientSample]) -> Vec<Vec<Option<f64>>> {
-    samples
-        .iter()
-        .map(|sample| sample.device_currents.clone())
         .collect()
 }
 

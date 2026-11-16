@@ -146,6 +146,9 @@ impl GuiApp {
         }
         let mut open = self.simulation_open;
         let mut run = false;
+        let mut pause = false;
+        let mut step = false;
+        let mut reset = false;
         let mut open_transient = false;
         let status = self.netlist_status();
         let previous_domain = self.simulation_domain;
@@ -155,6 +158,8 @@ impl GuiApp {
         let dc = self.analog_dc.as_ref();
         let trace = self.transient.as_ref();
         let busy = self.analog_busy;
+        let paused = self.analog_paused;
+        let has_trace = self.transient.is_some();
         egui::Window::new("Simulation")
             .open(&mut open)
             .default_size([420.0, 320.0])
@@ -185,9 +190,29 @@ impl GuiApp {
                 if busy {
                     ui.label("Solving...");
                 }
-                if ui.add_enabled(!busy, egui::Button::new("Run")).clicked() {
-                    run = true;
-                }
+                ui.horizontal(|ui| {
+                    if ui.add_enabled(!busy, egui::Button::new("Run")).clicked() {
+                        run = true;
+                    }
+                    if ui
+                        .add_enabled(busy && !paused, egui::Button::new("Pause"))
+                        .clicked()
+                    {
+                        pause = true;
+                    }
+                    if ui
+                        .add_enabled(busy && paused, egui::Button::new("Step"))
+                        .clicked()
+                    {
+                        step = true;
+                    }
+                    if ui
+                        .add_enabled(busy || has_trace, egui::Button::new("Reset"))
+                        .clicked()
+                    {
+                        reset = true;
+                    }
+                });
                 if *kind == crate::analysis::AnalysisKind::Dc {
                     show_dc_results(ui, dc);
                 } else {
@@ -200,6 +225,15 @@ impl GuiApp {
         }
         if run {
             self.run_analysis();
+        }
+        if pause {
+            self.pause_transient();
+        }
+        if step {
+            self.step_transient();
+        }
+        if reset {
+            self.reset_transient_session();
         }
         if open_transient {
             self.transient_open = true;

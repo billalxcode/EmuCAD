@@ -74,12 +74,12 @@ fn newton_iteration(
     Ok((next, residual, converged))
 }
 
-fn next_time(time: Time, step: Time) -> Result<Time, SimError> {
+pub(super) fn next_time(time: Time, step: Time) -> Result<Time, SimError> {
     time.checked_add(step)
         .ok_or_else(|| SimError::Internal("transient time overflow".to_string()))
 }
 
-fn sample(
+pub(super) fn sample(
     system: &SimulationSystem,
     time: Time,
     solution: &Solution,
@@ -95,7 +95,7 @@ fn sample(
     }
 }
 
-fn step_time(dt: f64) -> Result<Time, SimError> {
+pub(super) fn step_time(dt: f64) -> Result<Time, SimError> {
     Time::from_secs_f64(dt)
         .ok_or_else(|| SimError::InvalidNetlist("transient dt is out of range".to_string()))
 }
