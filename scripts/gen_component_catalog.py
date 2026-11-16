@@ -93,14 +93,41 @@ add("passive.transmission_line", "TransmissionLine", "TransmissionLine", 4,
     ])
 
 add("source.independent", "VoltageSource", "VoltageSource", 2, "voltage", 5.0, "V", [
-    ("DC voltage source", "VoltageSource"), ("DC current source", "CurrentSource"),
-    ("AC voltage source", "VoltageSource"), ("AC current source", "CurrentSource"),
-    ("sine voltage source", "VoltageSource"), ("sine current source", "CurrentSource"),
+    "DC voltage source",
 ])
-add("source.pulse", "VoltageSource", "VoltageSource", 2, "voltage", 5.0, "V", [
-    ("pulse voltage source", "VoltageSource"), ("PWL voltage source", "VoltageSource"),
-    ("exponential voltage source", "VoltageSource"), ("voltage noise source", "VoltageSource"),
-    ("current noise source", "CurrentSource"), ("pulse current source", "CurrentSource"),
+add("source.independent", "CurrentSource", "CurrentSource", 2, "current", 1e-3, "A", [
+    "DC current source",
+])
+add("source.independent", "VoltageSource", "VoltageSource", 2, "voltage", 5.0, "V", [
+    "AC voltage source",
+])
+add("source.independent", "CurrentSource", "CurrentSource", 2, "current", 1e-3, "A", [
+    "AC current source",
+])
+add("source.independent", "BehavioralSource", None, 2, "voltage", 5.0, "V", [
+    "sine voltage source",
+])
+add("source.independent", "BehavioralSource", None, 2, "current", 1e-3, "A", [
+    "sine current source",
+])
+
+add("source.pulse", "VoltageSource", "PulseVoltageSource", 2, "v2", 5.0, "V", [
+    "pulse voltage source",
+])
+add("source.pulse", "BehavioralSource", None, 2, "voltage", 5.0, "V", [
+    "PWL voltage source",
+])
+add("source.pulse", "BehavioralSource", None, 2, "voltage", 5.0, "V", [
+    "exponential voltage source",
+])
+add("source.pulse", "BehavioralSource", None, 2, "voltage", 5.0, "V", [
+    "voltage noise source",
+])
+add("source.pulse", "BehavioralSource", None, 2, "current", 1e-3, "A", [
+    "current noise source",
+])
+add("source.pulse", "BehavioralSource", None, 2, "current", 1e-3, "A", [
+    "pulse current source",
 ])
 add("source.controlled", "Vcvs", "Vcvs", 4, "gain", 1.0, "ratio", [
     ("VCVS", "Vcvs"), ("VCCS", "Vccs"), ("CCCS", "Cccs"), ("CCVS", "Ccvs"),
@@ -116,7 +143,7 @@ add("source.battery", "Battery", "VoltageSource", 2, "voltage", 1.5, "V", [
     "battery", "solar cell",
 ])
 
-add("diode.rectifier", "Diode", "Diode", 2, "saturation_current", 1e-12, "A", [
+add("diode.rectifier", "Diode", "Diode", 2, "is", 1e-12, "A", [
     "rectifier diode", "fast rectifier diode", "Schottky diode",
     "silicon carbide Schottky diode", "Zener diode", "avalanche diode",
     "tunnel diode", "PIN diode", "varactor diode", "current limiting diode",
@@ -133,14 +160,14 @@ add("diode.opto", "Optocoupler", None, 4, "current_transfer_ratio", 1.0, "ratio"
     "photovoltaic isolator", "slotted optical switch",
     "reflective optical sensor",
 ])
-add("diode.tvs", "Diode", "Diode", 2, "breakdown_voltage", 6.0, "V", [
+add("diode.tvs", "Diode", "Diode", 2, "is", 1e-12, "A", [
     "TVS diode", "ESD protection diode", "bidirectional TVS",
     "snapback ESD device", "tuning varactor", "PIN limiter diode",
 ])
 add("diode.bridge", "DiodeArray", None, 4, "forward_voltage", 0.7, "V", [
     "diode bridge", "dual diode", "diode array", "Schottky bridge",
 ])
-add("diode.other", "Diode", "Diode", 2, "forward_voltage", 0.7, "V", [
+add("diode.other", "Diode", "Diode", 2, "is", 1e-12, "A", [
     "backward diode", "Gunn diode", "IMPATT diode", "step recovery diode",
 ])
 
@@ -453,8 +480,6 @@ for group in groups:
             param, default, unit = "current", 1e-3, "A"
         elif cls == "TransmissionLine":
             param = "z0"
-        elif cls == "Diode":
-            param = "is"
         elif cls == "Bjt":
             param = "bf"
         elif cls == "Jfet":

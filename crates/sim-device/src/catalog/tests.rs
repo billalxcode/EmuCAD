@@ -1,5 +1,5 @@
-use super::{ComponentRegistry, ComponentRequest, Family, catalog};
-use sim_core::{CircuitBuilder, Device, DeviceId, NodeId};
+use super::{ComponentRegistry, ComponentRequest, Family, ModelClass, catalog};
+use sim_core::{CircuitBuilder, Device, DeviceId, DeviceKind, NodeId};
 use std::collections::BTreeSet;
 
 #[test]
@@ -128,6 +128,7 @@ fn supported_passive(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::Capacitor
             | sim_core::DeviceKind::Inductor
             | sim_core::DeviceKind::VoltageSource
+            | sim_core::DeviceKind::PulseVoltageSource
             | sim_core::DeviceKind::CurrentSource
             | sim_core::DeviceKind::Vcvs
             | sim_core::DeviceKind::Vccs
@@ -155,6 +156,44 @@ fn supported_active(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::Regulator
             | sim_core::DeviceKind::LogicGate
     )
+}
+
+#[test]
+fn diode_parameters_use_current_units() {
+    for entry in catalog() {
+        if entry.class != ModelClass::Diode {
+            continue;
+        }
+        assert_eq!(entry.parameter, "is", "{}", entry.id);
+        assert_eq!(entry.unit, "A", "{}", entry.id);
+        assert!(
+            entry.default > 0.0 && entry.default <= 1e-9,
+            "{}: {}",
+            entry.id,
+            entry.default
+        );
+    }
+}
+
+#[test]
+fn waveform_sources_map_to_waveform_devices_only() {
+    let registry = ComponentRegistry::new();
+    let pulse = registry
+        .find("source.pulse.pulse_voltage_source")
+        .expect("pulse source");
+    assert_eq!(pulse.device, Some(DeviceKind::PulseVoltageSource));
+    for id in [
+        "source.independent.sine_voltage_source",
+        "source.independent.sine_current_source",
+        "source.pulse.pwl_voltage_source",
+        "source.pulse.exponential_voltage_source",
+        "source.pulse.voltage_noise_source",
+        "source.pulse.current_noise_source",
+        "source.pulse.pulse_current_source",
+    ] {
+        let entry = registry.find(id).unwrap_or_else(|| panic!("missing {id}"));
+        assert!(entry.device.is_none(), "{id}");
+    }
 }
 
 #[test]

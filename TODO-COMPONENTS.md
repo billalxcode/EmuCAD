@@ -1,10 +1,11 @@
 # TODO - Komponen 500
 
-Status: katalog 500 entri sudah diimplementasikan di `sim-device`.
-Registry-backed emulation tersedia untuk 215 entri. Sebanyak 285 entri
-behavioral masih menunggu model solver dan belum dapat disimulasikan
-sebagai device MNA. Binding Python `sim-python` sudah menyediakan katalog
-dan builder netlist; simulasi tetap berjalan di crate Rust.
+Status per 2026-11-16: katalog 500 entri ada, 208 entri dapat
+diinstansiasi lewat registry, dan 292 entri belum punya model solver.
+Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
+dari 208 mapping masih generik atau salah topologi, jadi `mapped` tidak
+sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
+dan builder topologi; simulasi tetap berjalan di crate Rust.
 
 Tujuan: membangun katalog 500 model komponen yang terverifikasi, dapat
 diekspor ke Python builder, dan diuji dengan unit test ketat.
@@ -37,8 +38,9 @@ Urutan yang disarankan:
 - [x] C0-03 Setujui toleransi referensi per tingkat model.
 - [x] C0-04 Setujui schema katalog dan status draft sampai verified.
 - [x] C0-05 Setujui kebijakan sumber dan lisensi clean-room tanpa salin GPL.
-- [ ] C0-06 Pilih analisis pertama: DC operating point, transient, atau AC.
-- [ ] C0-07 Tentukan rasio model generik dan part-specific.
+- [x] C0-06 Pilih analisis pertama: DC operating point dan transient.
+- [x] C0-07 Tentukan rasio model generik dan part-specific.
+  - 500 model generik, ditambah 50 part-specific prioritas di C10.
 - [x] C0-08 Tentukan lingkup Python builder: batch atau interaktif.
 - [x] C0-09 Setujui lokasi katalog di `sim-device` tanpa crate baru.
 - [x] C0-10 Setujui nama, unit SI, dan aturan versioning.
@@ -49,6 +51,8 @@ Setiap batch dinyatakan selesai jika:
 
 - Entri katalog memiliki prinsip kerja satu paragraf.
 - Parameter memiliki unit, default, min, dan max.
+- Setiap parameter numerik dibaca model dan punya effect test.
+- Tidak ada parameter dekoratif yang tidak memengaruhi hasil.
 - Model Rust deterministic dan tidak memakai wall-clock.
 - Minimal tiga unit test: nominal, batas, dan error.
 - Minimal satu conservation atau energy test.
@@ -60,11 +64,50 @@ Setiap batch dinyatakan selesai jika:
 Batch yang gagal salah satu syarat tetap berstatus `tested`, bukan
 `verified`.
 
+## 3a. Keputusan Pendekatan
+
+| ID | Keputusan |
+|---|---|
+| D-01 | Perbaikan data dan mapping dikerjakan sebelum harness verifikasi. |
+| D-02 | Unit test model di `sim-device`; circuit dan conservation test di `sim-analysis`. |
+| D-03 | Reference vector memakai CSV sumber dan Rust const hasil generator. |
+| D-04 | Rasio akhir: 500 model generik dan 50 part-specific prioritas. |
+| D-05 | Target sebelum kembali ke TODO-SIMULATION adalah C2 verified. |
+| D-06 | Setiap parameter numerik wajib berfungsi dan punya effect test. |
+
+## 3b. Aturan Parameter
+
+Parameter yang terlihat dan dapat diedit pengguna wajib memenuhi aturan:
+
+- Nilai numerik dibaca model saat stamping atau update.
+- Mengubah nilai harus mengubah hasil simulasi sesuai fungsi fisiknya.
+- Default adalah nilai awal, bukan nilai tetap.
+- Parameter yang belum berfungsi tidak boleh tampil sebagai editable.
+- Parameter yang hanya berlaku pada region tertentu wajib punya test
+  yang memasuki region tersebut.
+- Konstanta fisik seperti Boltzmann dan elementary charge bukan parameter
+  pengguna dan tidak ditampilkan.
+- Nilai parameter disimpan di proyek JSON dan menginvalidasi hasil lama
+  ketika berubah.
+
+Setiap parameter minimal punya:
+
+- Test nominal pada nilai default.
+- Test sensitivity: nilai diubah dalam rentang valid, output berubah
+  dengan arah dan besaran yang diharapkan.
+- Test boundary: nilai min dan max valid; nilai di luar rentang ditolak.
+- Test no-op guard: parameter yang tidak dipakai model harus dihapus
+  atau ditandai unsupported.
+
 ## 4. Infrastruktur
 
 - [x] C1-01 Buat modul katalog di `crates/sim-device`.
-- [x] C1-02 Definisikan struct `ComponentSpec` dan parameter typed.
-- [x] C1-03 Buat validator ID, unit, pin, dan rentang parameter.
+- [~] C1-02 Definisikan struct `ComponentSpec` dan parameter typed.
+  - Struct ada, tetapi parameter masih satu nama string plus default.
+  - Schema multi-parameter dan tipe belum ada.
+- [~] C1-03 Buat validator ID, unit, pin, dan rentang parameter.
+  - ID, teks, pin positif, dan default finite sudah divalidasi.
+  - Unit, pin per kelas, min, dan max belum divalidasi.
 - [x] C1-04 Buat loader katalog deterministik.
 - [x] C1-05 Tambah perintah `emucad catalog --json`.
 - [ ] C1-06 Buat format reference vector dan parser test.
@@ -73,12 +116,13 @@ Batch yang gagal salah satu syarat tetap berstatus `tested`, bukan
 - [ ] C1-09 Buat harness convergence dan parameter fuzz.
 - [ ] C1-10 Buat cross-check opsional terhadap ngspice.
 - [x] C1-11 Tambah CI Linux untuk katalog dan test model.
-- [x] C1-12 Tambah laporan coverage per kategori dan status.
+- [~] C1-12 Tambah laporan coverage per kategori dan status.
+  - CLI baru melaporkan total; per kategori dan status belum.
 - [x] C1-21 Buat crate `sim-python` dengan `pyo3` untuk katalog dan
   builder netlist.
 - [x] C1-22 Tambah smoke test Python dan validasi jumlah pin registry.
 
-## 4a. Status Katalog
+## 4a. Status Katalog dan Audit
 
 - [x] C1-13 Hasilkan 500 entri katalog deterministik.
 - [x] C1-14 Uji jumlah 500, ID unik, slug ASCII, dan family count.
@@ -89,9 +133,196 @@ Batch yang gagal salah satu syarat tetap berstatus `tested`, bukan
 - [ ] C1-17 Implementasikan solver penuh untuk keluarga behavioral.
 - [ ] C1-18 Tambah reference vector dan cross-check ngspice per model.
 
-Katalog adalah lapisan registry. Entry dengan `device` sudah dapat
-memakai model solver yang ada. Entry behavioral baru memiliki metadata,
-prinsip, dan smoke response; solver penuhnya ada di backlog C2 sampai C9.
+Status per 2026-11-16. Angka `mapped` diambil dari field `device` di
+katalog. Angka `verified` diambil dari syarat batch di bagian 3.
+
+Legend:
+
+- `cataloged`: entri ada dan lolos validasi metadata.
+- `mapped`: `device` terisi dan registry dapat membuat `DeviceInstance`.
+- `tested`: model device punya test, tetapi belum tentu test per entry.
+- `verified`: memenuhi seluruh Aturan Batch.
+
+| Level | Jumlah | Arti |
+|---|---:|---|
+| cataloged | 500 | metadata katalog lengkap |
+| mapped | 208 | dapat masuk netlist lewat registry |
+| tested per entry | 0 | belum ada test per entry |
+| verified | 0 | belum ada yang lulus semua syarat |
+
+Peringatan: 208 `mapped` bukan 208 model yang benar. Audit menemukan
+mapping generik, pin count salah, dan parameter yang tidak sesuai model.
+
+### 4a.1 Matriks per Batch
+
+| Batch | Entri | Mapped | Catatan |
+|---|---:|---:|---|
+| C2-01 | 12 | 12 | 1 ideal benar; 11 butuh model khusus; potensiometer dan digital pot butuh pin kontrol. |
+| C2-02 | 13 | 13 | 1 ideal; 12 butuh ESR, ESL, C(V), atau kontrol. |
+| C2-03 | 10 | 10 | Ideal dan konstruksi dasar layak; coupled, current transformer, flyback, choke butuh 4 pin dan mutual. |
+| C2-04 | 6 | 0 | Belum ada model mutual inductance. |
+| C2-05 | 5 | 0 | Belum ada model BVD. |
+| C2-06 | 9 | 9 | 1 ideal; lossy butuh loss; attenuator, splitter, coupler bukan transmission line. |
+| C2-07 | 12 | 5 | 4 DC dan AC serta 1 pulse benar; 7 waveform lain ditandai unsupported. |
+| C2-08 | 8 | 4 | 4 controlled benar; 4 behavioral belum. |
+| C2-09 | 5 | 2 | Battery layak ideal; solar cell salah; 3 entri digital tidak sesuai kategori. |
+| C3-01 | 10 | 10 | 2 rectifier benar; 8 butuh model Schottky, Zener, avalanche, tunnel, PIN, varactor. |
+| C3-02 | 8 | 8 | Semua diode generik; tidak ada model optik atau LED. |
+| C3-03 | 8 | 2 | 2 photodiode tanpa photocurrent; 6 optocoupler belum. |
+| C3-04 | 10 | 6 | 6 TVS data salah; 4 bridge dan array belum. |
+| C3-05 | 4 | 4 | Data `is` salah, default 0.7 A dengan unit V. |
+| C3-06 | 12 | 12 | Ebers-Moll ada; parameter masih default kelas. |
+| C3-07 | 8 | 8 | Semua 3 pin; dual_pnp menjadi NPN; array butuh topologi sendiri. |
+| C3-08 | 8 | 8 | 6 single layak; 2 dual salah pin. |
+| C3-09 | 15 | 15 | 9 single layak; 2 dual dan 2 four-terminal salah pin; 2 depletion salah vto. |
+| C3-10 | 8 | 2 | 2 power MOSFET generik; 6 IGBT, GaN, SiC belum. |
+| C3-11 | 4 | 0 | Belum ada model. |
+| C4-01 | 8 | 0 | Belum ada model thyristor. |
+| C4-02 | 6 | 0 | Belum ada model proteksi; duplikasi konsep dengan fuse dan varistor di C2-01. |
+| C4-03 | 4 | 0 | Belum ada model breaker. |
+| C4-04 | 8 | 8 | 5 SPST-like layak; SPDT, DPST, DPDT 2 pin dan tidak bisa changeover. |
+| C4-05 | 7 | 7 | Relay 5 pin ada; latching dan time delay belum; SSR memakai switch generik. |
+| C4-06 | 5 | 5 | 2 switch layak; 4:1, 8:1, demux 4 pin salah. |
+| C4-07 | 5 | 5 | Semua resistor 2 pin; header, terminal, IC socket butuh pin lebih; jumper tanpa state. |
+| C5-01 | 15 | 15 | Hanya unit 5 pin yang layak; dual, quad, fully differential, instrumentation pin salah; tanpa noise, slew, bandwidth, offset. |
+| C5-02 | 6 | 6 | Comparator generik; hysteresis, open-collector, delay belum. |
+| C5-03 | 5 | 5 | Mapped ke opamp; topologi instrumentation tidak ada. |
+| C5-04 | 5 | 5 | OTA dan Norton salah model; audio, video, buffer generik. |
+| C5-05 | 5 | 0 | Belum ada model timer, oscillator, PLL. |
+| C5-06 | 4 | 4 | Voltage source 2 pin; current reference salah; topology shunt dan series belum. |
+| C6-01 | 12 | 9 | 8 gate benar; Schmitt tanpa hysteresis; 3 special belum. |
+| C6-02 | 10 | 0 | Belum ada model flip-flop dan latch. |
+| C6-03 | 10 | 0 | Belum ada model counter dan shift register. |
+| C6-04 | 8 | 0 | Belum ada model mux, decoder, encoder. |
+| C6-05 | 8 | 0 | Belum ada model adder, comparator, buffer. |
+| C6-06 | 6 | 0 | Belum ada model level shifter dan interface. |
+| C6-07 | 6 | 0 | Belum ada model programmable logic. |
+| C6-08 | 15 | 0 | Belum ada model memory. |
+| C6-09 | 11 | 0 | Belum ada model MCU. |
+| C6-10 | 5 | 0 | Belum ada model ADC, DAC, PWM. |
+| C6-11 | 6 | 0 | Belum ada model serial interface. |
+| C6-12 | 3 | 0 | Belum ada model timer, RTC, watchdog. |
+| C7-01 | 6 | 6 | Regulator 3 pin generik; negative, current, shunt, adjustable belum. |
+| C7-02 | 8 | 0 | Belum ada model DC-DC. |
+| C7-03 | 5 | 0 | Belum ada model charge pump dan charger. |
+| C7-04 | 5 | 0 | Belum ada model supervisor. |
+| C7-05 | 3 | 3 | Ideal switch; ideal diode dan ORing logic belum. |
+| C7-06 | 3 | 0 | Belum ada model motor driver. |
+| C7-07 | 6 | 0 | Belum ada model sensor suhu. |
+| C7-08 | 5 | 0 | Belum ada model sensor cahaya. |
+| C7-09 | 5 | 0 | Belum ada model sensor magnetik. |
+| C7-10 | 5 | 0 | Belum ada model sensor gerak. |
+| C7-11 | 4 | 0 | Belum ada model sensor tekanan. |
+| C7-12 | 4 | 0 | Belum ada model sensor kelembapan dan gas. |
+| C7-13 | 3 | 0 | Belum ada model sensor arus dan tegangan. |
+| C7-14 | 3 | 0 | Belum ada model proximity dan sentuh. |
+| C7-15 | 4 | 0 | Belum ada model LED dan lampu. |
+| C7-16 | 4 | 0 | Belum ada model buzzer dan speaker. |
+| C7-17 | 5 | 0 | Belum ada model motor dan servo. |
+| C7-18 | 4 | 0 | Belum ada model display. |
+| C7-19 | 3 | 0 | Belum ada model heater dan Peltier. |
+| C8-01 | 4 | 0 | Belum ada model RF amplifier. |
+| C8-02 | 4 | 0 | Belum ada model RF mixer dan modulator. |
+| C8-03 | 4 | 0 | Belum ada model RF filter. |
+| C8-04 | 3 | 0 | Belum ada model antenna. |
+| C8-05 | 3 | 0 | Belum ada model coupler, splitter, isolator. |
+| C8-06 | 5 | 0 | Belum ada model integrator, differentiator, filter. |
+| C8-07 | 5 | 0 | Belum ada model multiplier, divider, log, RMS. |
+| C8-08 | 5 | 0 | Belum ada model comparator, Schmitt, peak detector. |
+| C8-09 | 5 | 0 | Belum ada model VCO, PLL, modulator. |
+| C8-10 | 5 | 0 | Belum ada model sample-hold, ADC, DAC behavioral. |
+| C9-01 | 3 | 0 | Belum ada model board. |
+| C9-02 | 3 | 0 | Belum ada model breadboard dan jumper. |
+| C9-03 | 3 | 0 | Belum ada model power module dan USB. |
+| C9-04 | 3 | 0 | Belum ada model display dan sensor module. |
+| C9-05 | 2 | 0 | Belum ada model enclosure dan mechanical. |
+
+### 4a.2 Temuan Audit
+
+1. Parameter diode sudah dikoreksi.
+   - Sebelumnya 10 entri memakai `is` dengan unit V: 6 TVS default 6,
+     4 diode lain default 0.7.
+   - Sekarang semua `is` memakai unit A dan default 1e-12.
+   - Breakdown voltage TVS belum menjadi parameter terpisah.
+2. Waveform source sudah dikoreksi.
+   - Sebelumnya 8 entri sine, pulse, PWL, exponential, dan noise memakai
+     `VoltageSource` atau `CurrentSource` DC.
+   - Sekarang pulse voltage source memakai `PulseVoltageSource`; 7
+     waveform lain ditandai unsupported sampai model tersedia.
+3. Topologi multi-unit dan changeover salah.
+   - 8 BJT array memakai 3 pin; dual_pnp dan npn_pnp_pair memakai NPN.
+   - 2 dual JFET dan 4 MOSFET ganda atau four-terminal memakai 3 pin.
+   - 5 opamp multi-unit memakai 5 pin.
+   - 3 mechanical switch changeover memakai 2 pin.
+   - 3 analog mux dan demux memakai 4 pin.
+4. Model pengganti tidak sesuai entry.
+   - 11 resistor non-ideal, 12 kapasitor non-ideal, dan 9 induktor
+     non-ideal masih memakai model ideal.
+   - 8 LED, 2 photodiode, 6 TVS, dan 4 diode lain belum punya model
+     optik, breakdown, atau photocurrent.
+   - 4 voltage reference dan 6 regulator masih memakai source atau
+     regulator generik.
+   - 25 opamp dan OTA memakai satu macromodel opamp; 6 comparator
+     memakai satu macromodel comparator.
+   - 5 connector masih memakai resistor 2 pin.
+5. Validasi katalog hanya memeriksa `pins > 0`.
+   - Tidak ada aturan pin per model class.
+   - Tidak ada min, max, status, references, atau test per entry.
+6. Syarat batch belum terpenuhi.
+   - 0 dari 500 punya tiga unit test per entry.
+   - 0 dari 500 punya conservation test.
+   - 0 dari 500 punya reference vector.
+   - 0 dari 500 berstatus `verified`.
+7. Infrastruktur verifikasi belum ada.
+   - C1-06 sampai C1-10, C1-17, dan C1-18 masih terbuka.
+8. Dokumentasi belum selaras.
+   - `docs/11-netlist.md` masih menyebut device lama dan belum stamping.
+   - `docs/12-device-models.md` belum punya status per entry.
+   - Belum ada laporan coverage per kategori dan status.
+
+### 4a.3 Yang Sudah Layak
+
+- 500 entri katalog deterministik, ID unik, dan validasi metadata.
+- Perintah `emucad catalog --json` dan binding Python untuk katalog.
+- 25 device solver: resistor, capacitor, inductor, voltage source,
+  current source, pulse source, VCVS, VCCS, CCCS, CCVS, switch, ideal
+  switch, relay, transmission line, diode, BJT, JFET, MOSFET, opamp,
+  comparator, regulator, dan logic gate.
+- Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
+  clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
+  noise, distorsi, sensitivitas, corner, dan determinisme.
+- 829 test workspace lulus pada baseline audit ini.
+
+### 4a.4 Arti untuk Pengerjaan
+
+- `mapped` hanya berarti entry dapat masuk netlist, bukan model benar.
+- Batch baru boleh dicentang `verified` setelah C1-06 sampai C1-10
+  tersedia dan entry punya reference vector.
+- Perbaikan data dan mapping di 4b harus dikerjakan sebelum menambah
+  model baru, supaya model baru tidak mewarisi data yang salah.
+
+## 4b. Perbaikan Data dan Mapping
+
+- [x] C1-23 Perbaiki parameter diode TVS dan diode lain.
+  - `is` sekarang memakai unit A dan default 1e-12.
+  - Tegangan breakdown belum menjadi parameter terpisah; menunggu C1-30.
+- [x] C1-24 Perbaiki mapping sumber waveform.
+  - Pulse voltage source memakai `PulseVoltageSource`.
+  - Sine, PWL, exponential, noise, dan pulse current ditandai
+    unsupported sampai model tersedia.
+- [ ] C1-25 Perbaiki BJT array dan pasangan.
+  - Pin count, polaritas, dan topologi harus sesuai entry.
+- [ ] C1-26 Perbaiki pin MOSFET dan JFET ganda serta four-terminal.
+- [ ] C1-27 Pisahkan opamp multi-unit atau tandai unsupported.
+- [ ] C1-28 Perbaiki switch changeover dan analog multiplexer.
+- [ ] C1-29 Tambahkan validasi pin count per model class.
+- [ ] C1-30 Tambahkan status, min, max, dan references ke schema.
+- [ ] C1-31 Audit semua parameter katalog dan daftar output yang
+  dipengaruhinya.
+- [ ] C1-32 Buat parameter effect test untuk setiap parameter yang
+  dipakai model.
+- [ ] C1-33 Sembunyikan atau hapus parameter yang belum berfungsi
+  dari inspector.
 
 ## 5. Passives dan Sources
 
@@ -143,11 +374,15 @@ Target: 43 entri.
 - [ ] C4-01 SCR, TRIAC, DIAC, GTO 8 entri.
 - [ ] C4-02 Fuse, PTC, TVS, varistor 6 entri.
 - [ ] C4-03 Spark gap, crowbar, breaker 4 entri.
-- [x] C4-04 Mechanical switch 8 entri: SPST, SPDT, DPDT, push, toggle,
+- [~] C4-04 Mechanical switch 8 entri: SPST, SPDT, DPDT, push, toggle,
   DIP, reed, limit.
-- [x] C4-05 Relay dan solid-state relay 7 entri.
-- [x] C4-06 Analog switch dan multiplexer 5 entri.
-- [x] C4-07 Connector, jumper, test point 5 entri.
+- [~] C4-05 Relay dan solid-state relay 7 entri.
+- [~] C4-06 Analog switch dan multiplexer 5 entri.
+- [~] C4-07 Connector, jumper, test point 5 entri.
+
+Catatan: C4-04 sampai C4-07 sudah punya entri katalog dan registry,
+tetapi belum memenuhi Aturan Batch. Model masih generik dan beberapa
+pin count salah, sehingga statusnya sebagian, bukan selesai.
 
 ## 8. Op-Amp dan Analog IC
 
@@ -267,6 +502,8 @@ subprocess. Python memakai dict untuk request dan response.
 - [ ] Semua entri punya prinsip kerja, parameter, dan referensi.
 - [ ] Semua entri punya minimal tiga unit test.
 - [ ] Semua entri verified lulus reference vector.
+- [ ] Setiap parameter numerik punya effect test dan mengubah hasil.
+- [ ] Tidak ada parameter editable yang tidak dipakai model.
 - [ ] Tidak ada dependensi eksternal baru di crate inti.
 - [ ] Tidak ada `unsafe`.
 - [ ] Tidak ada wall-clock di simulation.

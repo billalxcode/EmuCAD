@@ -91,6 +91,12 @@ fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 | Q54 | Vertical slice pertama adalah GPIO blink |
 | Q55 | Jika benchmark gagal, real-time boleh diturunkan |
 | Q56 | Verifikasi memakai instruction, peripheral, dan timing |
+| Q57 | Perbaikan data dan mapping dikerjakan sebelum harness |
+| Q58 | Unit test model di sim-device; circuit test di sim-analysis |
+| Q59 | Reference vector memakai CSV sumber dan Rust const |
+| Q60 | 500 model generik ditambah 50 part-specific prioritas |
+| Q61 | Target sebelum simulasi adalah C2 verified |
+| Q62 | Setiap parameter numerik wajib mengubah hasil sesuai fungsi |
 
 ### 3.1 Target dan Fallback
 
@@ -135,7 +141,9 @@ Gerbang kelayakan sebelum implementasi besar:
     common, normally-open, normally-closed.
   - Setiap definisi komponen wajib memiliki role per pin.
 - [ ] S0-02 Definisikan `ParameterSpec`.
-  - Field: name, default, unit, minimum, maximum, required.
+  - Field: name, default, unit, minimum, maximum, required, effect.
+  - Setiap parameter punya effect test dan output yang dipengaruhi.
+  - Parameter tanpa efek model ditolak.
   - Validasi nilai finite dan dalam rentang.
 - [ ] S0-03 Definisikan `SimulationBinding`.
   - Menghubungkan definition ID ke catalog ID, `DeviceKind`, role pin,
@@ -232,7 +240,10 @@ transient, dan melihat grafik yang deterministik.
 - [ ] S4-01 Panel simulasi dengan analisis, run, pause, step, reset.
 - [ ] S4-02 Tampilkan status domain dan komponen unsupported.
 - [ ] S4-03 Inspector parameter numerik per komponen.
+  - Hanya tampilkan parameter yang punya effect test.
+  - Tampilkan unit, default, min, dan max.
 - [ ] S4-04 Simpan parameter dan pilihan analisis di JSON.
+  - Perubahan parameter menginvalidasi hasil simulasi lama.
 - [ ] S4-05 Migrasi proyek lama tanpa merusak nilai string.
 - [ ] S4-06 Tampilkan nama net dan pin role.
 - [ ] S4-07 Tampilkan error sebelum simulasi dimulai.
@@ -241,9 +252,12 @@ transient, dan melihat grafik yang deterministik.
   - Pilihan analisis.
   - Komponen unsupported.
   - Reload proyek.
+- [ ] S4-09 Test parameter effect di GUI.
+  - Ubah nilai parameter, hasil simulasi berubah sesuai fungsi.
+  - Parameter tanpa efek tidak tampil sebagai editable.
 
-**Acceptance S4:** pengguna dapat mengubah nilai, memilih analisis, dan
-melihat hasil tanpa crash.
+**Acceptance S4:** setiap parameter yang dapat diedit mengubah hasil
+simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
 
 ## 9. Fase S5 - Model Compact dan Behavioral Non-MCU
 
@@ -367,6 +381,8 @@ dokumentasi menyebut batas fidelity.
 - [ ] DC dan transient berjalan di worker.
 - [ ] Semua net dapat diprobe dengan buffer 10 detik simulasi.
 - [ ] Parameter dapat diedit dan disimpan di JSON.
+- [ ] Setiap parameter numerik punya effect test dan mengubah hasil.
+- [ ] Tidak ada parameter editable yang tidak dipakai model.
 - [ ] Semua 11 MCU gate-level logika selesai.
 - [ ] Semua 15 memory gate-level selesai.
 - [ ] AVR full chip termasuk ADC/SPI/TWI/USB selesai.

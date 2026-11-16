@@ -248,6 +248,9 @@ Aturan:
 - Urutan field deterministik.
 - Unit SI.
 - Tidak ada nilai default yang tidak terdokumentasi.
+- Setiap parameter numerik wajib dibaca model dan punya effect test.
+- Mengubah parameter harus mengubah output sesuai fungsi fisiknya.
+- Parameter yang belum berfungsi tidak boleh tampil sebagai editable.
 - Status: draft, implemented, tested, verified, deprecated.
 - Entri verified wajib punya referensi dan test.
 
@@ -337,8 +340,8 @@ Jumlah saat ini:
 
 - 500 entri katalog.
 - 60 model class.
-- 215 entri solver-backed dengan `DeviceKind`.
-- 285 entri behavioral dengan metadata dan smoke response.
+- 208 entri solver-backed dengan `DeviceKind`.
+- 292 entri behavioral dengan metadata dan smoke response.
 
 Registry `ComponentRegistry` memetakan entry ke `DeviceInstance` dan
 `DeviceModel`. Registry memvalidasi ID, jumlah pin, parameter default, dan

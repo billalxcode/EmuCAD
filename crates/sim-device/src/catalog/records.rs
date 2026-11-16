@@ -56,15 +56,19 @@ pub fn find_catalog_record(id: &str) -> Option<CatalogRecord> {
 
 #[cfg(test)]
 mod tests {
-    use super::{CatalogRecord, catalog_records, find_catalog_record};
+    use super::{CatalogRecord, catalog, catalog_records, find_catalog_record};
 
     #[test]
     fn records_cover_the_catalog() {
         let records = catalog_records();
         assert_eq!(records.len(), 500);
+        let expected = catalog()
+            .iter()
+            .filter(|spec| spec.device.is_some())
+            .count();
         assert_eq!(
             records.iter().filter(|record| record.solver_backed).count(),
-            215
+            expected
         );
     }
 
