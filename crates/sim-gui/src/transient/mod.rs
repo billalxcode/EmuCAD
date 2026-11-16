@@ -37,7 +37,6 @@ pub(crate) struct TransientTrace {
 
 impl TransientTrace {
     /// Returns the sample index nearest to the requested time.
-    #[cfg(test)]
     #[must_use]
     pub fn index_at(&self, time: f64) -> Option<usize> {
         self.times

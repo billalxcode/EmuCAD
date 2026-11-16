@@ -19,9 +19,19 @@ pub(crate) fn show_transient(
     ui.label(transient_header(trace, selected.len()));
     select_nets(ui, trace, selected);
     let width = ui.available_width().max(320.0);
-    let (response, painter) = ui.allocate_painter(egui::vec2(width, 220.0), egui::Sense::hover());
+    let (response, painter) =
+        ui.allocate_painter(egui::vec2(width, 220.0), egui::Sense::click_and_drag());
     let plot = response.rect.shrink2(egui::vec2(46.0, 16.0));
-    paint_transient(&painter, response.rect, plot, trace, selected);
+    let cursor = response
+        .hover_pos()
+        .filter(|position| plot.contains(*position))
+        .map(|position| time_at(plot, trace.duration(), position.x));
+    paint_transient(&painter, response.rect, plot, trace, selected, cursor);
+}
+
+fn time_at(plot: egui::Rect, duration: f64, x: f32) -> f64 {
+    let fraction = f64::from((x - plot.left()) / plot.width().max(1.0));
+    (fraction * duration).clamp(0.0, duration)
 }
 
 fn transient_header(trace: &crate::transient::TransientTrace, selected: usize) -> String {
@@ -61,6 +71,7 @@ fn paint_transient(
     plot: egui::Rect,
     trace: &crate::transient::TransientTrace,
     selected: &BTreeSet<usize>,
+    cursor: Option<f64>,
 ) {
     let palette = crate::design::palette_for(painter.ctx());
     painter.rect_filled(rect, 4.0, palette.graph_bg);
@@ -72,6 +83,66 @@ fn paint_transient(
     paint_time_labels(painter, plot, trace.duration());
     paint_series_set(painter, plot, trace, selected, range);
     paint_legend(painter, plot, trace, selected);
+    paint_cursor(painter, plot, trace, selected, cursor);
+}
+
+fn paint_cursor(
+    painter: &egui::Painter,
+    plot: egui::Rect,
+    trace: &crate::transient::TransientTrace,
+    selected: &BTreeSet<usize>,
+    cursor: Option<f64>,
+) {
+    let Some(time) = cursor else {
+        return;
+    };
+    let palette = crate::design::palette_for(painter.ctx());
+    let x = time_to_x(plot, trace.duration(), time);
+    let text = cursor_text(trace, selected, time);
+    paint_cursor_line(painter, plot, x, palette.warning);
+    paint_cursor_label(painter, plot, x, &text, palette.text);
+}
+
+fn paint_cursor_line(painter: &egui::Painter, plot: egui::Rect, x: f32, color: egui::Color32) {
+    painter.line_segment(
+        [egui::pos2(x, plot.top()), egui::pos2(x, plot.bottom())],
+        egui::Stroke::new(1.0, color),
+    );
+}
+
+fn paint_cursor_label(
+    painter: &egui::Painter,
+    plot: egui::Rect,
+    x: f32,
+    text: &str,
+    color: egui::Color32,
+) {
+    painter.text(
+        egui::pos2(x + 4.0, plot.top() + 4.0),
+        egui::Align2::LEFT_TOP,
+        text,
+        crate::design::mono(10.0),
+        color,
+    );
+}
+
+fn cursor_text(
+    trace: &crate::transient::TransientTrace,
+    selected: &BTreeSet<usize>,
+    time: f64,
+) -> String {
+    let mut text = format!("t {:.3} ms", time * 1e3);
+    let Some(index) = trace.index_at(time) else {
+        return text;
+    };
+    for &node in selected.iter().take(4) {
+        let value = trace.values[index][node];
+        if !value.is_finite() {
+            continue;
+        }
+        text.push_str(&format!("  {} {:.3} V", trace.nodes[node], value));
+    }
+    text
 }
 
 fn paint_empty(painter: &egui::Painter, plot: egui::Rect, palette: crate::design::Palette) {
@@ -202,20 +273,80 @@ fn series_points(
     node: usize,
     range: (f64, f64),
 ) -> Vec<egui::Pos2> {
-    let step = sample_step(trace.times.len(), plot.width());
+    let max_points = plot.width().max(32.0) as usize;
+    let bucket_size = trace.times.len().div_ceil(max_points.max(2));
     let mut points = Vec::new();
-    for index in (0..trace.times.len()).step_by(step) {
-        push_point(&mut points, plot, trace, node, range, index);
+    let mut start = 0;
+    while start < trace.times.len() {
+        let end = (start + bucket_size).min(trace.times.len());
+        push_bucket(&mut points, plot, trace, node, range, start..end);
+        start = end;
     }
-    push_last_point(&mut points, plot, trace, node, range);
     points
 }
 
-fn sample_step(count: usize, width: f32) -> usize {
-    (count / width.max(1.0) as usize).max(1)
+fn push_bucket(
+    points: &mut Vec<egui::Pos2>,
+    plot: egui::Rect,
+    trace: &crate::transient::TransientTrace,
+    node: usize,
+    range: (f64, f64),
+    indices: std::ops::Range<usize>,
+) {
+    let Some((first, second)) = bucket_extremes(trace, node, indices) else {
+        return;
+    };
+    push_index(points, plot, trace, node, range, first);
+    if second != first {
+        push_index(points, plot, trace, node, range, second);
+    }
 }
 
-fn push_point(
+fn bucket_extremes(
+    trace: &crate::transient::TransientTrace,
+    node: usize,
+    indices: std::ops::Range<usize>,
+) -> Option<(usize, usize)> {
+    let min_index = bucket_min(trace, node, indices.clone())?;
+    let max_index = bucket_max(trace, node, indices)?;
+    Some(if min_index <= max_index {
+        (min_index, max_index)
+    } else {
+        (max_index, min_index)
+    })
+}
+
+fn bucket_min(
+    trace: &crate::transient::TransientTrace,
+    node: usize,
+    indices: std::ops::Range<usize>,
+) -> Option<usize> {
+    let mut best: Option<(f64, usize)> = None;
+    for index in indices {
+        let value = trace.values[index][node];
+        if value.is_finite() && best.is_none_or(|(current, _)| value < current) {
+            best = Some((value, index));
+        }
+    }
+    best.map(|(_, index)| index)
+}
+
+fn bucket_max(
+    trace: &crate::transient::TransientTrace,
+    node: usize,
+    indices: std::ops::Range<usize>,
+) -> Option<usize> {
+    let mut best: Option<(f64, usize)> = None;
+    for index in indices {
+        let value = trace.values[index][node];
+        if value.is_finite() && best.is_none_or(|(current, _)| value > current) {
+            best = Some((value, index));
+        }
+    }
+    best.map(|(_, index)| index)
+}
+
+fn push_index(
     points: &mut Vec<egui::Pos2>,
     plot: egui::Rect,
     trace: &crate::transient::TransientTrace,
@@ -231,19 +362,6 @@ fn push_point(
         time_to_x(plot, trace.duration(), trace.times[index]),
         value_to_y(plot, range, value),
     ));
-}
-
-fn push_last_point(
-    points: &mut Vec<egui::Pos2>,
-    plot: egui::Rect,
-    trace: &crate::transient::TransientTrace,
-    node: usize,
-    range: (f64, f64),
-) {
-    let Some(index) = trace.times.len().checked_sub(1) else {
-        return;
-    };
-    push_point(points, plot, trace, node, range, index);
 }
 
 fn time_to_x(plot: egui::Rect, duration: f64, time: f64) -> f32 {
@@ -291,4 +409,37 @@ fn paint_legend_entry(
         crate::design::mono(10.0),
         palette.text,
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn trace() -> crate::transient::TransientTrace {
+        let mut values = vec![vec![0.0; 2]; 100];
+        values[50][1] = 5.0;
+        crate::transient::TransientTrace {
+            times: (0..100).map(|index| index as f64 * 1e-3).collect(),
+            nodes: vec!["0".to_string(), "out".to_string()],
+            values,
+            dt: 1e-3,
+        }
+    }
+
+    #[test]
+    fn min_max_decimation_keeps_spike() {
+        let trace = trace();
+        let plot = egui::Rect::from_min_size(egui::pos2(0.0, 0.0), egui::vec2(20.0, 100.0));
+        let points = series_points(plot, &trace, 1, (0.0, 5.0));
+        assert!(points.iter().any(|point| point.y <= plot.top() + 1.0));
+    }
+
+    #[test]
+    fn cursor_text_reports_time_and_values() {
+        let trace = trace();
+        let selected = std::collections::BTreeSet::from([1]);
+        let text = cursor_text(&trace, &selected, 0.050);
+        assert!(text.contains("50.000 ms"));
+        assert!(text.contains("5.000 V"));
+    }
 }

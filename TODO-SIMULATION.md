@@ -218,10 +218,12 @@ dan menghasilkan DC operating point atau error yang jelas.
   - Trace menyimpan semua node pada setiap langkah.
   - Grafik membatasi tampilan ke 8 series.
 - [ ] S3-04 Tambahkan probe branch current.
-- [~] S3-05 Tambahkan decimation min/max untuk grafik.
-  - Decimation berbasis step sudah ada.
-  - Min/max envelope belum.
-- [ ] S3-06 Tambahkan cursor waktu dan cycle.
+  - `Solution` menyimpan branch current per indeks MNA, bukan per komponen.
+  - Butuh API current per device sebelum probe arus aman.
+- [x] S3-05 Tambahkan decimation min/max untuk grafik.
+  - Bucket min/max menjaga spike tetap terlihat.
+- [x] S3-06 Tambahkan cursor waktu dan cycle.
+  - Cursor transient menampilkan waktu dan nilai net terpilih.
 - [~] S3-07 Batasi buffer 10 detik simulasi untuk semua net full rate.
   - Durasi transient dibatasi 10 detik.
   - Batas memori sampel belum.
