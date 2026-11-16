@@ -300,11 +300,19 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
     structural, multidomain, RF, dan unsupported.
 - [ ] S5-02 Gunakan `sim-cells` untuk logic, flip-flop, counter, dan
   multiplexer bila cocok.
-- [ ] S5-03 Tunda MCU dan memory ke fase S6; jangan membuat model
+  - Belum diimplementasikan; solver analog baru mendukung
+    `LogicGate` 5 pin.
+  - Butuh domain digital atau model digital multi-pin.
+- [x] S5-03 Tunda MCU dan memory ke fase S6; jangan membuat model
   sementara yang diklaim structural.
 - [ ] S5-04 Buat model sensor dengan input lingkungan.
+  - Belum ada data referensi per sensor.
+  - Input lingkungan belum punya UI atau schema per keluarga.
 - [ ] S5-05 Buat model actuator dengan output fisik.
+  - Belum ada output fisik yang dapat ditampilkan.
+  - Model elektrik generik akan menyesatkan tanpa data referensi.
 - [ ] S5-06 Buat model display dan RF hanya jika ada data referensi.
+  - Data referensi display dan S-parameter RF belum tersedia.
 - [~] S5-07 Tambahkan label fidelity pada setiap model.
   - Setiap entry solver-backed punya label dari `SimulationBinding`.
   - Inspector menampilkan label fidelity.
