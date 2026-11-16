@@ -1,0 +1,330 @@
+//! Parameter schemas for solver-backed device kinds.
+
+use sim_core::DeviceKind;
+
+/// How a parameter is edited.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ParameterKind {
+    Number,
+    Boolean,
+}
+
+/// One editable model parameter.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ParameterSpec {
+    pub name: &'static str,
+    pub unit: &'static str,
+    pub default: f64,
+    pub min: f64,
+    pub max: f64,
+    pub kind: ParameterKind,
+}
+
+impl ParameterSpec {
+    /// Creates a numeric parameter.
+    #[must_use]
+    pub const fn number(
+        name: &'static str,
+        unit: &'static str,
+        default: f64,
+        min: f64,
+        max: f64,
+    ) -> Self {
+        Self {
+            name,
+            unit,
+            default,
+            min,
+            max,
+            kind: ParameterKind::Number,
+        }
+    }
+
+    /// Creates a boolean parameter stored as 0 or 1.
+    #[must_use]
+    pub const fn boolean(name: &'static str, default: bool) -> Self {
+        Self {
+            name,
+            unit: "",
+            default: if default { 1.0 } else { 0.0 },
+            min: 0.0,
+            max: 1.0,
+            kind: ParameterKind::Boolean,
+        }
+    }
+
+    /// Returns true when the value is finite and inside the range.
+    #[must_use]
+    pub fn is_valid(&self, value: f64) -> bool {
+        value.is_finite() && value >= self.min && value <= self.max
+    }
+}
+
+const RESISTOR: &[ParameterSpec] = &[ParameterSpec::number(
+    "resistance",
+    "ohm",
+    1000.0,
+    1e-9,
+    1e12,
+)];
+
+const CAPACITOR: &[ParameterSpec] = &[ParameterSpec::number("capacitance", "F", 1e-6, 1e-15, 1e6)];
+
+const INDUCTOR: &[ParameterSpec] = &[ParameterSpec::number("inductance", "H", 1e-3, 1e-15, 1e6)];
+
+const TRANSMISSION_LINE: &[ParameterSpec] = &[
+    ParameterSpec::number("z0", "ohm", 50.0, 1e-9, 1e12),
+    ParameterSpec::number("delay", "s", 1e-9, 1e-15, 1e6),
+];
+
+const VOLTAGE_SOURCE: &[ParameterSpec] = &[ParameterSpec::number("voltage", "V", 5.0, -1e6, 1e6)];
+
+const CURRENT_SOURCE: &[ParameterSpec] = &[ParameterSpec::number("current", "A", 1e-3, -1e6, 1e6)];
+
+const PULSE_SOURCE: &[ParameterSpec] = &[
+    ParameterSpec::number("v1", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("v2", "V", 5.0, -1e6, 1e6),
+    ParameterSpec::number("delay", "s", 0.0, 0.0, 1e6),
+    ParameterSpec::number("rise", "s", 1e-9, 0.0, 1e6),
+    ParameterSpec::number("fall", "s", 1e-9, 0.0, 1e6),
+    ParameterSpec::number("width", "s", 1e-6, 0.0, 1e6),
+    ParameterSpec::number("period", "s", 2e-6, 1e-15, 1e6),
+];
+
+const VCVS: &[ParameterSpec] = &[ParameterSpec::number("gain", "ratio", 1.0, -1e12, 1e12)];
+
+const VCCS: &[ParameterSpec] = &[ParameterSpec::number("gm", "S", 1e-3, -1e12, 1e12)];
+
+const CCCS: &[ParameterSpec] = &[ParameterSpec::number("gain", "ratio", 1.0, -1e12, 1e12)];
+
+const CCVS: &[ParameterSpec] = &[ParameterSpec::number("rm", "ohm", 1.0, -1e12, 1e12)];
+
+const DIODE: &[ParameterSpec] = &[
+    ParameterSpec::number("is", "A", 1e-12, 1e-30, 1e6),
+    ParameterSpec::number("n", "ratio", 1.0, 1e-6, 1e3),
+    ParameterSpec::number("rs", "ohm", 0.0, 0.0, 1e12),
+    ParameterSpec::number("cj0", "F", 0.0, 0.0, 1e6),
+    ParameterSpec::number("vj", "V", 0.7, 1e-9, 1e6),
+    ParameterSpec::number("m", "ratio", 0.5, 0.0, 10.0),
+];
+
+const BJT: &[ParameterSpec] = &[
+    ParameterSpec::number("is", "A", 1e-15, 1e-30, 1e6),
+    ParameterSpec::number("bf", "ratio", 100.0, 1e-6, 1e9),
+    ParameterSpec::number("br", "ratio", 1.0, 1e-6, 1e9),
+    ParameterSpec::number("cje", "F", 0.0, 0.0, 1e6),
+    ParameterSpec::number("vje", "V", 0.75, 1e-9, 1e6),
+    ParameterSpec::number("mje", "ratio", 0.33, 0.0, 10.0),
+    ParameterSpec::number("cjc", "F", 0.0, 0.0, 1e6),
+    ParameterSpec::number("vjc", "V", 0.75, 1e-9, 1e6),
+    ParameterSpec::number("mjc", "ratio", 0.33, 0.0, 10.0),
+    ParameterSpec::number("tf", "s", 0.0, 0.0, 1e6),
+    ParameterSpec::number("tr", "s", 0.0, 0.0, 1e6),
+];
+
+const JFET: &[ParameterSpec] = &[
+    ParameterSpec::number("vto", "V", -2.0, -1e6, 1e6),
+    ParameterSpec::number("beta", "A/V^2", 1e-3, 1e-15, 1e6),
+    ParameterSpec::number("lambda", "1/V", 0.0, 0.0, 1e6),
+    ParameterSpec::number("cgs", "F", 0.0, 0.0, 1e6),
+    ParameterSpec::number("cgd", "F", 0.0, 0.0, 1e6),
+];
+
+const MOSFET: &[ParameterSpec] = &[
+    ParameterSpec::number("vto", "V", 0.7, -1e6, 1e6),
+    ParameterSpec::number("kp", "A/V^2", 1e-3, 1e-15, 1e6),
+    ParameterSpec::number("lambda", "1/V", 0.0, 0.0, 1e6),
+    ParameterSpec::number("w", "m", 1e-6, 1e-12, 1e6),
+    ParameterSpec::number("l", "m", 1e-6, 1e-12, 1e6),
+    ParameterSpec::number("gamma", "V^0.5", 0.0, 0.0, 1e6),
+    ParameterSpec::number("phi", "V", 0.7, 1e-9, 1e6),
+    ParameterSpec::number("cox", "F", 0.0, 0.0, 1e6),
+    ParameterSpec::number("cgso", "F", 0.0, 0.0, 1e6),
+    ParameterSpec::number("cgdo", "F", 0.0, 0.0, 1e6),
+];
+
+const SWITCH: &[ParameterSpec] = &[
+    ParameterSpec::number("vth", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("ron", "ohm", 1.0, 1e-12, 1e12),
+    ParameterSpec::number("roff", "ohm", 1e9, 1e-12, 1e18),
+    ParameterSpec::number("width", "V", 0.1, 1e-12, 1e6),
+];
+
+const IDEAL_SWITCH: &[ParameterSpec] = &[
+    ParameterSpec::number("ron", "ohm", 0.01, 1e-12, 1e12),
+    ParameterSpec::number("roff", "ohm", 1e12, 1e-12, 1e18),
+    ParameterSpec::boolean("closed", false),
+];
+
+const RELAY: &[ParameterSpec] = &[
+    ParameterSpec::number("rcoil", "ohm", 100.0, 1e-12, 1e12),
+    ParameterSpec::number("ron", "ohm", 0.1, 1e-12, 1e12),
+    ParameterSpec::number("roff", "ohm", 1e9, 1e-12, 1e18),
+    ParameterSpec::number("vth", "V", 2.5, -1e6, 1e6),
+];
+
+const OPAMP: &[ParameterSpec] = &[ParameterSpec::number("gain", "ratio", 1e5, 1e-6, 1e12)];
+
+const COMPARATOR: &[ParameterSpec] = &[ParameterSpec::number("gain", "ratio", 1e4, 1e-6, 1e12)];
+
+const REGULATOR: &[ParameterSpec] = &[ParameterSpec::number("output_voltage", "V", 5.0, 0.0, 1e6)];
+
+const LOGIC_GATE: &[ParameterSpec] = &[
+    ParameterSpec::number("vth", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("width", "V", 0.1, 1e-12, 1e6),
+];
+
+/// Returns the editable parameter schema for a solver-backed device kind.
+#[must_use]
+pub const fn device_parameters(device: &DeviceKind) -> &'static [ParameterSpec] {
+    let passive = passive_parameters(device);
+    let source = source_parameters(device);
+    let semiconductor = semiconductor_parameters(device);
+    let analog = analog_parameters(device);
+    first_non_empty(
+        first_non_empty(passive, source),
+        first_non_empty(semiconductor, analog),
+    )
+}
+
+const fn first_non_empty(
+    first: &'static [ParameterSpec],
+    second: &'static [ParameterSpec],
+) -> &'static [ParameterSpec] {
+    if first.is_empty() {
+        return second;
+    }
+    first
+}
+
+const fn passive_parameters(device: &DeviceKind) -> &'static [ParameterSpec] {
+    match device {
+        DeviceKind::Resistor => RESISTOR,
+        DeviceKind::Capacitor => CAPACITOR,
+        DeviceKind::Inductor => INDUCTOR,
+        DeviceKind::TransmissionLine => TRANSMISSION_LINE,
+        _ => &[],
+    }
+}
+
+const fn source_parameters(device: &DeviceKind) -> &'static [ParameterSpec] {
+    match device {
+        DeviceKind::VoltageSource => VOLTAGE_SOURCE,
+        DeviceKind::CurrentSource => CURRENT_SOURCE,
+        DeviceKind::PulseVoltageSource => PULSE_SOURCE,
+        DeviceKind::Vcvs => VCVS,
+        DeviceKind::Vccs => VCCS,
+        DeviceKind::Cccs => CCCS,
+        DeviceKind::Ccvs => CCVS,
+        _ => &[],
+    }
+}
+
+const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpec] {
+    match device {
+        DeviceKind::Diode => DIODE,
+        DeviceKind::Npn | DeviceKind::Pnp => BJT,
+        DeviceKind::JfetN | DeviceKind::JfetP => JFET,
+        DeviceKind::Nmos | DeviceKind::Pmos => MOSFET,
+        DeviceKind::Switch => SWITCH,
+        DeviceKind::IdealSwitch => IDEAL_SWITCH,
+        DeviceKind::Relay => RELAY,
+        _ => &[],
+    }
+}
+
+const fn analog_parameters(device: &DeviceKind) -> &'static [ParameterSpec] {
+    match device {
+        DeviceKind::OpAmp => OPAMP,
+        DeviceKind::Comparator => COMPARATOR,
+        DeviceKind::Regulator => REGULATOR,
+        DeviceKind::LogicGate => LOGIC_GATE,
+        _ => &[],
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{ParameterKind, device_parameters};
+    use sim_core::DeviceKind;
+
+    const DEVICES: &[DeviceKind] = &[
+        DeviceKind::Resistor,
+        DeviceKind::Capacitor,
+        DeviceKind::Inductor,
+        DeviceKind::TransmissionLine,
+        DeviceKind::VoltageSource,
+        DeviceKind::CurrentSource,
+        DeviceKind::PulseVoltageSource,
+        DeviceKind::Vcvs,
+        DeviceKind::Vccs,
+        DeviceKind::Cccs,
+        DeviceKind::Ccvs,
+        DeviceKind::Diode,
+        DeviceKind::Npn,
+        DeviceKind::Pnp,
+        DeviceKind::JfetN,
+        DeviceKind::JfetP,
+        DeviceKind::Nmos,
+        DeviceKind::Pmos,
+        DeviceKind::Switch,
+        DeviceKind::IdealSwitch,
+        DeviceKind::Relay,
+        DeviceKind::OpAmp,
+        DeviceKind::Comparator,
+        DeviceKind::Regulator,
+        DeviceKind::LogicGate,
+    ];
+
+    #[test]
+    fn every_solver_device_has_parameters() {
+        for device in DEVICES {
+            assert!(!device_parameters(device).is_empty(), "{}", device.name());
+        }
+    }
+
+    #[test]
+    fn catalog_primary_parameters_are_in_schema() {
+        for entry in crate::catalog() {
+            let Some(device) = entry.device.as_ref() else {
+                continue;
+            };
+            let schema = device_parameters(device);
+            assert!(
+                schema
+                    .iter()
+                    .any(|parameter| parameter.name == entry.parameter),
+                "{} {}",
+                entry.id,
+                entry.parameter
+            );
+        }
+    }
+
+    #[test]
+    fn defaults_are_inside_ranges() {
+        for device in DEVICES {
+            for parameter in device_parameters(device) {
+                assert!(
+                    parameter.is_valid(parameter.default),
+                    "{} {}",
+                    device.name(),
+                    parameter.name
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn boolean_parameters_use_zero_or_one() {
+        for device in DEVICES {
+            for parameter in device_parameters(device) {
+                if parameter.kind != ParameterKind::Boolean {
+                    continue;
+                }
+                assert_eq!(parameter.min, 0.0);
+                assert_eq!(parameter.max, 1.0);
+            }
+        }
+    }
+}

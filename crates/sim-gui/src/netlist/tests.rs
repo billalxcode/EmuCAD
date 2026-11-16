@@ -16,16 +16,24 @@ fn wire(document: &mut Document, points: &[(i32, i32)]) -> WireId {
 }
 
 fn divider() -> Document {
+    circuit("passive.resistor.ideal_resistor")
+}
+
+fn diode_clamp() -> Document {
+    circuit("diode.rectifier.rectifier_diode")
+}
+
+fn circuit(second: &str) -> Document {
     let mut document = Document::default();
-    add_divider_parts(&mut document);
+    add_circuit_parts(&mut document, second);
     add_divider_wires(&mut document);
     document
 }
 
-fn add_divider_parts(document: &mut Document) {
+fn add_circuit_parts(document: &mut Document, second: &str) {
     add(document, "source.independent.dc_voltage_source", 0, 0);
     add(document, "passive.resistor.ideal_resistor", 8, 0);
-    add(document, "passive.resistor.ideal_resistor", 8, 6);
+    add(document, second, 8, 6);
     add(document, "gnd", 10, 10);
     add(document, "vcc", 0, 12);
 }
@@ -148,13 +156,83 @@ fn invalid_value_is_rejected() {
 }
 
 fn set_value(document: &mut Document, label: &str, value: &str) {
-    let id = document
+    let id = component_id(document, label);
+    document.component_mut(id).expect("component").value = value.to_string();
+}
+
+fn set_parameter(document: &mut Document, label: &str, name: &str, value: f64) {
+    let id = component_id(document, label);
+    document
+        .component_mut(id)
+        .expect("component")
+        .parameters
+        .insert(name.to_string(), value);
+}
+
+fn component_id(document: &Document, label: &str) -> ComponentId {
+    document
         .components()
         .iter()
         .find(|part| part.label == label)
         .expect("component")
-        .id;
-    document.component_mut(id).expect("component").value = value.to_string();
+        .id
+}
+
+#[test]
+fn diode_has_multiple_parameters() {
+    let definition = library::find("diode.rectifier.rectifier_diode").expect("diode");
+    let fields = super::parameter_fields(definition);
+    let names: Vec<_> = fields.iter().map(|field| field.spec.name).collect();
+    assert!(names.contains(&"is"));
+    assert!(names.contains(&"n"));
+    assert!(names.contains(&"rs"));
+    assert!(
+        fields
+            .iter()
+            .any(|field| field.primary && field.spec.name == "is")
+    );
+}
+
+#[test]
+fn diode_parameter_changes_clamp() {
+    let mut document = diode_clamp();
+    let before = clamp_voltage(&document);
+    set_parameter(&mut document, "D1", "n", 2.0);
+    let after = clamp_voltage(&document);
+    assert!(
+        (after - before).abs() > 1e-3,
+        "before={before} after={after}"
+    );
+}
+
+fn clamp_voltage(document: &Document) -> f64 {
+    let netlist = extract(document).expect("netlist");
+    let result = solve_dc(&netlist).expect("dc");
+    let output = find_part(&netlist, "R1").pins[1];
+    result
+        .solution
+        .voltage(node_id(output))
+        .expect("output voltage")
+}
+
+#[test]
+fn unknown_parameter_is_rejected() {
+    let mut document = divider();
+    set_parameter(&mut document, "R1", "bogus", 1.0);
+    assert!(matches!(
+        extract(&document),
+        Err(NetlistError::UnknownParameter { .. })
+    ));
+}
+
+#[test]
+fn out_of_range_parameter_is_rejected() {
+    let mut document = divider();
+    set_parameter(&mut document, "R1", "resistance", -1.0);
+    assert!(matches!(
+        extract(&document),
+        Err(NetlistError::ParameterOutOfRange { .. })
+    ));
 }
 
 #[test]

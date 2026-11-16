@@ -22,7 +22,8 @@ mod transmission;
 pub use bjt::{BjtModel, bjt_capacitances};
 pub use catalog::{
     CatalogError, CatalogRecord, ComponentRegistry, ComponentRequest, ComponentSpec, Family,
-    ModelClass, catalog, catalog_records, find_catalog_record,
+    ModelClass, ParameterKind, ParameterSpec, catalog, catalog_records, device_parameters,
+    find_catalog_record,
 };
 pub use comparator::ComparatorModel;
 pub use controlled::{CccsModel, CcvsModel, VccsModel, VcvsModel};

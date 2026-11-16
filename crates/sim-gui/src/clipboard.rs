@@ -3,7 +3,7 @@
 use crate::model::{
     ComponentDefinition, ComponentId, Document, GridPos, Mirror, NetClass, Rotation, Wire, WireId,
 };
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Clone, Debug)]
 struct ClipComponent {
@@ -12,6 +12,7 @@ struct ClipComponent {
     rotation: Rotation,
     mirror: Mirror,
     value: String,
+    parameters: BTreeMap<String, f64>,
 }
 
 #[derive(Clone, Debug)]
@@ -108,6 +109,7 @@ impl ClipComponent {
             rotation: instance.rotation,
             mirror: instance.mirror,
             value: instance.value.clone(),
+            parameters: instance.parameters.clone(),
         }
     }
 }
@@ -159,13 +161,26 @@ fn paste_component(
     let definition = clip_definition(library, clip)?;
     let position = clip.position.offset(offset);
     ensure_placeable(document, library, definition, position, clip)?;
-    Ok(document.add_with_value(
+    Ok(paste_value(document, clip, definition, position))
+}
+
+fn paste_value(
+    document: &mut Document,
+    clip: &ClipComponent,
+    definition: &ComponentDefinition,
+    position: GridPos,
+) -> ComponentId {
+    let id = document.add_with_value(
         definition,
         position,
         clip.rotation,
         clip.mirror,
         &clip.value,
-    ))
+    );
+    if let Some(instance) = document.component_mut(id) {
+        instance.parameters = clip.parameters.clone();
+    }
+    id
 }
 
 fn clip_definition<'a>(
@@ -245,6 +260,11 @@ mod tests {
             Mirror::Horizontal,
             "10k",
         );
+        document
+            .component_mut(second)
+            .expect("component")
+            .parameters
+            .insert("resistance".to_string(), 10000.0);
         let (components, wires) = selection(&[first.0, second.0], &[]);
         let clipboard = Clipboard::capture(&document, &components, &wires);
         (document, clipboard)
@@ -282,6 +302,7 @@ mod tests {
         let copied = document.component(pasted.components[1]).expect("copied");
         assert_eq!(copied.position, GridPos::new(8, 2));
         assert_eq!(copied.value, "10k");
+        assert_eq!(copied.parameters.get("resistance"), Some(&10000.0));
     }
 
     #[test]

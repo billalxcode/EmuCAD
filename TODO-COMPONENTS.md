@@ -316,13 +316,18 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - [ ] C1-27 Pisahkan opamp multi-unit atau tandai unsupported.
 - [ ] C1-28 Perbaiki switch changeover dan analog multiplexer.
 - [ ] C1-29 Tambahkan validasi pin count per model class.
-- [ ] C1-30 Tambahkan status, min, max, dan references ke schema.
+- [~] C1-30 Tambahkan status, min, max, dan references ke schema.
+  - `ParameterSpec` dengan min, max, dan kind sudah ada.
+  - Status per entry dan references belum.
 - [ ] C1-31 Audit semua parameter katalog dan daftar output yang
   dipengaruhinya.
-- [ ] C1-32 Buat parameter effect test untuk setiap parameter yang
+- [~] C1-32 Buat parameter effect test untuk setiap parameter yang
   dipakai model.
-- [ ] C1-33 Sembunyikan atau hapus parameter yang belum berfungsi
+  - Resistor dan diode `n` sudah punya effect test DC.
+  - Parameter transient, AC, dan model lain belum.
+- [x] C1-33 Sembunyikan atau hapus parameter yang belum berfungsi
   dari inspector.
+  - Inspector hanya menampilkan parameter dari schema device.
 
 ## 5. Passives dan Sources
 

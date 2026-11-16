@@ -7,7 +7,7 @@ use crate::model::{
 };
 use eframe::egui;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 const FORMAT: &str = "emucad-gui";
@@ -49,6 +49,8 @@ struct ComponentFile {
     mirror: String,
     label: String,
     value: String,
+    #[serde(default)]
+    parameters: BTreeMap<String, f64>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -224,6 +226,7 @@ impl ComponentFile {
             mirror: instance.mirror.label().to_string(),
             label: instance.label.clone(),
             value: instance.value.clone(),
+            parameters: instance.parameters.clone(),
         }
     }
 
@@ -242,6 +245,7 @@ impl ComponentFile {
             mirror,
             label: self.label.clone(),
             value: self.value.clone(),
+            parameters: self.parameters.clone(),
         })
     }
 }

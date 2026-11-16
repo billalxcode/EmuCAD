@@ -434,6 +434,7 @@ pub struct ComponentInstance {
     pub mirror: Mirror,
     pub label: String,
     pub value: String,
+    pub parameters: BTreeMap<String, f64>,
 }
 
 impl ComponentInstance {

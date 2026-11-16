@@ -72,15 +72,87 @@ pub(crate) fn show_component_value(
     definition: &ComponentDefinition,
     action: &mut Option<InspectorAction>,
 ) {
-    let Some(info) = crate::netlist::parameter_info(definition) else {
+    let fields = crate::netlist::parameter_fields(definition);
+    if fields.is_empty() {
         return;
-    };
-    ui.separator();
-    ui.label(format!("{} ({})", info.name, info.unit));
-    let mut value = component.value.clone();
-    if ui.text_edit_singleline(&mut value).changed() {
-        *action = Some(InspectorAction::SetValue(value));
     }
+    ui.separator();
+    ui.label("Parameters");
+    for field in &fields {
+        show_parameter(ui, component, field, action);
+    }
+}
+
+fn show_parameter(
+    ui: &mut egui::Ui,
+    component: &ComponentInstance,
+    field: &crate::netlist::ParameterField,
+    action: &mut Option<InspectorAction>,
+) {
+    if field.is_boolean() {
+        show_boolean_parameter(ui, component, field, action);
+        return;
+    }
+    show_number_parameter(ui, component, field, action);
+}
+
+fn show_number_parameter(
+    ui: &mut egui::Ui,
+    component: &ComponentInstance,
+    field: &crate::netlist::ParameterField,
+    action: &mut Option<InspectorAction>,
+) {
+    let mut value = parameter_value(component, field);
+    ui.horizontal(|ui| {
+        ui.label(field.spec.name);
+        let changed = ui.add(drag_value(&mut value, field)).changed();
+        if !field.spec.unit.is_empty() {
+            ui.label(field.spec.unit);
+        }
+        if changed {
+            set_parameter(action, field, value);
+        }
+    });
+}
+
+fn show_boolean_parameter(
+    ui: &mut egui::Ui,
+    component: &ComponentInstance,
+    field: &crate::netlist::ParameterField,
+    action: &mut Option<InspectorAction>,
+) {
+    let mut checked = parameter_value(component, field) != 0.0;
+    if ui.checkbox(&mut checked, field.spec.name).changed() {
+        set_parameter(action, field, if checked { 1.0 } else { 0.0 });
+    }
+}
+
+fn parameter_value(component: &ComponentInstance, field: &crate::netlist::ParameterField) -> f64 {
+    component
+        .parameters
+        .get(field.spec.name)
+        .copied()
+        .unwrap_or(field.default)
+}
+
+fn drag_value<'a>(
+    value: &'a mut f64,
+    field: &crate::netlist::ParameterField,
+) -> egui::DragValue<'a> {
+    egui::DragValue::new(value)
+        .range(field.spec.min..=field.spec.max)
+        .speed(0.01)
+}
+
+fn set_parameter(
+    action: &mut Option<InspectorAction>,
+    field: &crate::netlist::ParameterField,
+    value: f64,
+) {
+    *action = Some(InspectorAction::SetParameter {
+        name: field.spec.name,
+        value,
+    });
 }
 
 pub(crate) fn show_component_simulation(ui: &mut egui::Ui) {

@@ -130,7 +130,16 @@ add("source.pulse", "BehavioralSource", None, 2, "current", 1e-3, "A", [
     "pulse current source",
 ])
 add("source.controlled", "Vcvs", "Vcvs", 4, "gain", 1.0, "ratio", [
-    ("VCVS", "Vcvs"), ("VCCS", "Vccs"), ("CCCS", "Cccs"), ("CCVS", "Ccvs"),
+    "VCVS",
+])
+add("source.controlled", "Vcvs", "Vccs", 4, "gm", 1e-3, "S", [
+    "VCCS",
+])
+add("source.controlled", "Vcvs", "Cccs", 4, "gain", 1.0, "ratio", [
+    "CCCS",
+])
+add("source.controlled", "Vcvs", "Ccvs", 4, "rm", 1.0, "ohm", [
+    "CCVS",
 ])
 add("source.behavioral", "BehavioralSource", None, 2, "gain", 1.0, "ratio", [
     "behavioral voltage source", "behavioral current source",

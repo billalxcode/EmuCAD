@@ -176,3 +176,23 @@ fn autosave_writes_and_clears_dirty() {
     assert_eq!(app.message, "Autosaved");
     let _ = std::fs::remove_dir_all(dir);
 }
+
+#[test]
+fn component_parameters_round_trip() {
+    let dir = temp_dir("parameters");
+    let path = dir.join("project.emu.json");
+    let library = crate::library::builtin();
+    let resistor = crate::library::find("resistor").expect("resistor");
+    let mut document = Document::new();
+    let id = document.add(resistor, GridPos::new(0, 0), Rotation::Deg0, Mirror::None);
+    document
+        .component_mut(id)
+        .expect("component")
+        .parameters
+        .insert("resistance".to_string(), 330.0);
+    persist::save(&path, &document, &GridCamera::default(), true).expect("save");
+    let project = persist::load(&path, library).expect("load");
+    let component = project.document.component(id).expect("component");
+    assert_eq!(component.parameters.get("resistance"), Some(&330.0));
+    let _ = std::fs::remove_dir_all(dir);
+}

@@ -123,3 +123,6 @@ mod class;
 mod component;
 mod family;
 mod response;
+
+mod schema;
+pub use schema::{ParameterKind, ParameterSpec, device_parameters};

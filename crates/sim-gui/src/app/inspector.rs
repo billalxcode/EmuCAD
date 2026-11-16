@@ -1,4 +1,5 @@
 use super::*;
+use crate::netlist::ParameterField;
 
 impl GuiApp {
     pub(super) fn inspector_contents(
@@ -289,27 +290,63 @@ impl GuiApp {
             InspectorAction::SetClass(class) => self.set_wire_class(class),
             InspectorAction::SetColor(color) => self.set_wire_color_override(color),
             InspectorAction::SetLabel(label) => self.set_wire_label(label),
-            InspectorAction::SetValue(value) => self.set_component_value(value),
+            InspectorAction::SetParameter { name, value } => {
+                self.set_component_parameter(name, value)
+            }
         }
     }
 
-    pub(super) fn set_component_value(&mut self, value: String) {
-        let Some(id) = self.selection.single_component() else {
+    pub(super) fn set_component_parameter(&mut self, name: &'static str, value: f64) {
+        let Some((id, field)) = self.selected_parameter_field(name) else {
             return;
         };
-        let Some(component) = self.document.component(id) else {
+        if !field.accepts(value) {
+            self.message = format!("Invalid value for {name}");
             return;
-        };
-        if component.value == value {
+        }
+        if self.current_parameter(id, &field) == value && !field.primary {
             return;
         }
         self.push_undo();
+        self.write_parameter(id, name, value, &field);
+        self.mark_dirty();
+        self.message = "Value updated; rerun DC".to_string();
+    }
+
+    fn selected_parameter_field(
+        &self,
+        name: &str,
+    ) -> Option<(crate::model::ComponentId, ParameterField)> {
+        let id = self.selection.single_component()?;
+        let component = self.document.component(id)?;
+        let definition = crate::library::find(component.definition)?;
+        let field = crate::netlist::parameter_fields(definition)
+            .into_iter()
+            .find(|field| field.spec.name == name)?;
+        Some((id, field))
+    }
+
+    fn current_parameter(&self, id: crate::model::ComponentId, field: &ParameterField) -> f64 {
+        self.document
+            .component(id)
+            .and_then(|component| component.parameters.get(field.spec.name).copied())
+            .unwrap_or(field.default)
+    }
+
+    fn write_parameter(
+        &mut self,
+        id: crate::model::ComponentId,
+        name: &str,
+        value: f64,
+        field: &ParameterField,
+    ) {
         let Some(component) = self.document.component_mut(id) else {
             return;
         };
-        component.value = value;
-        self.mark_dirty();
-        self.message = "Value updated; rerun DC".to_string();
+        component.parameters.insert(name.to_string(), value);
+        if field.primary {
+            component.value = format_parameter(value, field.spec.unit);
+        }
     }
 
     pub(super) fn set_wire_label(&mut self, label: Option<String>) {
@@ -372,4 +409,11 @@ impl GuiApp {
         self.mark_dirty();
         self.message = format!("Net class {}", class.label());
     }
+}
+
+fn format_parameter(value: f64, unit: &str) -> String {
+    if unit.is_empty() {
+        return format!("{value}");
+    }
+    format!("{value} {unit}")
 }

@@ -153,9 +153,29 @@ fn component_value_change_marks_dirty() {
         ..GuiApp::default()
     };
     app.selection.select_component(id);
-    app.set_component_value("330 ohm".to_string());
+    app.set_component_parameter("resistance", 330.0);
     let component = app.document.component(id).expect("component");
+    assert_eq!(component.parameters.get("resistance"), Some(&330.0));
     assert_eq!(component.value, "330 ohm");
     assert!(app.dirty);
     assert_eq!(app.message, "Value updated; rerun DC");
+}
+
+#[test]
+fn non_primary_parameter_keeps_primary_value() {
+    let library = crate::library::builtin();
+    let diode = crate::library::find("diode.rectifier.rectifier_diode").expect("diode");
+    let mut document = Document::new();
+    let id = document.add(diode, GridPos::new(0, 0), Rotation::Deg0, Mirror::None);
+    let mut app = GuiApp {
+        library,
+        document,
+        ..GuiApp::default()
+    };
+    app.selection.select_component(id);
+    app.set_component_parameter("n", 2.0);
+    let component = app.document.component(id).expect("component");
+    assert_eq!(component.parameters.get("n"), Some(&2.0));
+    assert_eq!(component.value, "1e-12 A");
+    assert!(app.dirty);
 }

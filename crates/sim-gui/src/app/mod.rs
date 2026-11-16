@@ -100,7 +100,7 @@ impl Tool {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) enum InspectorAction {
     Rotate,
     Mirror,
@@ -108,7 +108,7 @@ pub(crate) enum InspectorAction {
     SetClass(NetClass),
     SetColor(Option<[u8; 3]>),
     SetLabel(Option<String>),
-    SetValue(String),
+    SetParameter { name: &'static str, value: f64 },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

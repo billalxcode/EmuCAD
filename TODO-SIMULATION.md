@@ -140,11 +140,10 @@ Gerbang kelayakan sebelum implementasi besar:
     source, body, inverting, non-inverting, supply, output, control,
     common, normally-open, normally-closed.
   - Setiap definisi komponen wajib memiliki role per pin.
-- [ ] S0-02 Definisikan `ParameterSpec`.
-  - Field: name, default, unit, minimum, maximum, required, effect.
-  - Setiap parameter punya effect test dan output yang dipengaruhi.
-  - Parameter tanpa efek model ditolak.
-  - Validasi nilai finite dan dalam rentang.
+- [~] S0-02 Definisikan `ParameterSpec`.
+  - Field name, default, unit, min, max, dan kind sudah ada.
+  - Field required dan effect belum.
+  - Effect test baru untuk resistor dan diode `n`.
 - [ ] S0-03 Definisikan `SimulationBinding`.
   - Menghubungkan definition ID ke catalog ID, `DeviceKind`, role pin,
     dan parameter default.
@@ -231,10 +230,11 @@ transient, dan melihat grafik yang deterministik.
 - [ ] S4-01 Panel simulasi dengan analisis, run, pause, step, reset.
 - [ ] S4-02 Tampilkan status domain dan komponen unsupported.
 - [~] S4-03 Inspector parameter numerik per komponen.
-  - Parameter utama sudah bisa diedit dan mengubah hasil DC.
-  - Effect test baru untuk resistor; min, max, dan multi-parameter belum.
+  - Semua parameter schema tampil dengan min, max, dan unit.
+  - Parameter boolean tampil sebagai checkbox.
+  - Effect test baru untuk resistor dan diode `n`.
 - [~] S4-04 Simpan parameter dan pilihan analisis di JSON.
-  - Nilai komponen sudah tersimpan sebagai string.
+  - Nilai parameter numerik sudah tersimpan per instance.
   - Pilihan analisis dan hasil terstruktur belum.
 - [ ] S4-05 Migrasi proyek lama tanpa merusak nilai string.
 - [ ] S4-06 Tampilkan nama net dan pin role.
@@ -246,8 +246,8 @@ transient, dan melihat grafik yang deterministik.
   - Reload proyek.
 - [~] S4-09 Test parameter effect di GUI.
   - Test membuktikan perubahan nilai menandai proyek dirty.
-  - Test DC membuktikan resistor 2 kOhm mengubah divider.
-  - Parameter tanpa efek belum diuji menyeluruh.
+  - Test DC membuktikan resistor dan diode `n` mengubah hasil.
+  - Parameter transient dan AC belum diuji.
 
 **Acceptance S4:** setiap parameter yang dapat diedit mengubah hasil
 simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.

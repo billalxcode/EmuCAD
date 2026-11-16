@@ -16,6 +16,7 @@ pub(super) fn new_instance(
         mirror,
         label,
         value: definition.default_value.to_string(),
+        parameters: BTreeMap::new(),
     }
 }
 

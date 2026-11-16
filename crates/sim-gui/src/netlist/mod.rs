@@ -3,7 +3,9 @@
 use crate::library;
 use crate::model::world_pin;
 use crate::model::{ComponentDefinition, ComponentId, ComponentInstance, Document, GridPos, Wire};
-use sim_device::{ComponentRegistry, ComponentSpec};
+use sim_device::{
+    ComponentRegistry, ComponentSpec, ModelClass, ParameterKind, ParameterSpec, device_parameters,
+};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 use std::sync::OnceLock;
@@ -33,25 +35,62 @@ pub(crate) struct NetlistComponent {
     pub parameters: BTreeMap<String, f64>,
 }
 
-/// Parameter metadata shown by the component inspector.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) struct ParameterInfo {
-    pub name: &'static str,
-    pub unit: &'static str,
+/// One editable parameter and its effective default.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct ParameterField {
+    pub spec: ParameterSpec,
+    pub default: f64,
+    pub primary: bool,
 }
 
-/// Returns parameter metadata for a solver-backed definition.
-pub(crate) fn parameter_info(definition: &ComponentDefinition) -> Option<ParameterInfo> {
+impl ParameterField {
+    /// Returns true when the parameter is a boolean switch.
+    #[must_use]
+    pub fn is_boolean(&self) -> bool {
+        self.spec.kind == ParameterKind::Boolean
+    }
+
+    /// Returns true when the value is valid for this parameter.
+    #[must_use]
+    pub fn accepts(&self, value: f64) -> bool {
+        if !self.spec.is_valid(value) {
+            return false;
+        }
+        !self.is_boolean() || value == 0.0 || value == 1.0
+    }
+}
+
+/// Returns all editable parameters for a solver-backed definition.
+pub(crate) fn parameter_fields(definition: &ComponentDefinition) -> Vec<ParameterField> {
+    let Some(catalog) = catalog_spec(definition) else {
+        return Vec::new();
+    };
+    let Some(device) = catalog.device.as_ref() else {
+        return Vec::new();
+    };
+    device_parameters(device)
+        .iter()
+        .map(|spec| ParameterField {
+            spec: *spec,
+            default: parameter_default(catalog, spec),
+            primary: spec.name == catalog.parameter,
+        })
+        .collect()
+}
+
+fn catalog_spec(definition: &ComponentDefinition) -> Option<&'static ComponentSpec> {
     if part_kind(definition) != PartKind::Device {
         return None;
     }
     let part = builtin_part(definition.id).unwrap_or(definition.id);
-    let spec = part_spec(part)?;
-    spec.device.as_ref()?;
-    Some(ParameterInfo {
-        name: spec.parameter,
-        unit: spec.unit,
-    })
+    part_spec(part)
+}
+
+fn parameter_default(catalog: &ComponentSpec, spec: &ParameterSpec) -> f64 {
+    if spec.name == catalog.parameter {
+        return catalog.default;
+    }
+    spec.default
 }
 
 static SPECS: OnceLock<BTreeMap<&'static str, &'static ComponentSpec>> = OnceLock::new();
@@ -70,7 +109,7 @@ fn part_spec(id: &str) -> Option<&'static ComponentSpec> {
 }
 
 /// Netlist extraction failure.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) enum NetlistError {
     UnknownDefinition(String),
     Unsupported(String),
@@ -93,6 +132,15 @@ pub(crate) enum NetlistError {
     InvalidValue {
         component: String,
         value: String,
+    },
+    UnknownParameter {
+        component: String,
+        name: String,
+    },
+    ParameterOutOfRange {
+        component: String,
+        name: String,
+        value: f64,
     },
 }
 
@@ -118,6 +166,23 @@ impl NetlistError {
             Self::InvalidValue { component, value } => {
                 format!("{component} has invalid value: {value}")
             }
+            Self::UnknownParameter { .. } | Self::ParameterOutOfRange { .. } => {
+                self.parameter_message()
+            }
+        }
+    }
+
+    fn parameter_message(&self) -> String {
+        match self {
+            Self::UnknownParameter { component, name } => {
+                format!("{component} has unknown parameter: {name}")
+            }
+            Self::ParameterOutOfRange {
+                component,
+                name,
+                value,
+            } => format!("{component} parameter {name} is out of range: {value}"),
+            _ => String::new(),
         }
     }
 
@@ -288,12 +353,30 @@ fn require_pin_count(
 
 fn parameters_for(
     instance: &ComponentInstance,
-    spec: &ComponentSpec,
+    catalog: &ComponentSpec,
 ) -> Result<BTreeMap<String, f64>, NetlistError> {
-    let mut parameters = spec.default_parameters();
+    validate_overrides(instance, catalog)?;
+    let mut parameters = default_parameters(catalog);
+    parameters.extend(
+        instance
+            .parameters
+            .iter()
+            .map(|(name, value)| (name.clone(), *value)),
+    );
+    if instance.parameters.contains_key(catalog.parameter) {
+        return Ok(parameters);
+    }
+    apply_value_string(instance, catalog, parameters)
+}
+
+fn apply_value_string(
+    instance: &ComponentInstance,
+    catalog: &ComponentSpec,
+    mut parameters: BTreeMap<String, f64>,
+) -> Result<BTreeMap<String, f64>, NetlistError> {
     match parse_value(&instance.value) {
         Some(value) => {
-            parameters.insert(spec.parameter.to_string(), value);
+            parameters.insert(catalog.parameter.to_string(), value);
             Ok(parameters)
         }
         None if value_is_optional(instance) => Ok(parameters),
@@ -301,6 +384,66 @@ fn parameters_for(
             component: instance.label.clone(),
             value: instance.value.clone(),
         }),
+    }
+}
+
+fn default_parameters(catalog: &ComponentSpec) -> BTreeMap<String, f64> {
+    let Some(device) = catalog.device.as_ref() else {
+        return catalog.default_parameters();
+    };
+    let mut parameters: BTreeMap<String, f64> = device_parameters(device)
+        .iter()
+        .map(|spec| (spec.name.to_string(), parameter_default(catalog, spec)))
+        .collect();
+    if catalog.class == ModelClass::LogicGate {
+        parameters.insert("gate".to_string(), f64::from(catalog.variant));
+    }
+    parameters
+}
+
+fn validate_overrides(
+    instance: &ComponentInstance,
+    catalog: &ComponentSpec,
+) -> Result<(), NetlistError> {
+    let Some(device) = catalog.device.as_ref() else {
+        return Ok(());
+    };
+    for (name, value) in &instance.parameters {
+        let Some(spec) = parameter_spec(device, name) else {
+            return Err(unknown_parameter(instance, name));
+        };
+        if !spec.is_valid(*value) || !boolean_value_valid(spec, *value) {
+            return Err(out_of_range(instance, name, *value));
+        }
+    }
+    Ok(())
+}
+
+fn parameter_spec(device: &sim_core::DeviceKind, name: &str) -> Option<&'static ParameterSpec> {
+    device_parameters(device)
+        .iter()
+        .find(|spec| spec.name == name)
+}
+
+fn boolean_value_valid(spec: &ParameterSpec, value: f64) -> bool {
+    if spec.kind != ParameterKind::Boolean {
+        return true;
+    }
+    value == 0.0 || value == 1.0
+}
+
+fn unknown_parameter(instance: &ComponentInstance, name: &str) -> NetlistError {
+    NetlistError::UnknownParameter {
+        component: instance.label.clone(),
+        name: name.to_string(),
+    }
+}
+
+fn out_of_range(instance: &ComponentInstance, name: &str, value: f64) -> NetlistError {
+    NetlistError::ParameterOutOfRange {
+        component: instance.label.clone(),
+        name: name.to_string(),
+        value,
     }
 }
 
