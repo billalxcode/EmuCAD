@@ -373,19 +373,38 @@ simulasi dengan sumber gate-level yang dapat diaudit.
 
 ## 12. Fase S8 - Verifikasi dan Rilis
 
-- [ ] S8-01 Buat reference circuit untuk setiap keluarga.
-- [ ] S8-02 Bandingkan dengan solusi analitik.
-- [ ] S8-03 Sediakan CI container dengan ngspice dan golden test wajib.
-- [ ] S8-04 Tambahkan instruction suite, peripheral suite, dan timing test.
-- [ ] S8-05 Ukur performa real-time semua MCU di desktop dan akurasi 500 komponen.
+- [~] S8-01 Buat reference circuit untuk setiap keluarga.
+  - Divider, RC, dan RL punya reference analitik di
+    `crates/sim-analysis/tests/reference.rs`.
+  - Keluarga lain memakai test unit, belum semua punya reference
+    analitik terpadu.
+- [~] S8-02 Bandingkan dengan solusi analitik.
+  - Divider, RC, dan RL dibandingkan dengan solusi analitik.
+  - Perbandingan lengkap per keluarga belum.
+- [~] S8-03 Sediakan CI container dengan ngspice dan golden test wajib.
+  - `ci/ngspice.Dockerfile`, `scripts/ngspice_golden.sh`, dan job CI
+    sudah ada.
+  - Job belum dieksekusi lokal karena akses Docker socket ditolak;
+    hasil CI belum diverifikasi.
+- [~] S8-04 Tambahkan instruction suite, peripheral suite, dan timing test.
+  - Suite AVR sudah ada di `sim-avr`.
+  - Timing suite lintas MCU belum.
+- [~] S8-05 Ukur performa real-time semua MCU di desktop dan akurasi 500 komponen.
+  - AVR dan memory macro sudah diukur.
+  - 11 MCU dan 500 komponen belum diukur seluruhnya.
 - [~] S8-06 Perbarui docs, README, dan TODO.
+  - Fidelity, benchmark, reference circuit, dan persistensi sudah
+    diperbarui.
+  - Dokumentasi per keluarga behavioral belum lengkap.
   - Fidelity, benchmark, dan batas real-time sudah diperbarui.
   - Dokumentasi per keluarga behavioral belum lengkap.
 - [x] S8-07 Simpan hasil transient di JSON + file biner.
   - Metadata JSON dan sampel biner ditulis sebagai sidecar proyek.
   - Trace dipulihkan saat proyek dibuka; sidecar lama dihapus saat
     hasil baru tidak ada.
-- [ ] S8-08 Jalankan fmt, clippy, test, ASCII, package, dan CI ngspice.
+- [~] S8-08 Jalankan fmt, clippy, test, ASCII, package, dan CI ngspice.
+  - fmt, clippy, test, dan ASCII lulus.
+  - Package dan CI ngspice belum dijalankan pada mesin ini.
 
 **Acceptance S8:** semua test lulus, hasil dapat direproduksi, dan
 dokumentasi menyebut batas fidelity.
