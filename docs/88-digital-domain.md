@@ -6,7 +6,7 @@ Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
 ## 1. Cakupan
 
 Domain digital memakai `DigitalCircuit` dua-state dengan input dan
-output bernama. Saat ini 56 entry katalog sudah dapat dijalankan:
+output bernama. Saat ini 58 entry katalog sudah dapat dijalankan:
 
 | Kelompok | Entry |
 |---|---|
@@ -22,6 +22,7 @@ output bernama. Saat ini 56 entry katalog sudah dapat dijalankan:
 | Digital source | clock, PRBS, pattern |
 | Programmable | PAL, GAL, CPLD, FPGA logic block, lookup table (LUT 4-input) |
 | High-Z | open-drain, tri-state, transmission gate, bidirectional buffer, bidirectional/open-drain level |
+| Serial | UART dan SPI, satu tick per bit |
 
 ## 2. Perintah
 
@@ -71,10 +72,10 @@ Port ditentukan per entry, bukan dari jumlah pin katalog. Contoh:
 
 ## 5. Entry Digital yang Belum Didukung
 
-Masih ada 7 entry digital di luar domain ini:
+Masih ada 5 entry digital di luar domain ini:
 
 - 1 programmable logic (finite state machine).
-- 6 serial interface (UART, SPI, I2C, CAN, USB, Ethernet).
+- 4 serial interface (I2C, CAN, USB, Ethernet).
 
 ## 7. Verifikasi
 
@@ -94,6 +95,9 @@ Test domain digital mencakup:
 - Clock source toggle setiap tick.
 - Open-drain dan tri-state memakai sinyal `z` untuk kondisi released.
 - Bidirectional buffer mengarahkan satu sisi dan melepas sisi lain.
+- UART mengirim start, delapan bit LSB-first, dan stop; receiver
+  mengembalikan byte yang sama.
+- SPI mengirim MSB-first, menerima delapan bit, dan menghasilkan `done`.
 - PRBS source bergeser setelah reset.
 - Pattern source memuat pola saat reset.
 - LUT 4-input dengan mask AND menghasilkan output yang benar.

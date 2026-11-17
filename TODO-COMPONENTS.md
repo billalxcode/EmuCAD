@@ -200,7 +200,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C6-08 | 15 | 0 | Belum ada model memory. |
 | C6-09 | 11 | 0 | Belum ada model MCU. |
 | C6-10 | 5 | 0 | Belum ada model ADC, DAC, PWM. |
-| C6-11 | 6 | 0 | Belum ada model serial interface. |
+| C6-11 | 6 | 2 | UART dan SPI ada; I2C, CAN, USB, dan Ethernet belum. |
 | C6-12 | 3 | 3 | Timer, RTC, dan watchdog memakai counter digital 8-bit. |
 | C7-01 | 6 | 6 | Regulator 3 pin generik; negative, current, shunt, adjustable belum. |
 | C7-02 | 8 | 8 | Delapan topologi memakai converter teregulasi dengan efisiensi; verifikasi batch belum. |

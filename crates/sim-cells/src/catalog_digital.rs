@@ -122,12 +122,14 @@ pub fn digital_entry_with_config(
         "logic.level.open_drain_level_shifter" => {
             open_drain_entry("logic.level.open_drain_level_shifter")
         }
+        "mcu.serial.uart" => crate::catalog_uart::uart_entry(),
+        "mcu.serial.spi" => crate::catalog_spi::spi_entry(),
         _ => return Ok(None),
     };
     Ok(Some(entry))
 }
 
-fn finish(
+pub(crate) fn finish(
     id: &'static str,
     build: impl FnOnce(&mut DigitalBuilder) -> (Vec<&'static str>, Vec<&'static str>),
 ) -> DigitalEntry {

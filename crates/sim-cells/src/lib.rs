@@ -5,7 +5,10 @@
 mod arithmetic;
 mod basic;
 mod builder;
+mod catalog_bits;
 pub mod catalog_digital;
+mod catalog_spi;
+mod catalog_uart;
 mod cell;
 mod characterize;
 mod digital;
