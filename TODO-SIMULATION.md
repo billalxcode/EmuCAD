@@ -347,6 +347,20 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
   - Batas model compact sudah dicatat di `docs/12-device-models.md`.
   - Batas behavioral per keluarga belum lengkap.
 
+### 9.1 Sisa Pekerjaan Setelah S5
+
+| Kelompok | Entri | Blocker |
+|---|---:|---|
+| Digital logic | 63 | Butuh domain digital atau model multi-pin; `sim-cells` belum terhubung ke solver. |
+| Behavioral block | 25 | Butuh model filter, math, detector, oscillator, dan converter dengan state. |
+| Structural MCU dan memory | 26 | Butuh gate-level 11 MCU dan 15 memory; scope ada di `docs/64-gate-level.md`. |
+| RF | 14 | Mixer, filter, antenna, dan coupler butuh S-parameter dan solver dua-port. |
+| Board module | 14 | Board-level module belum punya batas dan referensi yang cukup. |
+| Mixed-signal ADC | 5 | Butuh sampling, kuantisasi, dan antarmuka digital. |
+| Behavioral source | 4 | Butuh parser ekspresi, polynomial, dan table. |
+| Timer PLL | 1 | Butuh phase detector, loop filter, dan feedback. |
+| **Total** | **152** | |
+
 **Acceptance S5:** setiap entri non-MCU yang diklaim simulatable punya
 model, input, output, dan referensi yang jelas.
 
