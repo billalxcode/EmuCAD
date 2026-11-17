@@ -104,6 +104,24 @@ pub fn digital_entry_with_config(
         "logic.programmable.fpga_logic_block" => {
             lut_entry("logic.programmable.fpga_logic_block", config.mask)
         }
+        "logic.gate_special.open_drain_buffer" => {
+            open_drain_entry("logic.gate_special.open_drain_buffer")
+        }
+        "logic.gate_special.tristate_buffer" => {
+            tristate_entry("logic.gate_special.tristate_buffer")
+        }
+        "logic.gate_special.transmission_gate" => {
+            tristate_entry("logic.gate_special.transmission_gate")
+        }
+        "logic.adder.bidirectional_buffer" => {
+            bidirectional_entry("logic.adder.bidirectional_buffer")
+        }
+        "logic.level.bidirectional_level_shifter" => {
+            bidirectional_entry("logic.level.bidirectional_level_shifter")
+        }
+        "logic.level.open_drain_level_shifter" => {
+            open_drain_entry("logic.level.open_drain_level_shifter")
+        }
         _ => return Ok(None),
     };
     Ok(Some(entry))
@@ -844,6 +862,56 @@ fn lut_entry(id: &'static str, mask: u16) -> DigitalEntry {
     })
 }
 
+fn open_drain_entry(id: &'static str) -> DigitalEntry {
+    finish(id, |builder| {
+        let input = builder.input("a");
+        let enable = builder.input("en");
+        let not_input = builder.not(input);
+        let driving = builder.and(enable, not_input);
+        let released = builder.not(driving);
+        let low = builder.constant(false);
+        builder.output("y", low);
+        builder.output("z", released);
+        (vec!["a", "en"], vec!["y", "z"])
+    })
+}
+
+fn tristate_entry(id: &'static str) -> DigitalEntry {
+    finish(id, |builder| {
+        let input = builder.input("a");
+        let enable = builder.input("en");
+        let output = builder.and(input, enable);
+        let released = builder.not(enable);
+        builder.output("y", output);
+        builder.output("z", released);
+        (vec!["a", "en"], vec!["y", "z"])
+    })
+}
+
+fn bidirectional_entry(id: &'static str) -> DigitalEntry {
+    finish(id, |builder| {
+        let a = builder.input("a");
+        let b = builder.input("b");
+        let direction = builder.input("dir");
+        let enable = builder.input("en");
+        let to_a = builder.and(enable, direction);
+        let not_direction = builder.not(direction);
+        let to_b = builder.and(enable, not_direction);
+        let y_a = builder.and(b, to_a);
+        let y_b = builder.and(a, to_b);
+        let z_a = builder.not(to_a);
+        let z_b = builder.not(to_b);
+        builder.output("y_a", y_a);
+        builder.output("z_a", z_a);
+        builder.output("y_b", y_b);
+        builder.output("z_b", z_b);
+        (
+            vec!["a", "b", "dir", "en"],
+            vec!["y_a", "z_a", "y_b", "z_b"],
+        )
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::digital_entry;
@@ -1089,6 +1157,45 @@ mod tests {
         entry.circuit.set_input("reset", true).expect("input");
         entry.circuit.tick().expect("tick");
         assert_eq!(entry.circuit.output("q0"), Some(true));
+    }
+
+    #[test]
+    fn open_drain_releases_when_input_high() {
+        let mut entry = entry("logic.gate_special.open_drain_buffer");
+        entry.circuit.set_input("a", false).expect("input");
+        entry.circuit.set_input("en", true).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("y"), Some(false));
+        assert_eq!(entry.circuit.output("z"), Some(false));
+        entry.circuit.set_input("a", true).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("z"), Some(true));
+    }
+
+    #[test]
+    fn tristate_releases_when_disabled() {
+        let mut entry = entry("logic.gate_special.tristate_buffer");
+        entry.circuit.set_input("a", true).expect("input");
+        entry.circuit.set_input("en", false).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("z"), Some(true));
+        entry.circuit.set_input("en", true).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("y"), Some(true));
+        assert_eq!(entry.circuit.output("z"), Some(false));
+    }
+
+    #[test]
+    fn bidirectional_buffer_drives_one_side() {
+        let mut entry = entry("logic.adder.bidirectional_buffer");
+        entry.circuit.set_input("a", true).expect("input");
+        entry.circuit.set_input("b", false).expect("input");
+        entry.circuit.set_input("dir", false).expect("input");
+        entry.circuit.set_input("en", true).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("y_b"), Some(true));
+        assert_eq!(entry.circuit.output("z_b"), Some(false));
+        assert_eq!(entry.circuit.output("z_a"), Some(true));
     }
 
     #[test]

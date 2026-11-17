@@ -6,7 +6,7 @@ Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
 ## 1. Cakupan
 
 Domain digital memakai `DigitalCircuit` dua-state dengan input dan
-output bernama. Saat ini 50 entry katalog sudah dapat dijalankan:
+output bernama. Saat ini 56 entry katalog sudah dapat dijalankan:
 
 | Kelompok | Entry |
 |---|---|
@@ -21,6 +21,7 @@ output bernama. Saat ini 50 entry katalog sudah dapat dijalankan:
 | Timer | timer, RTC, watchdog |
 | Digital source | clock, PRBS, pattern |
 | Programmable | PAL, GAL, CPLD, FPGA logic block, lookup table (LUT 4-input) |
+| High-Z | open-drain, tri-state, transmission gate, bidirectional buffer, bidirectional/open-drain level |
 
 ## 2. Perintah
 
@@ -70,15 +71,12 @@ Port ditentukan per entry, bukan dari jumlah pin katalog. Contoh:
 
 ## 5. Entry Digital yang Belum Didukung
 
-Masih ada 13 entry digital di luar domain ini:
+Masih ada 7 entry digital di luar domain ini:
 
-- 3 special gate (open-drain, tri-state, transmission gate).
-- 1 adder/buffer tambahan (bidirectional buffer).
-- 2 level shifter/interface tambahan (bidirectional, open-drain).
 - 1 programmable logic (finite state machine).
-- 6 serial interface.
+- 6 serial interface (UART, SPI, I2C, CAN, USB, Ethernet).
 
-## 6. Verifikasi
+## 7. Verifikasi
 
 Test domain digital mencakup:
 
@@ -94,6 +92,8 @@ Test domain digital mencakup:
 - PISO menggeser data parallel ke serial.
 - Watchdog timeout setelah 255 tick.
 - Clock source toggle setiap tick.
+- Open-drain dan tri-state memakai sinyal `z` untuk kondisi released.
+- Bidirectional buffer mengarahkan satu sisi dan melepas sisi lain.
 - PRBS source bergeser setelah reset.
 - Pattern source memuat pola saat reset.
 - LUT 4-input dengan mask AND menghasilkan output yang benar.
@@ -101,7 +101,7 @@ Test domain digital mencakup:
 - Decade counter kembali ke nol setelah sepuluh tick.
 - Shift register memindahkan data.
 
-## 7. Referensi
+## 8. Referensi
 
 - Logic gate, dasar gerbang dua-state:
   https://en.wikipedia.org/wiki/Logic_gate

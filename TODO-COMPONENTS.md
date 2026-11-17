@@ -190,12 +190,12 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C5-04 | 5 | 5 | OTA dan Norton salah model; audio, video, buffer generik. |
 | C5-05 | 5 | 5 | 555, monostable, astable, VCO, dan PLL solver-backed. |
 | C5-06 | 4 | 4 | Voltage source 2 pin; current reference salah; topology shunt dan series belum. |
-| C6-01 | 12 | 9 | 8 gate benar; Schmitt tanpa hysteresis; 3 special belum. |
+| C6-01 | 12 | 12 | 8 gate, Schmitt, open-drain, tri-state, dan transmission gate. |
 | C6-02 | 10 | 10 | D, JK, T, SR, latch, edge D, master-slave, dual/quad D, octal latch. |
 | C6-03 | 10 | 10 | 4/8-bit, decade, up/down, ripple, Johnson, shift 4/8-bit, SIPO, PISO. |
 | C6-04 | 8 | 8 | Mux 2:1/4:1/8:1, demux, decoder, encoder, dan priority encoder ada. |
-| C6-05 | 8 | 7 | Adder, comparator, parity, dan bus buffer; bidirectional buffer belum. |
-| C6-06 | 6 | 4 | Level shifter, line driver, receiver, dan optocoupler; 2 belum. |
+| C6-05 | 8 | 8 | Adder, comparator, parity, bus buffer, dan bidirectional buffer. |
+| C6-06 | 6 | 6 | Level shifter, line driver, receiver, optocoupler, bidirectional, dan open-drain. |
 | C6-07 | 6 | 5 | PAL, GAL, CPLD, FPGA logic block, dan LUT memakai LUT 4-input; FSM belum. |
 | C6-08 | 15 | 0 | Belum ada model memory. |
 | C6-09 | 11 | 0 | Belum ada model MCU. |
@@ -451,11 +451,10 @@ Target: 100 entri.
   - Delapan entry sudah ada di domain digital.
   - Reference vector dan verified belum.
 - [~] C6-05 Adder, comparator, buffer 8 entri.
-  - Tujuh entry sudah ada; bidirectional buffer belum.
+  - Delapan entry sudah ada.
   - Reference vector dan verified belum.
 - [~] C6-06 Level shifter dan interface 6 entri.
-  - Level shifter, line driver, receiver, dan optocoupler ada.
-  - Bidirectional dan open-drain belum.
+  - Enam entry sudah ada, termasuk high-Z eksplisit.
   - Reference vector dan verified belum.
 - [ ] C6-07 Programmable logic dan state machine 6 entri.
 - [ ] C6-08 Memory 15 entri: SRAM, DRAM, ROM, EEPROM, Flash, FRAM, MRAM,
