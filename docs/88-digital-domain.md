@@ -6,7 +6,7 @@ Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
 ## 1. Cakupan
 
 Domain digital memakai `DigitalCircuit` dua-state dengan input dan
-output bernama. Saat ini 76 entry katalog sudah dapat dijalankan:
+output bernama. Saat ini 77 entry katalog sudah dapat dijalankan:
 
 | Kelompok | Entry |
 |---|---|
@@ -22,7 +22,7 @@ output bernama. Saat ini 76 entry katalog sudah dapat dijalankan:
 | Digital source | clock, PRBS, pattern |
 | Programmable | PAL, GAL, CPLD, FPGA logic block, lookup table (LUT 4-input), FSM 3-input |
 | High-Z | open-drain, tri-state, transmission gate, bidirectional buffer, bidirectional/open-drain level |
-| Serial | UART, SPI, I2C master, dan CAN transmitter |
+| Serial | UART, SPI, I2C master, CAN transmitter, dan USB token |
 | Memory | sel SRAM/DRAM, array, ROM, PROM, module, controller, SPI flash, I2C EEPROM, dan SD card |
 
 ## 2. Perintah
@@ -73,7 +73,7 @@ Port ditentukan per entry, bukan dari jumlah pin katalog. Contoh:
 - Tidak ada timing, setup/hold, atau propagation delay.
 - Memory array memakai sel DFF, bukan transistor, dan belum memiliki
   timing akses, refresh, atau retensi non-volatile.
-- USB dan Ethernet belum didukung.
+- Ethernet belum didukung.
 
 ## 5. High-Z
 
@@ -117,7 +117,22 @@ driver harus memakai sinyal `z` di tingkat rangkaian.
 - Tidak ada bit timing, baud rate, arbitrase, remote frame, extended ID,
   CAN FD, error frame, atau DLC selain 8.
 
-## 8. Memory
+## 8. USB
+
+`mcu.serial.usb` adalah transmitter token packet USB full-speed:
+
+- Input: `reset`, `start`, `pid0..pid3`, `addr0..addr6`, `ep0..ep3`.
+- Output: `dp`, `dm`, `busy`, `done`.
+- Packet: SYNC, PID dan komplemennya, 7-bit address, 4-bit endpoint,
+  CRC5, lalu EOP.
+- CRC5 memakai polinomial `x^5 + x^2 + 1`, inisialisasi semua 1, dan
+  hasil dibalik.
+- NRZI dan bit stuffing setelah enam bit 1 diterapkan. EOP adalah dua
+  bit SE0 lalu satu bit J.
+- Hanya token packet; data packet, handshake packet, dan device stack
+  belum didukung.
+
+## 9. Memory
 
 Lima belas entry memory memakai model digital:
 
@@ -167,13 +182,13 @@ multi-block, atau timing. Ukuran blok SD tidak mengikuti parameter
 kapasitas katalog. Controller bersifat generik, bukan controller DRAM
 dengan refresh dan scheduling.
 
-## 9. Entry Digital yang Belum Didukung
+## 10. Entry Digital yang Belum Didukung
 
-Masih ada 2 entry digital di luar domain ini:
+Masih ada 1 entry digital di luar domain ini:
 
-- USB dan Ethernet.
+- Ethernet.
 
-## 10. Verifikasi
+## 11. Verifikasi
 
 Test domain digital mencakup:
 
@@ -212,6 +227,8 @@ Test domain digital mencakup:
   START, dan mengabaikan alamat device yang tidak cocok.
 - SD card menulis dan membaca satu blok 512 byte, menolak read sebelum
   CMD1, dan menolak perintah yang tidak dikenal.
+- USB token SOF dan IN cocok dengan reference vector, termasuk CRC5,
+  NRZI, bit stuffing, dan EOP.
 - I2C mengirim address dan data MSB-first, menghasilkan START/STOP,
   dan menandai NACK saat ACK tidak diberikan.
 - CAN mengirim frame 2.0A dengan CRC-15 dan satu bit stuff, lalu
@@ -223,7 +240,7 @@ Test domain digital mencakup:
 - Decade counter kembali ke nol setelah sepuluh tick.
 - Shift register memindahkan data.
 
-## 11. Referensi
+## 12. Referensi
 
 - Logic gate, dasar gerbang dua-state:
   https://en.wikipedia.org/wiki/Logic_gate
@@ -239,6 +256,10 @@ Test domain digital mencakup:
   https://en.wikipedia.org/wiki/I%C2%B2C
 - CAN bus, frame, dan CRC:
   https://en.wikipedia.org/wiki/CAN_bus
+- USB 2.0, packet dan CRC:
+  https://www.usb.org/document-library/usb-20-specification
+- USB CRC5, contoh dan implementasi:
+  https://www.usb.org/sites/default/files/crcdes.pdf
 - CRC-15-CAN, polinomial dan properti:
   https://www.can-cia.org/can-knowledge/cyclic-redundancy-check-crc-in-can-frames
 - Adder, penjumlahan biner:

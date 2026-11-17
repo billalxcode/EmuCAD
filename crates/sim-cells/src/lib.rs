@@ -15,6 +15,7 @@ mod catalog_memory;
 mod catalog_sd;
 mod catalog_spi;
 mod catalog_uart;
+mod catalog_usb;
 mod cell;
 mod characterize;
 mod digital;
