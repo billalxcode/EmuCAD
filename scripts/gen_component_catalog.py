@@ -482,8 +482,17 @@ add("sensor.pressure", "Sensor", "PressureSensor", 3, "sensitivity", 1e-5, "V/Pa
 add("sensor.pressure", "Sensor", "ForceSensor", 3, "sensitivity", 0.01, "V/N", [
     "force sensor",
 ])
-add("sensor.humidity", "Sensor", None, 3, "sensitivity", 1.0, "ratio", [
-    "humidity sensor", "gas sensor", "pH sensor", "electrochemical sensor",
+add("sensor.humidity", "Sensor", "HumiditySensor", 3, "sensitivity", 0.03, "V/%RH", [
+    "humidity sensor",
+])
+add("sensor.humidity", "Sensor", "GasSensor", 3, "resistance", 10000.0, "ohm", [
+    "gas sensor",
+])
+add("sensor.humidity", "Sensor", "PhSensor", 3, "sensitivity", 0.05916, "V/pH", [
+    "pH sensor",
+])
+add("sensor.humidity", "Sensor", "ElectrochemicalSensor", 3, "sensitivity", 0.01, "V/ppm", [
+    "electrochemical sensor",
 ])
 add("sensor.current", "Sensor", None, 3, "sensitivity", 1.0, "ratio", [
     "current sense resistor", "Hall current sensor", "voltage divider sensor",

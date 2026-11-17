@@ -18,9 +18,9 @@ use crate::regulator::RegulatorModel;
 use crate::relay::RelayModel;
 use crate::sensors::{
     LinearLightSensorModel, LinearSensorModel, LoadCellModel, MagneticFieldSensorModel,
-    MagneticSwitchModel, NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
-    RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel, TemperatureSensorModel,
-    ThermalSwitchModel, ThermocoupleModel,
+    MagneticSwitchModel, NtcModel, PhSensorModel, PhotodiodeSensorModel, PhotoresistorModel,
+    PtcModel, RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel,
+    TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
 };
 use crate::source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
 use crate::switch::{IdealSwitchModel, SwitchModel};
@@ -191,6 +191,26 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         )?),
         DeviceKind::ForceSensor => Box::new(LinearSensorModel::from_instance(
             instance, "force", 0.01, 0.0,
+        )?),
+        DeviceKind::HumiditySensor => Box::new(LinearSensorModel::from_instance(
+            instance,
+            "relative_humidity",
+            0.03,
+            0.8,
+        )?),
+        DeviceKind::GasSensor => Box::new(RelativeResistanceSensorModel::from_instance(
+            instance,
+            "gas_concentration",
+            10000.0,
+            -0.0001,
+            10000.0,
+        )?),
+        DeviceKind::PhSensor => Box::new(PhSensorModel::from_instance(instance)?),
+        DeviceKind::ElectrochemicalSensor => Box::new(LinearSensorModel::from_instance(
+            instance,
+            "concentration",
+            0.01,
+            0.0,
         )?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),

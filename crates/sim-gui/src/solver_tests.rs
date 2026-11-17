@@ -1142,3 +1142,18 @@ fn pressure_and_force_sensors_scale_linearly() {
     assert!((pressure - 1.5).abs() < 0.01, "pressure={pressure}");
     assert!((force - 1.0).abs() < 0.01, "force={force}");
 }
+
+#[test]
+fn humidity_gas_ph_and_electrochemical_sensors_respond() {
+    let humidity = sensor_output(DeviceKind::HumiditySensor, &[("relative_humidity", 50.0)]);
+    let gas = sensor_output(DeviceKind::GasSensor, &[("gas_concentration", 1000.0)]);
+    let ph = sensor_output(DeviceKind::PhSensor, &[("ph", 4.0)]);
+    let chemical = sensor_output(
+        DeviceKind::ElectrochemicalSensor,
+        &[("concentration", 100.0)],
+    );
+    assert!((humidity - 2.3).abs() < 0.01, "humidity={humidity}");
+    assert!((gas - 2.3684).abs() < 0.01, "gas={gas}");
+    assert!((ph - 2.67748).abs() < 0.01, "ph={ph}");
+    assert!((chemical - 1.0).abs() < 0.01, "chemical={chemical}");
+}

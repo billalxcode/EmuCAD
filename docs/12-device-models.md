@@ -3,7 +3,7 @@
 Katalog device yang tersedia di `sim-device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 156.
+dan transmission line sudah diimplementasikan. Total test `sim-device`: 159.
 
 ---
 
@@ -118,6 +118,10 @@ pub fn model_from_instance(
 | Load cell | 3 | Rated output mV/V | - |
 | Pressure sensor | 3 | Linear V/Pa output | - |
 | Force sensor | 3 | Linear V/N output | - |
+| Humidity sensor | 3 | Linear V/%RH output | - |
+| Gas sensor | 3 | Chemiresistor divider | - |
+| pH sensor | 3 | Nernst slope V/pH | - |
+| Electrochemical sensor | 3 | Linear V/ppm output | - |
 | VCVS | 4 | Linear gain | [47](47-controlled-sources.md) |
 | VCCS | 4 | Linear transconductance | [47](47-controlled-sources.md) |
 | CCCS | 4 | Linear current gain | [48](48-cccs-switch.md) |
@@ -373,8 +377,9 @@ Test device mencakup:
   dan fluxgate.
 - Sensor gerak accelerometer, gyroscope, IMU, tilt, dan vibration.
 - Sensor tekanan strain gauge, load cell, pressure, dan force.
+- Sensor kelembapan dan kimia humidity, gas, pH, dan electrochemical.
 
-Total test `sim-device`: 151 unit + 5 integration = 156.
+Total test `sim-device`: 154 unit + 5 integration = 159.
 
 ---
 

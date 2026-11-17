@@ -131,6 +131,14 @@ pub enum DeviceKind {
     PressureSensor,
     /// A force sensor module.
     ForceSensor,
+    /// A humidity sensor module.
+    HumiditySensor,
+    /// A gas sensor module.
+    GasSensor,
+    /// A pH sensor module.
+    PhSensor,
+    /// An electrochemical sensor module.
+    ElectrochemicalSensor,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -231,6 +239,10 @@ impl DeviceKind {
             Self::LoadCell => "load_cell",
             Self::PressureSensor => "pressure_sensor",
             Self::ForceSensor => "force_sensor",
+            Self::HumiditySensor => "humidity_sensor",
+            Self::GasSensor => "gas_sensor",
+            Self::PhSensor => "ph_sensor",
+            Self::ElectrochemicalSensor => "electrochemical_sensor",
             Self::Diode => "diode",
             _ => "custom",
         }

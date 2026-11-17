@@ -294,6 +294,34 @@ const FORCE_SENSOR: &[ParameterSpec] = &[
     ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
 ];
 
+const HUMIDITY_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/%RH", 0.03, 1e-12, 1e9),
+    ParameterSpec::number("offset", "V", 0.8, -1e6, 1e6),
+    ParameterSpec::number("relative_humidity", "%RH", 50.0, 0.0, 100.0),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const GAS_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
+    ParameterSpec::number("relative_sensitivity", "1/ppm", -0.0001, -1e9, 1e9),
+    ParameterSpec::number("series_resistance", "ohm", 10000.0, 1e-9, 1e12),
+    ParameterSpec::number("gas_concentration", "ppm", 0.0, 0.0, 1e9),
+];
+
+const PH_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/pH", 0.05916, 1e-12, 1e6),
+    ParameterSpec::number("offset", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("ph", "pH", 7.0, 0.0, 14.0),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const ELECTROCHEMICAL_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/ppm", 0.01, 1e-12, 1e9),
+    ParameterSpec::number("offset", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("concentration", "ppm", 0.0, 0.0, 1e9),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -548,6 +576,10 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::LoadCell => LOAD_CELL,
         DeviceKind::PressureSensor => PRESSURE_SENSOR,
         DeviceKind::ForceSensor => FORCE_SENSOR,
+        DeviceKind::HumiditySensor => HUMIDITY_SENSOR,
+        DeviceKind::GasSensor => GAS_SENSOR,
+        DeviceKind::PhSensor => PH_SENSOR,
+        DeviceKind::ElectrochemicalSensor => ELECTROCHEMICAL_SENSOR,
         _ => &[],
     }
 }
@@ -629,6 +661,10 @@ mod tests {
         DeviceKind::LoadCell,
         DeviceKind::PressureSensor,
         DeviceKind::ForceSensor,
+        DeviceKind::HumiditySensor,
+        DeviceKind::GasSensor,
+        DeviceKind::PhSensor,
+        DeviceKind::ElectrochemicalSensor,
     ];
 
     #[test]

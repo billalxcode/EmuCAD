@@ -675,7 +675,7 @@ impl RelativeResistanceSensorModel {
         let params = instance.parameters();
         Ok(Self {
             resistance: positive_parameter(params, "resistance", Some(resistance))?,
-            relative_sensitivity: non_negative_parameter(
+            relative_sensitivity: finite_parameter(
                 params,
                 "relative_sensitivity",
                 relative_sensitivity,
@@ -865,13 +865,61 @@ impl DeviceModel for LoadCellModel {
     }
 }
 
+/// A pH sensor module using the Nernst slope around neutral pH.
+pub struct PhSensorModel {
+    sensitivity: f64,
+    offset: f64,
+    ph: f64,
+    output_resistance: f64,
+    pins: [NodeId; 3],
+}
+
+impl PhSensorModel {
+    pub(crate) fn from_instance(instance: &DeviceInstance) -> Result<Self, SimError> {
+        let params = instance.parameters();
+        Ok(Self {
+            sensitivity: positive_parameter(params, "sensitivity", Some(0.05916))?,
+            offset: finite_parameter(params, "offset", 2.5)?,
+            ph: finite_parameter(params, "ph", 7.0)?,
+            output_resistance: positive_parameter(params, "output_resistance", Some(1000.0))?,
+            pins: sensor_pins(instance)?,
+        })
+    }
+
+    fn output(&self, supply: f64) -> f64 {
+        clamp_output(self.offset + self.sensitivity * (7.0 - self.ph), supply)
+    }
+}
+
+impl DeviceModel for PhSensorModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        solution: &Solution,
+        _dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        let supply = supply(solution, self.pins);
+        stamp_output(
+            ctx,
+            self.pins[2],
+            self.pins[1],
+            self.output(supply),
+            self.output_resistance,
+        )
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
         LinearLightSensorModel, LinearSensorModel, LoadCellModel, MagneticFieldSensorModel,
-        MagneticSwitchModel, NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
-        RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel, TemperatureSensorModel,
-        ThermalSwitchModel, ThermocoupleModel,
+        MagneticSwitchModel, NtcModel, PhSensorModel, PhotodiodeSensorModel, PhotoresistorModel,
+        PtcModel, RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel,
+        TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
     };
     use sim_core::{DeviceId, DeviceInstance, DeviceKind, NodeId};
     use std::collections::BTreeMap;
@@ -1128,5 +1176,49 @@ mod tests {
         let force = linear_output(DeviceKind::ForceSensor, "force", 100.0, 0.01, 0.0);
         assert!((pressure - 1.5).abs() < 1e-9, "pressure={pressure}");
         assert!((force - 1.0).abs() < 1e-9, "force={force}");
+    }
+
+    #[test]
+    fn humidity_and_electrochemical_outputs_scale_linearly() {
+        let humidity = linear_output(
+            DeviceKind::HumiditySensor,
+            "relative_humidity",
+            50.0,
+            0.03,
+            0.8,
+        );
+        let chemical = linear_output(
+            DeviceKind::ElectrochemicalSensor,
+            "concentration",
+            100.0,
+            0.01,
+            0.0,
+        );
+        assert!((humidity - 2.3).abs() < 1e-9, "humidity={humidity}");
+        assert!((chemical - 1.0).abs() < 1e-9, "chemical={chemical}");
+    }
+
+    #[test]
+    fn gas_sensor_resistance_falls_with_concentration() {
+        let model = RelativeResistanceSensorModel::from_instance(
+            &instance(DeviceKind::GasSensor, &[("gas_concentration", 1000.0)]),
+            "gas_concentration",
+            10000.0,
+            -0.0001,
+            10000.0,
+        )
+        .expect("model");
+        assert!((model.resistance_at() - 9000.0).abs() < 1e-9);
+        assert!((model.output(5.0).0 - 2.36842105263158).abs() < 1e-9);
+    }
+
+    #[test]
+    fn ph_sensor_uses_nernst_slope() {
+        let acidic = PhSensorModel::from_instance(&instance(DeviceKind::PhSensor, &[("ph", 4.0)]))
+            .expect("acidic");
+        let neutral =
+            PhSensorModel::from_instance(&instance(DeviceKind::PhSensor, &[])).expect("neutral");
+        assert!((acidic.output(5.0) - 2.67748).abs() < 1e-9);
+        assert!((neutral.output(5.0) - 2.5).abs() < 1e-9);
     }
 }

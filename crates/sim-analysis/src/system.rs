@@ -172,6 +172,10 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::LoadCell
             | DeviceKind::PressureSensor
             | DeviceKind::ForceSensor
+            | DeviceKind::HumiditySensor
+            | DeviceKind::GasSensor
+            | DeviceKind::PhSensor
+            | DeviceKind::ElectrochemicalSensor
     )
 }
 
