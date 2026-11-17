@@ -123,6 +123,14 @@ pub enum DeviceKind {
     TiltSensor,
     /// A vibration sensor module.
     VibrationSensor,
+    /// A strain gauge sensor module.
+    StrainGaugeSensor,
+    /// A load cell module.
+    LoadCell,
+    /// A pressure sensor module.
+    PressureSensor,
+    /// A force sensor module.
+    ForceSensor,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -219,6 +227,10 @@ impl DeviceKind {
             Self::Imu => "imu",
             Self::TiltSensor => "tilt_sensor",
             Self::VibrationSensor => "vibration_sensor",
+            Self::StrainGaugeSensor => "strain_gauge_sensor",
+            Self::LoadCell => "load_cell",
+            Self::PressureSensor => "pressure_sensor",
+            Self::ForceSensor => "force_sensor",
             Self::Diode => "diode",
             _ => "custom",
         }

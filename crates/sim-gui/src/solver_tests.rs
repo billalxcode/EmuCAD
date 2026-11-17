@@ -1126,3 +1126,19 @@ fn motion_sensors_scale_with_environment_inputs() {
     assert!((tilt - 3.0).abs() < 0.01, "tilt={tilt}");
     assert!((vibration - 3.0).abs() < 0.01, "vibration={vibration}");
 }
+
+#[test]
+fn strain_gauge_and_load_cell_use_excitation() {
+    let strain = sensor_output(DeviceKind::StrainGaugeSensor, &[("strain", 0.001)]);
+    let load = sensor_output(DeviceKind::LoadCell, &[("load", 50.0)]);
+    assert!((strain - 0.002625).abs() < 1e-6, "strain={strain}");
+    assert!((load - 0.005).abs() < 1e-6, "load={load}");
+}
+
+#[test]
+fn pressure_and_force_sensors_scale_linearly() {
+    let pressure = sensor_output(DeviceKind::PressureSensor, &[("pressure", 100000.0)]);
+    let force = sensor_output(DeviceKind::ForceSensor, &[("force", 100.0)]);
+    assert!((pressure - 1.5).abs() < 0.01, "pressure={pressure}");
+    assert!((force - 1.0).abs() < 0.01, "force={force}");
+}

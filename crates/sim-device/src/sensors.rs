@@ -765,13 +765,113 @@ impl DeviceModel for LinearSensorModel {
     }
 }
 
+/// A strain gauge module using the single-active-gauge bridge equation.
+pub struct StrainGaugeSensorModel {
+    gauge_factor: f64,
+    offset: f64,
+    strain: f64,
+    output_resistance: f64,
+    pins: [NodeId; 3],
+}
+
+impl StrainGaugeSensorModel {
+    pub(crate) fn from_instance(instance: &DeviceInstance) -> Result<Self, SimError> {
+        let params = instance.parameters();
+        Ok(Self {
+            gauge_factor: positive_parameter(params, "gauge_factor", Some(2.1))?,
+            offset: finite_parameter(params, "offset", 0.0)?,
+            strain: finite_parameter(params, "strain", 0.0)?,
+            output_resistance: positive_parameter(params, "output_resistance", Some(1000.0))?,
+            pins: sensor_pins(instance)?,
+        })
+    }
+
+    fn output(&self, supply: f64) -> f64 {
+        let bridge = supply.max(0.0) * self.gauge_factor * self.strain / 4.0;
+        clamp_output(self.offset + bridge, supply)
+    }
+}
+
+impl DeviceModel for StrainGaugeSensorModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        solution: &Solution,
+        _dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        let supply = supply(solution, self.pins);
+        stamp_output(
+            ctx,
+            self.pins[2],
+            self.pins[1],
+            self.output(supply),
+            self.output_resistance,
+        )
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        Ok(())
+    }
+}
+
+/// A load cell module using rated output in volts per volt.
+pub struct LoadCellModel {
+    rated_output: f64,
+    rated_load: f64,
+    offset: f64,
+    load: f64,
+    output_resistance: f64,
+    pins: [NodeId; 3],
+}
+
+impl LoadCellModel {
+    pub(crate) fn from_instance(instance: &DeviceInstance) -> Result<Self, SimError> {
+        let params = instance.parameters();
+        Ok(Self {
+            rated_output: positive_parameter(params, "rated_output", Some(0.002))?,
+            rated_load: positive_parameter(params, "rated_load", Some(100.0))?,
+            offset: finite_parameter(params, "offset", 0.0)?,
+            load: finite_parameter(params, "load", 0.0)?,
+            output_resistance: positive_parameter(params, "output_resistance", Some(1000.0))?,
+            pins: sensor_pins(instance)?,
+        })
+    }
+
+    fn output(&self, supply: f64) -> f64 {
+        let value = supply.max(0.0) * self.rated_output * self.load / self.rated_load;
+        clamp_output(self.offset + value, supply)
+    }
+}
+
+impl DeviceModel for LoadCellModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        solution: &Solution,
+        _dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        let supply = supply(solution, self.pins);
+        stamp_output(
+            ctx,
+            self.pins[2],
+            self.pins[1],
+            self.output(supply),
+            self.output_resistance,
+        )
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
-        LinearLightSensorModel, LinearSensorModel, MagneticFieldSensorModel, MagneticSwitchModel,
-        NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
-        RelativeResistanceSensorModel, RtdModel, TemperatureSensorModel, ThermalSwitchModel,
-        ThermocoupleModel,
+        LinearLightSensorModel, LinearSensorModel, LoadCellModel, MagneticFieldSensorModel,
+        MagneticSwitchModel, NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
+        RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel, TemperatureSensorModel,
+        ThermalSwitchModel, ThermocoupleModel,
     };
     use sim_core::{DeviceId, DeviceInstance, DeviceKind, NodeId};
     use std::collections::BTreeMap;
@@ -957,24 +1057,34 @@ mod tests {
         assert!(result.is_err());
     }
 
-    fn motion_output(kind: DeviceKind, input_name: &str, input: f64, sensitivity: f64) -> f64 {
+    fn linear_output(
+        kind: DeviceKind,
+        input_name: &str,
+        input: f64,
+        sensitivity: f64,
+        offset: f64,
+    ) -> f64 {
         let model = LinearSensorModel::from_instance(
             &instance(kind, &[(input_name, input)]),
             input_name,
             sensitivity,
-            2.5,
+            offset,
         )
         .expect("model");
         model.output(5.0)
     }
 
+    fn motion_value(kind: DeviceKind, input_name: &str, input: f64, sensitivity: f64) -> f64 {
+        linear_output(kind, input_name, input, sensitivity, 2.5)
+    }
+
     #[test]
     fn motion_sensors_use_their_environment_inputs() {
-        let accel = motion_output(DeviceKind::Accelerometer, "acceleration", 9.80665, 0.050986);
-        let gyro = motion_output(DeviceKind::Gyroscope, "angular_rate", 100.0, 0.01);
-        let imu = motion_output(DeviceKind::Imu, "acceleration", 9.80665, 0.050986);
-        let tilt = motion_output(DeviceKind::TiltSensor, "angle", 20.0, 0.025);
-        let vibration = motion_output(DeviceKind::VibrationSensor, "vibration", 9.80665, 0.050986);
+        let accel = motion_value(DeviceKind::Accelerometer, "acceleration", 9.80665, 0.050986);
+        let gyro = motion_value(DeviceKind::Gyroscope, "angular_rate", 100.0, 0.01);
+        let imu = motion_value(DeviceKind::Imu, "acceleration", 9.80665, 0.050986);
+        let tilt = motion_value(DeviceKind::TiltSensor, "angle", 20.0, 0.025);
+        let vibration = motion_value(DeviceKind::VibrationSensor, "vibration", 9.80665, 0.050986);
         assert!((accel - 3.0).abs() < 1e-5, "accel={accel}");
         assert!((gyro - 3.5).abs() < 1e-5, "gyro={gyro}");
         assert!((imu - 3.0).abs() < 1e-5, "imu={imu}");
@@ -992,5 +1102,31 @@ mod tests {
         )
         .expect("model");
         assert!((model.output(5.0) - 2.5).abs() < 1e-9);
+    }
+
+    #[test]
+    fn strain_gauge_uses_bridge_equation() {
+        let model = StrainGaugeSensorModel::from_instance(&instance(
+            DeviceKind::StrainGaugeSensor,
+            &[("strain", 0.001)],
+        ))
+        .expect("model");
+        assert!((model.output(5.0) - 0.002625).abs() < 1e-9);
+    }
+
+    #[test]
+    fn load_cell_uses_rated_output() {
+        let model =
+            LoadCellModel::from_instance(&instance(DeviceKind::LoadCell, &[("load", 50.0)]))
+                .expect("model");
+        assert!((model.output(5.0) - 0.005).abs() < 1e-9);
+    }
+
+    #[test]
+    fn pressure_and_force_outputs_scale_linearly() {
+        let pressure = linear_output(DeviceKind::PressureSensor, "pressure", 100000.0, 1e-5, 0.5);
+        let force = linear_output(DeviceKind::ForceSensor, "force", 100.0, 0.01, 0.0);
+        assert!((pressure - 1.5).abs() < 1e-9, "pressure={pressure}");
+        assert!((force - 1.0).abs() < 1e-9, "force={force}");
     }
 }

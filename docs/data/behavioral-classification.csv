@@ -130,10 +130,6 @@ power.supervisor.power_monitor,power,Supervisor,behavioral-electrical,power macr
 power.motor.hbridge,power,MotorDriver,behavioral-electrical,power macromodel,S5-2,P2
 power.motor.halfbridge,power,MotorDriver,behavioral-electrical,power macromodel,S5-2,P2
 power.motor.stepper_driver,power,MotorDriver,behavioral-electrical,power macromodel,S5-2,P2
-sensor.pressure.strain_gauge_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
-sensor.pressure.load_cell,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
-sensor.pressure.pressure_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
-sensor.pressure.force_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
 sensor.humidity.humidity_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
 sensor.humidity.gas_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
 sensor.humidity.ph_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5

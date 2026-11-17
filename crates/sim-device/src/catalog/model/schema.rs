@@ -265,6 +265,35 @@ const VIBRATION_SENSOR: &[ParameterSpec] = &[
     ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
 ];
 
+const STRAIN_GAUGE_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("gauge_factor", "ratio", 2.1, 1e-6, 1e6),
+    ParameterSpec::number("strain", "ratio", 0.0, -1e6, 1e6),
+    ParameterSpec::number("offset", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const LOAD_CELL: &[ParameterSpec] = &[
+    ParameterSpec::number("rated_output", "V/V", 0.002, 1e-9, 1e3),
+    ParameterSpec::number("rated_load", "N", 100.0, 1e-9, 1e12),
+    ParameterSpec::number("load", "N", 0.0, -1e12, 1e12),
+    ParameterSpec::number("offset", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const PRESSURE_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/Pa", 1e-5, 1e-12, 1e6),
+    ParameterSpec::number("offset", "V", 0.5, -1e6, 1e6),
+    ParameterSpec::number("pressure", "Pa", 0.0, -1e9, 1e9),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const FORCE_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/N", 0.01, 1e-12, 1e6),
+    ParameterSpec::number("offset", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("force", "N", 0.0, -1e12, 1e12),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -515,6 +544,10 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::Imu => IMU,
         DeviceKind::TiltSensor => TILT_SENSOR,
         DeviceKind::VibrationSensor => VIBRATION_SENSOR,
+        DeviceKind::StrainGaugeSensor => STRAIN_GAUGE_SENSOR,
+        DeviceKind::LoadCell => LOAD_CELL,
+        DeviceKind::PressureSensor => PRESSURE_SENSOR,
+        DeviceKind::ForceSensor => FORCE_SENSOR,
         _ => &[],
     }
 }
@@ -592,6 +625,10 @@ mod tests {
         DeviceKind::Imu,
         DeviceKind::TiltSensor,
         DeviceKind::VibrationSensor,
+        DeviceKind::StrainGaugeSensor,
+        DeviceKind::LoadCell,
+        DeviceKind::PressureSensor,
+        DeviceKind::ForceSensor,
     ];
 
     #[test]

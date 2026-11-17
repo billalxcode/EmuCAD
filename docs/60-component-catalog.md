@@ -340,8 +340,8 @@ Jumlah saat ini:
 
 - 500 entri katalog.
 - 60 model class.
-- 278 entri solver-backed dengan `DeviceKind`.
-- 222 entri behavioral dengan metadata dan smoke response.
+- 282 entri solver-backed dengan `DeviceKind`.
+- 218 entri behavioral dengan metadata dan smoke response.
 
 Registry `ComponentRegistry` memetakan entry ke `DeviceInstance` dan
 `DeviceModel`. Registry memvalidasi ID, jumlah pin, parameter default, dan

@@ -17,9 +17,10 @@ use crate::protection::{FuseModel, VaristorModel};
 use crate::regulator::RegulatorModel;
 use crate::relay::RelayModel;
 use crate::sensors::{
-    LinearLightSensorModel, LinearSensorModel, MagneticFieldSensorModel, MagneticSwitchModel,
-    NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel, RelativeResistanceSensorModel,
-    RtdModel, TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
+    LinearLightSensorModel, LinearSensorModel, LoadCellModel, MagneticFieldSensorModel,
+    MagneticSwitchModel, NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
+    RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel, TemperatureSensorModel,
+    ThermalSwitchModel, ThermocoupleModel,
 };
 use crate::source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
 use crate::switch::{IdealSwitchModel, SwitchModel};
@@ -182,6 +183,14 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
             "vibration",
             0.050986,
             2.5,
+        )?),
+        DeviceKind::StrainGaugeSensor => Box::new(StrainGaugeSensorModel::from_instance(instance)?),
+        DeviceKind::LoadCell => Box::new(LoadCellModel::from_instance(instance)?),
+        DeviceKind::PressureSensor => Box::new(LinearSensorModel::from_instance(
+            instance, "pressure", 1e-5, 0.5,
+        )?),
+        DeviceKind::ForceSensor => Box::new(LinearSensorModel::from_instance(
+            instance, "force", 0.01, 0.0,
         )?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),

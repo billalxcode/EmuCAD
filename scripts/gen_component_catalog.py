@@ -470,8 +470,17 @@ add("sensor.motion", "Sensor", "TiltSensor", 3, "sensitivity", 0.025, "V/deg", [
 add("sensor.motion", "Sensor", "VibrationSensor", 3, "sensitivity", 0.050986, "V/(m/s2)", [
     "vibration sensor",
 ])
-add("sensor.pressure", "Sensor", None, 3, "sensitivity", 1.0, "ratio", [
-    "strain gauge sensor", "load cell", "pressure sensor", "force sensor",
+add("sensor.pressure", "Sensor", "StrainGaugeSensor", 3, "gauge_factor", 2.1, "ratio", [
+    "strain gauge sensor",
+])
+add("sensor.pressure", "Sensor", "LoadCell", 3, "rated_output", 0.002, "V/V", [
+    "load cell",
+])
+add("sensor.pressure", "Sensor", "PressureSensor", 3, "sensitivity", 1e-5, "V/Pa", [
+    "pressure sensor",
+])
+add("sensor.pressure", "Sensor", "ForceSensor", 3, "sensitivity", 0.01, "V/N", [
+    "force sensor",
 ])
 add("sensor.humidity", "Sensor", None, 3, "sensitivity", 1.0, "ratio", [
     "humidity sensor", "gas sensor", "pH sensor", "electrochemical sensor",

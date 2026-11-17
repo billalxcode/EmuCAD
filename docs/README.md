@@ -68,13 +68,14 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 59 | [Golden RGBA GUI](59-gui-golden.md) | Status dan prosedur update golden image |
 | 60 | [Katalog komponen](60-component-catalog.md) | Target 500 model, taksonomi, akurasi, dan schema |
 | 61 | [Design system](61-design-system.md) | Token font, warna, spacing, dan aturan tampilan |
-| 62 | [Klasifikasi behavioral](62-behavioral-classification.md) | Kategori dan prioritas 222 entry behavioral |
+| 62 | [Klasifikasi behavioral](62-behavioral-classification.md) | Kategori dan prioritas 218 entry behavioral |
 | 63 | [Fidelity dan benchmark](63-fidelity.md) | Label fidelity, audit 60 kelas, dan hasil benchmark |
 | 64 | [Gate-level scope](64-gate-level.md) | Definisi, status, benchmark, dan gap S6/S7 |
 | 65 | [Sensor suhu](65-temperature-sensors.md) | Model NTC, PTC, RTD, thermocouple, semikonduktor, switch |
 | 66 | [Sensor cahaya](66-light-sensors.md) | Model photoresistor, photodiode, dan linear light sensor |
 | 67 | [Sensor magnetik](67-magnetic-sensors.md) | Model Hall, reed switch, magnetoresistive, dan fluxgate |
 | 68 | [Sensor gerak](68-motion-sensors.md) | Model accelerometer, gyroscope, IMU, tilt, dan vibration |
+| 69 | [Sensor tekanan](69-pressure-sensors.md) | Model strain gauge, load cell, pressure, dan force |
 
 ### 3.2 Fondasi
 

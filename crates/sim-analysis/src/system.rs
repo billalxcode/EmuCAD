@@ -168,6 +168,10 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::Imu
             | DeviceKind::TiltSensor
             | DeviceKind::VibrationSensor
+            | DeviceKind::StrainGaugeSensor
+            | DeviceKind::LoadCell
+            | DeviceKind::PressureSensor
+            | DeviceKind::ForceSensor
     )
 }
 
