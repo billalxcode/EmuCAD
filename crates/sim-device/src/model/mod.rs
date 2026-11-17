@@ -18,9 +18,9 @@ use crate::regulator::RegulatorModel;
 use crate::relay::RelayModel;
 use crate::sensors::{
     CurrentSenseModel, LinearLightSensorModel, LinearSensorModel, LoadCellModel,
-    MagneticFieldSensorModel, MagneticSwitchModel, NtcModel, PhSensorModel, PhotodiodeSensorModel,
-    PhotoresistorModel, PtcModel, RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel,
-    TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
+    MagneticFieldSensorModel, NtcModel, PhSensorModel, PhotodiodeSensorModel, PhotoresistorModel,
+    PtcModel, RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel,
+    TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel, ThresholdSwitchModel,
 };
 use crate::source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
 use crate::switch::{IdealSwitchModel, SwitchModel};
@@ -145,9 +145,9 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         DeviceKind::Photoresistor => Box::new(PhotoresistorModel::from_instance(instance)?),
         DeviceKind::PhotodiodeSensor => Box::new(PhotodiodeSensorModel::from_instance(instance)?),
         DeviceKind::LinearLightSensor => Box::new(LinearLightSensorModel::from_instance(instance)?),
-        DeviceKind::HallSwitch | DeviceKind::ReedSwitchSensor => {
-            Box::new(MagneticSwitchModel::from_instance(instance)?)
-        }
+        DeviceKind::HallSwitch | DeviceKind::ReedSwitchSensor => Box::new(
+            ThresholdSwitchModel::from_instance(instance, "magnetic_field", false, 0.005, 0.001)?,
+        ),
         DeviceKind::LinearHallSensor => {
             Box::new(MagneticFieldSensorModel::from_instance(instance, 5.0, 2.5)?)
         }

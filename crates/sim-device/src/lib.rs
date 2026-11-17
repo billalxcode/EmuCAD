@@ -53,9 +53,9 @@ pub use regulator::RegulatorModel;
 pub use relay::RelayModel;
 pub use sensors::{
     CurrentSenseModel, LinearLightSensorModel, LinearSensorModel, LoadCellModel,
-    MagneticFieldSensorModel, MagneticSwitchModel, NtcModel, PhSensorModel, PhotodiodeSensorModel,
-    PhotoresistorModel, PtcModel, RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel,
-    TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
+    MagneticFieldSensorModel, NtcModel, PhSensorModel, PhotodiodeSensorModel, PhotoresistorModel,
+    PtcModel, RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel,
+    TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel, ThresholdSwitchModel,
 };
 pub use source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
 pub use switch::{IdealSwitchModel, SwitchModel};

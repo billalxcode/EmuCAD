@@ -546,41 +546,63 @@ fn magnetic_field(params: &std::collections::BTreeMap<String, f64>) -> Result<f6
     finite_parameter(params, "magnetic_field", 0.0)
 }
 
-/// A magnetic field switch with hysteresis.
-pub struct MagneticSwitchModel {
+/// A threshold switch with hysteresis and a selectable input.
+pub struct ThresholdSwitchModel {
     threshold: f64,
     hysteresis: f64,
     output_resistance: f64,
-    field: f64,
+    input: f64,
+    trigger_below: bool,
     on: bool,
     pins: [NodeId; 3],
 }
 
-impl MagneticSwitchModel {
-    pub(crate) fn from_instance(instance: &DeviceInstance) -> Result<Self, SimError> {
+impl ThresholdSwitchModel {
+    pub(crate) fn from_instance(
+        instance: &DeviceInstance,
+        input_name: &str,
+        trigger_below: bool,
+        threshold: f64,
+        hysteresis: f64,
+    ) -> Result<Self, SimError> {
         let params = instance.parameters();
         Ok(Self {
-            threshold: non_negative_parameter(params, "threshold", 0.005)?,
-            hysteresis: non_negative_parameter(params, "hysteresis", 0.001)?,
+            threshold: non_negative_parameter(params, "threshold", threshold)?,
+            hysteresis: non_negative_parameter(params, "hysteresis", hysteresis)?,
             output_resistance: positive_parameter(params, "output_resistance", Some(1000.0))?,
-            field: magnetic_field(params)?,
+            input: finite_parameter(params, input_name, 0.0)?,
+            trigger_below,
             on: false,
             pins: sensor_pins(instance)?,
         })
     }
 
-    fn output(&mut self, supply: f64) -> f64 {
-        if self.field > self.threshold {
+    fn update_state(&mut self) {
+        let on = if self.trigger_below {
+            self.input < self.threshold
+        } else {
+            self.input > self.threshold
+        };
+        let off = if self.trigger_below {
+            self.input > self.threshold + self.hysteresis
+        } else {
+            self.input < self.threshold - self.hysteresis
+        };
+        if on {
             self.on = true;
         }
-        if self.field < self.threshold - self.hysteresis {
+        if off {
             self.on = false;
         }
+    }
+
+    fn output(&mut self, supply: f64) -> f64 {
+        self.update_state();
         if self.on { supply.max(0.0) } else { 0.0 }
     }
 }
 
-impl DeviceModel for MagneticSwitchModel {
+impl DeviceModel for ThresholdSwitchModel {
     fn stamp(
         &mut self,
         ctx: &mut MnaContext,
@@ -968,10 +990,10 @@ impl DeviceModel for CurrentSenseModel {
 mod tests {
     use super::{
         CurrentSenseModel, LinearLightSensorModel, LinearSensorModel, LoadCellModel,
-        MagneticFieldSensorModel, MagneticSwitchModel, NtcModel, PhSensorModel,
-        PhotodiodeSensorModel, PhotoresistorModel, PtcModel, RelativeResistanceSensorModel,
-        RtdModel, StrainGaugeSensorModel, TemperatureSensorModel, ThermalSwitchModel,
-        ThermocoupleModel,
+        MagneticFieldSensorModel, NtcModel, PhSensorModel, PhotodiodeSensorModel,
+        PhotoresistorModel, PtcModel, RelativeResistanceSensorModel, RtdModel,
+        StrainGaugeSensorModel, TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
+        ThresholdSwitchModel,
     };
     use sim_core::{DeviceId, DeviceInstance, DeviceKind, NodeId};
     use std::collections::BTreeMap;
@@ -1092,17 +1114,23 @@ mod tests {
 
     #[test]
     fn magnetic_switch_uses_hysteresis() {
-        let mut model = MagneticSwitchModel::from_instance(&instance(
-            DeviceKind::ReedSwitchSensor,
-            &[("threshold", 0.005), ("hysteresis", 0.001)],
-        ))
+        let mut model = ThresholdSwitchModel::from_instance(
+            &instance(
+                DeviceKind::ReedSwitchSensor,
+                &[("threshold", 0.005), ("hysteresis", 0.001)],
+            ),
+            "magnetic_field",
+            false,
+            0.005,
+            0.001,
+        )
         .expect("model");
         assert!(model.output(5.0).abs() < 1e-9);
-        model.field = 0.006;
+        model.input = 0.006;
         assert!((model.output(5.0) - 5.0).abs() < 1e-9);
-        model.field = 0.0045;
+        model.input = 0.0045;
         assert!((model.output(5.0) - 5.0).abs() < 1e-9);
-        model.field = 0.003;
+        model.input = 0.003;
         assert!(model.output(5.0).abs() < 1e-9);
     }
 
