@@ -1,6 +1,7 @@
 //! Device model API and factory.
 
 use crate::actuator::{DisplayModuleModel, LedActuatorModel, SeriesEmfModel};
+use crate::behavioral_converter::{BehavioralConverterModel, ConverterBlockKind};
 use crate::bjt::BjtModel;
 use crate::comparator::ComparatorModel;
 use crate::controlled::{CccsModel, CcvsModel, VccsModel, VcvsModel};
@@ -195,6 +196,22 @@ fn passive_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel
         DeviceKind::BehavioralPwm => Box::new(BehavioralOscillatorModel::from_instance(
             instance,
             OscillatorKind::Pwm,
+        )?),
+        DeviceKind::BehavioralSampleHold => Box::new(BehavioralConverterModel::from_instance(
+            instance,
+            ConverterBlockKind::SampleHold,
+        )?),
+        DeviceKind::BehavioralSarAdc => Box::new(BehavioralConverterModel::from_instance(
+            instance,
+            ConverterBlockKind::Sar,
+        )?),
+        DeviceKind::BehavioralDeltaSigmaAdc => Box::new(BehavioralConverterModel::from_instance(
+            instance,
+            ConverterBlockKind::DeltaSigma,
+        )?),
+        DeviceKind::BehavioralPwmDac => Box::new(BehavioralConverterModel::from_instance(
+            instance,
+            ConverterBlockKind::PwmDac,
         )?),
         DeviceKind::CurrentSource => Box::new(CurrentSourceModel::from_instance(instance)?),
         DeviceKind::Vcvs => Box::new(VcvsModel::from_instance(instance)?),

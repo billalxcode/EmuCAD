@@ -618,6 +618,35 @@ const BEHAVIORAL_PWM: &[ParameterSpec] = &[
     ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
 ];
 
+const BEHAVIORAL_SAMPLE_HOLD: &[ParameterSpec] = &[
+    ParameterSpec::number("gain", "ratio", 1.0, -1e9, 1e9),
+    ParameterSpec::number("threshold", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("output_limit", "V", 15.0, 1e-9, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const BEHAVIORAL_SAR_ADC: &[ParameterSpec] = &[
+    ParameterSpec::number("resolution", "bit", 8.0, 1.0, 16.0),
+    ParameterSpec::number("full_scale", "V", 5.0, 1e-9, 1e6),
+    ParameterSpec::number("threshold", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const BEHAVIORAL_DELTA_SIGMA_ADC: &[ParameterSpec] = &[
+    ParameterSpec::number("resolution", "bit", 8.0, 1.0, 16.0),
+    ParameterSpec::number("full_scale", "V", 5.0, 1e-9, 1e6),
+    ParameterSpec::number("threshold", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("time_constant", "s", 1e-3, 1e-12, 1e9),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const BEHAVIORAL_PWM_DAC: &[ParameterSpec] = &[
+    ParameterSpec::number("gain", "ratio", 1.0, -1e9, 1e9),
+    ParameterSpec::number("time_constant", "s", 1e-3, 1e-12, 1e9),
+    ParameterSpec::number("output_limit", "V", 15.0, 1e-9, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -924,6 +953,10 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::BehavioralAmplitude => BEHAVIORAL_AMPLITUDE,
         DeviceKind::BehavioralFrequency => BEHAVIORAL_FREQUENCY,
         DeviceKind::BehavioralPwm => BEHAVIORAL_PWM,
+        DeviceKind::BehavioralSampleHold => BEHAVIORAL_SAMPLE_HOLD,
+        DeviceKind::BehavioralSarAdc => BEHAVIORAL_SAR_ADC,
+        DeviceKind::BehavioralDeltaSigmaAdc => BEHAVIORAL_DELTA_SIGMA_ADC,
+        DeviceKind::BehavioralPwmDac => BEHAVIORAL_PWM_DAC,
         _ => &[],
     }
 }
@@ -1057,6 +1090,10 @@ mod tests {
         DeviceKind::BehavioralAmplitude,
         DeviceKind::BehavioralFrequency,
         DeviceKind::BehavioralPwm,
+        DeviceKind::BehavioralSampleHold,
+        DeviceKind::BehavioralSarAdc,
+        DeviceKind::BehavioralDeltaSigmaAdc,
+        DeviceKind::BehavioralPwmDac,
     ];
 
     #[test]

@@ -148,6 +148,18 @@ const BEHAVIORAL_FILTER: &[PinRole] = &[
     PinRole::Ground,
     PinRole::Common,
 ];
+const BEHAVIORAL_CONVERTER: &[PinRole] = &[
+    PinRole::Input1,
+    PinRole::Input2,
+    PinRole::Output,
+    PinRole::Ground,
+];
+const BEHAVIORAL_PWM_DAC: &[PinRole] = &[
+    PinRole::Input,
+    PinRole::Output,
+    PinRole::PositiveSupply,
+    PinRole::Ground,
+];
 const BEHAVIORAL_OSCILLATOR: &[PinRole] = &[
     PinRole::Input,
     PinRole::Output,
@@ -367,6 +379,10 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         | DeviceKind::BehavioralAmplitude
         | DeviceKind::BehavioralFrequency
         | DeviceKind::BehavioralPwm => BEHAVIORAL_OSCILLATOR,
+        DeviceKind::BehavioralSampleHold
+        | DeviceKind::BehavioralSarAdc
+        | DeviceKind::BehavioralDeltaSigmaAdc => BEHAVIORAL_CONVERTER,
+        DeviceKind::BehavioralPwmDac => BEHAVIORAL_PWM_DAC,
         DeviceKind::Timer555
         | DeviceKind::MonostableTimer
         | DeviceKind::AstableTimer

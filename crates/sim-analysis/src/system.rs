@@ -208,6 +208,10 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::BehavioralAmplitude
             | DeviceKind::BehavioralFrequency
             | DeviceKind::BehavioralPwm
+            | DeviceKind::BehavioralSampleHold
+            | DeviceKind::BehavioralSarAdc
+            | DeviceKind::BehavioralDeltaSigmaAdc
+            | DeviceKind::BehavioralPwmDac
     )
 }
 

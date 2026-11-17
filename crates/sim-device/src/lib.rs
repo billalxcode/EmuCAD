@@ -3,6 +3,7 @@
 #![forbid(unsafe_code)]
 
 mod actuator;
+mod behavioral_converter;
 mod bjt;
 mod catalog;
 mod comparator;
@@ -39,6 +40,7 @@ mod transmission;
 mod unijunction;
 
 pub use actuator::{DisplayModuleModel, LedActuatorModel, SeriesEmfModel};
+pub use behavioral_converter::BehavioralConverterModel;
 pub use bjt::{BjtModel, bjt_capacitances};
 pub use catalog::{
     CatalogError, CatalogRecord, ComponentRegistry, ComponentRequest, ComponentSpec, Family,

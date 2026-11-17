@@ -1810,3 +1810,78 @@ fn behavioral_pwm_transient_toggles_output() {
     assert!(high > 4.0, "high={high}");
     assert!(low < 0.5, "low={low}");
 }
+
+#[test]
+fn behavioral_sample_hold_and_sar_quantize() {
+    let tracked = converter_output(DeviceKind::BehavioralSampleHold, 2.0, 5.0, &[]);
+    let held = converter_output(DeviceKind::BehavioralSampleHold, 2.0, 0.0, &[]);
+    let sar = converter_output(
+        DeviceKind::BehavioralSarAdc,
+        2.5,
+        5.0,
+        &[("resolution", 8.0), ("full_scale", 5.0)],
+    );
+    assert!((tracked - 2.0).abs() < 0.02, "tracked={tracked}");
+    assert!(held.abs() < 0.01, "held={held}");
+    assert!((sar - 2.5098).abs() < 0.02, "sar={sar}");
+}
+
+fn converter_output(kind: DeviceKind, input: f64, control: f64, values: &[(&str, f64)]) -> f64 {
+    let mut builder = CircuitBuilder::new();
+    let signal = builder.node("in").expect("node");
+    let control_node = builder.node("ctrl").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", signal, ground, input);
+    add_input(&mut builder, "V2", control_node, ground, control);
+    builder
+        .device(
+            "U1",
+            kind,
+            vec![signal, control_node, output, ground],
+            params(values),
+        )
+        .expect("U1");
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![output, ground],
+            params(&[("resistance", 1e6)]),
+        )
+        .expect("R1");
+    let circuit = builder.build().expect("circuit");
+    let result = solve(&circuit);
+    result.solution.voltage(output).expect("output")
+}
+
+#[test]
+fn behavioral_pwm_dac_filters_input() {
+    let mut builder = CircuitBuilder::new();
+    let signal = builder.node("in").expect("node");
+    let supply = builder.node("vcc").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", signal, ground, 2.5);
+    add_input(&mut builder, "V2", supply, ground, 5.0);
+    builder
+        .device(
+            "U1",
+            DeviceKind::BehavioralPwmDac,
+            vec![signal, output, supply, ground],
+            params(&[("gain", 1.0)]),
+        )
+        .expect("U1");
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![output, ground],
+            params(&[("resistance", 1e6)]),
+        )
+        .expect("R1");
+    let circuit = builder.build().expect("circuit");
+    let result = solve(&circuit);
+    let voltage = result.solution.voltage(output).expect("output");
+    assert!((voltage - 2.5).abs() < 0.02, "voltage={voltage}");
+}

@@ -680,9 +680,20 @@ add("behavioral.oscillator", "BehavioralBlock", "BehavioralFrequency", 4, "frequ
 add("behavioral.oscillator", "BehavioralBlock", "BehavioralPwm", 4, "frequency", 1e3, "Hz", [
     "pulse width modulator",
 ])
-add("behavioral.converter", "BehavioralBlock", None, 4, "resolution", 10.0, "bit", [
-    "sample and hold", "SAR ADC behavioral", "delta sigma ADC behavioral",
-    "R-2R DAC behavioral", "PWM DAC",
+add("behavioral.converter", "BehavioralBlock", "BehavioralSampleHold", 4, "gain", 1.0, "ratio", [
+    "sample and hold",
+])
+add("behavioral.converter", "BehavioralBlock", "BehavioralSarAdc", 4, "resolution", 8.0, "bit", [
+    "SAR ADC behavioral",
+])
+add("behavioral.converter", "BehavioralBlock", "BehavioralDeltaSigmaAdc", 4, "resolution", 8.0, "bit", [
+    "delta sigma ADC behavioral",
+])
+add("behavioral.converter", "BehavioralBlock", None, 4, "resolution", 8.0, "bit", [
+    "R-2R DAC behavioral",
+])
+add("behavioral.converter", "BehavioralBlock", "BehavioralPwmDac", 4, "time_constant", 1e-3, "s", [
+    "PWM DAC",
 ])
 
 add("board.arduino", "BoardModule", None, 8, "voltage", 5.0, "V", [

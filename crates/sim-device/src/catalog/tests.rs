@@ -166,6 +166,10 @@ fn supported_actuator(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::BehavioralAmplitude
             | sim_core::DeviceKind::BehavioralFrequency
             | sim_core::DeviceKind::BehavioralPwm
+            | sim_core::DeviceKind::BehavioralSampleHold
+            | sim_core::DeviceKind::BehavioralSarAdc
+            | sim_core::DeviceKind::BehavioralDeltaSigmaAdc
+            | sim_core::DeviceKind::BehavioralPwmDac
     )
 }
 

@@ -21,8 +21,8 @@ ngspice belum dijalankan untuk seluruh keluarga.
 
 - 500 entry katalog.
 - 60 model class.
-- 367 entry solver-backed.
-- 133 entry behavioral atau unsupported.
+- 371 entry solver-backed.
+- 129 entry behavioral atau unsupported.
 - Setiap entry solver-backed memiliki `SimulationBinding` yang
   memvalidasi jumlah pin, role unik, dan parameter utama.
 - Setiap entry solver-backed memiliki label fidelity dari
@@ -47,8 +47,8 @@ Kelas `Timer` sudah sebagian: 4 timer/oscillator solver-backed dan
 PLL masih unsupported.
 Kelas `BehavioralSource` sudah sebagian: 7 source solver-backed dan 4
 entry behavioral/polynomial/table masih unsupported.
-Kelas `BehavioralBlock` sudah sebagian: 19 filter, math, detector,
-dan oscillator solver-backed; 6 entry lain masih unsupported.
+Kelas `BehavioralBlock` sudah sebagian: 23 filter, math, detector,
+oscillator, dan converter solver-backed; 2 entry lain masih unsupported.
 
 ## 3. Benchmark AVR
 

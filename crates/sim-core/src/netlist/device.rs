@@ -235,6 +235,14 @@ pub enum DeviceKind {
     BehavioralFrequency,
     /// A behavioral PWM block.
     BehavioralPwm,
+    /// A behavioral sample-and-hold block.
+    BehavioralSampleHold,
+    /// A behavioral SAR ADC block.
+    BehavioralSarAdc,
+    /// A behavioral delta-sigma ADC block.
+    BehavioralDeltaSigmaAdc,
+    /// A behavioral PWM DAC block.
+    BehavioralPwmDac,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -387,6 +395,10 @@ impl DeviceKind {
             Self::BehavioralAmplitude => "behavioral_amplitude",
             Self::BehavioralFrequency => "behavioral_frequency",
             Self::BehavioralPwm => "behavioral_pwm",
+            Self::BehavioralSampleHold => "behavioral_sample_hold",
+            Self::BehavioralSarAdc => "behavioral_sar_adc",
+            Self::BehavioralDeltaSigmaAdc => "behavioral_delta_sigma_adc",
+            Self::BehavioralPwmDac => "behavioral_pwm_dac",
             Self::Diode => "diode",
             _ => "custom",
         }
