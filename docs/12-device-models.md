@@ -3,7 +3,7 @@
 Katalog device yang tersedia di `sim-device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 186.
+dan transmission line sudah diimplementasikan. Total test `sim-device`: 190.
 
 ---
 
@@ -150,6 +150,7 @@ pub fn model_from_instance(
 | PWL voltage source | 2 | Empat titik interpolasi | [80](80-waveform-sources.md) |
 | Noise source | 2 | PRNG deterministik | [80](80-waveform-sources.md) |
 | Behavioral filter | 4 | Integrator, differentiator, low/high-pass, state-variable | [81](81-behavioral-filters.md) |
+| Behavioral math | 4 | Multiplier, divider, log, antilog, RMS | [82](82-behavioral-math.md) |
 | VCVS | 4 | Linear gain | [47](47-controlled-sources.md) |
 | VCCS | 4 | Linear transconductance | [47](47-controlled-sources.md) |
 | CCCS | 4 | Linear current gain | [48](48-cccs-switch.md) |
@@ -417,8 +418,9 @@ Test device mencakup:
 - Timer 555, astable, monostable, dan VCO.
 - Pulse current, exponential, PWL, dan noise source.
 - Behavioral filter 4 pin.
+- Behavioral math 4 pin.
 
-Total test `sim-device`: 181 unit + 5 integration = 186.
+Total test `sim-device`: 185 unit + 5 integration = 190.
 
 ---
 

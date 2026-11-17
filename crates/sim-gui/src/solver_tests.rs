@@ -1689,3 +1689,44 @@ fn behavioral_integrator_transient_accumulates() {
     assert!(late > early, "early={early}, late={late}");
     assert!(late > 0.5, "late={late}");
 }
+
+#[test]
+fn behavioral_math_blocks_compute_expected_values() {
+    let product = math_output(DeviceKind::BehavioralMultiplier, 2.0, 3.0);
+    let quotient = math_output(DeviceKind::BehavioralDivider, 4.0, 2.0);
+    let log = math_output(DeviceKind::BehavioralLog, 2.0_f64.exp(), 0.0);
+    let antilog = math_output(DeviceKind::BehavioralAntilog, 2.0_f64.ln(), 0.0);
+    assert!((product - 6.0).abs() < 0.02, "product={product}");
+    assert!((quotient - 2.0).abs() < 0.02, "quotient={quotient}");
+    assert!((log - 2.0).abs() < 0.02, "log={log}");
+    assert!((antilog - 2.0).abs() < 0.02, "antilog={antilog}");
+}
+
+fn math_output(kind: DeviceKind, first: f64, second: f64) -> f64 {
+    let mut builder = CircuitBuilder::new();
+    let input1 = builder.node("in1").expect("node");
+    let input2 = builder.node("in2").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", input1, ground, first);
+    add_input(&mut builder, "V2", input2, ground, second);
+    builder
+        .device(
+            "U1",
+            kind,
+            vec![input1, input2, output, ground],
+            params(&[]),
+        )
+        .expect("U1");
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![output, ground],
+            params(&[("resistance", 1e6)]),
+        )
+        .expect("R1");
+    let circuit = builder.build().expect("circuit");
+    let result = solve(&circuit);
+    result.solution.voltage(output).expect("output")
+}

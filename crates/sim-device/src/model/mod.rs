@@ -13,6 +13,7 @@ use crate::filter::{BehavioralFilterModel, FilterKind};
 use crate::igbt::IgbtModel;
 use crate::jfet::JfetModel;
 use crate::logic::LogicGateModel;
+use crate::math::{BehavioralMathModel, MathKind};
 use crate::mosfet::MosfetModel;
 use crate::opamp::OpAmpModel;
 use crate::optocoupler::OptocouplerModel;
@@ -139,6 +140,25 @@ fn passive_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel
             instance,
             FilterKind::StateVariable,
         )?),
+        DeviceKind::BehavioralMultiplier => Box::new(BehavioralMathModel::from_instance(
+            instance,
+            MathKind::Multiplier,
+        )?),
+        DeviceKind::BehavioralDivider => Box::new(BehavioralMathModel::from_instance(
+            instance,
+            MathKind::Divider,
+        )?),
+        DeviceKind::BehavioralLog => Box::new(BehavioralMathModel::from_instance(
+            instance,
+            MathKind::Logarithmic,
+        )?),
+        DeviceKind::BehavioralAntilog => Box::new(BehavioralMathModel::from_instance(
+            instance,
+            MathKind::Antilog,
+        )?),
+        DeviceKind::BehavioralRms => {
+            Box::new(BehavioralMathModel::from_instance(instance, MathKind::Rms)?)
+        }
         DeviceKind::CurrentSource => Box::new(CurrentSourceModel::from_instance(instance)?),
         DeviceKind::Vcvs => Box::new(VcvsModel::from_instance(instance)?),
         DeviceKind::Vccs => Box::new(VccsModel::from_instance(instance)?),

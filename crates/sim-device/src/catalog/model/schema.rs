@@ -531,6 +531,26 @@ const BEHAVIORAL_STATE_VARIABLE: &[ParameterSpec] = &[
     ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
 ];
 
+const BEHAVIORAL_MATH: &[ParameterSpec] = &[
+    ParameterSpec::number("gain", "ratio", 1.0, -1e9, 1e9),
+    ParameterSpec::number("output_limit", "V", 15.0, 1e-9, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const BEHAVIORAL_LOG: &[ParameterSpec] = &[
+    ParameterSpec::number("gain", "ratio", 1.0, -1e9, 1e9),
+    ParameterSpec::number("reference", "V", 1.0, 1e-12, 1e6),
+    ParameterSpec::number("output_limit", "V", 15.0, 1e-9, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const BEHAVIORAL_RMS: &[ParameterSpec] = &[
+    ParameterSpec::number("gain", "ratio", 1.0, -1e9, 1e9),
+    ParameterSpec::number("time_constant", "s", 1e-3, 1e-12, 1e9),
+    ParameterSpec::number("output_limit", "V", 15.0, 1e-9, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -823,6 +843,11 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         | DeviceKind::BehavioralLowPass
         | DeviceKind::BehavioralHighPass => BEHAVIORAL_FILTER,
         DeviceKind::BehavioralStateVariable => BEHAVIORAL_STATE_VARIABLE,
+        DeviceKind::BehavioralMultiplier
+        | DeviceKind::BehavioralDivider
+        | DeviceKind::BehavioralAntilog => BEHAVIORAL_MATH,
+        DeviceKind::BehavioralLog => BEHAVIORAL_LOG,
+        DeviceKind::BehavioralRms => BEHAVIORAL_RMS,
         _ => &[],
     }
 }
@@ -942,6 +967,11 @@ mod tests {
         DeviceKind::BehavioralLowPass,
         DeviceKind::BehavioralHighPass,
         DeviceKind::BehavioralStateVariable,
+        DeviceKind::BehavioralMultiplier,
+        DeviceKind::BehavioralDivider,
+        DeviceKind::BehavioralLog,
+        DeviceKind::BehavioralAntilog,
+        DeviceKind::BehavioralRms,
     ];
 
     #[test]

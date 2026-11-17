@@ -148,6 +148,12 @@ const BEHAVIORAL_FILTER: &[PinRole] = &[
     PinRole::Ground,
     PinRole::Common,
 ];
+const BEHAVIORAL_MATH: &[PinRole] = &[
+    PinRole::Input1,
+    PinRole::Input2,
+    PinRole::Output,
+    PinRole::Ground,
+];
 const BEHAVIORAL_STATE_VARIABLE: &[PinRole] = &[
     PinRole::Input,
     PinRole::Output,
@@ -341,6 +347,11 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         | DeviceKind::BehavioralLowPass
         | DeviceKind::BehavioralHighPass => BEHAVIORAL_FILTER,
         DeviceKind::BehavioralStateVariable => BEHAVIORAL_STATE_VARIABLE,
+        DeviceKind::BehavioralMultiplier
+        | DeviceKind::BehavioralDivider
+        | DeviceKind::BehavioralLog
+        | DeviceKind::BehavioralAntilog
+        | DeviceKind::BehavioralRms => BEHAVIORAL_MATH,
         DeviceKind::Timer555
         | DeviceKind::MonostableTimer
         | DeviceKind::AstableTimer

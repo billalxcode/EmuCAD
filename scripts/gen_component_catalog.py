@@ -635,8 +635,19 @@ add("behavioral.filter", "BehavioralBlock", "BehavioralHighPass", 4, "gain", 1.0
 add("behavioral.filter", "BehavioralBlock", "BehavioralStateVariable", 4, "gain", 1.0, "ratio", [
     "state variable filter",
 ])
-add("behavioral.math", "BehavioralBlock", None, 4, "gain", 1.0, "ratio", [
-    "multiplier", "divider", "logarithmic amplifier", "antilog amplifier",
+add("behavioral.math", "BehavioralBlock", "BehavioralMultiplier", 4, "gain", 1.0, "ratio", [
+    "multiplier",
+])
+add("behavioral.math", "BehavioralBlock", "BehavioralDivider", 4, "gain", 1.0, "ratio", [
+    "divider",
+])
+add("behavioral.math", "BehavioralBlock", "BehavioralLog", 4, "gain", 1.0, "ratio", [
+    "logarithmic amplifier",
+])
+add("behavioral.math", "BehavioralBlock", "BehavioralAntilog", 4, "gain", 1.0, "ratio", [
+    "antilog amplifier",
+])
+add("behavioral.math", "BehavioralBlock", "BehavioralRms", 4, "gain", 1.0, "ratio", [
     "RMS converter",
 ])
 add("behavioral.detector", "BehavioralBlock", None, 4, "gain", 1.0, "ratio", [

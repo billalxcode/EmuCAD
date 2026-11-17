@@ -194,6 +194,11 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::BehavioralLowPass
             | DeviceKind::BehavioralHighPass
             | DeviceKind::BehavioralStateVariable
+            | DeviceKind::BehavioralMultiplier
+            | DeviceKind::BehavioralDivider
+            | DeviceKind::BehavioralLog
+            | DeviceKind::BehavioralAntilog
+            | DeviceKind::BehavioralRms
     )
 }
 

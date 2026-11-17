@@ -68,7 +68,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 59 | [Golden RGBA GUI](59-gui-golden.md) | Status dan prosedur update golden image |
 | 60 | [Katalog komponen](60-component-catalog.md) | Target 500 model, taksonomi, akurasi, dan schema |
 | 61 | [Design system](61-design-system.md) | Token font, warna, spacing, dan aturan tampilan |
-| 62 | [Klasifikasi behavioral](62-behavioral-classification.md) | Kategori dan prioritas 147 entry behavioral |
+| 62 | [Klasifikasi behavioral](62-behavioral-classification.md) | Kategori dan prioritas 142 entry behavioral |
 | 63 | [Fidelity dan benchmark](63-fidelity.md) | Label fidelity, audit 60 kelas, dan hasil benchmark |
 | 64 | [Gate-level scope](64-gate-level.md) | Definisi, status, benchmark, dan gap S6/S7 |
 | 65 | [Sensor suhu](65-temperature-sensors.md) | Model NTC, PTC, RTD, thermocouple, semikonduktor, switch |
@@ -88,6 +88,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 79 | [Timer dan oscillator](79-timers.md) | Model 555, monostable, astable, dan VCO |
 | 80 | [Waveform dan noise source](80-waveform-sources.md) | Model pulse current, exponential, PWL, dan noise |
 | 81 | [Behavioral filter](81-behavioral-filters.md) | Model integrator, differentiator, low/high-pass, dan state-variable |
+| 82 | [Behavioral math](82-behavioral-math.md) | Model multiplier, divider, log, antilog, dan RMS |
 
 ### 3.2 Fondasi
 

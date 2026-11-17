@@ -207,6 +207,16 @@ pub enum DeviceKind {
     BehavioralHighPass,
     /// A behavioral state-variable filter block.
     BehavioralStateVariable,
+    /// A behavioral multiplier block.
+    BehavioralMultiplier,
+    /// A behavioral divider block.
+    BehavioralDivider,
+    /// A behavioral logarithmic amplifier block.
+    BehavioralLog,
+    /// A behavioral antilog amplifier block.
+    BehavioralAntilog,
+    /// A behavioral RMS converter block.
+    BehavioralRms,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -345,6 +355,11 @@ impl DeviceKind {
             Self::BehavioralLowPass => "behavioral_low_pass",
             Self::BehavioralHighPass => "behavioral_high_pass",
             Self::BehavioralStateVariable => "behavioral_state_variable",
+            Self::BehavioralMultiplier => "behavioral_multiplier",
+            Self::BehavioralDivider => "behavioral_divider",
+            Self::BehavioralLog => "behavioral_log",
+            Self::BehavioralAntilog => "behavioral_antilog",
+            Self::BehavioralRms => "behavioral_rms",
             Self::Diode => "diode",
             _ => "custom",
         }
