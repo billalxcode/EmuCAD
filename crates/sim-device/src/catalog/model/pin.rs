@@ -328,7 +328,13 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         | DeviceKind::MonostableTimer
         | DeviceKind::AstableTimer
         | DeviceKind::VcoTimer => TIMER8,
-        DeviceKind::SineVoltageSource | DeviceKind::SineCurrentSource => SOURCE,
+        DeviceKind::SineVoltageSource
+        | DeviceKind::SineCurrentSource
+        | DeviceKind::PulseCurrentSource
+        | DeviceKind::ExponentialVoltageSource
+        | DeviceKind::PwlVoltageSource
+        | DeviceKind::NoiseVoltageSource
+        | DeviceKind::NoiseCurrentSource => SOURCE,
         DeviceKind::DiodeBridge => DIODE_BRIDGE,
         DeviceKind::DualDiode => DUAL_DIODE,
         DeviceKind::Switch => SWITCH,

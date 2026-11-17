@@ -3,7 +3,7 @@
 Katalog device yang tersedia di `sim-device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 180.
+dan transmission line sudah diimplementasikan. Total test `sim-device`: 183.
 
 ---
 
@@ -145,6 +145,10 @@ pub fn model_from_instance(
 | Timer 555 dan astable | 8 | Square wave period dan duty | [79](79-timers.md) |
 | Monostable timer | 8 | Trigger edge dan pulse width | [79](79-timers.md) |
 | VCO timer | 8 | Frequency dari control voltage | [79](79-timers.md) |
+| Pulse current source | 2 | Pulse current | [80](80-waveform-sources.md) |
+| Exponential voltage source | 2 | Dua segmen eksponensial | [80](80-waveform-sources.md) |
+| PWL voltage source | 2 | Empat titik interpolasi | [80](80-waveform-sources.md) |
+| Noise source | 2 | PRNG deterministik | [80](80-waveform-sources.md) |
 | VCVS | 4 | Linear gain | [47](47-controlled-sources.md) |
 | VCCS | 4 | Linear transconductance | [47](47-controlled-sources.md) |
 | CCCS | 4 | Linear current gain | [48](48-cccs-switch.md) |
@@ -410,8 +414,9 @@ Test device mencakup:
 - Motor driver empat pin dengan switch satu kanal.
 - Sine voltage dan current source.
 - Timer 555, astable, monostable, dan VCO.
+- Pulse current, exponential, PWL, dan noise source.
 
-Total test `sim-device`: 175 unit + 5 integration = 180.
+Total test `sim-device`: 178 unit + 5 integration = 183.
 
 ---
 

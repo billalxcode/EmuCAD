@@ -142,6 +142,11 @@ fn supported_actuator(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::MonostableTimer
             | sim_core::DeviceKind::AstableTimer
             | sim_core::DeviceKind::VcoTimer
+            | sim_core::DeviceKind::PulseCurrentSource
+            | sim_core::DeviceKind::ExponentialVoltageSource
+            | sim_core::DeviceKind::PwlVoltageSource
+            | sim_core::DeviceKind::NoiseVoltageSource
+            | sim_core::DeviceKind::NoiseCurrentSource
     )
 }
 
@@ -292,7 +297,7 @@ fn waveform_sources_map_to_waveform_devices_only() {
         "source.pulse.pulse_current_source",
     ] {
         let entry = registry.find(id).unwrap_or_else(|| panic!("missing {id}"));
-        assert!(entry.device.is_none(), "{id}");
+        assert!(entry.device.is_some(), "{id}");
     }
 }
 

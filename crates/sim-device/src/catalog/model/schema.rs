@@ -476,6 +476,46 @@ const VCO_TIMER: &[ParameterSpec] = &[
     ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
 ];
 
+const PULSE_CURRENT_SOURCE: &[ParameterSpec] = &[
+    ParameterSpec::number("v1", "A", 0.0, -1e6, 1e6),
+    ParameterSpec::number("v2", "A", 1e-3, -1e6, 1e6),
+    ParameterSpec::number("delay", "s", 0.0, 0.0, 1e9),
+    ParameterSpec::number("rise", "s", 1e-9, 0.0, 1e9),
+    ParameterSpec::number("fall", "s", 1e-9, 0.0, 1e9),
+    ParameterSpec::number("width", "s", 1e-6, 0.0, 1e9),
+    ParameterSpec::number("period", "s", 2e-6, 1e-12, 1e9),
+];
+
+const EXPONENTIAL_VOLTAGE_SOURCE: &[ParameterSpec] = &[
+    ParameterSpec::number("v1", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("v2", "V", 5.0, -1e6, 1e6),
+    ParameterSpec::number("td1", "s", 0.0, 0.0, 1e9),
+    ParameterSpec::number("tau1", "s", 1e-3, 1e-12, 1e9),
+    ParameterSpec::number("td2", "s", 1e-3, 0.0, 1e9),
+    ParameterSpec::number("tau2", "s", 1e-3, 1e-12, 1e9),
+];
+
+const PWL_VOLTAGE_SOURCE: &[ParameterSpec] = &[
+    ParameterSpec::number("t0", "s", 0.0, -1e9, 1e9),
+    ParameterSpec::number("v0", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("t1", "s", 1e-3, -1e9, 1e9),
+    ParameterSpec::number("v1", "V", 5.0, -1e6, 1e6),
+    ParameterSpec::number("t2", "s", 2e-3, -1e9, 1e9),
+    ParameterSpec::number("v2", "V", 5.0, -1e6, 1e6),
+    ParameterSpec::number("t3", "s", 3e-3, -1e9, 1e9),
+    ParameterSpec::number("v3", "V", 0.0, -1e6, 1e6),
+];
+
+const NOISE_VOLTAGE_SOURCE: &[ParameterSpec] = &[
+    ParameterSpec::number("amplitude", "V", 1e-3, 0.0, 1e6),
+    ParameterSpec::number("seed", "ratio", 1.0, 0.0, 1e15),
+];
+
+const NOISE_CURRENT_SOURCE: &[ParameterSpec] = &[
+    ParameterSpec::number("amplitude", "A", 1e-6, 0.0, 1e6),
+    ParameterSpec::number("seed", "ratio", 1.0, 0.0, 1e15),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -758,6 +798,11 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::MonostableTimer => MONOSTABLE_TIMER,
         DeviceKind::AstableTimer => ASTABLE_TIMER,
         DeviceKind::VcoTimer => VCO_TIMER,
+        DeviceKind::PulseCurrentSource => PULSE_CURRENT_SOURCE,
+        DeviceKind::ExponentialVoltageSource => EXPONENTIAL_VOLTAGE_SOURCE,
+        DeviceKind::PwlVoltageSource => PWL_VOLTAGE_SOURCE,
+        DeviceKind::NoiseVoltageSource => NOISE_VOLTAGE_SOURCE,
+        DeviceKind::NoiseCurrentSource => NOISE_CURRENT_SOURCE,
         _ => &[],
     }
 }
@@ -867,6 +912,11 @@ mod tests {
         DeviceKind::MonostableTimer,
         DeviceKind::AstableTimer,
         DeviceKind::VcoTimer,
+        DeviceKind::PulseCurrentSource,
+        DeviceKind::ExponentialVoltageSource,
+        DeviceKind::PwlVoltageSource,
+        DeviceKind::NoiseVoltageSource,
+        DeviceKind::NoiseCurrentSource,
     ];
 
     #[test]

@@ -26,7 +26,10 @@ use crate::sensors::{
     PtcModel, RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel,
     TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel, ThresholdSwitchModel,
 };
-use crate::source::{CurrentSourceModel, PulseSourceModel, SineSourceModel, VoltageSourceModel};
+use crate::source::{
+    CurrentSourceModel, ExponentialSourceModel, NoiseSourceModel, PulseSourceModel, PwlSourceModel,
+    SineSourceModel, VoltageSourceModel,
+};
 use crate::supervisor::{CurrentReferenceModel, SupervisorModel, VoltageReferenceModel};
 use crate::switch::{IdealSwitchModel, SwitchModel};
 use crate::thyristor::ThyristorModel;
@@ -107,7 +110,14 @@ fn passive_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel
         DeviceKind::Capacitor => Box::new(CapacitorModel::from_instance(instance)?),
         DeviceKind::Inductor => Box::new(InductorModel::from_instance(instance)?),
         DeviceKind::VoltageSource => Box::new(VoltageSourceModel::from_instance(instance)?),
-        DeviceKind::PulseVoltageSource => Box::new(PulseSourceModel::from_instance(instance)?),
+        DeviceKind::PulseVoltageSource => Box::new(PulseSourceModel::voltage(instance)?),
+        DeviceKind::PulseCurrentSource => Box::new(PulseSourceModel::current(instance)?),
+        DeviceKind::ExponentialVoltageSource => {
+            Box::new(ExponentialSourceModel::from_instance(instance)?)
+        }
+        DeviceKind::PwlVoltageSource => Box::new(PwlSourceModel::from_instance(instance)?),
+        DeviceKind::NoiseVoltageSource => Box::new(NoiseSourceModel::voltage(instance)?),
+        DeviceKind::NoiseCurrentSource => Box::new(NoiseSourceModel::current(instance)?),
         DeviceKind::CurrentSource => Box::new(CurrentSourceModel::from_instance(instance)?),
         DeviceKind::Vcvs => Box::new(VcvsModel::from_instance(instance)?),
         DeviceKind::Vccs => Box::new(VccsModel::from_instance(instance)?),

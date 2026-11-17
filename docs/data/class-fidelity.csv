@@ -5,7 +5,7 @@ Adder,8,0,unsupported,logic
 AnalogSwitch,5,5,compact,switch
 Battery,2,2,compact,source
 BehavioralBlock,25,0,unsupported,behavioral
-BehavioralSource,11,2,behavioral,source
+BehavioralSource,11,7,behavioral,source
 Bjt,20,20,compact,transistor
 BoardModule,14,0,unsupported,board
 Capacitor,13,13,ideal,passive

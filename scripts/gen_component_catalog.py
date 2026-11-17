@@ -114,19 +114,19 @@ add("source.independent", "BehavioralSource", "SineCurrentSource", 2, "amplitude
 add("source.pulse", "VoltageSource", "PulseVoltageSource", 2, "v2", 5.0, "V", [
     "pulse voltage source",
 ])
-add("source.pulse", "BehavioralSource", None, 2, "voltage", 5.0, "V", [
+add("source.pulse", "BehavioralSource", "PwlVoltageSource", 2, "v1", 5.0, "V", [
     "PWL voltage source",
 ])
-add("source.pulse", "BehavioralSource", None, 2, "voltage", 5.0, "V", [
+add("source.pulse", "BehavioralSource", "ExponentialVoltageSource", 2, "v2", 5.0, "V", [
     "exponential voltage source",
 ])
-add("source.pulse", "BehavioralSource", None, 2, "voltage", 5.0, "V", [
+add("source.pulse", "BehavioralSource", "NoiseVoltageSource", 2, "amplitude", 1e-3, "V", [
     "voltage noise source",
 ])
-add("source.pulse", "BehavioralSource", None, 2, "current", 1e-3, "A", [
+add("source.pulse", "BehavioralSource", "NoiseCurrentSource", 2, "amplitude", 1e-6, "A", [
     "current noise source",
 ])
-add("source.pulse", "BehavioralSource", None, 2, "current", 1e-3, "A", [
+add("source.pulse", "BehavioralSource", "PulseCurrentSource", 2, "v2", 1e-3, "A", [
     "pulse current source",
 ])
 add("source.controlled", "Vcvs", "Vcvs", 4, "gain", 1.0, "ratio", [

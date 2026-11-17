@@ -47,9 +47,16 @@ impl DeviceModel for VoltageSourceModel {
     }
 }
 
-/// An independent pulse voltage source.
+#[derive(Clone, Copy)]
+enum PulseMode {
+    Voltage,
+    Current,
+}
+
+/// An independent pulse voltage or current source.
 pub struct PulseSourceModel {
     id: DeviceId,
+    mode: PulseMode,
     initial: f64,
     pulsed: f64,
     timing: PulseTiming,
@@ -69,17 +76,27 @@ struct PulseTiming {
 }
 
 impl PulseSourceModel {
-    pub(crate) fn from_instance(instance: &DeviceInstance) -> Result<Self, SimError> {
+    pub(crate) fn voltage(instance: &DeviceInstance) -> Result<Self, SimError> {
+        Self::from_instance(instance, PulseMode::Voltage)
+    }
+
+    pub(crate) fn current(instance: &DeviceInstance) -> Result<Self, SimError> {
+        Self::from_instance(instance, PulseMode::Current)
+    }
+
+    fn from_instance(instance: &DeviceInstance, mode: PulseMode) -> Result<Self, SimError> {
         let pins = pins_exact(instance, 2)?;
         let params = instance.parameters();
-        let initial = parameter(params, "v1", 0.0);
-        let pulsed = parameter(params, "v2", 5.0);
-        let timing = pulse_timing(params)?;
+        let default_pulsed = match mode {
+            PulseMode::Voltage => 5.0,
+            PulseMode::Current => 1e-3,
+        };
         Ok(Self {
             id: instance.id(),
-            initial,
-            pulsed,
-            timing,
+            mode,
+            initial: parameter(params, "v1", 0.0),
+            pulsed: parameter(params, "v2", default_pulsed),
+            timing: pulse_timing(params)?,
             time: 0.0,
             step: None,
             branch: None,
@@ -130,9 +147,14 @@ impl DeviceModel for PulseSourceModel {
                 self.time = dt;
             }
         }
-        let voltage = self.value_at(self.time);
-        self.branch = Some(branch_index(ctx, self.id)?);
-        stamp_voltage_branch(ctx, self.id, self.pins[0], self.pins[1], voltage)
+        let value = self.value_at(self.time);
+        match self.mode {
+            PulseMode::Voltage => {
+                self.branch = Some(branch_index(ctx, self.id)?);
+                stamp_voltage_branch(ctx, self.id, self.pins[0], self.pins[1], value)
+            }
+            PulseMode::Current => stamp_current_source(ctx, self.pins[0], self.pins[1], value),
+        }
     }
 
     fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
@@ -143,7 +165,10 @@ impl DeviceModel for PulseSourceModel {
     }
 
     fn terminal_current(&self, solution: &Solution) -> Option<f64> {
-        solution.branch_current(self.branch?)
+        match self.mode {
+            PulseMode::Voltage => solution.branch_current(self.branch?),
+            PulseMode::Current => Some(self.value_at(self.time)),
+        }
     }
 }
 
@@ -241,6 +266,287 @@ impl DeviceModel for SineSourceModel {
     }
 }
 
+/// An exponential voltage source with two timed exponentials.
+pub struct ExponentialSourceModel {
+    id: DeviceId,
+    initial: f64,
+    pulsed: f64,
+    delay1: f64,
+    tau1: f64,
+    delay2: f64,
+    tau2: f64,
+    time: f64,
+    step: Option<f64>,
+    branch: Option<usize>,
+    pins: [NodeId; 2],
+}
+
+impl ExponentialSourceModel {
+    pub(crate) fn from_instance(instance: &DeviceInstance) -> Result<Self, SimError> {
+        let pins = pins_exact(instance, 2)?;
+        let params = instance.parameters();
+        let delay1 = non_negative_parameter(params, "td1", 0.0)?;
+        let delay2 = non_negative_parameter(params, "td2", 1e-3)?;
+        if delay2 < delay1 {
+            return Err(SimError::InvalidNetlist(
+                "exponential source td2 must not precede td1".to_string(),
+            ));
+        }
+        Ok(Self {
+            id: instance.id(),
+            initial: finite_parameter(params, "v1", 0.0)?,
+            pulsed: finite_parameter(params, "v2", 5.0)?,
+            delay1,
+            tau1: positive_parameter(params, "tau1", Some(1e-3))?,
+            delay2,
+            tau2: positive_parameter(params, "tau2", Some(1e-3))?,
+            time: 0.0,
+            step: None,
+            branch: None,
+            pins: [pins[0], pins[1]],
+        })
+    }
+
+    fn value_at(&self, time: f64) -> f64 {
+        if time < self.delay1 {
+            return self.initial;
+        }
+        if time < self.delay2 {
+            let ratio = 1.0 - (-(time - self.delay1) / self.tau1).exp();
+            return self.initial + (self.pulsed - self.initial) * ratio;
+        }
+        let ratio1 = 1.0 - (-(self.delay2 - self.delay1) / self.tau1).exp();
+        let peak = self.initial + (self.pulsed - self.initial) * ratio1;
+        let ratio2 = 1.0 - (-(time - self.delay2) / self.tau2).exp();
+        peak + (self.initial - self.pulsed) * ratio2
+    }
+}
+
+impl DeviceModel for ExponentialSourceModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        _solution: &Solution,
+        dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        if let Some(dt) = dt {
+            if self.step.is_none() {
+                self.step = Some(dt);
+                self.time = dt;
+            }
+        }
+        self.branch = Some(branch_index(ctx, self.id)?);
+        let value = self.value_at(self.time);
+        stamp_voltage_branch(ctx, self.id, self.pins[0], self.pins[1], value)
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        if let Some(dt) = self.step {
+            self.time += dt;
+        }
+        Ok(())
+    }
+
+    fn terminal_current(&self, solution: &Solution) -> Option<f64> {
+        solution.branch_current(self.branch?)
+    }
+}
+
+#[derive(Clone, Copy)]
+struct PwlPoint {
+    time: f64,
+    value: f64,
+}
+
+/// A piecewise-linear voltage source with up to four points.
+pub struct PwlSourceModel {
+    id: DeviceId,
+    points: [PwlPoint; 4],
+    time: f64,
+    step: Option<f64>,
+    branch: Option<usize>,
+    pins: [NodeId; 2],
+}
+
+impl PwlSourceModel {
+    pub(crate) fn from_instance(instance: &DeviceInstance) -> Result<Self, SimError> {
+        let pins = pins_exact(instance, 2)?;
+        let params = instance.parameters();
+        let points = [
+            PwlPoint {
+                time: finite_parameter(params, "t0", 0.0)?,
+                value: finite_parameter(params, "v0", 0.0)?,
+            },
+            PwlPoint {
+                time: finite_parameter(params, "t1", 1e-3)?,
+                value: finite_parameter(params, "v1", 5.0)?,
+            },
+            PwlPoint {
+                time: finite_parameter(params, "t2", 2e-3)?,
+                value: finite_parameter(params, "v2", 5.0)?,
+            },
+            PwlPoint {
+                time: finite_parameter(params, "t3", 3e-3)?,
+                value: finite_parameter(params, "v3", 0.0)?,
+            },
+        ];
+        if points.windows(2).any(|pair| pair[1].time < pair[0].time) {
+            return Err(SimError::InvalidNetlist(
+                "PWL source times must be non-decreasing".to_string(),
+            ));
+        }
+        Ok(Self {
+            id: instance.id(),
+            points,
+            time: 0.0,
+            step: None,
+            branch: None,
+            pins: [pins[0], pins[1]],
+        })
+    }
+
+    fn value_at(&self, time: f64) -> f64 {
+        if time <= self.points[0].time {
+            return self.points[0].value;
+        }
+        for index in 1..self.points.len() {
+            let point = self.points[index];
+            if time > point.time {
+                continue;
+            }
+            let previous = self.points[index - 1];
+            let span = point.time - previous.time;
+            if span <= 0.0 {
+                return point.value;
+            }
+            let ratio = (time - previous.time) / span;
+            return previous.value + (point.value - previous.value) * ratio;
+        }
+        self.points[self.points.len() - 1].value
+    }
+}
+
+impl DeviceModel for PwlSourceModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        _solution: &Solution,
+        dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        if let Some(dt) = dt {
+            if self.step.is_none() {
+                self.step = Some(dt);
+                self.time = dt;
+            }
+        }
+        self.branch = Some(branch_index(ctx, self.id)?);
+        let value = self.value_at(self.time);
+        stamp_voltage_branch(ctx, self.id, self.pins[0], self.pins[1], value)
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        if let Some(dt) = self.step {
+            self.time += dt;
+        }
+        Ok(())
+    }
+
+    fn terminal_current(&self, solution: &Solution) -> Option<f64> {
+        solution.branch_current(self.branch?)
+    }
+}
+
+#[derive(Clone, Copy)]
+enum NoiseMode {
+    Voltage,
+    Current,
+}
+
+/// A deterministic pseudo-random voltage or current source.
+pub struct NoiseSourceModel {
+    id: DeviceId,
+    mode: NoiseMode,
+    amplitude: f64,
+    state: u64,
+    value: f64,
+    stepped: bool,
+    branch: Option<usize>,
+    pins: [NodeId; 2],
+}
+
+impl NoiseSourceModel {
+    pub(crate) fn voltage(instance: &DeviceInstance) -> Result<Self, SimError> {
+        Self::from_instance(instance, NoiseMode::Voltage)
+    }
+
+    pub(crate) fn current(instance: &DeviceInstance) -> Result<Self, SimError> {
+        Self::from_instance(instance, NoiseMode::Current)
+    }
+
+    fn from_instance(instance: &DeviceInstance, mode: NoiseMode) -> Result<Self, SimError> {
+        let pins = pins_exact(instance, 2)?;
+        let params = instance.parameters();
+        let default_amplitude = match mode {
+            NoiseMode::Voltage => 1e-3,
+            NoiseMode::Current => 1e-6,
+        };
+        let seed = finite_parameter(params, "seed", 1.0)? as u64 | 1;
+        Ok(Self {
+            id: instance.id(),
+            mode,
+            amplitude: non_negative_parameter(params, "amplitude", default_amplitude)?,
+            state: seed,
+            value: 0.0,
+            stepped: false,
+            branch: None,
+            pins: [pins[0], pins[1]],
+        })
+    }
+
+    fn generate(&mut self) -> f64 {
+        self.state ^= self.state << 13;
+        self.state ^= self.state >> 7;
+        self.state ^= self.state << 17;
+        let unit = (self.state >> 11) as f64 / (1u64 << 53) as f64;
+        self.amplitude * (2.0 * unit - 1.0)
+    }
+}
+
+impl DeviceModel for NoiseSourceModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        _solution: &Solution,
+        dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        if dt.is_some() && !self.stepped {
+            self.stepped = true;
+            self.value = self.generate();
+        }
+        match self.mode {
+            NoiseMode::Voltage => {
+                self.branch = Some(branch_index(ctx, self.id)?);
+                stamp_voltage_branch(ctx, self.id, self.pins[0], self.pins[1], self.value)
+            }
+            NoiseMode::Current => stamp_current_source(ctx, self.pins[0], self.pins[1], self.value),
+        }
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        if self.stepped {
+            self.value = self.generate();
+        }
+        Ok(())
+    }
+
+    fn terminal_current(&self, solution: &Solution) -> Option<f64> {
+        match self.mode {
+            NoiseMode::Voltage => solution.branch_current(self.branch?),
+            NoiseMode::Current => Some(self.value),
+        }
+    }
+}
+
 /// An independent current source.
 pub struct CurrentSourceModel {
     current: f64,
@@ -279,13 +585,32 @@ impl DeviceModel for CurrentSourceModel {
 
 #[cfg(test)]
 mod tests {
-    use super::{PulseSourceModel, PulseTiming, SineMode, SineSourceModel};
+    use super::{
+        ExponentialSourceModel, NoiseMode, NoiseSourceModel, PulseMode, PulseSourceModel,
+        PulseTiming, PwlSourceModel, SineMode, SineSourceModel,
+    };
     use crate::model::DeviceModel;
-    use sim_core::{DeviceId, NodeId, Solution};
+    use sim_core::{DeviceId, DeviceInstance, DeviceKind, NodeId, Solution};
+    use std::collections::BTreeMap;
+
+    fn source_instance(kind: DeviceKind, params: &[(&str, f64)]) -> DeviceInstance {
+        let parameters: BTreeMap<_, _> = params
+            .iter()
+            .map(|(name, value)| ((*name).to_string(), *value))
+            .collect();
+        DeviceInstance::new(
+            DeviceId::new(0),
+            "V1".to_string(),
+            kind,
+            vec![NodeId::new(1), NodeId::GROUND],
+            parameters,
+        )
+    }
 
     fn pulse() -> PulseSourceModel {
         PulseSourceModel {
             id: DeviceId::new(0),
+            mode: PulseMode::Voltage,
             initial: 0.0,
             pulsed: 5.0,
             timing: PulseTiming {
@@ -354,5 +679,50 @@ mod tests {
         model.step = Some(1e-6);
         model.update(&Solution::zero(2, 0)).expect("update");
         assert!((model.time - 1e-6).abs() < 1e-12);
+    }
+
+    #[test]
+    fn exponential_source_rises_and_falls() {
+        let model = ExponentialSourceModel::from_instance(&source_instance(
+            DeviceKind::ExponentialVoltageSource,
+            &[
+                ("v1", 0.0),
+                ("v2", 5.0),
+                ("td1", 0.0),
+                ("tau1", 1e-3),
+                ("td2", 1e-3),
+                ("tau2", 1e-3),
+            ],
+        ))
+        .expect("model");
+        assert!(model.value_at(0.0).abs() < 1e-9);
+        assert!((model.value_at(1e-3) - 3.160602794).abs() < 1e-6);
+        assert!(model.value_at(2e-3).abs() < 1e-6);
+    }
+
+    #[test]
+    fn pwl_source_interpolates_points() {
+        let model =
+            PwlSourceModel::from_instance(&source_instance(DeviceKind::PwlVoltageSource, &[]))
+                .expect("model");
+        assert!(model.value_at(0.0).abs() < 1e-9);
+        assert!((model.value_at(0.5e-3) - 2.5).abs() < 1e-9);
+        assert!((model.value_at(2.5e-3) - 2.5).abs() < 1e-9);
+        assert!(model.value_at(4e-3).abs() < 1e-9);
+    }
+
+    #[test]
+    fn noise_is_deterministic_for_a_seed() {
+        let mut first = NoiseSourceModel::from_instance(
+            &source_instance(DeviceKind::NoiseVoltageSource, &[("seed", 7.0)]),
+            NoiseMode::Voltage,
+        )
+        .expect("first");
+        let mut second = NoiseSourceModel::from_instance(
+            &source_instance(DeviceKind::NoiseVoltageSource, &[("seed", 7.0)]),
+            NoiseMode::Voltage,
+        )
+        .expect("second");
+        assert!((first.generate() - second.generate()).abs() < 1e-12);
     }
 }

@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 343 entri dapat
-diinstansiasi lewat registry, dan 157 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 348 entri dapat
+diinstansiasi lewat registry, dan 152 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 343 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 348 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 343 | dapat masuk netlist lewat registry |
+| mapped | 348 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 343 `mapped` bukan 343 model yang benar. Audit menemukan
+Peringatan: 348 `mapped` bukan 348 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -163,7 +163,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C2-04 | 6 | 6 | Model mutual inductance ada; verifikasi batch belum. |
 | C2-05 | 5 | 5 | Model BVD ada; verifikasi batch belum. |
 | C2-06 | 9 | 9 | 1 ideal; lossy butuh loss; attenuator, splitter, coupler bukan transmission line. |
-| C2-07 | 12 | 7 | 4 DC dan AC, 1 pulse, dan 2 sine benar; 5 waveform lain unsupported. |
+| C2-07 | 12 | 11 | 4 DC/AC, pulse V/I, sine V/I, PWL, exponential, dan noise V/I; clock/pattern belum. |
 | C2-08 | 8 | 4 | 4 controlled benar; 4 behavioral belum. |
 | C2-09 | 5 | 2 | Battery layak ideal; solar cell salah; 3 entri digital tidak sesuai kategori. |
 | C3-01 | 10 | 10 | 2 rectifier benar; 8 butuh model Schottky, Zener, avalanche, tunnel, PIN, varactor. |
@@ -292,7 +292,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 1036 test workspace lulus pada audit ini.
+- 1039 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -355,8 +355,8 @@ Target: 80 entri.
   directional coupler.
 - [~] C2-07 Independent source 12 entri: DC V, DC I, AC V, AC I, sine,
   pulse, PWL, exponential, noise V, noise I, clock, pattern.
-  - Sine voltage dan sine current sudah solver-backed.
-  - PWL, exponential, noise, clock, dan pattern belum.
+  - Sine, pulse current, PWL, exponential, dan noise sudah solver-backed.
+  - Clock dan pattern belum.
   - Reference vector dan verified belum.
 - [ ] C2-08 Controlled dan behavioral source 8 entri: E, F, G, H, B
   voltage, B current, polynomial, table.

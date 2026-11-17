@@ -187,6 +187,16 @@ pub enum DeviceKind {
     AstableTimer,
     /// A voltage-controlled oscillator module.
     VcoTimer,
+    /// A pulse current source.
+    PulseCurrentSource,
+    /// An exponential voltage source.
+    ExponentialVoltageSource,
+    /// A piecewise-linear voltage source.
+    PwlVoltageSource,
+    /// A deterministic voltage noise source.
+    NoiseVoltageSource,
+    /// A deterministic current noise source.
+    NoiseCurrentSource,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -315,6 +325,11 @@ impl DeviceKind {
             Self::MonostableTimer => "monostable_timer",
             Self::AstableTimer => "astable_timer",
             Self::VcoTimer => "vco_timer",
+            Self::PulseCurrentSource => "pulse_current_source",
+            Self::ExponentialVoltageSource => "exponential_voltage_source",
+            Self::PwlVoltageSource => "pwl_voltage_source",
+            Self::NoiseVoltageSource => "noise_voltage_source",
+            Self::NoiseCurrentSource => "noise_current_source",
             Self::Diode => "diode",
             _ => "custom",
         }
