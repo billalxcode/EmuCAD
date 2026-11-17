@@ -1,6 +1,4 @@
 id,family,model_class,category,model,phase,priority
-source.independent.sine_voltage_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
-source.independent.sine_current_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
 source.pulse.pwl_voltage_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
 source.pulse.exponential_voltage_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
 source.pulse.voltage_noise_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2

@@ -3,7 +3,7 @@
 Katalog device yang tersedia di `sim-device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 175.
+dan transmission line sudah diimplementasikan. Total test `sim-device`: 177.
 
 ---
 
@@ -140,6 +140,8 @@ pub fn model_from_instance(
 | Current reference | 3 | Fixed output current | [76](76-supervisors.md) |
 | Supervisor | 3 | Threshold, hysteresis, dan polaritas | [76](76-supervisors.md) |
 | Motor driver | 4 | Switch high-side satu kanal | [77](77-motor-drivers.md) |
+| Sine voltage source | 2 | Sine dengan amplitude dan phase | [78](78-sine-sources.md) |
+| Sine current source | 2 | Sine dengan amplitude dan phase | [78](78-sine-sources.md) |
 | VCVS | 4 | Linear gain | [47](47-controlled-sources.md) |
 | VCCS | 4 | Linear transconductance | [47](47-controlled-sources.md) |
 | CCCS | 4 | Linear current gain | [48](48-cccs-switch.md) |
@@ -403,8 +405,9 @@ Test device mencakup:
 - Konverter DC-DC empat pin dan charge pump tiga pin.
 - Reference dan supervisor tiga pin.
 - Motor driver empat pin dengan switch satu kanal.
+- Sine voltage dan current source.
 
-Total test `sim-device`: 170 unit + 5 integration = 175.
+Total test `sim-device`: 172 unit + 5 integration = 177.
 
 ---
 

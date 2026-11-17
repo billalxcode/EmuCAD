@@ -1539,3 +1539,38 @@ fn motor_driver_output(control: f64) -> f64 {
     let result = solve(&circuit);
     result.solution.voltage(output).expect("out")
 }
+
+#[test]
+fn sine_voltage_source_transient_swings_negative() {
+    let mut builder = CircuitBuilder::new();
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    builder
+        .device(
+            "V1",
+            DeviceKind::SineVoltageSource,
+            vec![output, ground],
+            params(&[("amplitude", 5.0), ("frequency", 1000.0)]),
+        )
+        .expect("V1");
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![output, ground],
+            params(&[("resistance", 1000.0)]),
+        )
+        .expect("R1");
+    let circuit = builder.build().expect("circuit");
+    let config = sim_analysis::TransientConfig {
+        dt: 1e-5,
+        steps: 100,
+        use_dc_op: true,
+        ..sim_analysis::TransientConfig::default()
+    };
+    let samples = sim_analysis::transient(&circuit, &config).expect("transient");
+    let peak = samples[25].solution.voltage(output).expect("peak");
+    let trough = samples[75].solution.voltage(output).expect("trough");
+    assert!(peak > 4.5, "peak={peak}");
+    assert!(trough < -4.5, "trough={trough}");
+}

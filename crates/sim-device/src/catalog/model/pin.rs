@@ -314,6 +314,7 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
             SENSOR
         }
         DeviceKind::MotorDriver => MOTOR_DRIVER,
+        DeviceKind::SineVoltageSource | DeviceKind::SineCurrentSource => SOURCE,
         DeviceKind::DiodeBridge => DIODE_BRIDGE,
         DeviceKind::DualDiode => DUAL_DIODE,
         DeviceKind::Switch => SWITCH,

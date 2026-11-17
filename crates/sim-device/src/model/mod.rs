@@ -26,7 +26,7 @@ use crate::sensors::{
     PtcModel, RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel,
     TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel, ThresholdSwitchModel,
 };
-use crate::source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
+use crate::source::{CurrentSourceModel, PulseSourceModel, SineSourceModel, VoltageSourceModel};
 use crate::supervisor::{CurrentReferenceModel, SupervisorModel, VoltageReferenceModel};
 use crate::switch::{IdealSwitchModel, SwitchModel};
 use crate::thyristor::ThyristorModel;
@@ -267,6 +267,8 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         DeviceKind::CurrentReference => Box::new(CurrentReferenceModel::from_instance(instance)?),
         DeviceKind::Supervisor => Box::new(SupervisorModel::from_instance(instance)?),
         DeviceKind::MotorDriver => Box::new(MotorDriverModel::from_instance(instance)?),
+        DeviceKind::SineVoltageSource => Box::new(SineSourceModel::voltage(instance)?),
+        DeviceKind::SineCurrentSource => Box::new(SineSourceModel::current(instance)?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),
         DeviceKind::DiodeBridge => Box::new(DiodeBridgeModel::from_instance(instance)?),

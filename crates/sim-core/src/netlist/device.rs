@@ -175,6 +175,10 @@ pub enum DeviceKind {
     Supervisor,
     /// A four-pin motor driver module.
     MotorDriver,
+    /// A sine voltage source.
+    SineVoltageSource,
+    /// A sine current source.
+    SineCurrentSource,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -297,6 +301,8 @@ impl DeviceKind {
             Self::CurrentReference => "current_reference",
             Self::Supervisor => "supervisor",
             Self::MotorDriver => "motor_driver",
+            Self::SineVoltageSource => "sine_voltage_source",
+            Self::SineCurrentSource => "sine_current_source",
             Self::Diode => "diode",
             _ => "custom",
         }

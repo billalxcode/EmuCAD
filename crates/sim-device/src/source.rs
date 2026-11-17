@@ -1,8 +1,8 @@
 //! Independent source models.
 
 use crate::model::{
-    DeviceModel, branch_index, non_negative_parameter, parameter, pins_exact, positive_parameter,
-    stamp_current_source, stamp_voltage_branch,
+    DeviceModel, branch_index, finite_parameter, non_negative_parameter, parameter, pins_exact,
+    positive_parameter, stamp_current_source, stamp_voltage_branch,
 };
 use sim_core::{Device, DeviceId, DeviceInstance, MnaContext, NodeId, SimError, Solution};
 
@@ -147,6 +147,100 @@ impl DeviceModel for PulseSourceModel {
     }
 }
 
+#[derive(Clone, Copy)]
+enum SineMode {
+    Voltage,
+    Current,
+}
+
+/// A sine voltage or current source.
+pub struct SineSourceModel {
+    id: DeviceId,
+    mode: SineMode,
+    amplitude: f64,
+    frequency: f64,
+    phase: f64,
+    offset: f64,
+    time: f64,
+    step: Option<f64>,
+    branch: Option<usize>,
+    pins: [NodeId; 2],
+}
+
+impl SineSourceModel {
+    pub(crate) fn voltage(instance: &DeviceInstance) -> Result<Self, SimError> {
+        Self::from_instance(instance, SineMode::Voltage)
+    }
+
+    pub(crate) fn current(instance: &DeviceInstance) -> Result<Self, SimError> {
+        Self::from_instance(instance, SineMode::Current)
+    }
+
+    fn from_instance(instance: &DeviceInstance, mode: SineMode) -> Result<Self, SimError> {
+        let pins = pins_exact(instance, 2)?;
+        let params = instance.parameters();
+        let default_amplitude = match mode {
+            SineMode::Voltage => 5.0,
+            SineMode::Current => 1e-3,
+        };
+        Ok(Self {
+            id: instance.id(),
+            mode,
+            amplitude: finite_parameter(params, "amplitude", default_amplitude)?,
+            frequency: non_negative_parameter(params, "frequency", 1e3)?,
+            phase: finite_parameter(params, "phase", 0.0)?,
+            offset: finite_parameter(params, "offset", 0.0)?,
+            time: 0.0,
+            step: None,
+            branch: None,
+            pins: [pins[0], pins[1]],
+        })
+    }
+
+    fn value_at(&self, time: f64) -> f64 {
+        let angle = 2.0 * std::f64::consts::PI * self.frequency * time + self.phase.to_radians();
+        self.offset + self.amplitude * angle.sin()
+    }
+}
+
+impl DeviceModel for SineSourceModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        _solution: &Solution,
+        dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        if let Some(dt) = dt {
+            if self.step.is_none() {
+                self.step = Some(dt);
+                self.time = dt;
+            }
+        }
+        let value = self.value_at(self.time);
+        match self.mode {
+            SineMode::Voltage => {
+                self.branch = Some(branch_index(ctx, self.id)?);
+                stamp_voltage_branch(ctx, self.id, self.pins[0], self.pins[1], value)
+            }
+            SineMode::Current => stamp_current_source(ctx, self.pins[0], self.pins[1], value),
+        }
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        if let Some(dt) = self.step {
+            self.time += dt;
+        }
+        Ok(())
+    }
+
+    fn terminal_current(&self, solution: &Solution) -> Option<f64> {
+        match self.mode {
+            SineMode::Voltage => solution.branch_current(self.branch?),
+            SineMode::Current => Some(self.value_at(self.time)),
+        }
+    }
+}
+
 /// An independent current source.
 pub struct CurrentSourceModel {
     current: f64,
@@ -185,7 +279,7 @@ impl DeviceModel for CurrentSourceModel {
 
 #[cfg(test)]
 mod tests {
-    use super::{PulseSourceModel, PulseTiming};
+    use super::{PulseSourceModel, PulseTiming, SineMode, SineSourceModel};
     use crate::model::DeviceModel;
     use sim_core::{DeviceId, NodeId, Solution};
 
@@ -226,6 +320,37 @@ mod tests {
     #[test]
     fn update_advances_pulse_time() {
         let mut model = pulse();
+        model.step = Some(1e-6);
+        model.update(&Solution::zero(2, 0)).expect("update");
+        assert!((model.time - 1e-6).abs() < 1e-12);
+    }
+
+    fn sine() -> SineSourceModel {
+        SineSourceModel {
+            id: DeviceId::new(0),
+            mode: SineMode::Voltage,
+            amplitude: 5.0,
+            frequency: 1000.0,
+            phase: 0.0,
+            offset: 0.0,
+            time: 0.0,
+            step: None,
+            branch: None,
+            pins: [NodeId::new(1), NodeId::GROUND],
+        }
+    }
+
+    #[test]
+    fn sine_reaches_amplitude_at_quarter_period() {
+        let model = sine();
+        assert!(model.value_at(0.0).abs() < 1e-12);
+        assert!((model.value_at(0.25e-3) - 5.0).abs() < 1e-9);
+        assert!((model.value_at(0.75e-3) + 5.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn sine_update_advances_time() {
+        let mut model = sine();
         model.step = Some(1e-6);
         model.update(&Solution::zero(2, 0)).expect("update");
         assert!((model.time - 1e-6).abs() < 1e-12);

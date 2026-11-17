@@ -238,6 +238,7 @@ fn branch_slots(kind: &DeviceKind) -> usize {
         | DeviceKind::DcDcConverter
         | DeviceKind::ChargePump
         | DeviceKind::VoltageReference
+        | DeviceKind::SineVoltageSource
         | DeviceKind::Inductor => 1,
         _ => 0,
     }

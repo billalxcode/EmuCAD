@@ -104,10 +104,10 @@ add("source.independent", "VoltageSource", "VoltageSource", 2, "voltage", 5.0, "
 add("source.independent", "CurrentSource", "CurrentSource", 2, "current", 1e-3, "A", [
     "AC current source",
 ])
-add("source.independent", "BehavioralSource", None, 2, "voltage", 5.0, "V", [
+add("source.independent", "BehavioralSource", "SineVoltageSource", 2, "amplitude", 5.0, "V", [
     "sine voltage source",
 ])
-add("source.independent", "BehavioralSource", None, 2, "current", 1e-3, "A", [
+add("source.independent", "BehavioralSource", "SineCurrentSource", 2, "amplitude", 1e-3, "A", [
     "sine current source",
 ])
 

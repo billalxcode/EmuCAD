@@ -66,7 +66,7 @@ pub use sensors::{
     PtcModel, RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel,
     TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel, ThresholdSwitchModel,
 };
-pub use source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
+pub use source::{CurrentSourceModel, PulseSourceModel, SineSourceModel, VoltageSourceModel};
 pub use supervisor::{CurrentReferenceModel, SupervisorModel, VoltageReferenceModel};
 pub use switch::{IdealSwitchModel, SwitchModel};
 pub use thyristor::{ThyristorKind, ThyristorModel};

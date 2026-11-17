@@ -136,6 +136,8 @@ fn supported_actuator(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::CurrentReference
             | sim_core::DeviceKind::Supervisor
             | sim_core::DeviceKind::MotorDriver
+            | sim_core::DeviceKind::SineVoltageSource
+            | sim_core::DeviceKind::SineCurrentSource
     )
 }
 
@@ -270,9 +272,15 @@ fn waveform_sources_map_to_waveform_devices_only() {
         .find("source.pulse.pulse_voltage_source")
         .expect("pulse source");
     assert_eq!(pulse.device, Some(DeviceKind::PulseVoltageSource));
+    let sine_voltage = registry
+        .find("source.independent.sine_voltage_source")
+        .expect("sine voltage source");
+    let sine_current = registry
+        .find("source.independent.sine_current_source")
+        .expect("sine current source");
+    assert_eq!(sine_voltage.device, Some(DeviceKind::SineVoltageSource));
+    assert_eq!(sine_current.device, Some(DeviceKind::SineCurrentSource));
     for id in [
-        "source.independent.sine_voltage_source",
-        "source.independent.sine_current_source",
         "source.pulse.pwl_voltage_source",
         "source.pulse.exponential_voltage_source",
         "source.pulse.voltage_noise_source",

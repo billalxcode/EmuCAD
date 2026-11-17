@@ -437,6 +437,20 @@ const MOTOR_DRIVER: &[ParameterSpec] = &[
     ParameterSpec::number("off_resistance", "ohm", 1e6, 1e-9, 1e12),
 ];
 
+const SINE_VOLTAGE_SOURCE: &[ParameterSpec] = &[
+    ParameterSpec::number("amplitude", "V", 5.0, 0.0, 1e6),
+    ParameterSpec::number("frequency", "Hz", 1000.0, 0.0, 1e12),
+    ParameterSpec::number("phase", "deg", 0.0, -1e6, 1e6),
+    ParameterSpec::number("offset", "V", 0.0, -1e6, 1e6),
+];
+
+const SINE_CURRENT_SOURCE: &[ParameterSpec] = &[
+    ParameterSpec::number("amplitude", "A", 1e-3, 0.0, 1e6),
+    ParameterSpec::number("frequency", "Hz", 1000.0, 0.0, 1e12),
+    ParameterSpec::number("phase", "deg", 0.0, -1e6, 1e6),
+    ParameterSpec::number("offset", "A", 0.0, -1e6, 1e6),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -713,6 +727,8 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::CurrentReference => CURRENT_REFERENCE,
         DeviceKind::Supervisor => SUPERVISOR,
         DeviceKind::MotorDriver => MOTOR_DRIVER,
+        DeviceKind::SineVoltageSource => SINE_VOLTAGE_SOURCE,
+        DeviceKind::SineCurrentSource => SINE_CURRENT_SOURCE,
         _ => &[],
     }
 }
@@ -816,6 +832,8 @@ mod tests {
         DeviceKind::CurrentReference,
         DeviceKind::Supervisor,
         DeviceKind::MotorDriver,
+        DeviceKind::SineVoltageSource,
+        DeviceKind::SineCurrentSource,
     ];
 
     #[test]
