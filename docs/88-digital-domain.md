@@ -6,7 +6,7 @@ Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
 ## 1. Cakupan
 
 Domain digital memakai `DigitalCircuit` dua-state dengan input dan
-output bernama. Saat ini 72 entry katalog sudah dapat dijalankan:
+output bernama. Saat ini 73 entry katalog sudah dapat dijalankan:
 
 | Kelompok | Entry |
 |---|---|
@@ -23,7 +23,7 @@ output bernama. Saat ini 72 entry katalog sudah dapat dijalankan:
 | Programmable | PAL, GAL, CPLD, FPGA logic block, lookup table (LUT 4-input), FSM 3-input |
 | High-Z | open-drain, tri-state, transmission gate, bidirectional buffer, bidirectional/open-drain level |
 | Serial | UART, SPI, I2C master, dan CAN transmitter |
-| Memory | sel SRAM 1-bit, array 128x8, ROM, PROM, module, dan controller |
+| Memory | sel SRAM/DRAM 1-bit, array 128x8, ROM, PROM, module, dan controller |
 
 ## 2. Perintah
 
@@ -119,10 +119,14 @@ driver harus memakai sinyal `z` di tingkat rangkaian.
 
 ## 8. Memory
 
-Sebelas entry memory memakai model digital:
+Dua belas entry memory memakai model digital:
 
 - `memory.device.sram_cell`: satu bit storage dengan input `we` dan
   `d`, output `q`. Nilai ditahan saat `we=0`.
+- `memory.device.dram_cell`: satu bit storage dengan input `refresh`.
+  Tanpa refresh atau write, data hilang setelah 15 tick. Output
+  `expired` menandai window retensi habis. Ini model digital, bukan
+  fisika charge.
 - `memory.device.sram_array`: 128 kata x 8 bit (1024 bit), input
   `reset`, `we`, `addr0..addr6`, `din0..din7`, output `dout0..dout7`.
 - EEPROM, Flash, FRAM, MRAM, dan NVRAM memakai array 128x8 yang sama
@@ -141,10 +145,11 @@ Array menulis satu kata pada setiap tick ketika `we=1`, lalu membaca
 kata yang dialamatkan secara kombinasional. Array SRAM menghapus semua
 kata saat `reset`; array non-volatile, ROM, dan PROM mempertahankan
 isi. Model non-volatile belum memiliki erase, endurance, wear, atau
-persistensi antar proses simulasi. DRAM belum dipetakan karena refresh
-belum dimodelkan. SPI flash, I2C EEPROM, dan SD card belum dipetakan
-karena protokol serialnya belum dimodelkan. Controller bersifat
-generik, bukan controller DRAM dengan refresh dan scheduling.
+persistensi antar proses simulasi. DRAM hanya tersedia sebagai sel
+1-bit dengan refresh global; array dan timing DRAM belum ada. SPI
+flash, I2C EEPROM, dan SD card belum dipetakan karena protokol
+serialnya belum dimodelkan. Controller bersifat generik, bukan
+controller DRAM dengan refresh dan scheduling.
 
 ## 9. Entry Digital yang Belum Didukung
 
@@ -183,6 +188,8 @@ Test domain digital mencakup:
   bus saat tidak dipilih.
 - Memory controller menyelesaikan tulis dan baca lewat handshake
   `req`/`ready`.
+- Sel DRAM kehilangan data setelah window retensi dan bertahan saat
+  di-refresh.
 - I2C mengirim address dan data MSB-first, menghasilkan START/STOP,
   dan menandai NACK saat ACK tidak diberikan.
 - CAN mengirim frame 2.0A dengan CRC-15 dan satu bit stuff, lalu

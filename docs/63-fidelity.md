@@ -109,5 +109,5 @@ yang lebih cepat atau batas abstraksi yang disepakati.
 - Belum ada reference vector per entry.
 - Belum ada golden ngspice di CI.
 - Belum ada full-chip AVR gate-level.
-- 11 dari 15 memory sudah gate-level; 4 belum.
+- 12 dari 15 memory sudah gate-level; 3 belum.
 - Benchmark bergantung pada CPU dan build `--release`.

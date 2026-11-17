@@ -1,6 +1,6 @@
 //! Gate-level SRAM cell and digital memory arrays.
 
-use crate::catalog_bits::{equals, mux_tree, register_bits};
+use crate::catalog_bits::{equals, increment, mux_tree, register_bits};
 use crate::catalog_digital::{DigitalEntry, finish};
 use crate::{DigitalBuilder, NetId};
 
@@ -314,6 +314,76 @@ fn controller_outputs(builder: &mut DigitalBuilder, state: ControllerState) {
     builder.output("valid", valid);
 }
 
+const DRAM_INPUTS: [&str; 4] = ["reset", "refresh", "we", "d"];
+const DRAM_OUTPUTS: [&str; 2] = ["q", "expired"];
+
+pub(crate) fn dram_cell_entry(id: &'static str) -> DigitalEntry {
+    finish(id, |builder| {
+        let reset = builder.input("reset");
+        let refresh = builder.input("refresh");
+        let we = builder.input("we");
+        let data = builder.input("d");
+        let q = builder.net();
+        let counter = [builder.net(), builder.net(), builder.net(), builder.net()];
+        dram_registers(builder, reset, refresh, we, data, q, counter);
+        let expired = equals(builder, &counter, 15);
+        builder.output("q", q);
+        builder.output("expired", expired);
+        (DRAM_INPUTS.to_vec(), DRAM_OUTPUTS.to_vec())
+    })
+}
+
+fn dram_registers(
+    builder: &mut DigitalBuilder,
+    reset: NetId,
+    refresh: NetId,
+    we: NetId,
+    data: NetId,
+    q: NetId,
+    counter: [NetId; 4],
+) {
+    let expired = equals(builder, &counter, 15);
+    let q_next = dram_q_next(builder, reset, refresh, we, data, q, expired);
+    let counter_next = dram_counter_next(builder, reset, refresh, we, &counter, expired);
+    let one = builder.constant(true);
+    builder.dff_into(q_next, q);
+    register_bits(builder, &counter, &counter_next, one);
+}
+
+fn dram_q_next(
+    builder: &mut DigitalBuilder,
+    reset: NetId,
+    refresh: NetId,
+    we: NetId,
+    data: NetId,
+    q: NetId,
+    expired: NetId,
+) -> NetId {
+    let zero = builder.constant(false);
+    let value = builder.mux(q, zero, expired);
+    let value = builder.mux(value, q, refresh);
+    let value = builder.mux(value, data, we);
+    builder.mux(value, zero, reset)
+}
+
+fn dram_counter_next(
+    builder: &mut DigitalBuilder,
+    reset: NetId,
+    refresh: NetId,
+    we: NetId,
+    counter: &[NetId; 4],
+    expired: NetId,
+) -> [NetId; 4] {
+    let incremented = increment(builder, counter);
+    let zero = builder.constant(false);
+    std::array::from_fn(|index| {
+        let value = builder.mux(incremented[index], counter[index], expired);
+        let value = builder.mux(value, zero, refresh);
+        let value = builder.mux(value, zero, we);
+        builder.mux(value, zero, reset)
+    })
+}
+
 pub(crate) fn sram_cell_entry(id: &'static str) -> DigitalEntry {
     finish(id, |builder| {
         let reset = builder.input("reset");
@@ -556,6 +626,42 @@ mod tests {
         entry.circuit.tick().expect("reset");
         entry.circuit.set_input("reset", false).expect("reset");
         assert_eq!(read_word(&mut entry, 7), 0x5a);
+    }
+
+    #[test]
+    fn dram_cell_expires_without_refresh() {
+        let mut entry = super::dram_cell_entry("memory.device.dram_cell");
+        entry.circuit.set_input("d", true).expect("d");
+        entry.circuit.set_input("we", true).expect("we");
+        entry.circuit.tick().expect("write");
+        entry.circuit.set_input("we", false).expect("we");
+        assert_eq!(entry.circuit.output("q"), Some(true));
+        for _ in 0..15 {
+            entry.circuit.tick().expect("retain");
+        }
+        assert_eq!(entry.circuit.output("q"), Some(true));
+        entry.circuit.tick().expect("expire");
+        assert_eq!(entry.circuit.output("q"), Some(false));
+        assert_eq!(entry.circuit.output("expired"), Some(true));
+    }
+
+    #[test]
+    fn dram_cell_retains_with_refresh() {
+        let mut entry = super::dram_cell_entry("memory.device.dram_cell");
+        entry.circuit.set_input("d", true).expect("d");
+        entry.circuit.set_input("we", true).expect("we");
+        entry.circuit.tick().expect("write");
+        entry.circuit.set_input("we", false).expect("we");
+        for _ in 0..10 {
+            entry.circuit.tick().expect("retain");
+        }
+        entry.circuit.set_input("refresh", true).expect("refresh");
+        entry.circuit.tick().expect("refresh");
+        entry.circuit.set_input("refresh", false).expect("refresh");
+        for _ in 0..10 {
+            entry.circuit.tick().expect("retain");
+        }
+        assert_eq!(entry.circuit.output("q"), Some(true));
     }
 
     #[test]

@@ -133,6 +133,9 @@ pub fn digital_entry_with_config(
         "memory.device.sram_cell" => {
             crate::catalog_memory::sram_cell_entry("memory.device.sram_cell")
         }
+        "memory.device.dram_cell" => {
+            crate::catalog_memory::dram_cell_entry("memory.device.dram_cell")
+        }
         "memory.device.sram_array" => {
             crate::catalog_memory::memory_array_entry("memory.device.sram_array", false)
         }

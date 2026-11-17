@@ -365,17 +365,17 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
 | Kelompok | Entri | Blocker |
 |---|---:|---|
 | Digital logic | 2 | 61 sudah di domain digital; 2 belum, yaitu USB dan Ethernet. |
-| Structural MCU dan memory | 15 | 11 dari 15 memory sudah gate-level; butuh 11 MCU dan 4 memory lain. Scope ada di `docs/64-gate-level.md`. |
+| Structural MCU dan memory | 14 | 12 dari 15 memory sudah gate-level; butuh 11 MCU dan 3 memory lain. Scope ada di `docs/64-gate-level.md`. |
 | RF | 14 | Mixer, filter, antenna, dan coupler butuh S-parameter dan solver dua-port. |
 | Board module | 14 | Board-level module belum punya batas dan referensi yang cukup. |
 | Mixed-signal ADC | 1 | R-2R DAC membutuhkan bus multi-bit; 4 converter lain sudah dipetakan. |
 | Behavioral source | 2 | Behavioral voltage/current membutuhkan parser ekspresi bebas. |
 | R-2R DAC | 1 | Butuh bus multi-bit; katalog hanya menyediakan 4 pin. |
-| **Total** | **49** | |
+| **Total** | **48** | |
 
-Dari 121 entry yang belum analog solver-backed, 72 sudah dapat
+Dari 121 entry yang belum analog solver-backed, 73 sudah dapat
 dijalankan melalui domain digital. Sisa yang belum punya model sama
-sekali adalah 49 entry.
+sekali adalah 48 entry.
 
 **Acceptance S5:** setiap entri non-MCU yang diklaim simulatable punya
 model, input, output, dan referensi yang jelas.
@@ -400,12 +400,13 @@ model, input, output, dan referensi yang jelas.
     ada dengan retensi setelah reset.
   - ROM dan PROM memakai array dengan port load; PROM satu kali per kata.
   - Memory module dan controller generik sudah ada.
-  - DRAM, SPI flash, I2C EEPROM, dan SD card belum.
+  - Sel DRAM dengan refresh sudah ada; array DRAM belum.
+  - SPI flash, I2C EEPROM, dan SD card belum.
 - [~] S6-04 Gunakan `sim-cells` untuk sel memory dan logic.
   - AVR datapath, register bank, ALU, dan register file memakai
     `sim-cells`.
-  - Sel SRAM dan array katalog (SRAM, non-volatile, ROM, PROM, module,
-    dan controller) memakai `sim-cells::catalog_memory`.
+  - Sel SRAM/DRAM dan array katalog (SRAM, non-volatile, ROM, PROM,
+    module, dan controller) memakai `sim-cells::catalog_memory`.
   - Sel memory digital lain belum.
 - [~] S6-05 Tambahkan model interface dan timing.
   - Timing digital AVR dan peripheral sudah diuji sebagian.
