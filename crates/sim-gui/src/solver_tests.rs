@@ -1157,3 +1157,13 @@ fn humidity_gas_ph_and_electrochemical_sensors_respond() {
     assert!((ph - 2.67748).abs() < 0.01, "ph={ph}");
     assert!((chemical - 1.0).abs() < 0.01, "chemical={chemical}");
 }
+
+#[test]
+fn current_and_voltage_sensors_respond() {
+    let shunt = sensor_output(DeviceKind::CurrentSenseResistor, &[("current", 1.0)]);
+    let hall = sensor_output(DeviceKind::HallCurrentSensor, &[("current", 10.0)]);
+    let divider = sensor_output(DeviceKind::VoltageDividerSensor, &[("voltage", 10.0)]);
+    assert!((shunt - 2.0).abs() < 0.01, "shunt={shunt}");
+    assert!((hall - 3.5).abs() < 0.01, "hall={hall}");
+    assert!((divider - 2.0).abs() < 0.01, "divider={divider}");
+}

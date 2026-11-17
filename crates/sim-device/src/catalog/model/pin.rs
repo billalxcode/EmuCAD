@@ -273,7 +273,10 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         | DeviceKind::HumiditySensor
         | DeviceKind::GasSensor
         | DeviceKind::PhSensor
-        | DeviceKind::ElectrochemicalSensor => SENSOR,
+        | DeviceKind::ElectrochemicalSensor
+        | DeviceKind::CurrentSenseResistor
+        | DeviceKind::HallCurrentSensor
+        | DeviceKind::VoltageDividerSensor => SENSOR,
         DeviceKind::Scr => SCR,
         DeviceKind::Triac => TRIAC,
         DeviceKind::Diac => DIAC,

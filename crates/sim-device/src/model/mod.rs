@@ -17,9 +17,9 @@ use crate::protection::{FuseModel, VaristorModel};
 use crate::regulator::RegulatorModel;
 use crate::relay::RelayModel;
 use crate::sensors::{
-    LinearLightSensorModel, LinearSensorModel, LoadCellModel, MagneticFieldSensorModel,
-    MagneticSwitchModel, NtcModel, PhSensorModel, PhotodiodeSensorModel, PhotoresistorModel,
-    PtcModel, RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel,
+    CurrentSenseModel, LinearLightSensorModel, LinearSensorModel, LoadCellModel,
+    MagneticFieldSensorModel, MagneticSwitchModel, NtcModel, PhSensorModel, PhotodiodeSensorModel,
+    PhotoresistorModel, PtcModel, RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel,
     TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
 };
 use crate::source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
@@ -211,6 +211,13 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
             "concentration",
             0.01,
             0.0,
+        )?),
+        DeviceKind::CurrentSenseResistor => Box::new(CurrentSenseModel::from_instance(instance)?),
+        DeviceKind::HallCurrentSensor => Box::new(LinearSensorModel::from_instance(
+            instance, "current", 0.1, 2.5,
+        )?),
+        DeviceKind::VoltageDividerSensor => Box::new(LinearSensorModel::from_instance(
+            instance, "voltage", 0.2, 0.0,
         )?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),

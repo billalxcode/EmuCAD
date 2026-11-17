@@ -148,6 +148,9 @@ fn supported_sensor(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::GasSensor
             | sim_core::DeviceKind::PhSensor
             | sim_core::DeviceKind::ElectrochemicalSensor
+            | sim_core::DeviceKind::CurrentSenseResistor
+            | sim_core::DeviceKind::HallCurrentSensor
+            | sim_core::DeviceKind::VoltageDividerSensor
     )
 }
 

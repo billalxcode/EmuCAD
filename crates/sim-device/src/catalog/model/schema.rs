@@ -322,6 +322,28 @@ const ELECTROCHEMICAL_SENSOR: &[ParameterSpec] = &[
     ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
 ];
 
+const CURRENT_SENSE_RESISTOR: &[ParameterSpec] = &[
+    ParameterSpec::number("shunt_resistance", "ohm", 0.1, 1e-12, 1e9),
+    ParameterSpec::number("gain", "V/V", 20.0, 1e-12, 1e9),
+    ParameterSpec::number("current", "A", 0.0, -1e6, 1e6),
+    ParameterSpec::number("offset", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const HALL_CURRENT_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/A", 0.1, 1e-12, 1e9),
+    ParameterSpec::number("offset", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("current", "A", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const VOLTAGE_DIVIDER_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/V", 0.2, 0.0, 1.0),
+    ParameterSpec::number("offset", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("voltage", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -580,6 +602,9 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::GasSensor => GAS_SENSOR,
         DeviceKind::PhSensor => PH_SENSOR,
         DeviceKind::ElectrochemicalSensor => ELECTROCHEMICAL_SENSOR,
+        DeviceKind::CurrentSenseResistor => CURRENT_SENSE_RESISTOR,
+        DeviceKind::HallCurrentSensor => HALL_CURRENT_SENSOR,
+        DeviceKind::VoltageDividerSensor => VOLTAGE_DIVIDER_SENSOR,
         _ => &[],
     }
 }
@@ -665,6 +690,9 @@ mod tests {
         DeviceKind::GasSensor,
         DeviceKind::PhSensor,
         DeviceKind::ElectrochemicalSensor,
+        DeviceKind::CurrentSenseResistor,
+        DeviceKind::HallCurrentSensor,
+        DeviceKind::VoltageDividerSensor,
     ];
 
     #[test]

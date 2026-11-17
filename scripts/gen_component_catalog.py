@@ -494,8 +494,14 @@ add("sensor.humidity", "Sensor", "PhSensor", 3, "sensitivity", 0.05916, "V/pH", 
 add("sensor.humidity", "Sensor", "ElectrochemicalSensor", 3, "sensitivity", 0.01, "V/ppm", [
     "electrochemical sensor",
 ])
-add("sensor.current", "Sensor", None, 3, "sensitivity", 1.0, "ratio", [
-    "current sense resistor", "Hall current sensor", "voltage divider sensor",
+add("sensor.current", "Sensor", "CurrentSenseResistor", 3, "shunt_resistance", 0.1, "ohm", [
+    "current sense resistor",
+])
+add("sensor.current", "Sensor", "HallCurrentSensor", 3, "sensitivity", 0.1, "V/A", [
+    "Hall current sensor",
+])
+add("sensor.current", "Sensor", "VoltageDividerSensor", 3, "sensitivity", 0.2, "V/V", [
+    "voltage divider sensor",
 ])
 add("sensor.proximity", "Sensor", None, 3, "sensitivity", 1.0, "ratio", [
     "inductive proximity sensor", "capacitive touch sensor",

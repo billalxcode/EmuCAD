@@ -913,13 +913,65 @@ impl DeviceModel for PhSensorModel {
     }
 }
 
+/// A current sense resistor module with a shunt amplifier.
+pub struct CurrentSenseModel {
+    shunt_resistance: f64,
+    gain: f64,
+    offset: f64,
+    current: f64,
+    output_resistance: f64,
+    pins: [NodeId; 3],
+}
+
+impl CurrentSenseModel {
+    pub(crate) fn from_instance(instance: &DeviceInstance) -> Result<Self, SimError> {
+        let params = instance.parameters();
+        Ok(Self {
+            shunt_resistance: positive_parameter(params, "shunt_resistance", Some(0.1))?,
+            gain: positive_parameter(params, "gain", Some(20.0))?,
+            offset: finite_parameter(params, "offset", 0.0)?,
+            current: finite_parameter(params, "current", 0.0)?,
+            output_resistance: positive_parameter(params, "output_resistance", Some(1000.0))?,
+            pins: sensor_pins(instance)?,
+        })
+    }
+
+    fn output(&self, supply: f64) -> f64 {
+        let shunt = self.shunt_resistance * self.current;
+        clamp_output(self.offset + self.gain * shunt, supply)
+    }
+}
+
+impl DeviceModel for CurrentSenseModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        solution: &Solution,
+        _dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        let supply = supply(solution, self.pins);
+        stamp_output(
+            ctx,
+            self.pins[2],
+            self.pins[1],
+            self.output(supply),
+            self.output_resistance,
+        )
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
-        LinearLightSensorModel, LinearSensorModel, LoadCellModel, MagneticFieldSensorModel,
-        MagneticSwitchModel, NtcModel, PhSensorModel, PhotodiodeSensorModel, PhotoresistorModel,
-        PtcModel, RelativeResistanceSensorModel, RtdModel, StrainGaugeSensorModel,
-        TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
+        CurrentSenseModel, LinearLightSensorModel, LinearSensorModel, LoadCellModel,
+        MagneticFieldSensorModel, MagneticSwitchModel, NtcModel, PhSensorModel,
+        PhotodiodeSensorModel, PhotoresistorModel, PtcModel, RelativeResistanceSensorModel,
+        RtdModel, StrainGaugeSensorModel, TemperatureSensorModel, ThermalSwitchModel,
+        ThermocoupleModel,
     };
     use sim_core::{DeviceId, DeviceInstance, DeviceKind, NodeId};
     use std::collections::BTreeMap;
@@ -1220,5 +1272,23 @@ mod tests {
             PhSensorModel::from_instance(&instance(DeviceKind::PhSensor, &[])).expect("neutral");
         assert!((acidic.output(5.0) - 2.67748).abs() < 1e-9);
         assert!((neutral.output(5.0) - 2.5).abs() < 1e-9);
+    }
+
+    #[test]
+    fn current_sense_uses_shunt_and_gain() {
+        let model = CurrentSenseModel::from_instance(&instance(
+            DeviceKind::CurrentSenseResistor,
+            &[("current", 1.0)],
+        ))
+        .expect("model");
+        assert!((model.output(5.0) - 2.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn hall_current_and_voltage_divider_scale_linearly() {
+        let hall = linear_output(DeviceKind::HallCurrentSensor, "current", 10.0, 0.1, 2.5);
+        let divider = linear_output(DeviceKind::VoltageDividerSensor, "voltage", 10.0, 0.2, 0.0);
+        assert!((hall - 3.5).abs() < 1e-9, "hall={hall}");
+        assert!((divider - 2.0).abs() < 1e-9, "divider={divider}");
     }
 }

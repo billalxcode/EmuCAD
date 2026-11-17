@@ -176,6 +176,9 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::GasSensor
             | DeviceKind::PhSensor
             | DeviceKind::ElectrochemicalSensor
+            | DeviceKind::CurrentSenseResistor
+            | DeviceKind::HallCurrentSensor
+            | DeviceKind::VoltageDividerSensor
     )
 }
 

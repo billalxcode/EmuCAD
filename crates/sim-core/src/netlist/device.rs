@@ -139,6 +139,12 @@ pub enum DeviceKind {
     PhSensor,
     /// An electrochemical sensor module.
     ElectrochemicalSensor,
+    /// A current sense resistor module.
+    CurrentSenseResistor,
+    /// A Hall-effect current sensor module.
+    HallCurrentSensor,
+    /// A voltage divider sensor module.
+    VoltageDividerSensor,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -243,6 +249,9 @@ impl DeviceKind {
             Self::GasSensor => "gas_sensor",
             Self::PhSensor => "ph_sensor",
             Self::ElectrochemicalSensor => "electrochemical_sensor",
+            Self::CurrentSenseResistor => "current_sense_resistor",
+            Self::HallCurrentSensor => "hall_current_sensor",
+            Self::VoltageDividerSensor => "voltage_divider_sensor",
             Self::Diode => "diode",
             _ => "custom",
         }
