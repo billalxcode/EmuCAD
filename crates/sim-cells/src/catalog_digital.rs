@@ -134,7 +134,22 @@ pub fn digital_entry_with_config(
             crate::catalog_memory::sram_cell_entry("memory.device.sram_cell")
         }
         "memory.device.sram_array" => {
-            crate::catalog_memory::sram_array_entry("memory.device.sram_array")
+            crate::catalog_memory::memory_array_entry("memory.device.sram_array", false)
+        }
+        "memory.device.eeprom" => {
+            crate::catalog_memory::memory_array_entry("memory.device.eeprom", true)
+        }
+        "memory.device.flash" => {
+            crate::catalog_memory::memory_array_entry("memory.device.flash", true)
+        }
+        "memory.device.fram" => {
+            crate::catalog_memory::memory_array_entry("memory.device.fram", true)
+        }
+        "memory.device.mram" => {
+            crate::catalog_memory::memory_array_entry("memory.device.mram", true)
+        }
+        "memory.device.nvram" => {
+            crate::catalog_memory::memory_array_entry("memory.device.nvram", true)
         }
         _ => return Ok(None),
     };

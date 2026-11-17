@@ -6,7 +6,7 @@ Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
 ## 1. Cakupan
 
 Domain digital memakai `DigitalCircuit` dua-state dengan input dan
-output bernama. Saat ini 63 entry katalog sudah dapat dijalankan:
+output bernama. Saat ini 68 entry katalog sudah dapat dijalankan:
 
 | Kelompok | Entry |
 |---|---|
@@ -23,7 +23,7 @@ output bernama. Saat ini 63 entry katalog sudah dapat dijalankan:
 | Programmable | PAL, GAL, CPLD, FPGA logic block, lookup table (LUT 4-input), FSM 3-input |
 | High-Z | open-drain, tri-state, transmission gate, bidirectional buffer, bidirectional/open-drain level |
 | Serial | UART, SPI, I2C master, dan CAN transmitter |
-| Memory | sel SRAM 1-bit dan array SRAM 128x8 (1024 bit) |
+| Memory | sel SRAM 1-bit dan array 128x8 (SRAM serta non-volatile) |
 
 ## 2. Perintah
 
@@ -119,18 +119,23 @@ driver harus memakai sinyal `z` di tingkat rangkaian.
 
 ## 8. Memory
 
-Dua entry memory memakai model digital:
+Tujuh entry memory memakai model digital:
 
 - `memory.device.sram_cell`: satu bit storage dengan input `we` dan
   `d`, output `q`. Nilai ditahan saat `we=0`.
 - `memory.device.sram_array`: 128 kata x 8 bit (1024 bit), input
   `reset`, `we`, `addr0..addr6`, `din0..din7`, output `dout0..dout7`.
+- EEPROM, Flash, FRAM, MRAM, dan NVRAM memakai array 128x8 yang sama
+  dengan retensi setelah `reset`.
 
 Array menulis satu kata pada setiap tick ketika `we=1`, lalu membaca
-kata yang dialamatkan secara kombinasional. `reset` menghapus semua
-kata. Entry non-volatile (EEPROM, Flash, FRAM, MRAM, NVRAM) belum
-dipetakan karena retensi, erase, dan timing belum dimodelkan. DRAM
-belum dipetakan karena refresh belum dimodelkan.
+kata yang dialamatkan secara kombinasional. Array SRAM menghapus semua
+kata saat `reset`; array non-volatile mempertahankan isi. Model
+non-volatile belum memiliki erase, endurance, wear, atau persistensi
+antar proses simulasi. DRAM belum dipetakan karena refresh belum
+dimodelkan. ROM, PROM, controller, module, SPI flash, I2C EEPROM, dan
+SD card belum dipetakan karena semantik program dan protokolnya belum
+dimodelkan.
 
 ## 9. Entry Digital yang Belum Didukung
 
@@ -162,6 +167,7 @@ Test domain digital mencakup:
 - FSM tiga input mencacah state 0, 1, 2, 3 dengan mask `0x0605`.
 - Sel SRAM menahan nilai saat write enable rendah.
 - Array SRAM menyimpan dan membaca kembali kata pada alamat 5 dan 100.
+- Array non-volatile mempertahankan kata setelah reset.
 - I2C mengirim address dan data MSB-first, menghasilkan START/STOP,
   dan menandai NACK saat ACK tidak diberikan.
 - CAN mengirim frame 2.0A dengan CRC-15 dan satu bit stuff, lalu

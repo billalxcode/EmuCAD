@@ -1,4 +1,4 @@
-//! Gate-level SRAM cell and array circuits.
+//! Gate-level SRAM cell and digital memory arrays.
 
 use crate::catalog_bits::{equals, mux_tree};
 use crate::catalog_digital::{DigitalEntry, finish};
@@ -17,14 +17,22 @@ const DATA_OUT: [&str; DATA_BITS] = [
     "dout0", "dout1", "dout2", "dout3", "dout4", "dout5", "dout6", "dout7",
 ];
 
-pub(crate) fn sram_array_entry(id: &'static str) -> DigitalEntry {
+pub(crate) fn memory_array_entry(id: &'static str, retain: bool) -> DigitalEntry {
     finish(id, |builder| {
         let reset = builder.input("reset");
         let write_enable = builder.input("we");
         let address = address_inputs(builder);
         let data_in = data_inputs(builder);
         let cells = sram_cells(builder);
-        sram_write(builder, &cells, reset, write_enable, &address, &data_in);
+        sram_write(
+            builder,
+            &cells,
+            reset,
+            write_enable,
+            retain,
+            &address,
+            &data_in,
+        );
         let data_out = sram_read(builder, &cells, &address);
         for (index, net) in data_out.iter().enumerate() {
             builder.output(DATA_OUT[index], *net);
@@ -97,6 +105,7 @@ fn sram_write(
     cells: &[Vec<NetId>],
     reset: NetId,
     write_enable: NetId,
+    retain: bool,
     address: &[NetId; ADDRESS_BITS],
     data_in: &[NetId; DATA_BITS],
 ) {
@@ -104,11 +113,26 @@ fn sram_write(
     for (index, word) in cells.iter().enumerate() {
         let selected = equals(builder, address, index as u32);
         let write = builder.and(write_enable, selected);
-        for bit in 0..DATA_BITS {
-            let next = builder.mux(word[bit], data_in[bit], write);
-            let next = builder.and(next, not_reset);
-            builder.dff_into(next, word[bit]);
-        }
+        write_word(builder, word, data_in, write, retain, not_reset);
+    }
+}
+
+fn write_word(
+    builder: &mut DigitalBuilder,
+    word: &[NetId],
+    data_in: &[NetId; DATA_BITS],
+    write: NetId,
+    retain: bool,
+    not_reset: NetId,
+) {
+    for bit in 0..DATA_BITS {
+        let next = builder.mux(word[bit], data_in[bit], write);
+        let next = if retain {
+            next
+        } else {
+            builder.and(next, not_reset)
+        };
+        builder.dff_into(next, word[bit]);
     }
 }
 
@@ -125,7 +149,7 @@ fn sram_read(
 
 #[cfg(test)]
 mod tests {
-    use super::{DATA_BITS, sram_array_entry, sram_cell_entry};
+    use super::{DATA_BITS, memory_array_entry, sram_cell_entry};
 
     fn set_address(entry: &mut super::DigitalEntry, value: usize) {
         for index in 0..7 {
@@ -173,7 +197,7 @@ mod tests {
 
     #[test]
     fn sram_array_stores_and_reads_words() {
-        let mut entry = sram_array_entry("memory.device.sram_array");
+        let mut entry = memory_array_entry("memory.device.sram_array", false);
         write_word(&mut entry, 5, 0xa5);
         write_word(&mut entry, 100, 0x3c);
         assert_eq!(read_word(&mut entry, 5), 0xa5);
@@ -182,12 +206,22 @@ mod tests {
 
     #[test]
     fn sram_array_reset_clears_words() {
-        let mut entry = sram_array_entry("memory.device.sram_array");
+        let mut entry = memory_array_entry("memory.device.sram_array", false);
         write_word(&mut entry, 5, 0xa5);
         entry.circuit.set_input("reset", true).expect("reset");
         entry.circuit.tick().expect("reset");
         entry.circuit.set_input("reset", false).expect("reset");
         assert_eq!(read_word(&mut entry, 5), 0);
+    }
+
+    #[test]
+    fn non_volatile_array_retains_after_reset() {
+        let mut entry = memory_array_entry("memory.device.fram", true);
+        write_word(&mut entry, 7, 0x5a);
+        entry.circuit.set_input("reset", true).expect("reset");
+        entry.circuit.tick().expect("reset");
+        entry.circuit.set_input("reset", false).expect("reset");
+        assert_eq!(read_word(&mut entry, 7), 0x5a);
     }
 
     #[test]
