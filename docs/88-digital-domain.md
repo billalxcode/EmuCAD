@@ -6,7 +6,7 @@ Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
 ## 1. Cakupan
 
 Domain digital memakai `DigitalCircuit` dua-state dengan input dan
-output bernama. Saat ini 42 entry katalog sudah dapat dijalankan:
+output bernama. Saat ini 44 entry katalog sudah dapat dijalankan:
 
 | Kelompok | Entry |
 |---|---|
@@ -19,6 +19,7 @@ output bernama. Saat ini 42 entry katalog sudah dapat dijalankan:
 | Shift register | 4-bit, 8-bit, SIPO, PISO |
 | Level | level shifter, line driver, line receiver, optocoupler interface |
 | Timer | timer, RTC, watchdog |
+| Digital source | clock, PRBS |
 
 ## 2. Perintah
 
@@ -62,14 +63,14 @@ Port ditentukan per entry, bukan dari jumlah pin katalog. Contoh:
 
 ## 5. Entry Digital yang Belum Didukung
 
-Masih ada 21 entry digital di luar domain ini:
+Masih ada 19 entry digital di luar domain ini:
 
 - 3 special gate (open-drain, tri-state, transmission gate).
 - 1 adder/buffer tambahan (bidirectional buffer).
 - 2 level shifter/interface tambahan (bidirectional, open-drain).
 - 6 programmable logic.
 - 6 serial interface.
-- 3 digital source.
+- 1 digital source (pattern).
 
 ## 6. Verifikasi
 
@@ -86,6 +87,8 @@ Test domain digital mencakup:
 - Up/down counter menghitung dua arah.
 - PISO menggeser data parallel ke serial.
 - Watchdog timeout setelah 255 tick.
+- Clock source toggle setiap tick.
+- PRBS source bergeser setelah reset.
 - Counter 4-bit setelah tiga tick.
 - Decade counter kembali ke nol setelah sepuluh tick.
 - Shift register memindahkan data.

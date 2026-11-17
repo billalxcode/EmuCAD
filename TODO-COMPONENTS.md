@@ -163,7 +163,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C2-04 | 6 | 6 | Model mutual inductance ada; verifikasi batch belum. |
 | C2-05 | 5 | 5 | Model BVD ada; verifikasi batch belum. |
 | C2-06 | 9 | 9 | 1 ideal; lossy butuh loss; attenuator, splitter, coupler bukan transmission line. |
-| C2-07 | 12 | 11 | 4 DC/AC, pulse V/I, sine V/I, PWL, exponential, dan noise V/I; clock/pattern belum. |
+| C2-07 | 12 | 11 | 4 DC/AC, pulse V/I, sine V/I, PWL, exponential, noise V/I; clock di domain digital, pattern belum. |
 | C2-08 | 8 | 6 | 4 controlled, polynomial, dan table; behavioral V/I belum. |
 | C2-09 | 5 | 2 | Battery layak ideal; solar cell salah; 3 entri digital tidak sesuai kategori. |
 | C3-01 | 10 | 10 | 2 rectifier benar; 8 butuh model Schottky, Zener, avalanche, tunnel, PIN, varactor. |
@@ -356,7 +356,7 @@ Target: 80 entri.
 - [~] C2-07 Independent source 12 entri: DC V, DC I, AC V, AC I, sine,
   pulse, PWL, exponential, noise V, noise I, clock, pattern.
   - Sine, pulse current, PWL, exponential, dan noise sudah solver-backed.
-  - Clock dan pattern belum.
+  - Clock sudah ada di domain digital; pattern belum.
   - Reference vector dan verified belum.
 - [~] C2-08 Controlled dan behavioral source 8 entri: E, F, G, H, B
   voltage, B current, polynomial, table.

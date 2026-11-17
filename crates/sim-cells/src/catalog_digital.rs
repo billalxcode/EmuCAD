@@ -66,6 +66,8 @@ pub fn digital_entry(id: &str) -> Result<Option<DigitalEntry>, SimError> {
         "mcu.timer.timer" => timer_entry("mcu.timer.timer", false),
         "mcu.timer.rtc" => timer_entry("mcu.timer.rtc", false),
         "mcu.timer.watchdog" => timer_entry("mcu.timer.watchdog", true),
+        "source.digital.digital_clock_source" => clock_entry(),
+        "source.digital.prbs_source" => prbs_entry(),
         _ => return Ok(None),
     };
     Ok(Some(entry))
@@ -721,6 +723,45 @@ fn timer_entry(id: &'static str, watchdog: bool) -> DigitalEntry {
     })
 }
 
+fn clock_entry() -> DigitalEntry {
+    finish("source.digital.digital_clock_source", |builder| {
+        let reset = builder.input("reset");
+        let output = builder.net();
+        let not_output = builder.not(output);
+        let zero = builder.constant(false);
+        let next = builder.mux(not_output, zero, reset);
+        builder.dff_into(next, output);
+        builder.output("q", output);
+        (vec!["reset"], vec!["q"])
+    })
+}
+
+fn prbs_entry() -> DigitalEntry {
+    finish("source.digital.prbs_source", |builder| {
+        let reset = builder.input("reset");
+        let bits: Vec<NetId> = (0..8).map(|_| builder.net()).collect();
+        let first = builder.xor(bits[7], bits[5]);
+        let second = builder.xor(bits[4], bits[3]);
+        let feedback = builder.xor(first, second);
+        let one = builder.constant(true);
+        for (index, bit) in bits.iter().enumerate() {
+            let source = if index == 0 {
+                feedback
+            } else {
+                bits[index - 1]
+            };
+            let next = builder.mux(source, one, reset);
+            builder.dff_into(next, *bit);
+            builder.output(Q8[index], *bit);
+        }
+        builder.output("bit", bits[0]);
+        (
+            vec!["reset"],
+            vec!["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "bit"],
+        )
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::digital_entry;
@@ -911,6 +952,25 @@ mod tests {
             entry.circuit.tick().expect("tick");
         }
         assert_eq!(entry.circuit.output("timeout"), Some(true));
+    }
+
+    #[test]
+    fn clock_source_toggles_each_tick() {
+        let mut entry = entry("source.digital.digital_clock_source");
+        entry.circuit.tick().expect("tick");
+        assert_eq!(entry.circuit.output("q"), Some(true));
+        entry.circuit.tick().expect("tick");
+        assert_eq!(entry.circuit.output("q"), Some(false));
+    }
+
+    #[test]
+    fn prbs_source_moves_after_reset() {
+        let mut entry = entry("source.digital.prbs_source");
+        entry.circuit.set_input("reset", true).expect("input");
+        entry.circuit.tick().expect("tick");
+        entry.circuit.set_input("reset", false).expect("input");
+        entry.circuit.tick().expect("tick");
+        assert_eq!(entry.circuit.output("q0"), Some(false));
     }
 
     #[test]
