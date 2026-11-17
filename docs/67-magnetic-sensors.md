@@ -53,11 +53,11 @@ dimodelkan.
 Resistansi bergantung pada medan:
 
 ```
-R(B) = max(R0 * (1 + field_sensitivity * B), 1e-9)
+R(B) = max(R0 * (1 + relative_sensitivity * B), 1e-9)
 Vout = VCC * R(B) / (R(B) + series_resistance)
 ```
 
-Default `resistance` 1000 ohm, `field_sensitivity` 10 per tesla, dan
+Default `resistance` 1000 ohm, `relative_sensitivity` 10 per tesla, dan
 `series_resistance` 1000 ohm. Pada 0.05 T, R menjadi 1500 ohm dan
 output 3 V pada supply 5 V.
 

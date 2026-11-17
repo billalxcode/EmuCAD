@@ -218,7 +218,7 @@ const REED_SWITCH_SENSOR: &[ParameterSpec] = &[
 
 const MAGNETORESISTIVE_SENSOR: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 1000.0, 1e-9, 1e12),
-    ParameterSpec::number("field_sensitivity", "1/T", 10.0, 0.0, 1e9),
+    ParameterSpec::number("relative_sensitivity", "1/T", 10.0, 0.0, 1e9),
     ParameterSpec::number("series_resistance", "ohm", 1000.0, 1e-9, 1e12),
     ParameterSpec::number("magnetic_field", "T", 0.0, -1e3, 1e3),
 ];

@@ -17,10 +17,9 @@ use crate::protection::{FuseModel, VaristorModel};
 use crate::regulator::RegulatorModel;
 use crate::relay::RelayModel;
 use crate::sensors::{
-    LinearLightSensorModel, MagneticFieldSensorModel, MagneticSwitchModel,
-    MagnetoresistiveSensorModel, MotionSensorModel, NtcModel, PhotodiodeSensorModel,
-    PhotoresistorModel, PtcModel, RtdModel, TemperatureSensorModel, ThermalSwitchModel,
-    ThermocoupleModel,
+    LinearLightSensorModel, LinearSensorModel, MagneticFieldSensorModel, MagneticSwitchModel,
+    NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel, RelativeResistanceSensorModel,
+    RtdModel, TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
 };
 use crate::source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
 use crate::switch::{IdealSwitchModel, SwitchModel};
@@ -155,24 +154,30 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
             instance, 1000.0, 0.0,
         )?),
         DeviceKind::MagnetoresistiveSensor => {
-            Box::new(MagnetoresistiveSensorModel::from_instance(instance)?)
+            Box::new(RelativeResistanceSensorModel::from_instance(
+                instance,
+                "magnetic_field",
+                1000.0,
+                10.0,
+                1000.0,
+            )?)
         }
-        DeviceKind::Accelerometer | DeviceKind::Imu => Box::new(MotionSensorModel::from_instance(
+        DeviceKind::Accelerometer | DeviceKind::Imu => Box::new(LinearSensorModel::from_instance(
             instance,
             "acceleration",
             0.050986,
             2.5,
         )?),
-        DeviceKind::Gyroscope => Box::new(MotionSensorModel::from_instance(
+        DeviceKind::Gyroscope => Box::new(LinearSensorModel::from_instance(
             instance,
             "angular_rate",
             0.01,
             2.5,
         )?),
-        DeviceKind::TiltSensor => Box::new(MotionSensorModel::from_instance(
+        DeviceKind::TiltSensor => Box::new(LinearSensorModel::from_instance(
             instance, "angle", 0.025, 2.5,
         )?),
-        DeviceKind::VibrationSensor => Box::new(MotionSensorModel::from_instance(
+        DeviceKind::VibrationSensor => Box::new(LinearSensorModel::from_instance(
             instance,
             "vibration",
             0.050986,

@@ -655,29 +655,39 @@ impl DeviceModel for MagneticFieldSensorModel {
     }
 }
 
-/// A magnetoresistive sensor module with a field-dependent divider.
-pub struct MagnetoresistiveSensorModel {
+/// A sensor module with a relative resistance change and a divider.
+pub struct RelativeResistanceSensorModel {
     resistance: f64,
-    field_sensitivity: f64,
+    relative_sensitivity: f64,
     series: f64,
     field: f64,
     pins: [NodeId; 3],
 }
 
-impl MagnetoresistiveSensorModel {
-    pub(crate) fn from_instance(instance: &DeviceInstance) -> Result<Self, SimError> {
+impl RelativeResistanceSensorModel {
+    pub(crate) fn from_instance(
+        instance: &DeviceInstance,
+        input_name: &str,
+        resistance: f64,
+        relative_sensitivity: f64,
+        series: f64,
+    ) -> Result<Self, SimError> {
         let params = instance.parameters();
         Ok(Self {
-            resistance: positive_parameter(params, "resistance", Some(1000.0))?,
-            field_sensitivity: non_negative_parameter(params, "field_sensitivity", 10.0)?,
-            series: positive_parameter(params, "series_resistance", Some(1000.0))?,
-            field: magnetic_field(params)?,
+            resistance: positive_parameter(params, "resistance", Some(resistance))?,
+            relative_sensitivity: non_negative_parameter(
+                params,
+                "relative_sensitivity",
+                relative_sensitivity,
+            )?,
+            series: positive_parameter(params, "series_resistance", Some(series))?,
+            field: finite_parameter(params, input_name, 0.0)?,
             pins: sensor_pins(instance)?,
         })
     }
 
     fn resistance_at(&self) -> f64 {
-        (self.resistance * (1.0 + self.field_sensitivity * self.field)).max(1e-9)
+        (self.resistance * (1.0 + self.relative_sensitivity * self.field)).max(1e-9)
     }
 
     fn output(&self, supply: f64) -> (f64, f64) {
@@ -685,7 +695,7 @@ impl MagnetoresistiveSensorModel {
     }
 }
 
-impl DeviceModel for MagnetoresistiveSensorModel {
+impl DeviceModel for RelativeResistanceSensorModel {
     fn stamp(
         &mut self,
         ctx: &mut MnaContext,
@@ -703,7 +713,7 @@ impl DeviceModel for MagnetoresistiveSensorModel {
 }
 
 /// A linear motion sensor module with an explicit environment input.
-pub struct MotionSensorModel {
+pub struct LinearSensorModel {
     sensitivity: f64,
     offset: f64,
     input: f64,
@@ -711,7 +721,7 @@ pub struct MotionSensorModel {
     pins: [NodeId; 3],
 }
 
-impl MotionSensorModel {
+impl LinearSensorModel {
     pub(crate) fn from_instance(
         instance: &DeviceInstance,
         input_name: &str,
@@ -733,7 +743,7 @@ impl MotionSensorModel {
     }
 }
 
-impl DeviceModel for MotionSensorModel {
+impl DeviceModel for LinearSensorModel {
     fn stamp(
         &mut self,
         ctx: &mut MnaContext,
@@ -758,9 +768,9 @@ impl DeviceModel for MotionSensorModel {
 #[cfg(test)]
 mod tests {
     use super::{
-        LinearLightSensorModel, MagneticFieldSensorModel, MagneticSwitchModel,
-        MagnetoresistiveSensorModel, MotionSensorModel, NtcModel, PhotodiodeSensorModel,
-        PhotoresistorModel, PtcModel, RtdModel, TemperatureSensorModel, ThermalSwitchModel,
+        LinearLightSensorModel, LinearSensorModel, MagneticFieldSensorModel, MagneticSwitchModel,
+        NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
+        RelativeResistanceSensorModel, RtdModel, TemperatureSensorModel, ThermalSwitchModel,
         ThermocoupleModel,
     };
     use sim_core::{DeviceId, DeviceInstance, DeviceKind, NodeId};
@@ -920,10 +930,16 @@ mod tests {
 
     #[test]
     fn magnetoresistive_resistance_rises_with_field() {
-        let model = MagnetoresistiveSensorModel::from_instance(&instance(
-            DeviceKind::MagnetoresistiveSensor,
-            &[("magnetic_field", 0.05)],
-        ))
+        let model = RelativeResistanceSensorModel::from_instance(
+            &instance(
+                DeviceKind::MagnetoresistiveSensor,
+                &[("magnetic_field", 0.05)],
+            ),
+            "magnetic_field",
+            1000.0,
+            10.0,
+            1000.0,
+        )
         .expect("model");
         assert!((model.resistance_at() - 1500.0).abs() < 1e-9);
         let (voltage, resistance) = model.output(5.0);
@@ -942,7 +958,7 @@ mod tests {
     }
 
     fn motion_output(kind: DeviceKind, input_name: &str, input: f64, sensitivity: f64) -> f64 {
-        let model = MotionSensorModel::from_instance(
+        let model = LinearSensorModel::from_instance(
             &instance(kind, &[(input_name, input)]),
             input_name,
             sensitivity,
@@ -968,7 +984,7 @@ mod tests {
 
     #[test]
     fn motion_sensor_at_rest_stays_at_mid_supply() {
-        let model = MotionSensorModel::from_instance(
+        let model = LinearSensorModel::from_instance(
             &instance(DeviceKind::Gyroscope, &[]),
             "angular_rate",
             0.01,
