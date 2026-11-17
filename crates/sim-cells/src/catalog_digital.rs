@@ -23,8 +23,8 @@ pub fn digital_entry(id: &str) -> Result<Option<DigitalEntry>, SimError> {
         "logic.adder.half_adder" => half_adder_entry(),
         "logic.adder.full_adder" => full_adder_entry(),
         "logic.adder.4bit_adder" => adder4_entry(),
-        "logic.flipflop.d_flipflop" => dff_entry(),
-        "logic.flipflop.jk_flipflop" => jk_entry(),
+        "logic.flipflop.d_flipflop" => dff_entry("logic.flipflop.d_flipflop"),
+        "logic.flipflop.jk_flipflop" => jk_entry("logic.flipflop.jk_flipflop"),
         "logic.flipflop.t_flipflop" => t_entry(),
         "logic.flipflop.sr_latch" => sr_entry(),
         "logic.counter.4bit_counter" => counter4_entry(),
@@ -48,6 +48,24 @@ pub fn digital_entry(id: &str) -> Result<Option<DigitalEntry>, SimError> {
         "logic.level.logic_level_shifter" => level_entry("logic.level.logic_level_shifter"),
         "logic.level.line_driver" => level_entry("logic.level.line_driver"),
         "logic.level.line_receiver" => level_entry("logic.level.line_receiver"),
+        "logic.level.optocoupler_interface" => level_entry("logic.level.optocoupler_interface"),
+        "logic.flipflop.d_latch" => latch_entry("logic.flipflop.d_latch"),
+        "logic.flipflop.edge_triggered_d_flipflop" => {
+            dff_entry("logic.flipflop.edge_triggered_d_flipflop")
+        }
+        "logic.flipflop.master_slave_jk" => jk_entry("logic.flipflop.master_slave_jk"),
+        "logic.flipflop.dual_d_flipflop" => {
+            multi_dff_entry("logic.flipflop.dual_d_flipflop", &D2, &Q2)
+        }
+        "logic.flipflop.quad_d_flipflop" => {
+            multi_dff_entry("logic.flipflop.quad_d_flipflop", &D4, &Q4)
+        }
+        "logic.flipflop.octal_latch" => octal_latch_entry(),
+        "logic.counter.up_down_counter" => up_down_entry(),
+        "logic.counter.parallel_in_serial_out" => piso_entry(),
+        "mcu.timer.timer" => timer_entry("mcu.timer.timer", false),
+        "mcu.timer.rtc" => timer_entry("mcu.timer.rtc", false),
+        "mcu.timer.watchdog" => timer_entry("mcu.timer.watchdog", true),
         _ => return Ok(None),
     };
     Ok(Some(entry))
@@ -154,8 +172,8 @@ fn adder4_entry() -> DigitalEntry {
     })
 }
 
-fn dff_entry() -> DigitalEntry {
-    finish("logic.flipflop.d_flipflop", |builder| {
+fn dff_entry(id: &'static str) -> DigitalEntry {
+    finish(id, |builder| {
         let data = builder.input("d");
         let clock = builder.input("clk");
         let (q, _) = edge_register(builder, data, clock);
@@ -176,8 +194,8 @@ fn edge_register(builder: &mut DigitalBuilder, data: NetId, clock: NetId) -> (Ne
     (q, previous_clock)
 }
 
-fn jk_entry() -> DigitalEntry {
-    finish("logic.flipflop.jk_flipflop", |builder| {
+fn jk_entry(id: &'static str) -> DigitalEntry {
+    finish(id, |builder| {
         let j = builder.input("j");
         let k = builder.input("k");
         let clock = builder.input("clk");
@@ -316,8 +334,14 @@ fn shift4_entry() -> DigitalEntry {
     })
 }
 
+const D2: [&str; 2] = ["d0", "d1"];
+const D4: [&str; 4] = ["d0", "d1", "d2", "d3"];
+const D8: [&str; 8] = ["d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7"];
+const Q2: [&str; 2] = ["q0", "q1"];
 const Q4: [&str; 4] = ["q0", "q1", "q2", "q3"];
 const Q8: [&str; 8] = ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7"];
+const PISO_OUT: [&str; 5] = ["q", "q0", "q1", "q2", "q3"];
+const WATCHDOG_OUT: [&str; 9] = ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "timeout"];
 
 fn mux8_entry() -> DigitalEntry {
     finish("logic.mux.8_to_1_multiplexer", |builder| {
@@ -576,6 +600,127 @@ fn level_entry(id: &'static str) -> DigitalEntry {
     })
 }
 
+fn latch_entry(id: &'static str) -> DigitalEntry {
+    finish(id, |builder| {
+        let data = builder.input("d");
+        let enable = builder.input("en");
+        let q = builder.net();
+        let next = builder.mux(q, data, enable);
+        builder.dff_into(next, q);
+        let not_q = builder.not(q);
+        builder.output("q", q);
+        builder.output("qn", not_q);
+        (vec!["d", "en"], vec!["q", "qn"])
+    })
+}
+
+fn multi_dff_entry(
+    id: &'static str,
+    inputs: &'static [&'static str],
+    outputs: &'static [&'static str],
+) -> DigitalEntry {
+    finish(id, |builder| {
+        let clock = builder.input("clk");
+        for (index, name) in inputs.iter().enumerate() {
+            let data = builder.input(name);
+            let (q, _) = edge_register(builder, data, clock);
+            builder.output(outputs[index], q);
+        }
+        let mut all_inputs = vec!["clk"];
+        all_inputs.extend_from_slice(inputs);
+        (all_inputs, outputs.to_vec())
+    })
+}
+
+fn octal_latch_entry() -> DigitalEntry {
+    finish("logic.flipflop.octal_latch", |builder| {
+        let enable = builder.input("en");
+        for (index, name) in D8.iter().enumerate() {
+            let data = builder.input(name);
+            let q = builder.net();
+            let next = builder.mux(q, data, enable);
+            builder.dff_into(next, q);
+            builder.output(Q8[index], q);
+        }
+        let mut inputs = vec!["en"];
+        inputs.extend_from_slice(&D8);
+        (inputs, Q8.to_vec())
+    })
+}
+
+fn up_down_entry() -> DigitalEntry {
+    finish("logic.counter.up_down_counter", |builder| {
+        let up = builder.input("up");
+        let down = builder.input("down");
+        let reset = builder.input("reset");
+        let (bits, increment) = counter_nets(builder, 4);
+        let decrement = decrement_nets(builder, &bits);
+        let zero = builder.constant(false);
+        for (index, bit) in bits.iter().enumerate() {
+            let up_or_hold = builder.mux(*bit, increment[index], up);
+            let next = builder.mux(up_or_hold, decrement[index], down);
+            let value = builder.mux(next, zero, reset);
+            builder.dff_into(value, *bit);
+            builder.output(Q4[index], *bit);
+        }
+        (vec!["up", "down", "reset"], Q4.to_vec())
+    })
+}
+
+fn decrement_nets(builder: &mut DigitalBuilder, bits: &[NetId]) -> Vec<NetId> {
+    let mut borrow = builder.constant(true);
+    let mut next = Vec::new();
+    for bit in bits {
+        next.push(builder.xor(*bit, borrow));
+        let not_bit = builder.not(*bit);
+        borrow = builder.and(borrow, not_bit);
+    }
+    next
+}
+
+fn piso_entry() -> DigitalEntry {
+    finish("logic.counter.parallel_in_serial_out", |builder| {
+        let load = builder.input("load");
+        let reset = builder.input("reset");
+        let zero = builder.constant(false);
+        let mut stages = Vec::new();
+        for (index, name) in D4.iter().enumerate() {
+            let parallel = builder.input(name);
+            let stage = builder.net();
+            let source = if index == 0 { zero } else { stages[index - 1] };
+            let loaded = builder.mux(source, parallel, load);
+            let next = builder.mux(loaded, zero, reset);
+            builder.dff_into(next, stage);
+            builder.output(Q4[index], stage);
+            stages.push(stage);
+        }
+        builder.output("q", stages[3]);
+        (
+            vec!["d0", "d1", "d2", "d3", "load", "reset"],
+            PISO_OUT.to_vec(),
+        )
+    })
+}
+
+fn timer_entry(id: &'static str, watchdog: bool) -> DigitalEntry {
+    finish(id, |builder| {
+        let reset = builder.input("reset");
+        let (bits, next) = counter_nets(builder, 8);
+        let zero = builder.constant(false);
+        for (index, bit) in bits.iter().enumerate() {
+            let value = builder.mux(next[index], zero, reset);
+            builder.dff_into(value, *bit);
+            builder.output(Q8[index], *bit);
+        }
+        if watchdog {
+            let timeout = crate::and_all(builder, &bits);
+            builder.output("timeout", timeout);
+            return (vec!["reset"], WATCHDOG_OUT.to_vec());
+        }
+        (vec!["reset"], Q8.to_vec())
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::digital_entry;
@@ -706,6 +851,66 @@ mod tests {
         entry.circuit.settle().expect("settle");
         assert_eq!(entry.circuit.output("y0"), Some(true));
         assert_eq!(entry.circuit.output("y2"), Some(true));
+    }
+
+    #[test]
+    fn d_latch_holds_when_disabled() {
+        let mut entry = entry("logic.flipflop.d_latch");
+        entry.circuit.set_input("d", true).expect("input");
+        entry.circuit.set_input("en", true).expect("input");
+        entry.circuit.tick().expect("tick");
+        assert_eq!(entry.circuit.output("q"), Some(true));
+        entry.circuit.set_input("d", false).expect("input");
+        entry.circuit.set_input("en", false).expect("input");
+        entry.circuit.tick().expect("tick");
+        assert_eq!(entry.circuit.output("q"), Some(true));
+    }
+
+    #[test]
+    fn dual_dff_captures_second_bit() {
+        let mut entry = entry("logic.flipflop.dual_d_flipflop");
+        entry.circuit.set_input("d1", true).expect("input");
+        entry.circuit.set_input("clk", true).expect("input");
+        entry.circuit.tick().expect("tick");
+        assert_eq!(entry.circuit.output("q1"), Some(true));
+        assert_eq!(entry.circuit.output("q0"), Some(false));
+    }
+
+    #[test]
+    fn up_down_counter_counts_both_ways() {
+        let mut entry = entry("logic.counter.up_down_counter");
+        entry.circuit.set_input("up", true).expect("input");
+        entry.circuit.tick().expect("tick");
+        assert_eq!(entry.circuit.output("q0"), Some(true));
+        entry.circuit.set_input("up", false).expect("input");
+        entry.circuit.set_input("down", true).expect("input");
+        entry.circuit.tick().expect("tick");
+        assert_eq!(entry.circuit.output("q0"), Some(false));
+    }
+
+    #[test]
+    fn piso_shifts_loaded_data() {
+        let mut entry = entry("logic.counter.parallel_in_serial_out");
+        entry.circuit.set_input("d0", true).expect("input");
+        for label in ["d1", "d2", "d3"] {
+            entry.circuit.set_input(label, false).expect("input");
+        }
+        entry.circuit.set_input("load", true).expect("input");
+        entry.circuit.tick().expect("tick");
+        entry.circuit.set_input("load", false).expect("input");
+        for _ in 0..3 {
+            entry.circuit.tick().expect("tick");
+        }
+        assert_eq!(entry.circuit.output("q"), Some(true));
+    }
+
+    #[test]
+    fn watchdog_times_out_after_max_count() {
+        let mut entry = entry("mcu.timer.watchdog");
+        for _ in 0..255 {
+            entry.circuit.tick().expect("tick");
+        }
+        assert_eq!(entry.circuit.output("timeout"), Some(true));
     }
 
     #[test]

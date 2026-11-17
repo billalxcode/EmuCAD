@@ -191,17 +191,17 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C5-05 | 5 | 5 | 555, monostable, astable, VCO, dan PLL solver-backed. |
 | C5-06 | 4 | 4 | Voltage source 2 pin; current reference salah; topology shunt dan series belum. |
 | C6-01 | 12 | 9 | 8 gate benar; Schmitt tanpa hysteresis; 3 special belum. |
-| C6-02 | 10 | 4 | D, JK, T, dan SR ada di domain digital; 6 belum. |
-| C6-03 | 10 | 8 | 4/8-bit, decade, ripple, Johnson, shift 4/8-bit, SIPO; up/down dan PISO belum. |
+| C6-02 | 10 | 10 | D, JK, T, SR, latch, edge D, master-slave, dual/quad D, octal latch. |
+| C6-03 | 10 | 10 | 4/8-bit, decade, up/down, ripple, Johnson, shift 4/8-bit, SIPO, PISO. |
 | C6-04 | 8 | 8 | Mux 2:1/4:1/8:1, demux, decoder, encoder, dan priority encoder ada. |
 | C6-05 | 8 | 7 | Adder, comparator, parity, dan bus buffer; bidirectional buffer belum. |
-| C6-06 | 6 | 3 | Level shifter, line driver, dan line receiver ada; 3 belum. |
+| C6-06 | 6 | 4 | Level shifter, line driver, receiver, dan optocoupler; 2 belum. |
 | C6-07 | 6 | 0 | Belum ada model programmable logic. |
 | C6-08 | 15 | 0 | Belum ada model memory. |
 | C6-09 | 11 | 0 | Belum ada model MCU. |
 | C6-10 | 5 | 0 | Belum ada model ADC, DAC, PWM. |
 | C6-11 | 6 | 0 | Belum ada model serial interface. |
-| C6-12 | 3 | 0 | Belum ada model timer, RTC, watchdog. |
+| C6-12 | 3 | 3 | Timer, RTC, dan watchdog memakai counter digital 8-bit. |
 | C7-01 | 6 | 6 | Regulator 3 pin generik; negative, current, shunt, adjustable belum. |
 | C7-02 | 8 | 8 | Delapan topologi memakai converter teregulasi dengan efisiensi; verifikasi batch belum. |
 | C7-03 | 5 | 5 | Charge pump dan charger memakai model tiga pin dengan efisiensi; verifikasi batch belum. |
@@ -442,12 +442,10 @@ Target: 100 entri.
 - [ ] C6-01 Gate 12 entri: AND, OR, NOT, NAND, NOR, XOR, XNOR, buffer,
   Schmitt, open drain, tri-state, transmission gate.
 - [~] C6-02 Flip-flop dan latch 10 entri.
-  - D, JK, T, dan SR sudah ada di domain digital.
-  - Latch, edge-triggered, master-slave, dan multi-bit belum.
+  - Sepuluh entry sudah ada di domain digital.
   - Reference vector dan verified belum.
 - [~] C6-03 Counter dan shift register 10 entri.
-  - 4/8-bit, decade, ripple, Johnson, shift 4/8-bit, dan SIPO ada.
-  - Up/down dan PISO belum.
+  - Sepuluh entry sudah ada di domain digital.
   - Reference vector dan verified belum.
 - [~] C6-04 Mux, decoder, encoder 8 entri.
   - Delapan entry sudah ada di domain digital.
@@ -456,8 +454,8 @@ Target: 100 entri.
   - Tujuh entry sudah ada; bidirectional buffer belum.
   - Reference vector dan verified belum.
 - [~] C6-06 Level shifter dan interface 6 entri.
-  - Level shifter, line driver, dan line receiver ada.
-  - Bidirectional, open-drain, dan optocoupler interface belum.
+  - Level shifter, line driver, receiver, dan optocoupler ada.
+  - Bidirectional dan open-drain belum.
   - Reference vector dan verified belum.
 - [ ] C6-07 Programmable logic dan state machine 6 entri.
 - [ ] C6-08 Memory 15 entri: SRAM, DRAM, ROM, EEPROM, Flash, FRAM, MRAM,
@@ -465,7 +463,10 @@ Target: 100 entri.
 - [ ] C6-09 MCU core 11 entri: AVR, PIC, 8051, ARM, RISC-V, ESP, STM32.
 - [ ] C6-10 ADC, DAC, PWM peripheral 5 entri.
 - [ ] C6-11 UART, SPI, I2C, CAN, USB, Ethernet 6 entri.
-- [ ] C6-12 Timer, RTC, watchdog 3 entri.
+- [~] C6-12 Timer, RTC, watchdog 3 entri.
+  - Tiga entry memakai counter digital 8-bit.
+  - Watchdog memiliki output timeout.
+  - Reference vector dan verified belum.
 
 ## 10. Power, Sensor, Actuator
 

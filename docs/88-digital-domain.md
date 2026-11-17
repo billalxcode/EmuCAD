@@ -6,7 +6,7 @@ Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
 ## 1. Cakupan
 
 Domain digital memakai `DigitalCircuit` dua-state dengan input dan
-output bernama. Saat ini 30 entry katalog sudah dapat dijalankan:
+output bernama. Saat ini 42 entry katalog sudah dapat dijalankan:
 
 | Kelompok | Entry |
 |---|---|
@@ -14,10 +14,11 @@ output bernama. Saat ini 30 entry katalog sudah dapat dijalankan:
 | Demux/decoder/encoder | 1:2 demux, 2:4 decoder, 3:8 decoder, 8:3 encoder, priority encoder |
 | Adder/comparator | half adder, full adder, 4-bit adder, magnitude comparator |
 | Parity/buffer | parity generator, parity checker, bus buffer |
-| Flip-flop | D, JK, T, SR |
-| Counter | 4-bit, 8-bit, decade, ripple, Johnson |
-| Shift register | 4-bit, 8-bit, SIPO |
-| Level | level shifter, line driver, line receiver |
+| Flip-flop | D, JK, T, SR, D latch, edge D, master-slave JK, dual/quad D, octal latch |
+| Counter | 4-bit, 8-bit, decade, up/down, ripple, Johnson |
+| Shift register | 4-bit, 8-bit, SIPO, PISO |
+| Level | level shifter, line driver, line receiver, optocoupler interface |
+| Timer | timer, RTC, watchdog |
 
 ## 2. Perintah
 
@@ -61,18 +62,13 @@ Port ditentukan per entry, bukan dari jumlah pin katalog. Contoh:
 
 ## 5. Entry Digital yang Belum Didukung
 
-Masih ada 33 entry digital di luar domain ini:
+Masih ada 21 entry digital di luar domain ini:
 
 - 3 special gate (open-drain, tri-state, transmission gate).
-- 6 flip-flop tambahan (latch, edge-triggered, master-slave, multi-bit).
-- 2 counter/shift tambahan (up/down, PISO).
-- 0 mux/decoder/encoder tambahan.
 - 1 adder/buffer tambahan (bidirectional buffer).
-- 3 level shifter/interface tambahan (bidirectional, open-drain,
-  optocoupler interface).
+- 2 level shifter/interface tambahan (bidirectional, open-drain).
 - 6 programmable logic.
 - 6 serial interface.
-- 3 timer peripheral.
 - 3 digital source.
 
 ## 6. Verifikasi
@@ -85,7 +81,11 @@ Test domain digital mencakup:
 - Comparator 5 > 3.
 - Parity checker mendeteksi error.
 - Bus buffer mengikuti enable.
-- Capture D flip-flop pada tepi naik.
+- D flip-flop dan dual D flip-flop menangkap pada tepi naik.
+- D latch menahan nilai saat enable rendah.
+- Up/down counter menghitung dua arah.
+- PISO menggeser data parallel ke serial.
+- Watchdog timeout setelah 255 tick.
 - Counter 4-bit setelah tiga tick.
 - Decade counter kembali ke nol setelah sepuluh tick.
 - Shift register memindahkan data.

@@ -4,7 +4,7 @@
 yang memodelkan transistor, gerbang CMOS, CPU AVR, peripheral, dan board,
 serta mampu menjalankan firmware AVR.
 
-> **Status v0.1:** 1081 test lulus, 9 crate, crate simulasi zero external
+> **Status v0.1:** 1086 test lulus, 9 crate, crate simulasi zero external
 > dependency; dependensi GUI dan binding Python dibatasi pada daftar yang
 > disetujui di `AGENTS.md`.
 > Tag `v0.1` tersedia. Archive Linux ada di
@@ -166,7 +166,7 @@ Dokumen yang sering dipakai:
 
 Sudah:
 
-- 1081 test workspace.
+- 1086 test workspace.
 - fmt, clippy, test, dan build release lulus.
 - Paket Linux dapat dibuat.
 - Determinisme Linux diuji.
