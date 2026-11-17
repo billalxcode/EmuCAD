@@ -52,7 +52,8 @@ pub use protection::{FuseModel, VaristorModel};
 pub use regulator::RegulatorModel;
 pub use relay::RelayModel;
 pub use sensors::{
-    LinearLightSensorModel, NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
+    LinearLightSensorModel, MagneticFieldSensorModel, MagneticSwitchModel,
+    MagnetoresistiveSensorModel, NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
     RtdModel, TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
 };
 pub use source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};

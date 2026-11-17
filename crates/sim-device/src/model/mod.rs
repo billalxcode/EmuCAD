@@ -17,7 +17,8 @@ use crate::protection::{FuseModel, VaristorModel};
 use crate::regulator::RegulatorModel;
 use crate::relay::RelayModel;
 use crate::sensors::{
-    LinearLightSensorModel, NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
+    LinearLightSensorModel, MagneticFieldSensorModel, MagneticSwitchModel,
+    MagnetoresistiveSensorModel, NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
     RtdModel, TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
 };
 use crate::source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
@@ -143,6 +144,18 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         DeviceKind::Photoresistor => Box::new(PhotoresistorModel::from_instance(instance)?),
         DeviceKind::PhotodiodeSensor => Box::new(PhotodiodeSensorModel::from_instance(instance)?),
         DeviceKind::LinearLightSensor => Box::new(LinearLightSensorModel::from_instance(instance)?),
+        DeviceKind::HallSwitch | DeviceKind::ReedSwitchSensor => {
+            Box::new(MagneticSwitchModel::from_instance(instance)?)
+        }
+        DeviceKind::LinearHallSensor => {
+            Box::new(MagneticFieldSensorModel::from_instance(instance, 5.0, 2.5)?)
+        }
+        DeviceKind::FluxgateSensor => Box::new(MagneticFieldSensorModel::from_instance(
+            instance, 1000.0, 0.0,
+        )?),
+        DeviceKind::MagnetoresistiveSensor => {
+            Box::new(MagnetoresistiveSensorModel::from_instance(instance)?)
+        }
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),
         DeviceKind::DiodeBridge => Box::new(DiodeBridgeModel::from_instance(instance)?),

@@ -103,6 +103,16 @@ pub enum DeviceKind {
     PhotodiodeSensor,
     /// A linear light sensor module.
     LinearLightSensor,
+    /// A Hall-effect switch with hysteresis.
+    HallSwitch,
+    /// A linear Hall-effect sensor module.
+    LinearHallSensor,
+    /// A reed switch sensor module.
+    ReedSwitchSensor,
+    /// A magnetoresistive sensor module.
+    MagnetoresistiveSensor,
+    /// A fluxgate magnetic field sensor module.
+    FluxgateSensor,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -189,6 +199,11 @@ impl DeviceKind {
             Self::Photoresistor => "photoresistor",
             Self::PhotodiodeSensor => "photodiode_sensor",
             Self::LinearLightSensor => "linear_light_sensor",
+            Self::HallSwitch => "hall_switch",
+            Self::LinearHallSensor => "linear_hall_sensor",
+            Self::ReedSwitchSensor => "reed_switch_sensor",
+            Self::MagnetoresistiveSensor => "magnetoresistive_sensor",
+            Self::FluxgateSensor => "fluxgate_sensor",
             Self::Diode => "diode",
             _ => "custom",
         }

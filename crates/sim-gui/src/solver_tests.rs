@@ -1089,3 +1089,26 @@ fn linear_light_sensor_scales_with_illuminance() {
     assert!((first - 1.0).abs() < 0.01, "first={first}");
     assert!((second - 2.0).abs() < 0.01, "second={second}");
 }
+
+#[test]
+fn hall_and_reed_switches_respond_to_field() {
+    let hall_off = sensor_output(DeviceKind::HallSwitch, &[("magnetic_field", 0.0)]);
+    let hall_on = sensor_output(DeviceKind::HallSwitch, &[("magnetic_field", 0.01)]);
+    let reed_on = sensor_output(DeviceKind::ReedSwitchSensor, &[("magnetic_field", 0.01)]);
+    assert!(hall_off.abs() < 0.01, "hall_off={hall_off}");
+    assert!((hall_on - 5.0).abs() < 0.01, "hall_on={hall_on}");
+    assert!((reed_on - 5.0).abs() < 0.01, "reed_on={reed_on}");
+}
+
+#[test]
+fn linear_magnetic_sensors_scale_with_field() {
+    let hall = sensor_output(DeviceKind::LinearHallSensor, &[("magnetic_field", 0.2)]);
+    let fluxgate = sensor_output(DeviceKind::FluxgateSensor, &[("magnetic_field", 0.001)]);
+    let bridge = sensor_output(
+        DeviceKind::MagnetoresistiveSensor,
+        &[("magnetic_field", 0.05)],
+    );
+    assert!((hall - 3.5).abs() < 0.01, "hall={hall}");
+    assert!((fluxgate - 1.0).abs() < 0.01, "fluxgate={fluxgate}");
+    assert!((bridge - 3.0).abs() < 0.01, "bridge={bridge}");
+}

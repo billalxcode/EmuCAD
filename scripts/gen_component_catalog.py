@@ -440,9 +440,20 @@ add("sensor.light", "Sensor", "LinearLightSensor", 3, "sensitivity", 0.001, "V/l
 add("sensor.light", "Sensor", "LinearLightSensor", 3, "sensitivity", 0.001, "V/lux", [
     "color sensor",
 ])
-add("sensor.magnetic", "Sensor", None, 3, "sensitivity", 1.0, "ratio", [
-    "Hall sensor", "linear Hall sensor", "reed switch sensor",
-    "magnetoresistive sensor", "fluxgate sensor",
+add("sensor.magnetic", "Sensor", "HallSwitch", 3, "threshold", 0.005, "T", [
+    "Hall sensor",
+])
+add("sensor.magnetic", "Sensor", "LinearHallSensor", 3, "sensitivity", 5.0, "V/T", [
+    "linear Hall sensor",
+])
+add("sensor.magnetic", "Sensor", "ReedSwitchSensor", 3, "threshold", 0.005, "T", [
+    "reed switch sensor",
+])
+add("sensor.magnetic", "Sensor", "MagnetoresistiveSensor", 3, "resistance", 1000.0, "ohm", [
+    "magnetoresistive sensor",
+])
+add("sensor.magnetic", "Sensor", "FluxgateSensor", 3, "sensitivity", 1000.0, "V/T", [
+    "fluxgate sensor",
 ])
 add("sensor.motion", "Sensor", None, 3, "sensitivity", 1.0, "ratio", [
     "accelerometer", "gyroscope", "IMU", "tilt sensor", "vibration sensor",

@@ -1,4 +1,4 @@
-//! Behavioral three-pin temperature sensor modules.
+//! Behavioral three-pin sensor modules.
 
 use crate::model::{
     DeviceModel, non_negative_parameter, parameter, pins_exact, positive_parameter,
@@ -528,10 +528,185 @@ impl DeviceModel for LinearLightSensorModel {
     }
 }
 
+fn finite_parameter(
+    params: &std::collections::BTreeMap<String, f64>,
+    name: &str,
+    default: f64,
+) -> Result<f64, SimError> {
+    let value = parameter(params, name, default);
+    if !value.is_finite() {
+        return Err(SimError::InvalidNetlist(format!(
+            "parameter {name} must be finite"
+        )));
+    }
+    Ok(value)
+}
+
+fn magnetic_field(params: &std::collections::BTreeMap<String, f64>) -> Result<f64, SimError> {
+    finite_parameter(params, "magnetic_field", 0.0)
+}
+
+/// A magnetic field switch with hysteresis.
+pub struct MagneticSwitchModel {
+    threshold: f64,
+    hysteresis: f64,
+    output_resistance: f64,
+    field: f64,
+    on: bool,
+    pins: [NodeId; 3],
+}
+
+impl MagneticSwitchModel {
+    pub(crate) fn from_instance(instance: &DeviceInstance) -> Result<Self, SimError> {
+        let params = instance.parameters();
+        Ok(Self {
+            threshold: non_negative_parameter(params, "threshold", 0.005)?,
+            hysteresis: non_negative_parameter(params, "hysteresis", 0.001)?,
+            output_resistance: positive_parameter(params, "output_resistance", Some(1000.0))?,
+            field: magnetic_field(params)?,
+            on: false,
+            pins: sensor_pins(instance)?,
+        })
+    }
+
+    fn output(&mut self, supply: f64) -> f64 {
+        if self.field > self.threshold {
+            self.on = true;
+        }
+        if self.field < self.threshold - self.hysteresis {
+            self.on = false;
+        }
+        if self.on { supply.max(0.0) } else { 0.0 }
+    }
+}
+
+impl DeviceModel for MagneticSwitchModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        solution: &Solution,
+        _dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        let supply = supply(solution, self.pins);
+        let output = self.output(supply);
+        stamp_output(
+            ctx,
+            self.pins[2],
+            self.pins[1],
+            output,
+            self.output_resistance,
+        )
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        Ok(())
+    }
+}
+
+/// A linear magnetic field sensor module in volts per tesla.
+pub struct MagneticFieldSensorModel {
+    sensitivity: f64,
+    offset: f64,
+    field: f64,
+    output_resistance: f64,
+    pins: [NodeId; 3],
+}
+
+impl MagneticFieldSensorModel {
+    pub(crate) fn from_instance(
+        instance: &DeviceInstance,
+        sensitivity: f64,
+        offset: f64,
+    ) -> Result<Self, SimError> {
+        let params = instance.parameters();
+        Ok(Self {
+            sensitivity: positive_parameter(params, "sensitivity", Some(sensitivity))?,
+            offset: finite_parameter(params, "offset", offset)?,
+            field: magnetic_field(params)?,
+            output_resistance: positive_parameter(params, "output_resistance", Some(1000.0))?,
+            pins: sensor_pins(instance)?,
+        })
+    }
+
+    fn output(&self, supply: f64) -> f64 {
+        clamp_output(self.offset + self.sensitivity * self.field, supply)
+    }
+}
+
+impl DeviceModel for MagneticFieldSensorModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        solution: &Solution,
+        _dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        let supply = supply(solution, self.pins);
+        stamp_output(
+            ctx,
+            self.pins[2],
+            self.pins[1],
+            self.output(supply),
+            self.output_resistance,
+        )
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        Ok(())
+    }
+}
+
+/// A magnetoresistive sensor module with a field-dependent divider.
+pub struct MagnetoresistiveSensorModel {
+    resistance: f64,
+    field_sensitivity: f64,
+    series: f64,
+    field: f64,
+    pins: [NodeId; 3],
+}
+
+impl MagnetoresistiveSensorModel {
+    pub(crate) fn from_instance(instance: &DeviceInstance) -> Result<Self, SimError> {
+        let params = instance.parameters();
+        Ok(Self {
+            resistance: positive_parameter(params, "resistance", Some(1000.0))?,
+            field_sensitivity: non_negative_parameter(params, "field_sensitivity", 10.0)?,
+            series: positive_parameter(params, "series_resistance", Some(1000.0))?,
+            field: magnetic_field(params)?,
+            pins: sensor_pins(instance)?,
+        })
+    }
+
+    fn resistance_at(&self) -> f64 {
+        (self.resistance * (1.0 + self.field_sensitivity * self.field)).max(1e-9)
+    }
+
+    fn output(&self, supply: f64) -> (f64, f64) {
+        divider_output(self.resistance_at(), self.series, supply)
+    }
+}
+
+impl DeviceModel for MagnetoresistiveSensorModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        solution: &Solution,
+        _dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        let supply = supply(solution, self.pins);
+        let (voltage, resistance) = self.output(supply);
+        stamp_output(ctx, self.pins[2], self.pins[1], voltage, resistance)
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
-        LinearLightSensorModel, NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
+        LinearLightSensorModel, MagneticFieldSensorModel, MagneticSwitchModel,
+        MagnetoresistiveSensorModel, NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
         RtdModel, TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
     };
     use sim_core::{DeviceId, DeviceInstance, DeviceKind, NodeId};
@@ -649,5 +824,66 @@ mod tests {
         ))
         .expect("model");
         assert!((model.output(5.0) - 1.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn magnetic_switch_uses_hysteresis() {
+        let mut model = MagneticSwitchModel::from_instance(&instance(
+            DeviceKind::ReedSwitchSensor,
+            &[("threshold", 0.005), ("hysteresis", 0.001)],
+        ))
+        .expect("model");
+        assert!(model.output(5.0).abs() < 1e-9);
+        model.field = 0.006;
+        assert!((model.output(5.0) - 5.0).abs() < 1e-9);
+        model.field = 0.0045;
+        assert!((model.output(5.0) - 5.0).abs() < 1e-9);
+        model.field = 0.003;
+        assert!(model.output(5.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn linear_hall_output_is_offset_plus_field() {
+        let model = MagneticFieldSensorModel::from_instance(
+            &instance(DeviceKind::LinearHallSensor, &[("magnetic_field", 0.2)]),
+            5.0,
+            2.5,
+        )
+        .expect("model");
+        assert!((model.output(5.0) - 3.5).abs() < 1e-9);
+    }
+
+    #[test]
+    fn fluxgate_output_matches_volts_per_tesla() {
+        let model = MagneticFieldSensorModel::from_instance(
+            &instance(DeviceKind::FluxgateSensor, &[("magnetic_field", 0.001)]),
+            1000.0,
+            0.0,
+        )
+        .expect("model");
+        assert!((model.output(5.0) - 1.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn magnetoresistive_resistance_rises_with_field() {
+        let model = MagnetoresistiveSensorModel::from_instance(&instance(
+            DeviceKind::MagnetoresistiveSensor,
+            &[("magnetic_field", 0.05)],
+        ))
+        .expect("model");
+        assert!((model.resistance_at() - 1500.0).abs() < 1e-9);
+        let (voltage, resistance) = model.output(5.0);
+        assert!((voltage - 3.0).abs() < 1e-9);
+        assert!((resistance - 600.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn magnetic_field_must_be_finite() {
+        let result = MagneticFieldSensorModel::from_instance(
+            &instance(DeviceKind::FluxgateSensor, &[("magnetic_field", f64::NAN)]),
+            1000.0,
+            0.0,
+        );
+        assert!(result.is_err());
     }
 }

@@ -3,7 +3,7 @@
 Katalog device yang tersedia di `sim-device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 146.
+dan transmission line sudah diimplementasikan. Total test `sim-device`: 151.
 
 ---
 
@@ -104,6 +104,11 @@ pub fn model_from_instance(
 | Photoresistor | 3 | Gamma resistance dan divider | - |
 | Photodiode sensor | 3 | Transimpedance photocurrent | - |
 | Linear light sensor | 3 | Linear V/lux output | - |
+| Hall switch | 3 | Threshold dan hysteresis | - |
+| Linear Hall sensor | 3 | Offset dan V/T output | - |
+| Reed switch sensor | 3 | Threshold dan hysteresis | - |
+| Magnetoresistive sensor | 3 | Field-dependent divider | - |
+| Fluxgate sensor | 3 | Linear V/T output | - |
 | VCVS | 4 | Linear gain | [47](47-controlled-sources.md) |
 | VCCS | 4 | Linear transconductance | [47](47-controlled-sources.md) |
 | CCCS | 4 | Linear current gain | [48](48-cccs-switch.md) |
@@ -355,8 +360,10 @@ Test device mencakup:
 - Optocoupler CTR.
 - Sensor suhu NTC, PTC, RTD, thermocouple, semikonduktor, dan switch.
 - Sensor cahaya photoresistor, photodiode, dan linear light.
+- Sensor magnetik Hall switch, Hall linear, reed switch, magnetoresistive,
+  dan fluxgate.
 
-Total test `sim-device`: 141 unit + 5 integration = 146.
+Total test `sim-device`: 146 unit + 5 integration = 151.
 
 ---
 

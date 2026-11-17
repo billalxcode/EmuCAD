@@ -195,6 +195,41 @@ const LINEAR_LIGHT_SENSOR: &[ParameterSpec] = &[
     ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
 ];
 
+const HALL_SWITCH: &[ParameterSpec] = &[
+    ParameterSpec::number("threshold", "T", 0.005, 0.0, 1e3),
+    ParameterSpec::number("hysteresis", "T", 0.001, 0.0, 1e3),
+    ParameterSpec::number("magnetic_field", "T", 0.0, -1e3, 1e3),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const LINEAR_HALL_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/T", 5.0, 1e-12, 1e9),
+    ParameterSpec::number("offset", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("magnetic_field", "T", 0.0, -1e3, 1e3),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const REED_SWITCH_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("threshold", "T", 0.005, 0.0, 1e3),
+    ParameterSpec::number("hysteresis", "T", 0.001, 0.0, 1e3),
+    ParameterSpec::number("magnetic_field", "T", 0.0, -1e3, 1e3),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const MAGNETORESISTIVE_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("resistance", "ohm", 1000.0, 1e-9, 1e12),
+    ParameterSpec::number("field_sensitivity", "1/T", 10.0, 0.0, 1e9),
+    ParameterSpec::number("series_resistance", "ohm", 1000.0, 1e-9, 1e12),
+    ParameterSpec::number("magnetic_field", "T", 0.0, -1e3, 1e3),
+];
+
+const FLUXGATE_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/T", 1000.0, 1e-12, 1e9),
+    ParameterSpec::number("offset", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("magnetic_field", "T", 0.0, -1e3, 1e3),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -435,6 +470,11 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::Photoresistor => PHOTORESISTOR,
         DeviceKind::PhotodiodeSensor => PHOTODIODE_SENSOR,
         DeviceKind::LinearLightSensor => LINEAR_LIGHT_SENSOR,
+        DeviceKind::HallSwitch => HALL_SWITCH,
+        DeviceKind::LinearHallSensor => LINEAR_HALL_SENSOR,
+        DeviceKind::ReedSwitchSensor => REED_SWITCH_SENSOR,
+        DeviceKind::MagnetoresistiveSensor => MAGNETORESISTIVE_SENSOR,
+        DeviceKind::FluxgateSensor => FLUXGATE_SENSOR,
         _ => &[],
     }
 }
@@ -502,6 +542,11 @@ mod tests {
         DeviceKind::Photoresistor,
         DeviceKind::PhotodiodeSensor,
         DeviceKind::LinearLightSensor,
+        DeviceKind::HallSwitch,
+        DeviceKind::LinearHallSensor,
+        DeviceKind::ReedSwitchSensor,
+        DeviceKind::MagnetoresistiveSensor,
+        DeviceKind::FluxgateSensor,
     ];
 
     #[test]
