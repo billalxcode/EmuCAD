@@ -31,6 +31,11 @@ pub(crate) fn mux_tree(
     level[0]
 }
 
+/// Shifts a bit vector left and inserts a new least-significant bit.
+pub(crate) fn shift_in<const N: usize>(bits: &[NetId; N], input: NetId) -> [NetId; N] {
+    std::array::from_fn(|index| if index == 0 { input } else { bits[index - 1] })
+}
+
 /// Returns true when a bit vector is less than a constant.
 pub(crate) fn less_than(builder: &mut DigitalBuilder, bits: &[NetId], value: u32) -> NetId {
     let mut equal = builder.constant(true);

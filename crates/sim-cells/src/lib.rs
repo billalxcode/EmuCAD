@@ -8,6 +8,7 @@ mod builder;
 mod catalog_bits;
 mod catalog_can;
 pub mod catalog_digital;
+mod catalog_flash;
 mod catalog_i2c;
 mod catalog_memory;
 mod catalog_spi;

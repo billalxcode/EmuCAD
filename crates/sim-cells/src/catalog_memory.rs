@@ -4,9 +4,9 @@ use crate::catalog_bits::{equals, increment, mux_tree, register_bits};
 use crate::catalog_digital::{DigitalEntry, finish};
 use crate::{DigitalBuilder, NetId};
 
-const ADDRESS_BITS: usize = 7;
-const DATA_BITS: usize = 8;
-const WORDS: usize = 1 << ADDRESS_BITS;
+pub(crate) const ADDRESS_BITS: usize = 7;
+pub(crate) const DATA_BITS: usize = 8;
+pub(crate) const WORDS: usize = 1 << ADDRESS_BITS;
 const ADDRESS: [&str; ADDRESS_BITS] = [
     "addr0", "addr1", "addr2", "addr3", "addr4", "addr5", "addr6",
 ];
@@ -431,7 +431,7 @@ fn data_inputs(builder: &mut DigitalBuilder) -> [NetId; DATA_BITS] {
     ]
 }
 
-fn array_cells(builder: &mut DigitalBuilder) -> Vec<Vec<NetId>> {
+pub(crate) fn array_cells(builder: &mut DigitalBuilder) -> Vec<Vec<NetId>> {
     let mut cells = Vec::with_capacity(WORDS);
     for _ in 0..WORDS {
         let mut word = Vec::with_capacity(DATA_BITS);
@@ -479,7 +479,7 @@ fn write_word(
     }
 }
 
-fn array_read(
+pub(crate) fn array_read(
     builder: &mut DigitalBuilder,
     cells: &[Vec<NetId>],
     address: &[NetId; ADDRESS_BITS],

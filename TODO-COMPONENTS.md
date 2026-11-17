@@ -197,7 +197,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C6-05 | 8 | 8 | Adder, comparator, parity, bus buffer, dan bidirectional buffer. |
 | C6-06 | 6 | 6 | Level shifter, line driver, receiver, optocoupler, bidirectional, dan open-drain. |
 | C6-07 | 6 | 6 | PAL, GAL, CPLD, FPGA logic block, LUT, dan FSM 3-input. |
-| C6-08 | 15 | 12 | Sel SRAM/DRAM, array, ROM, PROM, module, dan controller sudah ada; 3 entry belum. |
+| C6-08 | 15 | 13 | Sel SRAM/DRAM, array, ROM, PROM, module, controller, dan SPI flash sudah ada; 2 entry belum. |
 | C6-09 | 11 | 0 | Belum ada model MCU. |
 | C6-10 | 5 | 4 | SAR, delta-sigma, flash, dan PWM generator; R-2R DAC belum. |
 | C6-11 | 6 | 4 | UART, SPI, I2C, dan CAN ada; USB dan Ethernet belum. |
@@ -467,8 +467,9 @@ Target: 100 entri.
   - ROM dan PROM memakai port load simulasi; PROM satu kali per kata.
   - Memory module memakai cs/we/oe; controller memakai req/ready.
   - Sel DRAM memakai refresh global dan window retensi 15 tick.
-  - Belum ada erase, endurance, wear, atau persistensi antar proses.
-  - SPI flash, I2C EEPROM, dan SD card belum.
+  - SPI flash memakai perintah WREN, RDSR, READ, PAGE PROGRAM, dan CHIP ERASE.
+  - Belum ada endurance, wear, atau persistensi antar proses.
+  - I2C EEPROM dan SD card belum.
   - Reference vector dan benchmark array belum.
 - [ ] C6-09 MCU core 11 entri: AVR, PIC, 8051, ARM, RISC-V, ESP, STM32.
 - [ ] C6-10 ADC, DAC, PWM peripheral 5 entri.
