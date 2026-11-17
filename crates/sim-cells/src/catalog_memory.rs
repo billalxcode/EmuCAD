@@ -23,7 +23,7 @@ pub(crate) fn memory_array_entry(id: &'static str, retain: bool) -> DigitalEntry
         let write_enable = builder.input("we");
         let address = address_inputs(builder);
         let data_in = data_inputs(builder);
-        let cells = sram_cells(builder);
+        let cells = array_cells(builder);
         sram_write(
             builder,
             &cells,
@@ -33,12 +33,93 @@ pub(crate) fn memory_array_entry(id: &'static str, retain: bool) -> DigitalEntry
             &address,
             &data_in,
         );
-        let data_out = sram_read(builder, &cells, &address);
+        let data_out = array_read(builder, &cells, &address);
         for (index, net) in data_out.iter().enumerate() {
             builder.output(DATA_OUT[index], *net);
         }
         (sram_inputs(), DATA_OUT.to_vec())
     })
+}
+
+const ROM_INPUTS: [&str; 16] = [
+    "load", "addr0", "addr1", "addr2", "addr3", "addr4", "addr5", "addr6", "din0", "din1", "din2",
+    "din3", "din4", "din5", "din6", "din7",
+];
+
+pub(crate) fn rom_array_entry(id: &'static str) -> DigitalEntry {
+    rom_entry(id, false)
+}
+
+pub(crate) fn prom_array_entry(id: &'static str) -> DigitalEntry {
+    rom_entry(id, true)
+}
+
+fn rom_entry(id: &'static str, one_time: bool) -> DigitalEntry {
+    finish(id, |builder| {
+        let load = builder.input("load");
+        let address = address_inputs(builder);
+        let data_in = data_inputs(builder);
+        let cells = array_cells(builder);
+        let flags = if one_time {
+            Some(flag_cells(builder))
+        } else {
+            None
+        };
+        rom_load(builder, &cells, flags.as_deref(), load, &address, &data_in);
+        let data_out = array_read(builder, &cells, &address);
+        for (index, net) in data_out.iter().enumerate() {
+            builder.output(DATA_OUT[index], *net);
+        }
+        (ROM_INPUTS.to_vec(), DATA_OUT.to_vec())
+    })
+}
+
+fn flag_cells(builder: &mut DigitalBuilder) -> Vec<NetId> {
+    (0..WORDS).map(|_| builder.net()).collect()
+}
+
+fn rom_load(
+    builder: &mut DigitalBuilder,
+    cells: &[Vec<NetId>],
+    flags: Option<&[NetId]>,
+    load: NetId,
+    address: &[NetId; ADDRESS_BITS],
+    data_in: &[NetId; DATA_BITS],
+) {
+    for (index, word) in cells.iter().enumerate() {
+        let selected = equals(builder, address, index as u32);
+        let write = builder.and(load, selected);
+        match flags {
+            Some(flags) => prom_word(builder, word, flags[index], data_in, write),
+            None => rom_word(builder, word, data_in, write),
+        }
+    }
+}
+
+fn prom_word(
+    builder: &mut DigitalBuilder,
+    word: &[NetId],
+    flag: NetId,
+    data_in: &[NetId; DATA_BITS],
+    write: NetId,
+) {
+    let not_set = builder.not(flag);
+    let accepted = builder.and(write, not_set);
+    rom_word(builder, word, data_in, accepted);
+    let next = builder.or(flag, accepted);
+    builder.dff_into(next, flag);
+}
+
+fn rom_word(
+    builder: &mut DigitalBuilder,
+    word: &[NetId],
+    data_in: &[NetId; DATA_BITS],
+    write: NetId,
+) {
+    for bit in 0..DATA_BITS {
+        let next = builder.mux(word[bit], data_in[bit], write);
+        builder.dff_into(next, word[bit]);
+    }
 }
 
 pub(crate) fn sram_cell_entry(id: &'static str) -> DigitalEntry {
@@ -88,7 +169,7 @@ fn data_inputs(builder: &mut DigitalBuilder) -> [NetId; DATA_BITS] {
     ]
 }
 
-fn sram_cells(builder: &mut DigitalBuilder) -> Vec<Vec<NetId>> {
+fn array_cells(builder: &mut DigitalBuilder) -> Vec<Vec<NetId>> {
     let mut cells = Vec::with_capacity(WORDS);
     for _ in 0..WORDS {
         let mut word = Vec::with_capacity(DATA_BITS);
@@ -136,7 +217,7 @@ fn write_word(
     }
 }
 
-fn sram_read(
+fn array_read(
     builder: &mut DigitalBuilder,
     cells: &[Vec<NetId>],
     address: &[NetId; ADDRESS_BITS],
@@ -212,6 +293,29 @@ mod tests {
         entry.circuit.tick().expect("reset");
         entry.circuit.set_input("reset", false).expect("reset");
         assert_eq!(read_word(&mut entry, 5), 0);
+    }
+
+    fn load_word(entry: &mut super::DigitalEntry, address: usize, value: u8) {
+        set_address(entry, address);
+        set_data(entry, value);
+        entry.circuit.set_input("load", true).expect("load");
+        entry.circuit.tick().expect("load");
+        entry.circuit.set_input("load", false).expect("load");
+    }
+
+    #[test]
+    fn rom_reads_loaded_word() {
+        let mut entry = super::rom_array_entry("memory.device.rom");
+        load_word(&mut entry, 9, 0x77);
+        assert_eq!(read_word(&mut entry, 9), 0x77);
+    }
+
+    #[test]
+    fn prom_ignores_second_program() {
+        let mut entry = super::prom_array_entry("memory.device.prom");
+        load_word(&mut entry, 9, 0x77);
+        load_word(&mut entry, 9, 0x11);
+        assert_eq!(read_word(&mut entry, 9), 0x77);
     }
 
     #[test]

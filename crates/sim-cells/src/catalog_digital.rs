@@ -151,6 +151,8 @@ pub fn digital_entry_with_config(
         "memory.device.nvram" => {
             crate::catalog_memory::memory_array_entry("memory.device.nvram", true)
         }
+        "memory.device.rom" => crate::catalog_memory::rom_array_entry("memory.device.rom"),
+        "memory.device.prom" => crate::catalog_memory::prom_array_entry("memory.device.prom"),
         _ => return Ok(None),
     };
     Ok(Some(entry))
