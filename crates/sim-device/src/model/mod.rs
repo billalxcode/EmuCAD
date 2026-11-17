@@ -8,6 +8,7 @@ use crate::converter::ConverterModel;
 use crate::crystal::CrystalModel;
 use crate::diode::DiodeModel;
 use crate::diode_array::{DiodeBridgeModel, DualDiodeModel};
+use crate::driver::MotorDriverModel;
 use crate::igbt::IgbtModel;
 use crate::jfet::JfetModel;
 use crate::logic::LogicGateModel;
@@ -265,6 +266,7 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         DeviceKind::VoltageReference => Box::new(VoltageReferenceModel::from_instance(instance)?),
         DeviceKind::CurrentReference => Box::new(CurrentReferenceModel::from_instance(instance)?),
         DeviceKind::Supervisor => Box::new(SupervisorModel::from_instance(instance)?),
+        DeviceKind::MotorDriver => Box::new(MotorDriverModel::from_instance(instance)?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),
         DeviceKind::DiodeBridge => Box::new(DiodeBridgeModel::from_instance(instance)?),

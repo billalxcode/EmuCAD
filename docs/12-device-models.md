@@ -3,7 +3,7 @@
 Katalog device yang tersedia di `sim-device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 173.
+dan transmission line sudah diimplementasikan. Total test `sim-device`: 175.
 
 ---
 
@@ -139,6 +139,7 @@ pub fn model_from_instance(
 | Voltage reference | 3 | Fixed output dan quiescent current | [76](76-supervisors.md) |
 | Current reference | 3 | Fixed output current | [76](76-supervisors.md) |
 | Supervisor | 3 | Threshold, hysteresis, dan polaritas | [76](76-supervisors.md) |
+| Motor driver | 4 | Switch high-side satu kanal | [77](77-motor-drivers.md) |
 | VCVS | 4 | Linear gain | [47](47-controlled-sources.md) |
 | VCCS | 4 | Linear transconductance | [47](47-controlled-sources.md) |
 | CCCS | 4 | Linear current gain | [48](48-cccs-switch.md) |
@@ -401,8 +402,9 @@ Test device mencakup:
 - RF amplifier VCVS tiga pin.
 - Konverter DC-DC empat pin dan charge pump tiga pin.
 - Reference dan supervisor tiga pin.
+- Motor driver empat pin dengan switch satu kanal.
 
-Total test `sim-device`: 168 unit + 5 integration = 173.
+Total test `sim-device`: 170 unit + 5 integration = 175.
 
 ---
 

@@ -1502,3 +1502,40 @@ fn supervisor_output(supply: f64, active_low: f64) -> f64 {
     let result = solve(&circuit);
     result.solution.voltage(output).expect("out")
 }
+
+#[test]
+fn motor_driver_switches_output_with_control() {
+    let on = motor_driver_output(5.0);
+    let off = motor_driver_output(0.0);
+    assert!((on - 4.7619).abs() < 0.02, "on={on}");
+    assert!(off.abs() < 0.01, "off={off}");
+}
+
+fn motor_driver_output(control: f64) -> f64 {
+    let mut builder = CircuitBuilder::new();
+    let supply = builder.node("vcc").expect("node");
+    let input = builder.node("in").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", supply, ground, 5.0);
+    add_input(&mut builder, "V2", input, ground, control);
+    builder
+        .device(
+            "U1",
+            DeviceKind::MotorDriver,
+            vec![supply, ground, input, output],
+            params(&[("threshold", 2.5), ("on_resistance", 0.5)]),
+        )
+        .expect("U1");
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![output, ground],
+            params(&[("resistance", 10.0)]),
+        )
+        .expect("R1");
+    let circuit = builder.build().expect("circuit");
+    let result = solve(&circuit);
+    result.solution.voltage(output).expect("out")
+}

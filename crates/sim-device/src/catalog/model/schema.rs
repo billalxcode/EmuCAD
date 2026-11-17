@@ -430,6 +430,13 @@ const SUPERVISOR: &[ParameterSpec] = &[
     ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
 ];
 
+const MOTOR_DRIVER: &[ParameterSpec] = &[
+    ParameterSpec::number("threshold", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("hysteresis", "V", 0.1, 0.0, 1e6),
+    ParameterSpec::number("on_resistance", "ohm", 0.5, 1e-9, 1e12),
+    ParameterSpec::number("off_resistance", "ohm", 1e6, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -705,6 +712,7 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::VoltageReference => VOLTAGE_REFERENCE,
         DeviceKind::CurrentReference => CURRENT_REFERENCE,
         DeviceKind::Supervisor => SUPERVISOR,
+        DeviceKind::MotorDriver => MOTOR_DRIVER,
         _ => &[],
     }
 }
@@ -807,6 +815,7 @@ mod tests {
         DeviceKind::VoltageReference,
         DeviceKind::CurrentReference,
         DeviceKind::Supervisor,
+        DeviceKind::MotorDriver,
     ];
 
     #[test]

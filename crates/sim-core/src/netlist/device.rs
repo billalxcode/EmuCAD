@@ -173,6 +173,8 @@ pub enum DeviceKind {
     CurrentReference,
     /// A three-pin supply supervisor module.
     Supervisor,
+    /// A four-pin motor driver module.
+    MotorDriver,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -294,6 +296,7 @@ impl DeviceKind {
             Self::VoltageReference => "voltage_reference",
             Self::CurrentReference => "current_reference",
             Self::Supervisor => "supervisor",
+            Self::MotorDriver => "motor_driver",
             Self::Diode => "diode",
             _ => "custom",
         }

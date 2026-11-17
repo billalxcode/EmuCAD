@@ -184,6 +184,7 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::UltrasonicDistanceSensor
             | DeviceKind::LedActuator
             | DeviceKind::Supervisor
+            | DeviceKind::MotorDriver
     )
 }
 

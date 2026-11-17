@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 334 entri dapat
-diinstansiasi lewat registry, dan 166 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 337 entri dapat
+diinstansiasi lewat registry, dan 163 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 334 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 337 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 334 | dapat masuk netlist lewat registry |
+| mapped | 337 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 334 `mapped` bukan 334 model yang benar. Audit menemukan
+Peringatan: 337 `mapped` bukan 337 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -207,7 +207,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C7-03 | 5 | 5 | Charge pump dan charger memakai model tiga pin dengan efisiensi; verifikasi batch belum. |
 | C7-04 | 5 | 5 | Voltage/current reference dan tiga supervisor memakai model tiga pin; verifikasi batch belum. |
 | C7-05 | 3 | 3 | Ideal switch; ideal diode dan ORing logic belum. |
-| C7-06 | 3 | 0 | Belum ada model motor driver. |
+| C7-06 | 3 | 3 | H-bridge, half-bridge, dan stepper driver memakai switch satu kanal; verifikasi batch belum. |
 | C7-07 | 6 | 6 | Model NTC, PTC, RTD, thermocouple, semikonduktor, thermal switch; verifikasi batch belum. |
 | C7-08 | 5 | 5 | Photoresistor, photodiode, phototransistor/ambient/color memakai model cahaya; verifikasi batch belum. |
 | C7-09 | 5 | 5 | Hall switch, Hall linear, reed switch, magnetoresistive, fluxgate; verifikasi batch belum. |
@@ -291,7 +291,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 1026 test workspace lulus pada audit ini.
+- 1029 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -463,7 +463,10 @@ Target: 85 entri.
   - Delay dan proteksi belum dimodelkan.
   - Reference vector dan verified belum.
 - [ ] C7-05 Ideal diode, ORing, load switch 3 entri.
-- [ ] C7-06 Motor driver 3 entri.
+- [~] C7-06 Motor driver 3 entri.
+  - Tiga entry memakai switch high-side satu kanal.
+  - Arah, PWM, dead time, dan proteksi belum dimodelkan.
+  - Reference vector dan verified belum.
 - [~] C7-07 Temperature sensor 6 entri.
   - NTC, PTC, RTD, thermocouple, sensor semikonduktor, dan thermal
     switch sudah solver-backed.

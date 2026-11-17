@@ -135,6 +135,7 @@ fn supported_actuator(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::VoltageReference
             | sim_core::DeviceKind::CurrentReference
             | sim_core::DeviceKind::Supervisor
+            | sim_core::DeviceKind::MotorDriver
     )
 }
 

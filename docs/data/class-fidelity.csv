@@ -32,7 +32,7 @@ LogicGateSpecial,3,0,unsupported,logic
 Mcu,11,0,unsupported,mcu
 Memory,15,0,unsupported,memory
 Mosfet,17,17,compact,transistor
-MotorDriver,3,0,unsupported,power
+MotorDriver,3,3,behavioral,power
 Multiplexer,8,0,unsupported,logic
 OpAmp,25,25,behavioral,analog
 Optocoupler,6,6,behavioral,diode

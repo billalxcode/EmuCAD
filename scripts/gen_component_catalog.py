@@ -414,7 +414,7 @@ add("power.supervisor", "Supervisor", "Supervisor", 3, "threshold", 2.5, "V", [
 add("power.switch", "PowerSwitch", "IdealSwitch", 2, "ron", 0.05, "ohm", [
     "ideal diode", "ORing controller", "load switch",
 ])
-add("power.motor", "MotorDriver", None, 4, "current", 1.0, "A", [
+add("power.motor", "MotorDriver", "MotorDriver", 4, "threshold", 2.5, "V", [
     "H-bridge", "half-bridge", "stepper driver",
 ])
 
