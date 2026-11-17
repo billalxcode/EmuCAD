@@ -183,6 +183,7 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::CapacitiveTouchSensor
             | DeviceKind::UltrasonicDistanceSensor
             | DeviceKind::LedActuator
+            | DeviceKind::Supervisor
     )
 }
 
@@ -235,6 +236,7 @@ fn branch_slots(kind: &DeviceKind) -> usize {
         | DeviceKind::RfAmplifier
         | DeviceKind::DcDcConverter
         | DeviceKind::ChargePump
+        | DeviceKind::VoltageReference
         | DeviceKind::Inductor => 1,
         _ => 0,
     }

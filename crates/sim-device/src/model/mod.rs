@@ -26,6 +26,7 @@ use crate::sensors::{
     TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel, ThresholdSwitchModel,
 };
 use crate::source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
+use crate::supervisor::{CurrentReferenceModel, SupervisorModel, VoltageReferenceModel};
 use crate::switch::{IdealSwitchModel, SwitchModel};
 use crate::thyristor::ThyristorModel;
 use crate::transformer::TransformerModel;
@@ -261,6 +262,9 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         DeviceKind::RfAmplifier => Box::new(RfAmplifierModel::from_instance(instance)?),
         DeviceKind::DcDcConverter => Box::new(ConverterModel::from_four_pin(instance, 12.0, 0.85)?),
         DeviceKind::ChargePump => Box::new(ConverterModel::from_three_pin(instance, 5.0, 0.8)?),
+        DeviceKind::VoltageReference => Box::new(VoltageReferenceModel::from_instance(instance)?),
+        DeviceKind::CurrentReference => Box::new(CurrentReferenceModel::from_instance(instance)?),
+        DeviceKind::Supervisor => Box::new(SupervisorModel::from_instance(instance)?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),
         DeviceKind::DiodeBridge => Box::new(DiodeBridgeModel::from_instance(instance)?),

@@ -304,6 +304,9 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         DeviceKind::RfAmplifier => RF_AMPLIFIER,
         DeviceKind::DcDcConverter => DCDC_CONVERTER,
         DeviceKind::ChargePump => CHARGE_PUMP,
+        DeviceKind::VoltageReference | DeviceKind::CurrentReference | DeviceKind::Supervisor => {
+            SENSOR
+        }
         DeviceKind::DiodeBridge => DIODE_BRIDGE,
         DeviceKind::DualDiode => DUAL_DIODE,
         DeviceKind::Switch => SWITCH,

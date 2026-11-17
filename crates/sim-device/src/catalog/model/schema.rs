@@ -413,6 +413,23 @@ const CHARGE_PUMP: &[ParameterSpec] = &[
     ParameterSpec::number("efficiency", "ratio", 0.8, 1e-6, 1.0),
 ];
 
+const VOLTAGE_REFERENCE: &[ParameterSpec] = &[
+    ParameterSpec::number("threshold", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("quiescent_current", "A", 1e-3, 0.0, 1e6),
+];
+
+const CURRENT_REFERENCE: &[ParameterSpec] = &[
+    ParameterSpec::number("output_current", "A", 1e-3, -1e6, 1e6),
+    ParameterSpec::number("quiescent_current", "A", 1e-3, 0.0, 1e6),
+];
+
+const SUPERVISOR: &[ParameterSpec] = &[
+    ParameterSpec::number("threshold", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("hysteresis", "V", 0.1, 0.0, 1e6),
+    ParameterSpec::boolean("active_low", false),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -685,6 +702,9 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::RfAmplifier => RF_AMPLIFIER,
         DeviceKind::DcDcConverter => DCDC_CONVERTER,
         DeviceKind::ChargePump => CHARGE_PUMP,
+        DeviceKind::VoltageReference => VOLTAGE_REFERENCE,
+        DeviceKind::CurrentReference => CURRENT_REFERENCE,
+        DeviceKind::Supervisor => SUPERVISOR,
         _ => &[],
     }
 }
@@ -784,6 +804,9 @@ mod tests {
         DeviceKind::RfAmplifier,
         DeviceKind::DcDcConverter,
         DeviceKind::ChargePump,
+        DeviceKind::VoltageReference,
+        DeviceKind::CurrentReference,
+        DeviceKind::Supervisor,
     ];
 
     #[test]

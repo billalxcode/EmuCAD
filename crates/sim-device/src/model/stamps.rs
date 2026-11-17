@@ -192,3 +192,15 @@ fn stamp_row(
     ctx.add_matrix_opt(row, cols.3, values.3)?;
     ctx.add_rhs_opt(row, constant)
 }
+
+pub(crate) fn stamp_output(
+    ctx: &mut MnaContext,
+    output: NodeId,
+    ground: NodeId,
+    voltage: f64,
+    resistance: f64,
+) -> Result<(), SimError> {
+    let conductance = 1.0 / resistance.max(1e-9);
+    stamp_conductance(ctx, output, ground, conductance)?;
+    stamp_current_source(ctx, ground, output, voltage * conductance)
+}

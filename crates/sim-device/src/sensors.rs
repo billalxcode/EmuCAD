@@ -2,7 +2,7 @@
 
 use crate::model::{
     DeviceModel, finite_parameter, non_negative_parameter, parameter, pins_exact,
-    positive_parameter, stamp_conductance, stamp_current_source,
+    positive_parameter, stamp_output,
 };
 use sim_core::{Device, DeviceInstance, MnaContext, NodeId, SimError, Solution};
 
@@ -20,18 +20,6 @@ fn supply(solution: &Solution, pins: [NodeId; 3]) -> f64 {
 
 fn clamp_output(value: f64, supply: f64) -> f64 {
     value.clamp(0.0, supply.max(0.0))
-}
-
-fn stamp_output(
-    ctx: &mut MnaContext,
-    output: NodeId,
-    ground: NodeId,
-    voltage: f64,
-    resistance: f64,
-) -> Result<(), SimError> {
-    let conductance = 1.0 / resistance.max(1e-9);
-    stamp_conductance(ctx, output, ground, conductance)?;
-    stamp_current_source(ctx, ground, output, voltage * conductance)
 }
 
 fn divider_output(resistance: f64, series: f64, supply: f64) -> (f64, f64) {

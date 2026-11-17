@@ -109,11 +109,6 @@ mcu.serial.ethernet,mcu,SerialInterface,digital,digital peripheral,S5-3,P3
 mcu.timer.timer,mcu,TimerPeripheral,digital,digital peripheral,S5-3,P3
 mcu.timer.rtc,mcu,TimerPeripheral,digital,digital peripheral,S5-3,P3
 mcu.timer.watchdog,mcu,TimerPeripheral,digital,digital peripheral,S5-3,P3
-power.supervisor.voltage_reference,power,Supervisor,behavioral-electrical,power macromodel,S5-2,P2
-power.supervisor.current_reference,power,Supervisor,behavioral-electrical,power macromodel,S5-2,P2
-power.supervisor.voltage_supervisor,power,Supervisor,behavioral-electrical,power macromodel,S5-2,P2
-power.supervisor.reset_supervisor,power,Supervisor,behavioral-electrical,power macromodel,S5-2,P2
-power.supervisor.power_monitor,power,Supervisor,behavioral-electrical,power macromodel,S5-2,P2
 power.motor.hbridge,power,MotorDriver,behavioral-electrical,power macromodel,S5-2,P2
 power.motor.halfbridge,power,MotorDriver,behavioral-electrical,power macromodel,S5-2,P2
 power.motor.stepper_driver,power,MotorDriver,behavioral-electrical,power macromodel,S5-2,P2

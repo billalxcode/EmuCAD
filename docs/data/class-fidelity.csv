@@ -48,7 +48,7 @@ RfBlock,18,4,behavioral,rf
 Sensor,35,35,behavioral,sensor
 SerialInterface,6,0,unsupported,mcu
 SolidStateRelay,4,4,compact,switch
-Supervisor,5,0,unsupported,power
+Supervisor,5,5,behavioral,power
 Switch,8,8,compact,switch
 Thyristor,8,8,compact,protection
 Timer,5,0,unsupported,analog

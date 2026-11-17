@@ -132,6 +132,9 @@ fn supported_actuator(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::RfAmplifier
             | sim_core::DeviceKind::DcDcConverter
             | sim_core::DeviceKind::ChargePump
+            | sim_core::DeviceKind::VoltageReference
+            | sim_core::DeviceKind::CurrentReference
+            | sim_core::DeviceKind::Supervisor
     )
 }
 

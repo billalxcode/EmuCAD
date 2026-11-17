@@ -396,9 +396,20 @@ add("power.charge", "ChargePump", "ChargePump", 3, "output_voltage", 5.0, "V", [
     "charge pump", "inverting charge pump", "linear charger",
     "switching charger", "solar charger",
 ])
-add("power.supervisor", "Supervisor", None, 3, "threshold", 2.5, "V", [
-    "voltage reference", "current reference", "voltage supervisor",
-    "reset supervisor", "power monitor",
+add("power.supervisor", "Supervisor", "VoltageReference", 3, "threshold", 2.5, "V", [
+    "voltage reference",
+])
+add("power.supervisor", "Supervisor", "CurrentReference", 3, "output_current", 1e-3, "A", [
+    "current reference",
+])
+add("power.supervisor", "Supervisor", "Supervisor", 3, "threshold", 2.5, "V", [
+    "voltage supervisor",
+])
+add("power.supervisor", "Supervisor", "Supervisor", 3, "active_low", 1.0, "ratio", [
+    "reset supervisor",
+])
+add("power.supervisor", "Supervisor", "Supervisor", 3, "threshold", 2.5, "V", [
+    "power monitor",
 ])
 add("power.switch", "PowerSwitch", "IdealSwitch", 2, "ron", 0.05, "ohm", [
     "ideal diode", "ORing controller", "load switch",

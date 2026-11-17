@@ -167,6 +167,12 @@ pub enum DeviceKind {
     DcDcConverter,
     /// A three-pin charge pump or charger module.
     ChargePump,
+    /// A three-pin voltage reference module.
+    VoltageReference,
+    /// A three-pin current reference module.
+    CurrentReference,
+    /// A three-pin supply supervisor module.
+    Supervisor,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -285,6 +291,9 @@ impl DeviceKind {
             Self::RfAmplifier => "rf_amplifier",
             Self::DcDcConverter => "dcdc_converter",
             Self::ChargePump => "charge_pump",
+            Self::VoltageReference => "voltage_reference",
+            Self::CurrentReference => "current_reference",
+            Self::Supervisor => "supervisor",
             Self::Diode => "diode",
             _ => "custom",
         }

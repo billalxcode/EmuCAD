@@ -68,7 +68,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 59 | [Golden RGBA GUI](59-gui-golden.md) | Status dan prosedur update golden image |
 | 60 | [Katalog komponen](60-component-catalog.md) | Target 500 model, taksonomi, akurasi, dan schema |
 | 61 | [Design system](61-design-system.md) | Token font, warna, spacing, dan aturan tampilan |
-| 62 | [Klasifikasi behavioral](62-behavioral-classification.md) | Kategori dan prioritas 171 entry behavioral |
+| 62 | [Klasifikasi behavioral](62-behavioral-classification.md) | Kategori dan prioritas 166 entry behavioral |
 | 63 | [Fidelity dan benchmark](63-fidelity.md) | Label fidelity, audit 60 kelas, dan hasil benchmark |
 | 64 | [Gate-level scope](64-gate-level.md) | Definisi, status, benchmark, dan gap S6/S7 |
 | 65 | [Sensor suhu](65-temperature-sensors.md) | Model NTC, PTC, RTD, thermocouple, semikonduktor, switch |
@@ -82,6 +82,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 73 | [Actuator dan display](73-actuators.md) | Model LED, lampu, buzzer, motor, heater, Peltier, TEG, dan display |
 | 74 | [RF amplifier](74-rf-amplifiers.md) | Model VCVS tiga pin dan batas RF yang belum didukung |
 | 75 | [Konverter daya](75-converters.md) | Model DC-DC, charge pump, dan charger teregulasi |
+| 76 | [Reference dan supervisor](76-supervisors.md) | Model voltage reference, current reference, dan supervisor |
 
 ### 3.2 Fondasi
 

@@ -25,6 +25,7 @@ mod relay;
 mod rf;
 mod sensors;
 mod source;
+mod supervisor;
 mod switch;
 mod thyristor;
 mod transformer;
@@ -64,6 +65,7 @@ pub use sensors::{
     TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel, ThresholdSwitchModel,
 };
 pub use source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
+pub use supervisor::{CurrentReferenceModel, SupervisorModel, VoltageReferenceModel};
 pub use switch::{IdealSwitchModel, SwitchModel};
 pub use thyristor::{ThyristorKind, ThyristorModel};
 pub use transformer::TransformerModel;

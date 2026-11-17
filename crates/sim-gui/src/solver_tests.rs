@@ -1407,3 +1407,98 @@ fn charge_pump_regulates_output_and_draws_input_current() {
     assert!((output_voltage - 5.0).abs() < 0.01, "out={output_voltage}");
     assert!((input_voltage - 4.375).abs() < 0.02, "in={input_voltage}");
 }
+
+#[test]
+fn voltage_reference_outputs_threshold_and_draws_quiescent_current() {
+    let mut builder = CircuitBuilder::new();
+    let supply = builder.node("vin").expect("node");
+    let reference = builder.node("ref").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", supply, ground, 5.0);
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![supply, reference],
+            params(&[("resistance", 1000.0)]),
+        )
+        .expect("R1");
+    builder
+        .device(
+            "U1",
+            DeviceKind::VoltageReference,
+            vec![reference, ground, output],
+            params(&[("threshold", 2.5), ("quiescent_current", 1e-3)]),
+        )
+        .expect("U1");
+    let circuit = builder.build().expect("circuit");
+    let result = solve(&circuit);
+    let reference_voltage = result.solution.voltage(reference).expect("ref");
+    let output_voltage = result.solution.voltage(output).expect("out");
+    assert!(
+        (reference_voltage - 4.0).abs() < 0.01,
+        "ref={reference_voltage}"
+    );
+    assert!((output_voltage - 2.5).abs() < 0.01, "out={output_voltage}");
+}
+
+#[test]
+fn current_reference_drives_a_load() {
+    let mut builder = CircuitBuilder::new();
+    let supply = builder.node("vin").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", supply, ground, 5.0);
+    builder
+        .device(
+            "U1",
+            DeviceKind::CurrentReference,
+            vec![supply, ground, output],
+            params(&[("output_current", 1e-3)]),
+        )
+        .expect("U1");
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![output, ground],
+            params(&[("resistance", 1000.0)]),
+        )
+        .expect("R1");
+    let circuit = builder.build().expect("circuit");
+    let result = solve(&circuit);
+    let voltage = result.solution.voltage(output).expect("out");
+    assert!((voltage - 1.0).abs() < 0.01, "out={voltage}");
+}
+
+#[test]
+fn supervisor_polarity_follows_supply() {
+    let high = supervisor_output(5.0, 0.0);
+    let low = supervisor_output(2.0, 0.0);
+    let reset_high = supervisor_output(5.0, 1.0);
+    let reset_low = supervisor_output(2.0, 1.0);
+    assert!((high - 5.0).abs() < 0.01, "high={high}");
+    assert!(low.abs() < 0.01, "low={low}");
+    assert!(reset_high.abs() < 0.01, "reset_high={reset_high}");
+    assert!((reset_low - 2.0).abs() < 0.01, "reset_low={reset_low}");
+}
+
+fn supervisor_output(supply: f64, active_low: f64) -> f64 {
+    let mut builder = CircuitBuilder::new();
+    let input = builder.node("vin").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", input, ground, supply);
+    builder
+        .device(
+            "U1",
+            DeviceKind::Supervisor,
+            vec![input, ground, output],
+            params(&[("threshold", 2.5), ("active_low", active_low)]),
+        )
+        .expect("U1");
+    let circuit = builder.build().expect("circuit");
+    let result = solve(&circuit);
+    result.solution.voltage(output).expect("out")
+}
