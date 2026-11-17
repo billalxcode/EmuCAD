@@ -196,7 +196,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C6-04 | 8 | 8 | Mux 2:1/4:1/8:1, demux, decoder, encoder, dan priority encoder ada. |
 | C6-05 | 8 | 7 | Adder, comparator, parity, dan bus buffer; bidirectional buffer belum. |
 | C6-06 | 6 | 4 | Level shifter, line driver, receiver, dan optocoupler; 2 belum. |
-| C6-07 | 6 | 0 | Belum ada model programmable logic. |
+| C6-07 | 6 | 5 | PAL, GAL, CPLD, FPGA logic block, dan LUT memakai LUT 4-input; FSM belum. |
 | C6-08 | 15 | 0 | Belum ada model memory. |
 | C6-09 | 11 | 0 | Belum ada model MCU. |
 | C6-10 | 5 | 0 | Belum ada model ADC, DAC, PWM. |
@@ -356,7 +356,7 @@ Target: 80 entri.
 - [~] C2-07 Independent source 12 entri: DC V, DC I, AC V, AC I, sine,
   pulse, PWL, exponential, noise V, noise I, clock, pattern.
   - Sine, pulse current, PWL, exponential, dan noise sudah solver-backed.
-  - Clock sudah ada di domain digital; pattern belum.
+  - Clock dan pattern sudah ada di domain digital.
   - Reference vector dan verified belum.
 - [~] C2-08 Controlled dan behavioral source 8 entri: E, F, G, H, B
   voltage, B current, polynomial, table.

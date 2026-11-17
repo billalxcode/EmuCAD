@@ -6,7 +6,7 @@ Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
 ## 1. Cakupan
 
 Domain digital memakai `DigitalCircuit` dua-state dengan input dan
-output bernama. Saat ini 44 entry katalog sudah dapat dijalankan:
+output bernama. Saat ini 50 entry katalog sudah dapat dijalankan:
 
 | Kelompok | Entry |
 |---|---|
@@ -19,12 +19,13 @@ output bernama. Saat ini 44 entry katalog sudah dapat dijalankan:
 | Shift register | 4-bit, 8-bit, SIPO, PISO |
 | Level | level shifter, line driver, line receiver, optocoupler interface |
 | Timer | timer, RTC, watchdog |
-| Digital source | clock, PRBS |
+| Digital source | clock, PRBS, pattern |
+| Programmable | PAL, GAL, CPLD, FPGA logic block, lookup table (LUT 4-input) |
 
 ## 2. Perintah
 
 ```
-emucad digital <id> [nama=0|1]... [--ticks N]
+emucad digital <id> [nama=0|1]... [--ticks N] [--pattern V] [--mask V]
 ```
 
 Contoh:
@@ -33,7 +34,13 @@ Contoh:
 emucad digital logic.adder.4bit_adder a0=1 a1=1 b0=1 b2=1
 emucad digital logic.counter.4bit_counter --ticks 3
 emucad digital logic.flipflop.d_flipflop d=1 clk=1 --ticks 1
+emucad digital logic.programmable.lookup_table a0=1 a1=1 --mask 8
+emucad digital source.digital.digital_pattern_source reset=1 --pattern 1 --ticks 1
 ```
+
+`--pattern` dan `--mask` menerima desimal atau hex `0x`. LUT memakai
+empat input `a0..a3` dan mask 16 bit; bit ke-i adalah output untuk
+kombinasi input i.
 
 Tanpa `--ticks`, rangkaian hanya di-settle satu kali. Dengan
 `--ticks N`, clock global dijalankan N kali.
@@ -63,14 +70,13 @@ Port ditentukan per entry, bukan dari jumlah pin katalog. Contoh:
 
 ## 5. Entry Digital yang Belum Didukung
 
-Masih ada 19 entry digital di luar domain ini:
+Masih ada 13 entry digital di luar domain ini:
 
 - 3 special gate (open-drain, tri-state, transmission gate).
 - 1 adder/buffer tambahan (bidirectional buffer).
 - 2 level shifter/interface tambahan (bidirectional, open-drain).
-- 6 programmable logic.
+- 1 programmable logic (finite state machine).
 - 6 serial interface.
-- 1 digital source (pattern).
 
 ## 6. Verifikasi
 
@@ -89,6 +95,8 @@ Test domain digital mencakup:
 - Watchdog timeout setelah 255 tick.
 - Clock source toggle setiap tick.
 - PRBS source bergeser setelah reset.
+- Pattern source memuat pola saat reset.
+- LUT 4-input dengan mask AND menghasilkan output yang benar.
 - Counter 4-bit setelah tiga tick.
 - Decade counter kembali ke nol setelah sepuluh tick.
 - Shift register memindahkan data.

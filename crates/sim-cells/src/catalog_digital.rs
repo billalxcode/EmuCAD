@@ -3,6 +3,24 @@
 use crate::{DigitalBuilder, DigitalCircuit, NetId};
 use sim_core::SimError;
 
+/// Configuration for configurable digital entries.
+#[derive(Clone, Copy)]
+pub struct DigitalConfig {
+    /// Pattern loaded by the pattern source.
+    pub pattern: u8,
+    /// Truth table for a four-input LUT.
+    pub mask: u16,
+}
+
+impl Default for DigitalConfig {
+    fn default() -> Self {
+        Self {
+            pattern: 0xa5,
+            mask: 0x0008,
+        }
+    }
+}
+
 /// A catalog digital entry with named ports.
 pub struct DigitalEntry {
     /// Catalog identifier.
@@ -17,6 +35,14 @@ pub struct DigitalEntry {
 
 /// Builds a named digital circuit for a catalog entry.
 pub fn digital_entry(id: &str) -> Result<Option<DigitalEntry>, SimError> {
+    digital_entry_with_config(id, DigitalConfig::default())
+}
+
+/// Builds a named digital circuit with explicit configuration.
+pub fn digital_entry_with_config(
+    id: &str,
+    config: DigitalConfig,
+) -> Result<Option<DigitalEntry>, SimError> {
     let entry = match id {
         "logic.mux.2_to_1_multiplexer" => mux2_entry(),
         "logic.mux.4_to_1_multiplexer" => mux4_entry(),
@@ -68,6 +94,16 @@ pub fn digital_entry(id: &str) -> Result<Option<DigitalEntry>, SimError> {
         "mcu.timer.watchdog" => timer_entry("mcu.timer.watchdog", true),
         "source.digital.digital_clock_source" => clock_entry(),
         "source.digital.prbs_source" => prbs_entry(),
+        "source.digital.digital_pattern_source" => pattern_entry(config.pattern),
+        "logic.programmable.lookup_table" => {
+            lut_entry("logic.programmable.lookup_table", config.mask)
+        }
+        "logic.programmable.pal" => lut_entry("logic.programmable.pal", config.mask),
+        "logic.programmable.gal" => lut_entry("logic.programmable.gal", config.mask),
+        "logic.programmable.cpld" => lut_entry("logic.programmable.cpld", config.mask),
+        "logic.programmable.fpga_logic_block" => {
+            lut_entry("logic.programmable.fpga_logic_block", config.mask)
+        }
         _ => return Ok(None),
     };
     Ok(Some(entry))
@@ -762,6 +798,52 @@ fn prbs_entry() -> DigitalEntry {
     })
 }
 
+fn pattern_entry(pattern: u8) -> DigitalEntry {
+    finish("source.digital.digital_pattern_source", |builder| {
+        let reset = builder.input("reset");
+        let bits: Vec<NetId> = (0..8).map(|_| builder.net()).collect();
+        for (index, bit) in bits.iter().enumerate() {
+            let source = if index == 0 {
+                builder.constant(false)
+            } else {
+                bits[index - 1]
+            };
+            let pattern_bit = builder.constant(pattern & (1 << index) != 0);
+            let next = builder.mux(source, pattern_bit, reset);
+            builder.dff_into(next, *bit);
+            builder.output(Q8[index], *bit);
+        }
+        builder.output("bit", bits[0]);
+        (
+            vec!["reset"],
+            vec!["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "bit"],
+        )
+    })
+}
+
+fn lut_entry(id: &'static str, mask: u16) -> DigitalEntry {
+    finish(id, |builder| {
+        let inputs: Vec<NetId> = (0..4)
+            .map(|index| builder.input(&format!("a{index}")))
+            .collect();
+        let mut level: Vec<NetId> = (0..16)
+            .map(|index| builder.constant(mask & (1 << index) != 0))
+            .collect();
+        for (stage, select) in inputs.iter().enumerate() {
+            level = level
+                .chunks(2)
+                .map(|pair| builder.mux(pair[0], pair[1], *select))
+                .collect();
+            if level.len() == 1 {
+                break;
+            }
+            let _ = stage;
+        }
+        builder.output("y", level[0]);
+        (vec!["a0", "a1", "a2", "a3"], vec!["y"])
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::digital_entry;
@@ -971,6 +1053,42 @@ mod tests {
         entry.circuit.set_input("reset", false).expect("input");
         entry.circuit.tick().expect("tick");
         assert_eq!(entry.circuit.output("q0"), Some(false));
+    }
+
+    #[test]
+    fn lut_and_mask_implements_and() {
+        let mut entry = super::digital_entry_with_config(
+            "logic.programmable.lookup_table",
+            super::DigitalConfig {
+                pattern: 0,
+                mask: 0x0008,
+            },
+        )
+        .expect("build")
+        .expect("entry");
+        entry.circuit.set_input("a0", true).expect("input");
+        entry.circuit.set_input("a1", true).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("y"), Some(true));
+        entry.circuit.set_input("a1", false).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("y"), Some(false));
+    }
+
+    #[test]
+    fn pattern_source_loads_on_reset() {
+        let mut entry = super::digital_entry_with_config(
+            "source.digital.digital_pattern_source",
+            super::DigitalConfig {
+                pattern: 0x01,
+                mask: 0,
+            },
+        )
+        .expect("build")
+        .expect("entry");
+        entry.circuit.set_input("reset", true).expect("input");
+        entry.circuit.tick().expect("tick");
+        assert_eq!(entry.circuit.output("q0"), Some(true));
     }
 
     #[test]

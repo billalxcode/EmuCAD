@@ -1,22 +1,27 @@
 //! `emucad digital` command.
 
-use sim_cells::catalog_digital::{DigitalEntry, digital_entry};
+use sim_cells::catalog_digital::{DigitalConfig, DigitalEntry, digital_entry_with_config};
+
+struct Request {
+    inputs: Vec<(String, bool)>,
+    ticks: usize,
+    config: DigitalConfig,
+}
 
 /// Runs `emucad digital`.
 pub fn run(args: &[String]) -> Result<(), String> {
-    let id = args
-        .first()
-        .ok_or_else(|| "usage: emucad digital <id> [name=0|1] [--ticks N]".to_string())?;
-    let entry = build(id)?;
-    let inputs = parse_inputs(&args[1..])?;
-    let ticks = parse_ticks(&args[1..])?;
-    let outputs = simulate(entry, &inputs, ticks)?;
+    let id = args.first().ok_or_else(|| {
+        "usage: emucad digital <id> [name=0|1] [--ticks N] [--pattern V] [--mask V]".to_string()
+    })?;
+    let request = parse_request(&args[1..])?;
+    let entry = build(id, request.config)?;
+    let outputs = simulate(entry, &request.inputs, request.ticks)?;
     println!("{}: {}", id, format_outputs(&outputs));
     Ok(())
 }
 
-fn build(id: &str) -> Result<DigitalEntry, String> {
-    digital_entry(id)
+fn build(id: &str, config: DigitalConfig) -> Result<DigitalEntry, String> {
+    digital_entry_with_config(id, config)
         .map_err(|error| error.to_string())?
         .ok_or_else(|| format!("digital entry is not supported: {id}"))
 }
@@ -46,21 +51,53 @@ fn simulate(
         .collect())
 }
 
-fn parse_inputs(args: &[String]) -> Result<Vec<(String, bool)>, String> {
-    let mut inputs = Vec::new();
-    let mut skip = false;
-    for arg in args {
-        if skip {
-            skip = false;
-            continue;
+fn parse_request(args: &[String]) -> Result<Request, String> {
+    let mut request = Request {
+        inputs: Vec::new(),
+        ticks: 0,
+        config: DigitalConfig::default(),
+    };
+    let mut index = 0;
+    while index < args.len() {
+        match args[index].as_str() {
+            "--ticks" => {
+                request.ticks = value_at(args, index + 1, "ticks")?
+                    .parse()
+                    .map_err(|_| "ticks must be a positive integer".to_string())?;
+                index += 2;
+            }
+            "--pattern" => {
+                request.config.pattern = parse_number(value_at(args, index + 1, "pattern")?)? as u8;
+                index += 2;
+            }
+            "--mask" => {
+                request.config.mask = parse_number(value_at(args, index + 1, "mask")?)? as u16;
+                index += 2;
+            }
+            value if value.starts_with("--") => {
+                return Err(format!("unknown option: {value}"));
+            }
+            value => {
+                request.inputs.push(parse_assignment(value)?);
+                index += 1;
+            }
         }
-        if arg == "--ticks" {
-            skip = true;
-            continue;
-        }
-        inputs.push(parse_assignment(arg)?);
     }
-    Ok(inputs)
+    Ok(request)
+}
+
+fn value_at<'a>(args: &'a [String], index: usize, name: &str) -> Result<&'a str, String> {
+    args.get(index)
+        .map(String::as_str)
+        .ok_or_else(|| format!("missing value after --{name}"))
+}
+
+fn parse_number(text: &str) -> Result<u32, String> {
+    if let Some(hex) = text.strip_prefix("0x").or_else(|| text.strip_prefix("0X")) {
+        u32::from_str_radix(hex, 16).map_err(|_| format!("invalid number: {text}"))
+    } else {
+        text.parse().map_err(|_| format!("invalid number: {text}"))
+    }
 }
 
 fn parse_assignment(text: &str) -> Result<(String, bool), String> {
@@ -75,17 +112,6 @@ fn parse_assignment(text: &str) -> Result<(String, bool), String> {
     Ok((name.to_string(), value))
 }
 
-fn parse_ticks(args: &[String]) -> Result<usize, String> {
-    let position = args.iter().position(|arg| arg == "--ticks");
-    let Some(position) = position else {
-        return Ok(0);
-    };
-    args.get(position + 1)
-        .ok_or_else(|| "missing value after --ticks".to_string())?
-        .parse()
-        .map_err(|_| "ticks must be a positive integer".to_string())
-}
-
 fn format_outputs(outputs: &[(&str, bool)]) -> String {
     outputs
         .iter()
@@ -96,8 +122,8 @@ fn format_outputs(outputs: &[(&str, bool)]) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{format_outputs, parse_assignment, parse_ticks, simulate};
-    use sim_cells::catalog_digital::digital_entry;
+    use super::{format_outputs, parse_assignment, parse_request, simulate};
+    use sim_cells::catalog_digital::digital_entry_with_config;
 
     #[test]
     fn assignment_parses_binary_values() {
@@ -113,19 +139,40 @@ mod tests {
     }
 
     #[test]
-    fn ticks_require_a_value() {
-        assert_eq!(
-            parse_ticks(&["--ticks".to_string(), "3".to_string()]).expect("ticks"),
-            3
-        );
-        assert!(parse_ticks(&["--ticks".to_string()]).is_err());
+    fn request_parses_ticks_and_config() {
+        let args = ["--ticks", "3", "--pattern", "0x0f", "--mask", "8", "a0=1"]
+            .iter()
+            .map(|value| value.to_string())
+            .collect::<Vec<_>>();
+        let request = parse_request(&args).expect("request");
+        assert_eq!(request.ticks, 3);
+        assert_eq!(request.config.pattern, 15);
+        assert_eq!(request.config.mask, 8);
+        assert_eq!(request.inputs, vec![("a0".to_string(), true)]);
+    }
+
+    #[test]
+    fn lut_and_mask_simulates() {
+        let config = sim_cells::catalog_digital::DigitalConfig {
+            pattern: 0,
+            mask: 0x0008,
+        };
+        let entry = digital_entry_with_config("logic.programmable.lookup_table", config)
+            .expect("build")
+            .expect("entry");
+        let inputs = vec![("a0".to_string(), true), ("a1".to_string(), true)];
+        let outputs = simulate(entry, &inputs, 0).expect("simulate");
+        assert!(format_outputs(&outputs).contains("y=1"));
     }
 
     #[test]
     fn adder4_simulates_three_plus_five() {
-        let entry = digital_entry("logic.adder.4bit_adder")
-            .expect("build")
-            .expect("entry");
+        let entry = digital_entry_with_config(
+            "logic.adder.4bit_adder",
+            sim_cells::catalog_digital::DigitalConfig::default(),
+        )
+        .expect("build")
+        .expect("entry");
         let inputs = vec![
             ("a0".to_string(), true),
             ("a1".to_string(), true),

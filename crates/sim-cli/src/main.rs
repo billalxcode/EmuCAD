@@ -150,5 +150,5 @@ fn number(args: &[&str], index: usize, default: usize) -> Result<usize, String> 
 }
 
 fn usage() -> String {
-    "usage: emucad [--link path] [--socket path] | emucad monitor <hex words...> | emucad disasm <hex words...> | emucad run <file.hex> [steps] [--realtime] | emucad bench [iterations] [nodes] | emucad catalog [--json] | emucad digital <id> [name=0|1] [--ticks N] | emucad serial [--link path] [--socket path] | emucad usb [--socket path]".to_string()
+    "usage: emucad [--link path] [--socket path] | emucad monitor <hex words...> | emucad disasm <hex words...> | emucad run <file.hex> [steps] [--realtime] | emucad bench [iterations] [nodes] | emucad catalog [--json] | emucad digital <id> [name=0|1] [--ticks N] [--pattern V] [--mask V] | emucad serial [--link path] [--socket path] | emucad usb [--socket path]".to_string()
 }
