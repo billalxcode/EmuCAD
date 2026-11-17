@@ -1112,3 +1112,17 @@ fn linear_magnetic_sensors_scale_with_field() {
     assert!((fluxgate - 1.0).abs() < 0.01, "fluxgate={fluxgate}");
     assert!((bridge - 3.0).abs() < 0.01, "bridge={bridge}");
 }
+
+#[test]
+fn motion_sensors_scale_with_environment_inputs() {
+    let accel = sensor_output(DeviceKind::Accelerometer, &[("acceleration", 9.80665)]);
+    let gyro = sensor_output(DeviceKind::Gyroscope, &[("angular_rate", 100.0)]);
+    let imu = sensor_output(DeviceKind::Imu, &[("acceleration", 9.80665)]);
+    let tilt = sensor_output(DeviceKind::TiltSensor, &[("angle", 20.0)]);
+    let vibration = sensor_output(DeviceKind::VibrationSensor, &[("vibration", 9.80665)]);
+    assert!((accel - 3.0).abs() < 0.01, "accel={accel}");
+    assert!((gyro - 3.5).abs() < 0.01, "gyro={gyro}");
+    assert!((imu - 3.0).abs() < 0.01, "imu={imu}");
+    assert!((tilt - 3.0).abs() < 0.01, "tilt={tilt}");
+    assert!((vibration - 3.0).abs() < 0.01, "vibration={vibration}");
+}

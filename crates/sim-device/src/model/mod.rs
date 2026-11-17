@@ -18,8 +18,9 @@ use crate::regulator::RegulatorModel;
 use crate::relay::RelayModel;
 use crate::sensors::{
     LinearLightSensorModel, MagneticFieldSensorModel, MagneticSwitchModel,
-    MagnetoresistiveSensorModel, NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
-    RtdModel, TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
+    MagnetoresistiveSensorModel, MotionSensorModel, NtcModel, PhotodiodeSensorModel,
+    PhotoresistorModel, PtcModel, RtdModel, TemperatureSensorModel, ThermalSwitchModel,
+    ThermocoupleModel,
 };
 use crate::source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
 use crate::switch::{IdealSwitchModel, SwitchModel};
@@ -156,6 +157,27 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         DeviceKind::MagnetoresistiveSensor => {
             Box::new(MagnetoresistiveSensorModel::from_instance(instance)?)
         }
+        DeviceKind::Accelerometer | DeviceKind::Imu => Box::new(MotionSensorModel::from_instance(
+            instance,
+            "acceleration",
+            0.050986,
+            2.5,
+        )?),
+        DeviceKind::Gyroscope => Box::new(MotionSensorModel::from_instance(
+            instance,
+            "angular_rate",
+            0.01,
+            2.5,
+        )?),
+        DeviceKind::TiltSensor => Box::new(MotionSensorModel::from_instance(
+            instance, "angle", 0.025, 2.5,
+        )?),
+        DeviceKind::VibrationSensor => Box::new(MotionSensorModel::from_instance(
+            instance,
+            "vibration",
+            0.050986,
+            2.5,
+        )?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),
         DeviceKind::DiodeBridge => Box::new(DiodeBridgeModel::from_instance(instance)?),

@@ -113,6 +113,16 @@ pub enum DeviceKind {
     MagnetoresistiveSensor,
     /// A fluxgate magnetic field sensor module.
     FluxgateSensor,
+    /// A single-axis accelerometer module.
+    Accelerometer,
+    /// A single-axis gyroscope module.
+    Gyroscope,
+    /// A single-axis inertial measurement unit module.
+    Imu,
+    /// A tilt sensor module.
+    TiltSensor,
+    /// A vibration sensor module.
+    VibrationSensor,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -204,6 +214,11 @@ impl DeviceKind {
             Self::ReedSwitchSensor => "reed_switch_sensor",
             Self::MagnetoresistiveSensor => "magnetoresistive_sensor",
             Self::FluxgateSensor => "fluxgate_sensor",
+            Self::Accelerometer => "accelerometer",
+            Self::Gyroscope => "gyroscope",
+            Self::Imu => "imu",
+            Self::TiltSensor => "tilt_sensor",
+            Self::VibrationSensor => "vibration_sensor",
             Self::Diode => "diode",
             _ => "custom",
         }

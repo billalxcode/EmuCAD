@@ -230,6 +230,41 @@ const FLUXGATE_SENSOR: &[ParameterSpec] = &[
     ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
 ];
 
+const ACCELEROMETER: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/(m/s2)", 0.050986, 1e-12, 1e9),
+    ParameterSpec::number("offset", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("acceleration", "m/s2", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const GYROSCOPE: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/(deg/s)", 0.01, 1e-12, 1e9),
+    ParameterSpec::number("offset", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("angular_rate", "deg/s", 0.0, -1e9, 1e9),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const IMU: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/(m/s2)", 0.050986, 1e-12, 1e9),
+    ParameterSpec::number("offset", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("acceleration", "m/s2", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const TILT_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/deg", 0.025, 1e-12, 1e9),
+    ParameterSpec::number("offset", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("angle", "deg", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const VIBRATION_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/(m/s2)", 0.050986, 1e-12, 1e9),
+    ParameterSpec::number("offset", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("vibration", "m/s2", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -475,6 +510,11 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::ReedSwitchSensor => REED_SWITCH_SENSOR,
         DeviceKind::MagnetoresistiveSensor => MAGNETORESISTIVE_SENSOR,
         DeviceKind::FluxgateSensor => FLUXGATE_SENSOR,
+        DeviceKind::Accelerometer => ACCELEROMETER,
+        DeviceKind::Gyroscope => GYROSCOPE,
+        DeviceKind::Imu => IMU,
+        DeviceKind::TiltSensor => TILT_SENSOR,
+        DeviceKind::VibrationSensor => VIBRATION_SENSOR,
         _ => &[],
     }
 }
@@ -547,6 +587,11 @@ mod tests {
         DeviceKind::ReedSwitchSensor,
         DeviceKind::MagnetoresistiveSensor,
         DeviceKind::FluxgateSensor,
+        DeviceKind::Accelerometer,
+        DeviceKind::Gyroscope,
+        DeviceKind::Imu,
+        DeviceKind::TiltSensor,
+        DeviceKind::VibrationSensor,
     ];
 
     #[test]

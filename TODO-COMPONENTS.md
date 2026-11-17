@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 273 entri dapat
-diinstansiasi lewat registry, dan 227 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 278 entri dapat
+diinstansiasi lewat registry, dan 222 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 273 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 278 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 273 | dapat masuk netlist lewat registry |
+| mapped | 278 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 273 `mapped` bukan 273 model yang benar. Audit menemukan
+Peringatan: 278 `mapped` bukan 278 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -211,7 +211,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C7-07 | 6 | 6 | Model NTC, PTC, RTD, thermocouple, semikonduktor, thermal switch; verifikasi batch belum. |
 | C7-08 | 5 | 5 | Photoresistor, photodiode, phototransistor/ambient/color memakai model cahaya; verifikasi batch belum. |
 | C7-09 | 5 | 5 | Hall switch, Hall linear, reed switch, magnetoresistive, fluxgate; verifikasi batch belum. |
-| C7-10 | 5 | 0 | Belum ada model sensor gerak. |
+| C7-10 | 5 | 5 | Accelerometer, gyroscope, IMU, tilt, vibration memakai model satu sumbu; verifikasi batch belum. |
 | C7-11 | 4 | 0 | Belum ada model sensor tekanan. |
 | C7-12 | 4 | 0 | Belum ada model sensor kelembapan dan gas. |
 | C7-13 | 3 | 0 | Belum ada model sensor arus dan tegangan. |
@@ -291,7 +291,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 987 test workspace lulus pada audit ini.
+- 990 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -466,7 +466,11 @@ Target: 85 entri.
   - Hall switch, Hall linear, reed switch, magnetoresistive, dan
     fluxgate sudah solver-backed.
   - Reference vector dan verified belum.
-- [ ] C7-10 Motion, accelerometer, gyro, IMU 5 entri.
+- [~] C7-10 Motion, accelerometer, gyro, IMU 5 entri.
+  - Accelerometer, gyroscope, IMU, tilt, dan vibration sudah
+    solver-backed.
+  - Semua model hanya satu sumbu.
+  - Reference vector dan verified belum.
 - [ ] C7-11 Pressure, force, strain 4 entri.
 - [ ] C7-12 Humidity, gas, chemical 4 entri.
 - [ ] C7-13 Current, voltage, power sensor 3 entri.

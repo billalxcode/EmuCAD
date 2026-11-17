@@ -455,8 +455,20 @@ add("sensor.magnetic", "Sensor", "MagnetoresistiveSensor", 3, "resistance", 1000
 add("sensor.magnetic", "Sensor", "FluxgateSensor", 3, "sensitivity", 1000.0, "V/T", [
     "fluxgate sensor",
 ])
-add("sensor.motion", "Sensor", None, 3, "sensitivity", 1.0, "ratio", [
-    "accelerometer", "gyroscope", "IMU", "tilt sensor", "vibration sensor",
+add("sensor.motion", "Sensor", "Accelerometer", 3, "sensitivity", 0.050986, "V/(m/s2)", [
+    "accelerometer",
+])
+add("sensor.motion", "Sensor", "Gyroscope", 3, "sensitivity", 0.01, "V/(deg/s)", [
+    "gyroscope",
+])
+add("sensor.motion", "Sensor", "Imu", 3, "sensitivity", 0.050986, "V/(m/s2)", [
+    "IMU",
+])
+add("sensor.motion", "Sensor", "TiltSensor", 3, "sensitivity", 0.025, "V/deg", [
+    "tilt sensor",
+])
+add("sensor.motion", "Sensor", "VibrationSensor", 3, "sensitivity", 0.050986, "V/(m/s2)", [
+    "vibration sensor",
 ])
 add("sensor.pressure", "Sensor", None, 3, "sensitivity", 1.0, "ratio", [
     "strain gauge sensor", "load cell", "pressure sensor", "force sensor",

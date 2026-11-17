@@ -135,6 +135,11 @@ fn supported_sensor(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::ReedSwitchSensor
             | sim_core::DeviceKind::MagnetoresistiveSensor
             | sim_core::DeviceKind::FluxgateSensor
+            | sim_core::DeviceKind::Accelerometer
+            | sim_core::DeviceKind::Gyroscope
+            | sim_core::DeviceKind::Imu
+            | sim_core::DeviceKind::TiltSensor
+            | sim_core::DeviceKind::VibrationSensor
     )
 }
 

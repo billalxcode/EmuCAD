@@ -260,7 +260,12 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         | DeviceKind::LinearHallSensor
         | DeviceKind::ReedSwitchSensor
         | DeviceKind::MagnetoresistiveSensor
-        | DeviceKind::FluxgateSensor => SENSOR,
+        | DeviceKind::FluxgateSensor
+        | DeviceKind::Accelerometer
+        | DeviceKind::Gyroscope
+        | DeviceKind::Imu
+        | DeviceKind::TiltSensor
+        | DeviceKind::VibrationSensor => SENSOR,
         DeviceKind::Scr => SCR,
         DeviceKind::Triac => TRIAC,
         DeviceKind::Diac => DIAC,

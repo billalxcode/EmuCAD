@@ -3,7 +3,7 @@
 Katalog device yang tersedia di `sim-device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 151.
+dan transmission line sudah diimplementasikan. Total test `sim-device`: 153.
 
 ---
 
@@ -109,6 +109,11 @@ pub fn model_from_instance(
 | Reed switch sensor | 3 | Threshold dan hysteresis | - |
 | Magnetoresistive sensor | 3 | Field-dependent divider | - |
 | Fluxgate sensor | 3 | Linear V/T output | - |
+| Accelerometer | 3 | Mid-supply linear V/(m/s2) | - |
+| Gyroscope | 3 | Mid-supply linear V/(deg/s) | - |
+| IMU | 3 | Accelerometer satu sumbu | - |
+| Tilt sensor | 3 | Linear V/deg | - |
+| Vibration sensor | 3 | Linear vibration amplitude | - |
 | VCVS | 4 | Linear gain | [47](47-controlled-sources.md) |
 | VCCS | 4 | Linear transconductance | [47](47-controlled-sources.md) |
 | CCCS | 4 | Linear current gain | [48](48-cccs-switch.md) |
@@ -362,8 +367,9 @@ Test device mencakup:
 - Sensor cahaya photoresistor, photodiode, dan linear light.
 - Sensor magnetik Hall switch, Hall linear, reed switch, magnetoresistive,
   dan fluxgate.
+- Sensor gerak accelerometer, gyroscope, IMU, tilt, dan vibration.
 
-Total test `sim-device`: 146 unit + 5 integration = 151.
+Total test `sim-device`: 148 unit + 5 integration = 153.
 
 ---
 

@@ -702,12 +702,66 @@ impl DeviceModel for MagnetoresistiveSensorModel {
     }
 }
 
+/// A linear motion sensor module with an explicit environment input.
+pub struct MotionSensorModel {
+    sensitivity: f64,
+    offset: f64,
+    input: f64,
+    output_resistance: f64,
+    pins: [NodeId; 3],
+}
+
+impl MotionSensorModel {
+    pub(crate) fn from_instance(
+        instance: &DeviceInstance,
+        input_name: &str,
+        sensitivity: f64,
+        offset: f64,
+    ) -> Result<Self, SimError> {
+        let params = instance.parameters();
+        Ok(Self {
+            sensitivity: positive_parameter(params, "sensitivity", Some(sensitivity))?,
+            offset: finite_parameter(params, "offset", offset)?,
+            input: finite_parameter(params, input_name, 0.0)?,
+            output_resistance: positive_parameter(params, "output_resistance", Some(1000.0))?,
+            pins: sensor_pins(instance)?,
+        })
+    }
+
+    fn output(&self, supply: f64) -> f64 {
+        clamp_output(self.offset + self.sensitivity * self.input, supply)
+    }
+}
+
+impl DeviceModel for MotionSensorModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        solution: &Solution,
+        _dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        let supply = supply(solution, self.pins);
+        stamp_output(
+            ctx,
+            self.pins[2],
+            self.pins[1],
+            self.output(supply),
+            self.output_resistance,
+        )
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
         LinearLightSensorModel, MagneticFieldSensorModel, MagneticSwitchModel,
-        MagnetoresistiveSensorModel, NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
-        RtdModel, TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
+        MagnetoresistiveSensorModel, MotionSensorModel, NtcModel, PhotodiodeSensorModel,
+        PhotoresistorModel, PtcModel, RtdModel, TemperatureSensorModel, ThermalSwitchModel,
+        ThermocoupleModel,
     };
     use sim_core::{DeviceId, DeviceInstance, DeviceKind, NodeId};
     use std::collections::BTreeMap;
@@ -885,5 +939,42 @@ mod tests {
             0.0,
         );
         assert!(result.is_err());
+    }
+
+    fn motion_output(kind: DeviceKind, input_name: &str, input: f64, sensitivity: f64) -> f64 {
+        let model = MotionSensorModel::from_instance(
+            &instance(kind, &[(input_name, input)]),
+            input_name,
+            sensitivity,
+            2.5,
+        )
+        .expect("model");
+        model.output(5.0)
+    }
+
+    #[test]
+    fn motion_sensors_use_their_environment_inputs() {
+        let accel = motion_output(DeviceKind::Accelerometer, "acceleration", 9.80665, 0.050986);
+        let gyro = motion_output(DeviceKind::Gyroscope, "angular_rate", 100.0, 0.01);
+        let imu = motion_output(DeviceKind::Imu, "acceleration", 9.80665, 0.050986);
+        let tilt = motion_output(DeviceKind::TiltSensor, "angle", 20.0, 0.025);
+        let vibration = motion_output(DeviceKind::VibrationSensor, "vibration", 9.80665, 0.050986);
+        assert!((accel - 3.0).abs() < 1e-5, "accel={accel}");
+        assert!((gyro - 3.5).abs() < 1e-5, "gyro={gyro}");
+        assert!((imu - 3.0).abs() < 1e-5, "imu={imu}");
+        assert!((tilt - 3.0).abs() < 1e-5, "tilt={tilt}");
+        assert!((vibration - 3.0).abs() < 1e-5, "vibration={vibration}");
+    }
+
+    #[test]
+    fn motion_sensor_at_rest_stays_at_mid_supply() {
+        let model = MotionSensorModel::from_instance(
+            &instance(DeviceKind::Gyroscope, &[]),
+            "angular_rate",
+            0.01,
+            2.5,
+        )
+        .expect("model");
+        assert!((model.output(5.0) - 2.5).abs() < 1e-9);
     }
 }

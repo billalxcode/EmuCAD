@@ -163,6 +163,11 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::ReedSwitchSensor
             | DeviceKind::MagnetoresistiveSensor
             | DeviceKind::FluxgateSensor
+            | DeviceKind::Accelerometer
+            | DeviceKind::Gyroscope
+            | DeviceKind::Imu
+            | DeviceKind::TiltSensor
+            | DeviceKind::VibrationSensor
     )
 }
 

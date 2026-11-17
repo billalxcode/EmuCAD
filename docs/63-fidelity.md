@@ -21,8 +21,8 @@ ngspice belum dijalankan untuk seluruh keluarga.
 
 - 500 entry katalog.
 - 60 model class.
-- 273 entry solver-backed.
-- 227 entry behavioral atau unsupported.
+- 278 entry solver-backed.
+- 222 entry behavioral atau unsupported.
 - Setiap entry solver-backed memiliki `SimulationBinding` yang
   memvalidasi jumlah pin, role unik, dan parameter utama.
 - Setiap entry solver-backed memiliki label fidelity dari
@@ -31,7 +31,7 @@ ngspice belum dijalankan untuk seluruh keluarga.
 Kelas yang belum solver-backed tetap `unsupported` dan tidak diberi
 hasil simulasi. Entry unsupported harus ditolak oleh netlist GUI.
 
-Kelas `Sensor` sudah sebagian: 16 sensor solver-backed dan 19 sensor
+Kelas `Sensor` sudah sebagian: 21 sensor solver-backed dan 14 sensor
 lain masih unsupported.
 
 ## 3. Benchmark AVR
