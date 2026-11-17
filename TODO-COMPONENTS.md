@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 257 entri dapat
-diinstansiasi lewat registry, dan 243 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 263 entri dapat
+diinstansiasi lewat registry, dan 237 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 257 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 263 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 257 | dapat masuk netlist lewat registry |
+| mapped | 263 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 257 `mapped` bukan 257 model yang benar. Audit menemukan
+Peringatan: 263 `mapped` bukan 263 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -208,7 +208,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C7-04 | 5 | 0 | Belum ada model supervisor. |
 | C7-05 | 3 | 3 | Ideal switch; ideal diode dan ORing logic belum. |
 | C7-06 | 3 | 0 | Belum ada model motor driver. |
-| C7-07 | 6 | 0 | Belum ada model sensor suhu. |
+| C7-07 | 6 | 6 | Model NTC, PTC, RTD, thermocouple, semikonduktor, thermal switch; verifikasi batch belum. |
 | C7-08 | 5 | 0 | Belum ada model sensor cahaya. |
 | C7-09 | 5 | 0 | Belum ada model sensor magnetik. |
 | C7-10 | 5 | 0 | Belum ada model sensor gerak. |
@@ -291,7 +291,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 965 test workspace lulus pada audit ini.
+- 975 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -454,7 +454,10 @@ Target: 85 entri.
 - [ ] C7-04 Reference dan supervisor 5 entri.
 - [ ] C7-05 Ideal diode, ORing, load switch 3 entri.
 - [ ] C7-06 Motor driver 3 entri.
-- [ ] C7-07 Temperature sensor 6 entri.
+- [~] C7-07 Temperature sensor 6 entri.
+  - NTC, PTC, RTD, thermocouple, sensor semikonduktor, dan thermal
+    switch sudah solver-backed.
+  - Reference vector dan verified belum.
 - [ ] C7-08 Light dan optical sensor 5 entri.
 - [ ] C7-09 Magnetic, Hall, reed 5 entri.
 - [ ] C7-10 Motion, accelerometer, gyro, IMU 5 entri.

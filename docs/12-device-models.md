@@ -3,7 +3,7 @@
 Katalog device yang tersedia di `sim-device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 137.
+dan transmission line sudah diimplementasikan. Total test `sim-device`: 143.
 
 ---
 
@@ -95,6 +95,12 @@ pub fn model_from_instance(
 | Diode bridge | 4 | Empat diode bridge | - |
 | Dual diode | 4 | Dua diode independen | - |
 | Optocoupler | 4 | LED dan output transistor dengan CTR | - |
+| NTC | 3 | Beta equation dan divider | - |
+| PTC | 3 | Linear positive coefficient | - |
+| RTD | 3 | Callendar-Van Dusen dan divider | - |
+| Thermocouple | 3 | Seebeck sensitivity dan cold junction | - |
+| Temperature sensor | 3 | Linear V/C output | - |
+| Thermal switch | 3 | Threshold dan hysteresis | - |
 | VCVS | 4 | Linear gain | [47](47-controlled-sources.md) |
 | VCCS | 4 | Linear transconductance | [47](47-controlled-sources.md) |
 | CCCS | 4 | Linear current gain | [48](48-cccs-switch.md) |
@@ -344,8 +350,9 @@ Test device mencakup:
 - SCR, TRIAC, DIAC, GTO, dan SCS latching.
 - Diode bridge dan dual diode.
 - Optocoupler CTR.
+- Sensor suhu NTC, PTC, RTD, thermocouple, semikonduktor, dan switch.
 
-Total test `sim-device`: 132 unit + 5 integration = 137.
+Total test `sim-device`: 138 unit + 5 integration = 143.
 
 ---
 

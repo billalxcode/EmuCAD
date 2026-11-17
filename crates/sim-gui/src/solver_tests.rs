@@ -1001,3 +1001,67 @@ fn higher_ctr_pulls_collector_lower() {
         "low={low_collector} high={high_collector}"
     );
 }
+
+fn sensor_circuit(kind: DeviceKind, values: &[(&str, f64)]) -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let supply = builder.node("vcc").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", supply, ground, 5.0);
+    builder
+        .device("U1", kind, vec![supply, ground, output], params(values))
+        .expect("U1");
+    builder.build().expect("circuit")
+}
+
+fn sensor_output(kind: DeviceKind, values: &[(&str, f64)]) -> f64 {
+    let result = solve(&sensor_circuit(kind, values));
+    result.solution.voltage(NodeId::new(2)).expect("output")
+}
+
+#[test]
+fn ntc_and_ptc_follow_temperature() {
+    let ntc_cold = sensor_output(DeviceKind::Ntc, &[("temperature", 25.0)]);
+    let ntc_hot = sensor_output(DeviceKind::Ntc, &[("temperature", 100.0)]);
+    let ptc_cold = sensor_output(DeviceKind::Ptc, &[("temperature", 25.0)]);
+    let ptc_hot = sensor_output(DeviceKind::Ptc, &[("temperature", 100.0)]);
+    assert!((ntc_cold - 2.5).abs() < 0.1, "ntc_cold={ntc_cold}");
+    assert!(ntc_hot < ntc_cold, "ntc_hot={ntc_hot}");
+    assert!(ptc_hot > ptc_cold, "ptc_hot={ptc_hot}");
+}
+
+#[test]
+fn rtd_matches_pt100_divider() {
+    let zero = sensor_output(DeviceKind::Rtd, &[("temperature", 0.0)]);
+    let hundred = sensor_output(DeviceKind::Rtd, &[("temperature", 100.0)]);
+    assert!((zero - 100.0 / 1100.0 * 5.0).abs() < 0.01, "zero={zero}");
+    assert!(
+        (hundred - 138.5 / 1138.5 * 5.0).abs() < 0.02,
+        "hundred={hundred}"
+    );
+}
+
+#[test]
+fn thermocouple_and_semiconductor_outputs_are_linear() {
+    let thermocouple = sensor_output(
+        DeviceKind::Thermocouple,
+        &[("temperature", 100.0), ("cold_junction", 25.0)],
+    );
+    let semiconductor = sensor_output(DeviceKind::TemperatureSensor, &[("temperature", 25.0)]);
+    assert!(
+        (thermocouple - 41e-6 * 75.0).abs() < 1e-4,
+        "tc={thermocouple}"
+    );
+    assert!(
+        (semiconductor - 0.25).abs() < 0.01,
+        "sensor={semiconductor}"
+    );
+}
+
+#[test]
+fn thermal_switch_switches_at_threshold() {
+    let hot = sensor_output(DeviceKind::ThermalSwitch, &[("temperature", 80.0)]);
+    let cold = sensor_output(DeviceKind::ThermalSwitch, &[("temperature", 60.0)]);
+    assert!((hot - 5.0).abs() < 0.01, "hot={hot}");
+    assert!(cold.abs() < 0.01, "cold={cold}");
+}

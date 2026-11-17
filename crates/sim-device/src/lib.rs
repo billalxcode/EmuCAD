@@ -20,6 +20,7 @@ mod passive;
 mod protection;
 mod regulator;
 mod relay;
+mod sensors;
 mod source;
 mod switch;
 mod thyristor;
@@ -50,6 +51,9 @@ pub use passive::{CapacitorModel, InductorModel, ResistorModel};
 pub use protection::{FuseModel, VaristorModel};
 pub use regulator::RegulatorModel;
 pub use relay::RelayModel;
+pub use sensors::{
+    NtcModel, PtcModel, RtdModel, TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
+};
 pub use source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
 pub use switch::{IdealSwitchModel, SwitchModel};
 pub use thyristor::{ThyristorKind, ThyristorModel};

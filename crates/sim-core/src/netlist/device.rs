@@ -85,6 +85,18 @@ pub enum DeviceKind {
     DualDiode,
     /// An optically coupled LED and output transistor.
     Optocoupler,
+    /// An NTC thermistor sensor module.
+    Ntc,
+    /// A PTC thermistor sensor module.
+    Ptc,
+    /// A platinum resistance temperature detector module.
+    Rtd,
+    /// A thermocouple module.
+    Thermocouple,
+    /// A linear semiconductor temperature sensor module.
+    TemperatureSensor,
+    /// A temperature switch with hysteresis.
+    ThermalSwitch,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -162,6 +174,12 @@ impl DeviceKind {
             Self::DiodeBridge => "diode_bridge",
             Self::DualDiode => "dual_diode",
             Self::Optocoupler => "optocoupler",
+            Self::Ntc => "ntc",
+            Self::Ptc => "ptc",
+            Self::Rtd => "rtd",
+            Self::Thermocouple => "thermocouple",
+            Self::TemperatureSensor => "temperature_sensor",
+            Self::ThermalSwitch => "thermal_switch",
             Self::Diode => "diode",
             _ => "custom",
         }

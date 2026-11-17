@@ -96,14 +96,11 @@ fn analog_classes_expose_a_solver_kind() {
 }
 
 #[test]
-fn device_presence_matches_class_contract() {
+fn required_classes_have_devices() {
     for entry in catalog() {
-        assert_eq!(
-            entry.device.is_some(),
-            entry.class.requires_device(),
-            "{}",
-            entry.id
-        );
+        if entry.class.requires_device() {
+            assert!(entry.device.is_some(), "{}", entry.id);
+        }
     }
 }
 
@@ -118,7 +115,19 @@ fn device_kinds_are_solver_supported() {
 }
 
 fn supported_device(device: &sim_core::DeviceKind) -> bool {
-    supported_passive(device) || supported_active(device)
+    supported_passive(device) || supported_active(device) || supported_sensor(device)
+}
+
+fn supported_sensor(device: &sim_core::DeviceKind) -> bool {
+    matches!(
+        device,
+        sim_core::DeviceKind::Ntc
+            | sim_core::DeviceKind::Ptc
+            | sim_core::DeviceKind::Rtd
+            | sim_core::DeviceKind::Thermocouple
+            | sim_core::DeviceKind::TemperatureSensor
+            | sim_core::DeviceKind::ThermalSwitch
+    )
 }
 
 fn supported_passive(device: &sim_core::DeviceKind) -> bool {

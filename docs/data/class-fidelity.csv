@@ -35,7 +35,7 @@ Mosfet,17,17,compact,transistor
 MotorDriver,3,0,unsupported,power
 Multiplexer,8,0,unsupported,logic
 OpAmp,25,25,behavioral,analog
-Optocoupler,6,0,unsupported,diode
+Optocoupler,6,6,behavioral,diode
 OtherTransistor,10,10,compact,transistor
 Photodiode,2,2,compact,diode
 PowerSwitch,3,3,behavioral,power
@@ -45,7 +45,7 @@ Regulator,6,6,behavioral,power
 Relay,3,3,compact,switch
 Resistor,12,12,ideal,passive
 RfBlock,18,0,unsupported,rf
-Sensor,35,0,unsupported,sensor
+Sensor,35,6,behavioral,sensor
 SerialInterface,6,0,unsupported,mcu
 SolidStateRelay,4,4,compact,switch
 Supervisor,5,0,unsupported,power

@@ -123,6 +123,7 @@ const IGBT: &[PinRole] = &[PinRole::Collector, PinRole::Gate, PinRole::Emitter];
 const UJT: &[PinRole] = &[PinRole::Base1, PinRole::Base2, PinRole::Emitter];
 const PUT: &[PinRole] = &[PinRole::Anode, PinRole::Gate, PinRole::Cathode];
 const SCR: &[PinRole] = &[PinRole::Anode, PinRole::Gate, PinRole::Cathode];
+const SENSOR: &[PinRole] = &[PinRole::PositiveSupply, PinRole::Ground, PinRole::Output];
 const OPTOCOUPLER: &[PinRole] = &[
     PinRole::Anode,
     PinRole::Cathode,
@@ -246,6 +247,12 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         DeviceKind::Ujt => UJT,
         DeviceKind::Put => PUT,
         DeviceKind::Optocoupler => OPTOCOUPLER,
+        DeviceKind::Ntc
+        | DeviceKind::Ptc
+        | DeviceKind::Rtd
+        | DeviceKind::Thermocouple
+        | DeviceKind::TemperatureSensor
+        | DeviceKind::ThermalSwitch => SENSOR,
         DeviceKind::Scr => SCR,
         DeviceKind::Triac => TRIAC,
         DeviceKind::Diac => DIAC,

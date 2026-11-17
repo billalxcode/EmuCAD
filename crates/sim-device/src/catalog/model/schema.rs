@@ -172,6 +172,51 @@ const FUSE: &[ParameterSpec] = &[
     ParameterSpec::boolean("reset", false),
 ];
 
+const NTC: &[ParameterSpec] = &[
+    ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
+    ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
+    ParameterSpec::number("series_resistance", "ohm", 10000.0, 1e-9, 1e12),
+    ParameterSpec::number("temperature", "C", 25.0, -273.0, 1e6),
+];
+
+const PTC: &[ParameterSpec] = &[
+    ParameterSpec::number("resistance", "ohm", 1000.0, 1e-9, 1e12),
+    ParameterSpec::number("temperature_coefficient", "1/C", 0.0039, 0.0, 1e6),
+    ParameterSpec::number("series_resistance", "ohm", 1000.0, 1e-9, 1e12),
+    ParameterSpec::number("temperature", "C", 25.0, -273.0, 1e6),
+];
+
+const RTD: &[ParameterSpec] = &[
+    ParameterSpec::number("resistance", "ohm", 100.0, 1e-9, 1e12),
+    ParameterSpec::number("alpha", "1/C", 3.9083e-3, -1e6, 1e6),
+    ParameterSpec::number("beta", "1/C^2", -5.775e-7, -1e6, 1e6),
+    ParameterSpec::number("c", "1/C^4", -4.183e-12, -1e6, 1e6),
+    ParameterSpec::number("series_resistance", "ohm", 1000.0, 1e-9, 1e12),
+    ParameterSpec::number("temperature", "C", 25.0, -273.0, 1e6),
+];
+
+const THERMOCOUPLE: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/C", 41e-6, 0.0, 1e6),
+    ParameterSpec::number("cold_junction", "C", 25.0, -273.0, 1e6),
+    ParameterSpec::number("offset", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+    ParameterSpec::number("temperature", "C", 25.0, -273.0, 1e6),
+];
+
+const TEMPERATURE_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/C", 0.01, 0.0, 1e6),
+    ParameterSpec::number("offset", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1.0, 1e-9, 1e12),
+    ParameterSpec::number("temperature", "C", 25.0, -273.0, 1e6),
+];
+
+const THERMAL_SWITCH: &[ParameterSpec] = &[
+    ParameterSpec::number("threshold", "C", 75.0, -273.0, 1e6),
+    ParameterSpec::number("hysteresis", "C", 5.0, 0.0, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+    ParameterSpec::number("temperature", "C", 25.0, -273.0, 1e6),
+];
+
 const OPTOCOUPLER: &[ParameterSpec] = &[
     ParameterSpec::number("current_transfer_ratio", "ratio", 1.0, 1e-6, 1e3),
     ParameterSpec::number("forward_voltage", "V", 1.2, 1e-3, 1e6),
@@ -358,6 +403,12 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::Scs => SCS,
         DeviceKind::DiodeBridge | DeviceKind::DualDiode => DIODE_ARRAY,
         DeviceKind::Optocoupler => OPTOCOUPLER,
+        DeviceKind::Ntc => NTC,
+        DeviceKind::Ptc => PTC,
+        DeviceKind::Rtd => RTD,
+        DeviceKind::Thermocouple => THERMOCOUPLE,
+        DeviceKind::TemperatureSensor => TEMPERATURE_SENSOR,
+        DeviceKind::ThermalSwitch => THERMAL_SWITCH,
         _ => &[],
     }
 }
@@ -416,6 +467,12 @@ mod tests {
         DeviceKind::DiodeBridge,
         DeviceKind::DualDiode,
         DeviceKind::Optocoupler,
+        DeviceKind::Ntc,
+        DeviceKind::Ptc,
+        DeviceKind::Rtd,
+        DeviceKind::Thermocouple,
+        DeviceKind::TemperatureSensor,
+        DeviceKind::ThermalSwitch,
     ];
 
     #[test]

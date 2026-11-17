@@ -407,9 +407,23 @@ add("power.motor", "MotorDriver", None, 4, "current", 1.0, "A", [
     "H-bridge", "half-bridge", "stepper driver",
 ])
 
-add("sensor.temperature", "Sensor", None, 3, "sensitivity", 0.01, "ratio", [
-    "NTC thermistor sensor", "PTC thermistor sensor", "RTD",
-    "thermocouple", "semiconductor temperature sensor", "thermal switch",
+add("sensor.temperature", "Sensor", "Ntc", 3, "resistance", 10000.0, "ohm", [
+    "NTC thermistor sensor",
+])
+add("sensor.temperature", "Sensor", "Ptc", 3, "resistance", 1000.0, "ohm", [
+    "PTC thermistor sensor",
+])
+add("sensor.temperature", "Sensor", "Rtd", 3, "resistance", 100.0, "ohm", [
+    "RTD",
+])
+add("sensor.temperature", "Sensor", "Thermocouple", 3, "sensitivity", 41e-6, "V/C", [
+    "thermocouple",
+])
+add("sensor.temperature", "Sensor", "TemperatureSensor", 3, "sensitivity", 0.01, "V/C", [
+    "semiconductor temperature sensor",
+])
+add("sensor.temperature", "Sensor", "ThermalSwitch", 3, "threshold", 75.0, "C", [
+    "thermal switch",
 ])
 add("sensor.light", "Sensor", None, 3, "sensitivity", 1.0, "ratio", [
     "photoresistor", "photodiode sensor", "phototransistor sensor",

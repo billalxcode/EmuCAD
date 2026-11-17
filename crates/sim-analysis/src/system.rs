@@ -149,6 +149,12 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::DiodeBridge
             | DeviceKind::DualDiode
             | DeviceKind::Optocoupler
+            | DeviceKind::Ntc
+            | DeviceKind::Ptc
+            | DeviceKind::Rtd
+            | DeviceKind::Thermocouple
+            | DeviceKind::TemperatureSensor
+            | DeviceKind::ThermalSwitch
     )
 }
 
