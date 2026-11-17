@@ -1,5 +1,6 @@
 //! Device model API and factory.
 
+use crate::actuator::{DisplayModuleModel, LedActuatorModel, SeriesEmfModel};
 use crate::bjt::BjtModel;
 use crate::comparator::ComparatorModel;
 use crate::controlled::{CccsModel, CcvsModel, VccsModel, VcvsModel};
@@ -232,6 +233,29 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         DeviceKind::UltrasonicDistanceSensor => Box::new(LinearSensorModel::from_instance(
             instance, "distance", 1.0, 0.5,
         )?),
+        DeviceKind::LedActuator => Box::new(LedActuatorModel::from_instance(instance)?),
+        DeviceKind::DcMotor => Box::new(SeriesEmfModel::from_instance(
+            instance,
+            "speed",
+            "back_emf_constant",
+            10.0,
+            0.01,
+        )?),
+        DeviceKind::Peltier => Box::new(SeriesEmfModel::from_instance(
+            instance,
+            "delta_temperature",
+            "seebeck",
+            2.0,
+            0.05,
+        )?),
+        DeviceKind::ThermoelectricGenerator => Box::new(SeriesEmfModel::from_instance(
+            instance,
+            "delta_temperature",
+            "seebeck",
+            5.0,
+            0.05,
+        )?),
+        DeviceKind::DisplayModule => Box::new(DisplayModuleModel::from_instance(instance)?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),
         DeviceKind::DiodeBridge => Box::new(DiodeBridgeModel::from_instance(instance)?),

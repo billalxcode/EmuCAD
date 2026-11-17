@@ -1,5 +1,5 @@
 model_class,entries,solver_backed,fidelity,families
-Actuator,16,0,unsupported,actuator
+Actuator,16,16,behavioral,actuator
 Adc,5,0,unsupported,mcu
 Adder,8,0,unsupported,logic
 AnalogSwitch,5,5,compact,switch
@@ -21,7 +21,7 @@ DcDc,8,0,unsupported,power
 DigitalSource,3,0,unsupported,source
 Diode,20,20,compact,diode
 DiodeArray,4,4,compact,diode
-Display,4,0,unsupported,actuator
+Display,4,4,behavioral,actuator
 FlipFlop,10,0,unsupported,logic
 Inductor,10,10,ideal,passive
 Jfet,8,8,compact,transistor

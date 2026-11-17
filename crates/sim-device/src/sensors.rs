@@ -1,8 +1,8 @@
 //! Behavioral three-pin sensor modules.
 
 use crate::model::{
-    DeviceModel, non_negative_parameter, parameter, pins_exact, positive_parameter,
-    stamp_conductance, stamp_current_source,
+    DeviceModel, finite_parameter, non_negative_parameter, parameter, pins_exact,
+    positive_parameter, stamp_conductance, stamp_current_source,
 };
 use sim_core::{Device, DeviceInstance, MnaContext, NodeId, SimError, Solution};
 
@@ -526,20 +526,6 @@ impl DeviceModel for LinearLightSensorModel {
     fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
         Ok(())
     }
-}
-
-fn finite_parameter(
-    params: &std::collections::BTreeMap<String, f64>,
-    name: &str,
-    default: f64,
-) -> Result<f64, SimError> {
-    let value = parameter(params, name, default);
-    if !value.is_finite() {
-        return Err(SimError::InvalidNetlist(format!(
-            "parameter {name} must be finite"
-        )));
-    }
-    Ok(value)
 }
 
 fn magnetic_field(params: &std::collections::BTreeMap<String, f64>) -> Result<f64, SimError> {

@@ -513,22 +513,62 @@ add("sensor.proximity", "Sensor", "UltrasonicDistanceSensor", 3, "sensitivity", 
     "ultrasonic distance sensor",
 ])
 
-add("actuator.led", "Actuator", None, 2, "gain", 1.0, "ratio", [
-    "LED", "RGB LED", "incandescent lamp", "neon lamp",
+add("actuator.led", "Actuator", "LedActuator", 2, "is", 1e-15, "A", [
+    "LED", "RGB LED",
 ])
-add("actuator.buzzer", "Actuator", None, 2, "gain", 1.0, "ratio", [
-    "buzzer", "speaker", "piezo transducer", "piezo buzzer",
+add("actuator.led", "Actuator", "Resistor", 2, "resistance", 100.0, "ohm", [
+    "incandescent lamp",
 ])
-add("actuator.motor", "Actuator", None, 2, "gain", 1.0, "ratio", [
-    "DC motor", "brushless DC motor", "servo motor", "stepper motor",
+add("actuator.led", "Actuator", "Diac", 2, "vbo", 90.0, "V", [
+    "neon lamp",
+])
+add("actuator.buzzer", "Actuator", "Resistor", 2, "resistance", 100.0, "ohm", [
+    "buzzer",
+])
+add("actuator.buzzer", "Actuator", "Resistor", 2, "resistance", 8.0, "ohm", [
+    "speaker",
+])
+add("actuator.buzzer", "Actuator", "Capacitor", 2, "capacitance", 100e-9, "F", [
+    "piezo transducer",
+])
+add("actuator.buzzer", "Actuator", "Capacitor", 2, "capacitance", 20e-9, "F", [
+    "piezo buzzer",
+])
+add("actuator.motor", "Actuator", "DcMotor", 2, "resistance", 10.0, "ohm", [
+    "DC motor",
+])
+add("actuator.motor", "Actuator", "DcMotor", 2, "resistance", 5.0, "ohm", [
+    "brushless DC motor",
+])
+add("actuator.motor", "Actuator", "DcMotor", 2, "resistance", 50.0, "ohm", [
+    "servo motor",
+])
+add("actuator.motor", "Actuator", "DcMotor", 2, "resistance", 20.0, "ohm", [
+    "stepper motor",
+])
+add("actuator.motor", "Actuator", "Resistor", 2, "resistance", 20.0, "ohm", [
     "solenoid",
 ])
-add("actuator.display", "Display", None, 4, "resolution", 128.0, "pixel", [
-    "LCD character display", "LCD graphic display", "OLED display",
+add("actuator.display", "Display", "DisplayModule", 4, "supply_current", 0.002, "A", [
+    "LCD character display",
+])
+add("actuator.display", "Display", "DisplayModule", 4, "supply_current", 0.005, "A", [
+    "LCD graphic display",
+])
+add("actuator.display", "Display", "DisplayModule", 4, "supply_current", 0.02, "A", [
+    "OLED display",
+])
+add("actuator.display", "Display", "DisplayModule", 4, "supply_current", 0.001, "A", [
     "e-ink display",
 ])
-add("actuator.heater", "Actuator", None, 2, "gain", 1.0, "ratio", [
-    "resistive heater", "Peltier cooler", "thermoelectric generator",
+add("actuator.heater", "Actuator", "Resistor", 2, "resistance", 10.0, "ohm", [
+    "resistive heater",
+])
+add("actuator.heater", "Actuator", "Peltier", 2, "resistance", 2.0, "ohm", [
+    "Peltier cooler",
+])
+add("actuator.heater", "Actuator", "ThermoelectricGenerator", 2, "seebeck", 0.05, "V/K", [
+    "thermoelectric generator",
 ])
 
 add("rf.amplifier", "RfBlock", None, 3, "gain", 10.0, "ratio", [

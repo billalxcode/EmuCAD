@@ -79,3 +79,17 @@ pub(crate) fn pnjlim(voltage: f64, previous: f64, thermal: f64, critical: f64) -
     }
     thermal * (voltage / thermal).ln()
 }
+
+pub(crate) fn finite_parameter(
+    params: &BTreeMap<String, f64>,
+    name: &str,
+    default: f64,
+) -> Result<f64, SimError> {
+    let value = parameter(params, name, default);
+    if !value.is_finite() {
+        return Err(SimError::InvalidNetlist(format!(
+            "parameter {name} must be finite"
+        )));
+    }
+    Ok(value)
+}

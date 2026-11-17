@@ -1,6 +1,6 @@
 # 62 - Klasifikasi Entry Behavioral
 
-Dokumen ini mengklasifikasikan 208 entry katalog yang belum memiliki
+Dokumen ini mengklasifikasikan 188 entry katalog yang belum memiliki
 model solver. Tujuannya menentukan model apa yang harus dibuat pada S5
 dan mana yang harus menunggu fase lain.
 
@@ -26,13 +26,12 @@ Data per entry ada di
 |---|---:|
 | `digital` | 63 |
 | `behavioral-electrical` | 62 |
-| `multidomain` | 20 |
 | `compact-analog` | 0 |
 | `structural` | 26 |
 | `rf` | 18 |
 | `unsupported` | 14 |
 | `mixed-signal` | 5 |
-| **Total** | **208** |
+| **Total** | **188** |
 
 ## 3. Prioritas
 
@@ -68,9 +67,9 @@ Urutan implementasi yang disarankan:
 5. Digital.
    - Gunakan `sim-cells` untuk flip-flop, counter, mux, adder.
 6. Sensor dan actuator. Sebagian.
-   - 35 sensor sudah memakai model behavioral dan seluruh entry
-     kelas Sensor sudah solver-backed.
-   - 20 actuator/display belum.
+   - 35 sensor dan 20 actuator/display sudah solver-backed.
+   - Actuator/display memakai model elektrik behavioral; output
+     fisik belum dirender sebagai kanal terpisah.
 7. RF.
    - Tunda sampai AC dan S-parameter tersedia.
 
@@ -88,7 +87,7 @@ P1 compact-analog selesai pada level model. Tidak ada entry
 
 ## 6. Acceptance S5-01
 
-- CSV mencakup tepat 208 entry behavioral.
+- CSV mencakup tepat 188 entry behavioral.
 - Setiap entry punya satu kategori yang valid.
 - Setiap kategori punya fase dan prioritas.
 - Tidak ada entry yang hilang atau duplikat.

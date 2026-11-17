@@ -182,6 +182,7 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::InductiveProximitySensor
             | DeviceKind::CapacitiveTouchSensor
             | DeviceKind::UltrasonicDistanceSensor
+            | DeviceKind::LedActuator
     )
 }
 

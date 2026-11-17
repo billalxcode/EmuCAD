@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 292 entri dapat
-diinstansiasi lewat registry, dan 208 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 312 entri dapat
+diinstansiasi lewat registry, dan 188 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 292 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 312 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 292 | dapat masuk netlist lewat registry |
+| mapped | 312 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 292 `mapped` bukan 292 model yang benar. Audit menemukan
+Peringatan: 312 `mapped` bukan 312 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -213,14 +213,14 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C7-09 | 5 | 5 | Hall switch, Hall linear, reed switch, magnetoresistive, fluxgate; verifikasi batch belum. |
 | C7-10 | 5 | 5 | Accelerometer, gyroscope, IMU, tilt, vibration memakai model satu sumbu; verifikasi batch belum. |
 | C7-11 | 4 | 4 | Strain gauge, load cell, pressure, dan force memakai model bridge atau linier; verifikasi batch belum. |
-| C7-12 | 4 | 0 | Belum ada model sensor kelembapan dan gas. |
-| C7-13 | 3 | 0 | Belum ada model sensor arus dan tegangan. |
-| C7-14 | 3 | 0 | Belum ada model proximity dan sentuh. |
-| C7-15 | 4 | 0 | Belum ada model LED dan lampu. |
-| C7-16 | 4 | 0 | Belum ada model buzzer dan speaker. |
-| C7-17 | 5 | 0 | Belum ada model motor dan servo. |
-| C7-18 | 4 | 0 | Belum ada model display. |
-| C7-19 | 3 | 0 | Belum ada model heater dan Peltier. |
+| C7-12 | 4 | 4 | Humidity, gas, pH, dan electrochemical memakai model linier atau chemiresistor; verifikasi batch belum. |
+| C7-13 | 3 | 3 | Current sense resistor, Hall current, dan voltage divider; verifikasi batch belum. |
+| C7-14 | 3 | 3 | Inductive, capacitive touch, dan ultrasonic memakai model switch atau linier; verifikasi batch belum. |
+| C7-15 | 4 | 4 | LED dan RGB memakai junction eksponensial; lampu dan neon memakai resistor atau DIAC; verifikasi batch belum. |
+| C7-16 | 4 | 4 | Buzzer/speaker memakai resistor dan piezo memakai kapasitor; verifikasi batch belum. |
+| C7-17 | 5 | 5 | Motor memakai resistance dan back EMF; solenoid memakai resistor; verifikasi batch belum. |
+| C7-18 | 4 | 4 | Display memakai beban supply dan input leakage; verifikasi batch belum. |
+| C7-19 | 3 | 3 | Heater memakai resistor; Peltier/TEG memakai resistance dan Seebeck; verifikasi batch belum. |
 | C8-01 | 4 | 0 | Belum ada model RF amplifier. |
 | C8-02 | 4 | 0 | Belum ada model RF mixer dan modulator. |
 | C8-03 | 4 | 0 | Belum ada model RF filter. |
@@ -291,7 +291,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 1006 test workspace lulus pada audit ini.
+- 1014 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -487,11 +487,30 @@ Target: 85 entri.
   - Inductive dan capacitive touch memakai threshold switch.
   - Ultrasonic memakai output linier terhadap jarak.
   - Reference vector dan verified belum.
-- [ ] C7-15 LED dan lamp 4 entri.
-- [ ] C7-16 Buzzer, speaker, piezo 4 entri.
-- [ ] C7-17 Motor, servo, stepper, solenoid 5 entri.
-- [ ] C7-18 LCD, OLED, e-ink 4 entri.
-- [ ] C7-19 Heater dan Peltier 3 entri.
+- [~] C7-15 LED dan lamp 4 entri.
+  - LED dan RGB memakai junction eksponensial.
+  - Lamp memakai resistor dan neon memakai model DIAC.
+  - Output cahaya belum dirender.
+  - Reference vector dan verified belum.
+- [~] C7-16 Buzzer, speaker, piezo 4 entri.
+  - Buzzer dan speaker memakai resistor.
+  - Piezo memakai kapasitor.
+  - Output akustik belum dirender.
+  - Reference vector dan verified belum.
+- [~] C7-17 Motor, servo, stepper, solenoid 5 entri.
+  - Motor memakai resistance dan back EMF satu winding.
+  - Solenoid memakai resistor tanpa induktansi.
+  - Torsi dan kontrol posisi belum dimodelkan.
+  - Reference vector dan verified belum.
+- [~] C7-18 LCD, OLED, e-ink 4 entri.
+  - Display memakai beban supply empat pin.
+  - Protokol data dan piksel belum dimodelkan.
+  - Reference vector dan verified belum.
+- [~] C7-19 Heater dan Peltier 3 entri.
+  - Heater memakai resistor.
+  - Peltier dan TEG memakai resistance dan Seebeck.
+  - Aliran panas belum dimodelkan.
+  - Reference vector dan verified belum.
 
 ## 11. RF dan Behavioral
 

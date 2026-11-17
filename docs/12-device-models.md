@@ -3,7 +3,7 @@
 Katalog device yang tersedia di `sim-device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 164.
+dan transmission line sudah diimplementasikan. Total test `sim-device`: 167.
 
 ---
 
@@ -128,6 +128,11 @@ pub fn model_from_instance(
 | Inductive proximity sensor | 3 | Threshold switch pada jarak | - |
 | Capacitive touch sensor | 3 | Threshold switch pada kapasitansi | - |
 | Ultrasonic distance sensor | 3 | Linear V/m output | - |
+| LED actuator | 2 | Exponential junction dan series resistance | - |
+| DC motor | 2 | Winding resistance dan back EMF | - |
+| Peltier | 2 | Resistance dan Seebeck back EMF | - |
+| Thermoelectric generator | 2 | Thevenin Seebeck source | - |
+| Display module | 4 | Supply load dan input leakage | - |
 | VCVS | 4 | Linear gain | [47](47-controlled-sources.md) |
 | VCCS | 4 | Linear transconductance | [47](47-controlled-sources.md) |
 | CCCS | 4 | Linear current gain | [48](48-cccs-switch.md) |
@@ -386,8 +391,9 @@ Test device mencakup:
 - Sensor kelembapan dan kimia humidity, gas, pH, dan electrochemical.
 - Sensor arus current sense resistor, Hall current, dan voltage divider.
 - Sensor proximity inductive, capacitive touch, dan ultrasonic.
+- Actuator LED, lamp, buzzer, motor, heater, Peltier, TEG, dan display.
 
-Total test `sim-device`: 159 unit + 5 integration = 164.
+Total test `sim-device`: 162 unit + 5 integration = 167.
 
 ---
 

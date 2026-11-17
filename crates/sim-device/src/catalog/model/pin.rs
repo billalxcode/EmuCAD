@@ -124,6 +124,12 @@ const UJT: &[PinRole] = &[PinRole::Base1, PinRole::Base2, PinRole::Emitter];
 const PUT: &[PinRole] = &[PinRole::Anode, PinRole::Gate, PinRole::Cathode];
 const SCR: &[PinRole] = &[PinRole::Anode, PinRole::Gate, PinRole::Cathode];
 const SENSOR: &[PinRole] = &[PinRole::PositiveSupply, PinRole::Ground, PinRole::Output];
+const DISPLAY: &[PinRole] = &[
+    PinRole::PositiveSupply,
+    PinRole::Ground,
+    PinRole::Input1,
+    PinRole::Input2,
+];
 const OPTOCOUPLER: &[PinRole] = &[
     PinRole::Anode,
     PinRole::Cathode,
@@ -239,7 +245,7 @@ const fn source_roles(device: &DeviceKind) -> &'static [PinRole] {
 
 const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
     match device {
-        DeviceKind::Diode => DIODE,
+        DeviceKind::Diode | DeviceKind::LedActuator => DIODE,
         DeviceKind::Npn | DeviceKind::Pnp => BJT,
         DeviceKind::JfetN | DeviceKind::JfetP => JFET,
         DeviceKind::Nmos | DeviceKind::Pmos => MOSFET,
@@ -285,6 +291,8 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         DeviceKind::Diac => DIAC,
         DeviceKind::Gto => GTO,
         DeviceKind::Scs => SCS,
+        DeviceKind::DcMotor | DeviceKind::Peltier | DeviceKind::ThermoelectricGenerator => SOURCE,
+        DeviceKind::DisplayModule => DISPLAY,
         DeviceKind::DiodeBridge => DIODE_BRIDGE,
         DeviceKind::DualDiode => DUAL_DIODE,
         DeviceKind::Switch => SWITCH,

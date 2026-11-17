@@ -115,7 +115,21 @@ fn device_kinds_are_solver_supported() {
 }
 
 fn supported_device(device: &sim_core::DeviceKind) -> bool {
-    supported_passive(device) || supported_active(device) || supported_sensor(device)
+    supported_passive(device)
+        || supported_active(device)
+        || supported_sensor(device)
+        || supported_actuator(device)
+}
+
+fn supported_actuator(device: &sim_core::DeviceKind) -> bool {
+    matches!(
+        device,
+        sim_core::DeviceKind::LedActuator
+            | sim_core::DeviceKind::DcMotor
+            | sim_core::DeviceKind::Peltier
+            | sim_core::DeviceKind::ThermoelectricGenerator
+            | sim_core::DeviceKind::DisplayModule
+    )
 }
 
 fn supported_sensor(device: &sim_core::DeviceKind) -> bool {

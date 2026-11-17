@@ -1177,3 +1177,124 @@ fn proximity_sensors_respond_to_distance_and_capacitance() {
     assert!((touch - 5.0).abs() < 0.01, "touch={touch}");
     assert!((ultrasonic - 2.5).abs() < 0.01, "ultrasonic={ultrasonic}");
 }
+
+fn series_load_circuit(kind: DeviceKind, values: &[(&str, f64)], series: f64) -> Circuit {
+    let mut builder = CircuitBuilder::new();
+    let supply = builder.node("vcc").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", supply, ground, 5.0);
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![supply, output],
+            params(&[("resistance", series)]),
+        )
+        .expect("R1");
+    builder
+        .device("A1", kind, vec![output, ground], params(values))
+        .expect("A1");
+    builder.build().expect("circuit")
+}
+
+fn load_voltage(kind: DeviceKind, values: &[(&str, f64)], series: f64) -> f64 {
+    let result = solve(&series_load_circuit(kind, values, series));
+    result.solution.voltage(NodeId::new(2)).expect("output")
+}
+
+#[test]
+fn led_actuator_forward_voltage_is_led_like() {
+    let voltage = load_voltage(DeviceKind::LedActuator, &[("is", 1e-15)], 220.0);
+    assert!((1.5..3.0).contains(&voltage), "voltage={voltage}");
+}
+
+#[test]
+fn motor_current_depends_on_back_emf() {
+    let voltage = load_voltage(
+        DeviceKind::DcMotor,
+        &[("resistance", 10.0), ("speed", 100.0)],
+        1.0,
+    );
+    assert!((voltage - 4.63636).abs() < 0.05, "voltage={voltage}");
+}
+
+#[test]
+fn peltier_current_depends_on_temperature_difference() {
+    let voltage = load_voltage(
+        DeviceKind::Peltier,
+        &[
+            ("resistance", 2.0),
+            ("delta_temperature", 20.0),
+            ("seebeck", 0.05),
+        ],
+        0.5,
+    );
+    assert!((voltage - 4.2).abs() < 0.05, "voltage={voltage}");
+}
+
+#[test]
+fn thermoelectric_generator_drives_a_load() {
+    let mut builder = CircuitBuilder::new();
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    builder
+        .device(
+            "G1",
+            DeviceKind::ThermoelectricGenerator,
+            vec![output, ground],
+            params(&[
+                ("resistance", 5.0),
+                ("seebeck", 0.05),
+                ("delta_temperature", 40.0),
+            ]),
+        )
+        .expect("G1");
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![output, ground],
+            params(&[("resistance", 5.0)]),
+        )
+        .expect("R1");
+    let circuit = builder.build().expect("circuit");
+    let result = solve(&circuit);
+    let voltage = result.solution.voltage(NodeId::new(1)).expect("output");
+    assert!((voltage - 1.0).abs() < 0.01, "voltage={voltage}");
+}
+
+#[test]
+fn display_module_supply_current_scales_with_brightness() {
+    let full = display_voltage(1.0);
+    let half = display_voltage(0.5);
+    assert!((full - 4.80769).abs() < 0.01, "full={full}");
+    assert!((half - 4.90196).abs() < 0.01, "half={half}");
+}
+
+fn display_voltage(brightness: f64) -> f64 {
+    let mut builder = CircuitBuilder::new();
+    let supply = builder.node("vcc").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", supply, ground, 5.0);
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![supply, output],
+            params(&[("resistance", 100.0)]),
+        )
+        .expect("R1");
+    builder
+        .device(
+            "D1",
+            DeviceKind::DisplayModule,
+            vec![output, ground, ground, ground],
+            params(&[("brightness", brightness)]),
+        )
+        .expect("D1");
+    let circuit = builder.build().expect("circuit");
+    let result = solve(&circuit);
+    result.solution.voltage(NodeId::new(2)).expect("output")
+}

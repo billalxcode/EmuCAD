@@ -151,6 +151,16 @@ pub enum DeviceKind {
     CapacitiveTouchSensor,
     /// An ultrasonic distance sensor module.
     UltrasonicDistanceSensor,
+    /// An LED actuator module.
+    LedActuator,
+    /// A DC motor module with back EMF.
+    DcMotor,
+    /// A Peltier cooler module.
+    Peltier,
+    /// A thermoelectric generator module.
+    ThermoelectricGenerator,
+    /// A four-pin display module.
+    DisplayModule,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -261,6 +271,11 @@ impl DeviceKind {
             Self::InductiveProximitySensor => "inductive_proximity_sensor",
             Self::CapacitiveTouchSensor => "capacitive_touch_sensor",
             Self::UltrasonicDistanceSensor => "ultrasonic_distance_sensor",
+            Self::LedActuator => "led_actuator",
+            Self::DcMotor => "dc_motor",
+            Self::Peltier => "peltier",
+            Self::ThermoelectricGenerator => "thermoelectric_generator",
+            Self::DisplayModule => "display_module",
             Self::Diode => "diode",
             _ => "custom",
         }

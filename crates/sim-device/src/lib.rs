@@ -2,6 +2,7 @@
 
 #![forbid(unsafe_code)]
 
+mod actuator;
 mod bjt;
 mod catalog;
 mod comparator;
@@ -28,6 +29,7 @@ mod transformer;
 mod transmission;
 mod unijunction;
 
+pub use actuator::{DisplayModuleModel, LedActuatorModel, SeriesEmfModel};
 pub use bjt::{BjtModel, bjt_capacitances};
 pub use catalog::{
     CatalogError, CatalogRecord, ComponentRegistry, ComponentRequest, ComponentSpec, Family,

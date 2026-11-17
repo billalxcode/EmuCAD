@@ -365,6 +365,37 @@ const ULTRASONIC_DISTANCE_SENSOR: &[ParameterSpec] = &[
     ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
 ];
 
+const LED_ACTUATOR: &[ParameterSpec] = &[
+    ParameterSpec::number("is", "A", 1e-15, 1e-30, 1e6),
+    ParameterSpec::number("n", "ratio", 2.0, 1e-6, 1e3),
+    ParameterSpec::number("rs", "ohm", 10.0, 0.0, 1e12),
+];
+
+const DC_MOTOR: &[ParameterSpec] = &[
+    ParameterSpec::number("resistance", "ohm", 10.0, 1e-9, 1e12),
+    ParameterSpec::number("back_emf_constant", "V/(rad/s)", 0.01, 1e-12, 1e9),
+    ParameterSpec::number("speed", "rad/s", 0.0, -1e9, 1e9),
+];
+
+const PELTIER: &[ParameterSpec] = &[
+    ParameterSpec::number("resistance", "ohm", 2.0, 1e-9, 1e12),
+    ParameterSpec::number("seebeck", "V/K", 0.05, 1e-12, 1e9),
+    ParameterSpec::number("delta_temperature", "K", 0.0, -1e6, 1e6),
+];
+
+const THERMOELECTRIC_GENERATOR: &[ParameterSpec] = &[
+    ParameterSpec::number("resistance", "ohm", 5.0, 1e-9, 1e12),
+    ParameterSpec::number("seebeck", "V/K", 0.05, 1e-12, 1e9),
+    ParameterSpec::number("delta_temperature", "K", 0.0, -1e6, 1e6),
+];
+
+const DISPLAY_MODULE: &[ParameterSpec] = &[
+    ParameterSpec::number("rated_voltage", "V", 5.0, 1e-9, 1e6),
+    ParameterSpec::number("supply_current", "A", 0.002, 0.0, 1e6),
+    ParameterSpec::number("brightness", "ratio", 1.0, 0.0, 1e6),
+    ParameterSpec::number("input_leakage", "S", 1e-6, 0.0, 1e9),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -629,6 +660,11 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::InductiveProximitySensor => INDUCTIVE_PROXIMITY_SENSOR,
         DeviceKind::CapacitiveTouchSensor => CAPACITIVE_TOUCH_SENSOR,
         DeviceKind::UltrasonicDistanceSensor => ULTRASONIC_DISTANCE_SENSOR,
+        DeviceKind::LedActuator => LED_ACTUATOR,
+        DeviceKind::DcMotor => DC_MOTOR,
+        DeviceKind::Peltier => PELTIER,
+        DeviceKind::ThermoelectricGenerator => THERMOELECTRIC_GENERATOR,
+        DeviceKind::DisplayModule => DISPLAY_MODULE,
         _ => &[],
     }
 }
@@ -720,6 +756,11 @@ mod tests {
         DeviceKind::InductiveProximitySensor,
         DeviceKind::CapacitiveTouchSensor,
         DeviceKind::UltrasonicDistanceSensor,
+        DeviceKind::LedActuator,
+        DeviceKind::DcMotor,
+        DeviceKind::Peltier,
+        DeviceKind::ThermoelectricGenerator,
+        DeviceKind::DisplayModule,
     ];
 
     #[test]
