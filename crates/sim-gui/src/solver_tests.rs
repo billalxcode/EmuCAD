@@ -1327,3 +1327,83 @@ fn rf_amplifier_applies_voltage_gain() {
     let voltage = result.solution.voltage(NodeId::new(2)).expect("output");
     assert!((voltage - 10.0).abs() < 0.01, "voltage={voltage}");
 }
+
+#[test]
+fn dcdc_converter_regulates_output_and_draws_input_current() {
+    let mut builder = CircuitBuilder::new();
+    let supply = builder.node("vin").expect("node");
+    let input = builder.node("in").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", supply, ground, 12.0);
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![supply, input],
+            params(&[("resistance", 1.0)]),
+        )
+        .expect("R1");
+    builder
+        .device(
+            "U1",
+            DeviceKind::DcDcConverter,
+            vec![input, ground, output, ground],
+            params(&[("output_voltage", 5.0), ("efficiency", 0.85)]),
+        )
+        .expect("U1");
+    builder
+        .device(
+            "R2",
+            DeviceKind::Resistor,
+            vec![output, ground],
+            params(&[("resistance", 10.0)]),
+        )
+        .expect("R2");
+    let circuit = builder.build().expect("circuit");
+    let result = solve(&circuit);
+    let input_voltage = result.solution.voltage(input).expect("input");
+    let output_voltage = result.solution.voltage(output).expect("output");
+    assert!((output_voltage - 5.0).abs() < 0.01, "out={output_voltage}");
+    assert!((input_voltage - 11.7549).abs() < 0.02, "in={input_voltage}");
+}
+
+#[test]
+fn charge_pump_regulates_output_and_draws_input_current() {
+    let mut builder = CircuitBuilder::new();
+    let supply = builder.node("vin").expect("node");
+    let input = builder.node("in").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", supply, ground, 5.0);
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![supply, input],
+            params(&[("resistance", 1.0)]),
+        )
+        .expect("R1");
+    builder
+        .device(
+            "U1",
+            DeviceKind::ChargePump,
+            vec![input, output, ground],
+            params(&[("output_voltage", 5.0), ("efficiency", 0.8)]),
+        )
+        .expect("U1");
+    builder
+        .device(
+            "R2",
+            DeviceKind::Resistor,
+            vec![output, ground],
+            params(&[("resistance", 10.0)]),
+        )
+        .expect("R2");
+    let circuit = builder.build().expect("circuit");
+    let result = solve(&circuit);
+    let input_voltage = result.solution.voltage(input).expect("input");
+    let output_voltage = result.solution.voltage(output).expect("output");
+    assert!((output_voltage - 5.0).abs() < 0.01, "out={output_voltage}");
+    assert!((input_voltage - 4.375).abs() < 0.02, "in={input_voltage}");
+}

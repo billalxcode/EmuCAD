@@ -11,13 +11,13 @@ BoardModule,14,0,unsupported,board
 Capacitor,13,13,ideal,passive
 Cccs,1,1,ideal,source
 Ccvs,1,1,ideal,source
-ChargePump,5,0,unsupported,power
+ChargePump,5,5,behavioral,power
 Comparator,6,6,behavioral,analog
 Connector,5,5,compact,switch
 Counter,10,0,unsupported,logic
 Crystal,5,5,compact,passive
 CurrentSource,2,2,ideal,source
-DcDc,8,0,unsupported,power
+DcDc,8,8,behavioral,power
 DigitalSource,3,0,unsupported,source
 Diode,20,20,compact,diode
 DiodeArray,4,4,compact,diode

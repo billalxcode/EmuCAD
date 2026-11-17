@@ -401,6 +401,18 @@ const RF_AMPLIFIER: &[ParameterSpec] = &[
     ParameterSpec::number("input_resistance", "ohm", 1e6, 1e-9, 1e12),
 ];
 
+const DCDC_CONVERTER: &[ParameterSpec] = &[
+    ParameterSpec::number("output_voltage", "V", 5.0, -1e6, 1e6),
+    ParameterSpec::number("rated_input_voltage", "V", 12.0, 1e-9, 1e6),
+    ParameterSpec::number("efficiency", "ratio", 0.85, 1e-6, 1.0),
+];
+
+const CHARGE_PUMP: &[ParameterSpec] = &[
+    ParameterSpec::number("output_voltage", "V", 5.0, -1e6, 1e6),
+    ParameterSpec::number("rated_input_voltage", "V", 5.0, 1e-9, 1e6),
+    ParameterSpec::number("efficiency", "ratio", 0.8, 1e-6, 1.0),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -671,6 +683,8 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::ThermoelectricGenerator => THERMOELECTRIC_GENERATOR,
         DeviceKind::DisplayModule => DISPLAY_MODULE,
         DeviceKind::RfAmplifier => RF_AMPLIFIER,
+        DeviceKind::DcDcConverter => DCDC_CONVERTER,
+        DeviceKind::ChargePump => CHARGE_PUMP,
         _ => &[],
     }
 }
@@ -768,6 +782,8 @@ mod tests {
         DeviceKind::ThermoelectricGenerator,
         DeviceKind::DisplayModule,
         DeviceKind::RfAmplifier,
+        DeviceKind::DcDcConverter,
+        DeviceKind::ChargePump,
     ];
 
     #[test]

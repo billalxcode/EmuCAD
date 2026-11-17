@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 316 entri dapat
-diinstansiasi lewat registry, dan 184 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 329 entri dapat
+diinstansiasi lewat registry, dan 171 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 316 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 329 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 316 | dapat masuk netlist lewat registry |
+| mapped | 329 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 316 `mapped` bukan 316 model yang benar. Audit menemukan
+Peringatan: 329 `mapped` bukan 329 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -203,8 +203,8 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C6-11 | 6 | 0 | Belum ada model serial interface. |
 | C6-12 | 3 | 0 | Belum ada model timer, RTC, watchdog. |
 | C7-01 | 6 | 6 | Regulator 3 pin generik; negative, current, shunt, adjustable belum. |
-| C7-02 | 8 | 0 | Belum ada model DC-DC. |
-| C7-03 | 5 | 0 | Belum ada model charge pump dan charger. |
+| C7-02 | 8 | 8 | Delapan topologi memakai converter teregulasi dengan efisiensi; verifikasi batch belum. |
+| C7-03 | 5 | 5 | Charge pump dan charger memakai model tiga pin dengan efisiensi; verifikasi batch belum. |
 | C7-04 | 5 | 0 | Belum ada model supervisor. |
 | C7-05 | 3 | 3 | Ideal switch; ideal diode dan ORing logic belum. |
 | C7-06 | 3 | 0 | Belum ada model motor driver. |
@@ -291,7 +291,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 1016 test workspace lulus pada audit ini.
+- 1020 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -449,8 +449,14 @@ Target: 100 entri.
 Target: 85 entri.
 
 - [ ] C7-01 Linear regulator dan LDO 6 entri.
-- [ ] C7-02 Buck, boost, buck-boost 8 entri.
-- [ ] C7-03 Charge pump dan charger 5 entri.
+- [~] C7-02 Buck, boost, buck-boost 8 entri.
+  - Semua topologi memakai converter teregulasi dengan efisiensi.
+  - Duty cycle, ripple, dan isolasi belum dimodelkan.
+  - Reference vector dan verified belum.
+- [~] C7-03 Charge pump dan charger 5 entri.
+  - Charge pump dan charger memakai model tiga pin.
+  - Topologi switching dan proteksi baterai belum dimodelkan.
+  - Reference vector dan verified belum.
 - [ ] C7-04 Reference dan supervisor 5 entri.
 - [ ] C7-05 Ideal diode, ORing, load switch 3 entri.
 - [ ] C7-06 Motor driver 3 entri.

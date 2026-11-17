@@ -7,6 +7,7 @@ mod bjt;
 mod catalog;
 mod comparator;
 mod controlled;
+mod converter;
 mod crystal;
 mod diode;
 mod diode_array;
@@ -40,6 +41,7 @@ pub use catalog::{
 };
 pub use comparator::ComparatorModel;
 pub use controlled::{CccsModel, CcvsModel, VccsModel, VcvsModel};
+pub use converter::ConverterModel;
 pub use crystal::CrystalModel;
 pub use diode::{DiodeModel, diode_capacitance};
 pub use diode_array::{DiodeBridgeModel, DualDiodeModel};

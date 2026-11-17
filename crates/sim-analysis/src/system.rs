@@ -233,6 +233,8 @@ fn branch_slots(kind: &DeviceKind) -> usize {
         | DeviceKind::Regulator
         | DeviceKind::LogicGate
         | DeviceKind::RfAmplifier
+        | DeviceKind::DcDcConverter
+        | DeviceKind::ChargePump
         | DeviceKind::Inductor => 1,
         _ => 0,
     }

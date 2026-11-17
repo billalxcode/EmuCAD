@@ -387,12 +387,12 @@ add("power.linear", "Regulator", "Regulator", 3, "output_voltage", 5.0, "V", [
     "linear regulator", "LDO", "adjustable linear regulator",
     "negative linear regulator", "current regulator", "shunt regulator",
 ])
-add("power.dcdc", "DcDc", None, 4, "output_voltage", 5.0, "V", [
+add("power.dcdc", "DcDc", "DcDcConverter", 4, "output_voltage", 5.0, "V", [
     "buck converter", "boost converter", "buck-boost converter",
     "Cuk converter", "SEPIC converter", "flyback converter",
     "forward converter", "push-pull converter",
 ])
-add("power.charge", "ChargePump", None, 3, "output_voltage", 5.0, "V", [
+add("power.charge", "ChargePump", "ChargePump", 3, "output_voltage", 5.0, "V", [
     "charge pump", "inverting charge pump", "linear charger",
     "switching charger", "solar charger",
 ])

@@ -163,6 +163,10 @@ pub enum DeviceKind {
     DisplayModule,
     /// A three-pin RF amplifier module.
     RfAmplifier,
+    /// A four-pin DC-DC converter module.
+    DcDcConverter,
+    /// A three-pin charge pump or charger module.
+    ChargePump,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -279,6 +283,8 @@ impl DeviceKind {
             Self::ThermoelectricGenerator => "thermoelectric_generator",
             Self::DisplayModule => "display_module",
             Self::RfAmplifier => "rf_amplifier",
+            Self::DcDcConverter => "dcdc_converter",
+            Self::ChargePump => "charge_pump",
             Self::Diode => "diode",
             _ => "custom",
         }

@@ -4,6 +4,7 @@ use crate::actuator::{DisplayModuleModel, LedActuatorModel, SeriesEmfModel};
 use crate::bjt::BjtModel;
 use crate::comparator::ComparatorModel;
 use crate::controlled::{CccsModel, CcvsModel, VccsModel, VcvsModel};
+use crate::converter::ConverterModel;
 use crate::crystal::CrystalModel;
 use crate::diode::DiodeModel;
 use crate::diode_array::{DiodeBridgeModel, DualDiodeModel};
@@ -258,6 +259,8 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         )?),
         DeviceKind::DisplayModule => Box::new(DisplayModuleModel::from_instance(instance)?),
         DeviceKind::RfAmplifier => Box::new(RfAmplifierModel::from_instance(instance)?),
+        DeviceKind::DcDcConverter => Box::new(ConverterModel::from_four_pin(instance, 12.0, 0.85)?),
+        DeviceKind::ChargePump => Box::new(ConverterModel::from_three_pin(instance, 5.0, 0.8)?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),
         DeviceKind::DiodeBridge => Box::new(DiodeBridgeModel::from_instance(instance)?),
