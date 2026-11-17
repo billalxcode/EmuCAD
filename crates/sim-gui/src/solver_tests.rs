@@ -1730,3 +1730,44 @@ fn math_output(kind: DeviceKind, first: f64, second: f64) -> f64 {
     let result = solve(&circuit);
     result.solution.voltage(output).expect("output")
 }
+
+#[test]
+fn behavioral_detectors_compare_and_rectify() {
+    let high = detector_output(DeviceKind::BehavioralComparator, 1.0, 0.5);
+    let low = detector_output(DeviceKind::BehavioralComparator, 0.2, 0.5);
+    let positive = detector_output(DeviceKind::BehavioralPrecisionRectifier, 2.0, 0.0);
+    let negative = detector_output(DeviceKind::BehavioralPrecisionRectifier, -2.0, 0.0);
+    assert!(high > 4.9, "high={high}");
+    assert!(low.abs() < 0.01, "low={low}");
+    assert!((positive - 2.0).abs() < 0.02, "positive={positive}");
+    assert!(negative.abs() < 0.01, "negative={negative}");
+}
+
+fn detector_output(kind: DeviceKind, input: f64, reference: f64) -> f64 {
+    let mut builder = CircuitBuilder::new();
+    let signal = builder.node("in").expect("node");
+    let reference_node = builder.node("ref").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", signal, ground, input);
+    add_input(&mut builder, "V2", reference_node, ground, reference);
+    builder
+        .device(
+            "U1",
+            kind,
+            vec![signal, reference_node, output, ground],
+            params(&[]),
+        )
+        .expect("U1");
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![output, ground],
+            params(&[("resistance", 1e6)]),
+        )
+        .expect("R1");
+    let circuit = builder.build().expect("circuit");
+    let result = solve(&circuit);
+    result.solution.voltage(output).expect("output")
+}

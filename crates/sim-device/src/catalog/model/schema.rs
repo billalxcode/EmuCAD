@@ -551,6 +551,41 @@ const BEHAVIORAL_RMS: &[ParameterSpec] = &[
     ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
 ];
 
+const BEHAVIORAL_COMPARATOR: &[ParameterSpec] = &[
+    ParameterSpec::number("threshold", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("output_high", "V", 5.0, -1e6, 1e6),
+    ParameterSpec::number("output_low", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const BEHAVIORAL_SCHMITT: &[ParameterSpec] = &[
+    ParameterSpec::number("upper_threshold", "V", 3.0, -1e6, 1e6),
+    ParameterSpec::number("lower_threshold", "V", 2.0, -1e6, 1e6),
+    ParameterSpec::number("output_high", "V", 5.0, -1e6, 1e6),
+    ParameterSpec::number("output_low", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const BEHAVIORAL_PEAK: &[ParameterSpec] = &[
+    ParameterSpec::number("gain", "ratio", 1.0, -1e9, 1e9),
+    ParameterSpec::number("reset_threshold", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("output_limit", "V", 15.0, 1e-9, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const BEHAVIORAL_TRACK_HOLD: &[ParameterSpec] = &[
+    ParameterSpec::number("gain", "ratio", 1.0, -1e9, 1e9),
+    ParameterSpec::number("threshold", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("output_limit", "V", 15.0, 1e-9, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const BEHAVIORAL_RECTIFIER: &[ParameterSpec] = &[
+    ParameterSpec::number("gain", "ratio", 1.0, -1e9, 1e9),
+    ParameterSpec::number("output_limit", "V", 15.0, 1e-9, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -848,6 +883,11 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         | DeviceKind::BehavioralAntilog => BEHAVIORAL_MATH,
         DeviceKind::BehavioralLog => BEHAVIORAL_LOG,
         DeviceKind::BehavioralRms => BEHAVIORAL_RMS,
+        DeviceKind::BehavioralComparator => BEHAVIORAL_COMPARATOR,
+        DeviceKind::BehavioralSchmitt => BEHAVIORAL_SCHMITT,
+        DeviceKind::BehavioralPeakDetector => BEHAVIORAL_PEAK,
+        DeviceKind::BehavioralTrackHold => BEHAVIORAL_TRACK_HOLD,
+        DeviceKind::BehavioralPrecisionRectifier => BEHAVIORAL_RECTIFIER,
         _ => &[],
     }
 }
@@ -972,6 +1012,11 @@ mod tests {
         DeviceKind::BehavioralLog,
         DeviceKind::BehavioralAntilog,
         DeviceKind::BehavioralRms,
+        DeviceKind::BehavioralComparator,
+        DeviceKind::BehavioralSchmitt,
+        DeviceKind::BehavioralPeakDetector,
+        DeviceKind::BehavioralTrackHold,
+        DeviceKind::BehavioralPrecisionRectifier,
     ];
 
     #[test]

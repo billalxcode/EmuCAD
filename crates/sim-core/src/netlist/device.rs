@@ -217,6 +217,16 @@ pub enum DeviceKind {
     BehavioralAntilog,
     /// A behavioral RMS converter block.
     BehavioralRms,
+    /// A behavioral comparator block.
+    BehavioralComparator,
+    /// A behavioral Schmitt trigger block.
+    BehavioralSchmitt,
+    /// A behavioral peak detector block.
+    BehavioralPeakDetector,
+    /// A behavioral track-and-hold block.
+    BehavioralTrackHold,
+    /// A behavioral precision rectifier block.
+    BehavioralPrecisionRectifier,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -360,6 +370,11 @@ impl DeviceKind {
             Self::BehavioralLog => "behavioral_log",
             Self::BehavioralAntilog => "behavioral_antilog",
             Self::BehavioralRms => "behavioral_rms",
+            Self::BehavioralComparator => "behavioral_comparator",
+            Self::BehavioralSchmitt => "behavioral_schmitt",
+            Self::BehavioralPeakDetector => "behavioral_peak_detector",
+            Self::BehavioralTrackHold => "behavioral_track_hold",
+            Self::BehavioralPrecisionRectifier => "behavioral_precision_rectifier",
             Self::Diode => "diode",
             _ => "custom",
         }

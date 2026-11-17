@@ -112,11 +112,6 @@ rf.antenna.loop_antenna,rf,RfBlock,rf,RF block,S5-6,P7
 rf.coupler.directional_coupler,rf,RfBlock,rf,RF block,S5-6,P7
 rf.coupler.power_splitter,rf,RfBlock,rf,RF block,S5-6,P7
 rf.coupler.isolator,rf,RfBlock,rf,RF block,S5-6,P7
-behavioral.detector.behavioral_comparator,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
-behavioral.detector.schmitt_trigger,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
-behavioral.detector.peak_detector,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
-behavioral.detector.track_and_hold,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
-behavioral.detector.precision_rectifier,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
 behavioral.oscillator.vco,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
 behavioral.oscillator.pll,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
 behavioral.oscillator.amplitude_modulator,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2

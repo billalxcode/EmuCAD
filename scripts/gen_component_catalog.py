@@ -650,9 +650,20 @@ add("behavioral.math", "BehavioralBlock", "BehavioralAntilog", 4, "gain", 1.0, "
 add("behavioral.math", "BehavioralBlock", "BehavioralRms", 4, "gain", 1.0, "ratio", [
     "RMS converter",
 ])
-add("behavioral.detector", "BehavioralBlock", None, 4, "gain", 1.0, "ratio", [
-    "behavioral comparator", "Schmitt trigger", "peak detector",
-    "track and hold", "precision rectifier",
+add("behavioral.detector", "BehavioralBlock", "BehavioralComparator", 4, "threshold", 2.5, "V", [
+    "behavioral comparator",
+])
+add("behavioral.detector", "BehavioralBlock", "BehavioralSchmitt", 4, "upper_threshold", 3.0, "V", [
+    "Schmitt trigger",
+])
+add("behavioral.detector", "BehavioralBlock", "BehavioralPeakDetector", 4, "gain", 1.0, "ratio", [
+    "peak detector",
+])
+add("behavioral.detector", "BehavioralBlock", "BehavioralTrackHold", 4, "gain", 1.0, "ratio", [
+    "track and hold",
+])
+add("behavioral.detector", "BehavioralBlock", "BehavioralPrecisionRectifier", 4, "gain", 1.0, "ratio", [
+    "precision rectifier",
 ])
 add("behavioral.oscillator", "BehavioralBlock", None, 4, "frequency", 1e3, "Hz", [
     "VCO", "PLL", "amplitude modulator", "frequency modulator",

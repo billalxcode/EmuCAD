@@ -6,6 +6,7 @@ use crate::comparator::ComparatorModel;
 use crate::controlled::{CccsModel, CcvsModel, VccsModel, VcvsModel};
 use crate::converter::ConverterModel;
 use crate::crystal::CrystalModel;
+use crate::detector::{BehavioralDetectorModel, DetectorKind};
 use crate::diode::DiodeModel;
 use crate::diode_array::{DiodeBridgeModel, DualDiodeModel};
 use crate::driver::MotorDriverModel;
@@ -159,6 +160,25 @@ fn passive_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel
         DeviceKind::BehavioralRms => {
             Box::new(BehavioralMathModel::from_instance(instance, MathKind::Rms)?)
         }
+        DeviceKind::BehavioralComparator => Box::new(BehavioralDetectorModel::from_instance(
+            instance,
+            DetectorKind::Comparator,
+        )?),
+        DeviceKind::BehavioralSchmitt => Box::new(BehavioralDetectorModel::from_instance(
+            instance,
+            DetectorKind::Schmitt,
+        )?),
+        DeviceKind::BehavioralPeakDetector => Box::new(BehavioralDetectorModel::from_instance(
+            instance,
+            DetectorKind::Peak,
+        )?),
+        DeviceKind::BehavioralTrackHold => Box::new(BehavioralDetectorModel::from_instance(
+            instance,
+            DetectorKind::TrackHold,
+        )?),
+        DeviceKind::BehavioralPrecisionRectifier => Box::new(
+            BehavioralDetectorModel::from_instance(instance, DetectorKind::Rectifier)?,
+        ),
         DeviceKind::CurrentSource => Box::new(CurrentSourceModel::from_instance(instance)?),
         DeviceKind::Vcvs => Box::new(VcvsModel::from_instance(instance)?),
         DeviceKind::Vccs => Box::new(VccsModel::from_instance(instance)?),

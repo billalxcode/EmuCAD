@@ -351,7 +351,12 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         | DeviceKind::BehavioralDivider
         | DeviceKind::BehavioralLog
         | DeviceKind::BehavioralAntilog
-        | DeviceKind::BehavioralRms => BEHAVIORAL_MATH,
+        | DeviceKind::BehavioralRms
+        | DeviceKind::BehavioralComparator
+        | DeviceKind::BehavioralSchmitt
+        | DeviceKind::BehavioralPeakDetector
+        | DeviceKind::BehavioralTrackHold
+        | DeviceKind::BehavioralPrecisionRectifier => BEHAVIORAL_MATH,
         DeviceKind::Timer555
         | DeviceKind::MonostableTimer
         | DeviceKind::AstableTimer

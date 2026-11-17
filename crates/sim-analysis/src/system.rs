@@ -199,6 +199,11 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::BehavioralLog
             | DeviceKind::BehavioralAntilog
             | DeviceKind::BehavioralRms
+            | DeviceKind::BehavioralComparator
+            | DeviceKind::BehavioralSchmitt
+            | DeviceKind::BehavioralPeakDetector
+            | DeviceKind::BehavioralTrackHold
+            | DeviceKind::BehavioralPrecisionRectifier
     )
 }
 

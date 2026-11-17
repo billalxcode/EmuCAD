@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 358 entri dapat
-diinstansiasi lewat registry, dan 142 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 363 entri dapat
+diinstansiasi lewat registry, dan 137 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 358 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 363 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 358 | dapat masuk netlist lewat registry |
+| mapped | 363 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 358 `mapped` bukan 358 model yang benar. Audit menemukan
+Peringatan: 363 `mapped` bukan 363 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -228,7 +228,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C8-05 | 3 | 0 | Belum ada model coupler, splitter, isolator. |
 | C8-06 | 5 | 5 | Integrator, differentiator, low-pass, high-pass, dan state-variable sudah solver-backed. |
 | C8-07 | 5 | 5 | Multiplier, divider, log, antilog, dan RMS sudah solver-backed. |
-| C8-08 | 5 | 0 | Belum ada model comparator, Schmitt, peak detector. |
+| C8-08 | 5 | 5 | Comparator, Schmitt, peak, track-hold, dan rectifier sudah solver-backed. |
 | C8-09 | 5 | 0 | Belum ada model VCO, PLL, modulator. |
 | C8-10 | 5 | 0 | Belum ada model sample-hold, ADC, DAC behavioral. |
 | C9-01 | 3 | 0 | Belum ada model board. |
@@ -292,7 +292,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 1050 test workspace lulus pada audit ini.
+- 1054 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -552,7 +552,10 @@ Target: 43 entri.
   - Lima math block memakai model 4 pin.
   - Proteksi numerik ada, proteksi rangkaian belum.
   - Reference vector dan verified belum.
-- [ ] C8-08 Comparator, Schmitt, peak detector 5 entri.
+- [~] C8-08 Comparator, Schmitt, peak detector 5 entri.
+  - Lima detector memakai model 4 pin.
+  - Delay, droop, dan aperture time belum dimodelkan.
+  - Reference vector dan verified belum.
 - [ ] C8-09 VCO, PLL, modulator 5 entri.
 - [ ] C8-10 Sample-hold, ADC, DAC behavioral 5 entri.
 
