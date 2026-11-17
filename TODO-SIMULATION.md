@@ -300,12 +300,12 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
     structural, multidomain, RF, dan unsupported.
 - [~] S5-02 Gunakan `sim-cells` untuk logic, flip-flop, counter, dan
   multiplexer bila cocok.
-  - 13 entry digital sudah dapat dijalankan lewat `emucad digital`.
-  - Cakupan: 2 mux, 3 adder, 4 flip-flop, 3 counter, dan 1 shift
-    register.
-  - 50 entry digital lain belum: special gate, level shifter,
-    programmable logic, serial interface, timer peripheral, dan
-    digital source.
+  - 30 entry digital sudah dapat dijalankan lewat `emucad digital`.
+  - Cakupan: 8 mux/decoder/encoder, 7 adder/comparator/parity/buffer,
+    4 flip-flop, 8 counter/shift, dan 3 level buffer.
+  - 33 entry digital lain belum: special gate, 6 flip-flop, 2
+    counter/shift, 1 buffer, 3 level, 6 programmable logic, 6 serial,
+    3 timer peripheral, dan 3 digital source.
 - [x] S5-03 Tunda MCU dan memory ke fase S6; jangan membuat model
   sementara yang diklaim structural.
 - [x] S5-04 Buat model sensor dengan input lingkungan.
@@ -363,18 +363,18 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
 
 | Kelompok | Entri | Blocker |
 |---|---:|---|
-| Digital logic | 50 | 13 sudah di domain digital; 50 belum, termasuk serial, programmable logic, dan digital source. |
+| Digital logic | 33 | 30 sudah di domain digital; 33 belum, termasuk programmable logic, serial, timer peripheral, dan digital source. |
 | Structural MCU dan memory | 26 | Butuh gate-level 11 MCU dan 15 memory; scope ada di `docs/64-gate-level.md`. |
 | RF | 14 | Mixer, filter, antenna, dan coupler butuh S-parameter dan solver dua-port. |
 | Board module | 14 | Board-level module belum punya batas dan referensi yang cukup. |
 | Mixed-signal ADC | 5 | Butuh sampling, kuantisasi, dan antarmuka digital. |
 | Behavioral source | 2 | Behavioral voltage/current membutuhkan parser ekspresi bebas. |
 | R-2R DAC | 1 | Butuh bus multi-bit; katalog hanya menyediakan 4 pin. |
-| **Total** | **112** | |
+| **Total** | **95** | |
 
-Dari 125 entry yang belum analog solver-backed, 13 sudah dapat
+Dari 125 entry yang belum analog solver-backed, 30 sudah dapat
 dijalankan melalui domain digital. Sisa yang belum punya model sama
-sekali adalah 112 entry.
+sekali adalah 95 entry.
 
 **Acceptance S5:** setiap entri non-MCU yang diklaim simulatable punya
 model, input, output, dan referensi yang jelas.

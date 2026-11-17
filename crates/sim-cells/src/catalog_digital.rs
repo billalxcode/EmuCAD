@@ -31,6 +31,23 @@ pub fn digital_entry(id: &str) -> Result<Option<DigitalEntry>, SimError> {
         "logic.counter.decade_counter" => decade_entry(),
         "logic.counter.johnson_counter" => johnson_entry(),
         "logic.counter.4bit_shift_register" => shift4_entry(),
+        "logic.mux.8_to_1_multiplexer" => mux8_entry(),
+        "logic.mux.1_to_2_demultiplexer" => demux_entry(),
+        "logic.mux.2_to_4_decoder" => decoder24_entry(),
+        "logic.mux.3_to_8_decoder" => decoder38_entry(),
+        "logic.mux.8_to_3_encoder" => encoder83_entry(),
+        "logic.mux.priority_encoder" => priority_encoder_entry(),
+        "logic.adder.magnitude_comparator" => comparator4_entry(),
+        "logic.adder.parity_generator" => parity_generator_entry(),
+        "logic.adder.parity_checker" => parity_checker_entry(),
+        "logic.adder.bus_buffer" => bus_buffer_entry(),
+        "logic.counter.8bit_counter" => counter8_entry(),
+        "logic.counter.ripple_counter" => ripple_entry(),
+        "logic.counter.8bit_shift_register" => shift8_entry(),
+        "logic.counter.serial_in_parallel_out" => sipo_entry(),
+        "logic.level.logic_level_shifter" => level_entry("logic.level.logic_level_shifter"),
+        "logic.level.line_driver" => level_entry("logic.level.line_driver"),
+        "logic.level.line_receiver" => level_entry("logic.level.line_receiver"),
         _ => return Ok(None),
     };
     Ok(Some(entry))
@@ -299,6 +316,266 @@ fn shift4_entry() -> DigitalEntry {
     })
 }
 
+const Q4: [&str; 4] = ["q0", "q1", "q2", "q3"];
+const Q8: [&str; 8] = ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7"];
+
+fn mux8_entry() -> DigitalEntry {
+    finish("logic.mux.8_to_1_multiplexer", |builder| {
+        let inputs: Vec<NetId> = (0..8)
+            .map(|index| builder.input(&format!("in{index}")))
+            .collect();
+        let select0 = builder.input("sel0");
+        let select1 = builder.input("sel1");
+        let select2 = builder.input("sel2");
+        let mut level: Vec<NetId> = inputs
+            .chunks(2)
+            .map(|pair| builder.mux(pair[0], pair[1], select0))
+            .collect();
+        level = level
+            .chunks(2)
+            .map(|pair| builder.mux(pair[0], pair[1], select1))
+            .collect();
+        let output = builder.mux(level[0], level[1], select2);
+        builder.output("y", output);
+        (
+            vec![
+                "in0", "in1", "in2", "in3", "in4", "in5", "in6", "in7", "sel0", "sel1", "sel2",
+            ],
+            vec!["y"],
+        )
+    })
+}
+
+fn demux_entry() -> DigitalEntry {
+    finish("logic.mux.1_to_2_demultiplexer", |builder| {
+        let input = builder.input("in");
+        let select = builder.input("sel");
+        let not_select = builder.not(select);
+        let first = builder.and(input, not_select);
+        let second = builder.and(input, select);
+        builder.output("y0", first);
+        builder.output("y1", second);
+        (vec!["in", "sel"], vec!["y0", "y1"])
+    })
+}
+
+fn decoder24_entry() -> DigitalEntry {
+    finish("logic.mux.2_to_4_decoder", |builder| {
+        let a0 = builder.input("a0");
+        let a1 = builder.input("a1");
+        let not0 = builder.not(a0);
+        let not1 = builder.not(a1);
+        let outputs = [
+            builder.and(not0, not1),
+            builder.and(a0, not1),
+            builder.and(not0, a1),
+            builder.and(a0, a1),
+        ];
+        for (index, net) in outputs.iter().enumerate() {
+            builder.output(&format!("y{index}"), *net);
+        }
+        (vec!["a0", "a1"], vec!["y0", "y1", "y2", "y3"])
+    })
+}
+
+fn decoder38_entry() -> DigitalEntry {
+    finish("logic.mux.3_to_8_decoder", |builder| {
+        let a0 = builder.input("a0");
+        let a1 = builder.input("a1");
+        let a2 = builder.input("a2");
+        let not0 = builder.not(a0);
+        let not1 = builder.not(a1);
+        let not2 = builder.not(a2);
+        for index in 0..8 {
+            let first = if index & 1 == 0 { not0 } else { a0 };
+            let second = if index & 2 == 0 { not1 } else { a1 };
+            let third = if index & 4 == 0 { not2 } else { a2 };
+            let low = builder.and(first, second);
+            let output = builder.and(low, third);
+            builder.output(&format!("y{index}"), output);
+        }
+        (
+            vec!["a0", "a1", "a2"],
+            vec!["y0", "y1", "y2", "y3", "y4", "y5", "y6", "y7"],
+        )
+    })
+}
+
+fn encoder83_entry() -> DigitalEntry {
+    finish("logic.mux.8_to_3_encoder", |builder| {
+        let inputs: Vec<NetId> = (0..8)
+            .map(|index| builder.input(&format!("d{index}")))
+            .collect();
+        let y0 = crate::or_all(builder, &[inputs[1], inputs[3], inputs[5], inputs[7]]);
+        let y1 = crate::or_all(builder, &[inputs[2], inputs[3], inputs[6], inputs[7]]);
+        let y2 = crate::or_all(builder, &[inputs[4], inputs[5], inputs[6], inputs[7]]);
+        let valid = crate::or_all(builder, &inputs);
+        builder.output("y0", y0);
+        builder.output("y1", y1);
+        builder.output("y2", y2);
+        builder.output("valid", valid);
+        (
+            vec!["d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7"],
+            vec!["y0", "y1", "y2", "valid"],
+        )
+    })
+}
+
+fn priority_encoder_entry() -> DigitalEntry {
+    finish("logic.mux.priority_encoder", |builder| {
+        let inputs: Vec<NetId> = (0..8)
+            .map(|index| builder.input(&format!("d{index}")))
+            .collect();
+        let y2 = crate::or_all(builder, &[inputs[4], inputs[5], inputs[6], inputs[7]]);
+        let low = crate::or_all(builder, &[inputs[2], inputs[3]]);
+        let y1 = builder.or(low, y2);
+        let y0 = crate::or_all(builder, &[inputs[1], inputs[3], inputs[5], inputs[7]]);
+        let valid = crate::or_all(builder, &inputs);
+        builder.output("y0", y0);
+        builder.output("y1", y1);
+        builder.output("y2", y2);
+        builder.output("valid", valid);
+        (
+            vec!["d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7"],
+            vec!["y0", "y1", "y2", "valid"],
+        )
+    })
+}
+
+fn comparator4_entry() -> DigitalEntry {
+    finish("logic.adder.magnitude_comparator", |builder| {
+        let a: Vec<NetId> = (0..4)
+            .map(|index| builder.input(&format!("a{index}")))
+            .collect();
+        let b: Vec<NetId> = (0..4)
+            .map(|index| builder.input(&format!("b{index}")))
+            .collect();
+        let mut greater = builder.constant(false);
+        let mut equal = builder.constant(true);
+        for index in (0..4).rev() {
+            let not_b = builder.not(b[index]);
+            let a_greater = builder.and(a[index], not_b);
+            let difference = builder.xor(a[index], b[index]);
+            let bit_equal = builder.not(difference);
+            let greater_here = builder.and(equal, a_greater);
+            greater = builder.or(greater, greater_here);
+            equal = builder.and(equal, bit_equal);
+        }
+        let either = builder.or(greater, equal);
+        let less = builder.not(either);
+        builder.output("eq", equal);
+        builder.output("gt", greater);
+        builder.output("lt", less);
+        (
+            vec!["a0", "a1", "a2", "a3", "b0", "b1", "b2", "b3"],
+            vec!["eq", "gt", "lt"],
+        )
+    })
+}
+
+fn parity_generator_entry() -> DigitalEntry {
+    finish("logic.adder.parity_generator", |builder| {
+        let inputs: Vec<NetId> = (0..4)
+            .map(|index| builder.input(&format!("a{index}")))
+            .collect();
+        let parity = xor_all(builder, &inputs);
+        builder.output("parity", parity);
+        (vec!["a0", "a1", "a2", "a3"], vec!["parity"])
+    })
+}
+
+fn parity_checker_entry() -> DigitalEntry {
+    finish("logic.adder.parity_checker", |builder| {
+        let inputs: Vec<NetId> = (0..4)
+            .map(|index| builder.input(&format!("a{index}")))
+            .collect();
+        let check = builder.input("parity");
+        let parity = xor_all(builder, &inputs);
+        let error = builder.xor(parity, check);
+        builder.output("error", error);
+        (vec!["a0", "a1", "a2", "a3", "parity"], vec!["error"])
+    })
+}
+
+fn xor_all(builder: &mut DigitalBuilder, inputs: &[NetId]) -> NetId {
+    inputs[1..]
+        .iter()
+        .fold(inputs[0], |left, right| builder.xor(left, *right))
+}
+
+fn bus_buffer_entry() -> DigitalEntry {
+    finish("logic.adder.bus_buffer", |builder| {
+        let enable = builder.input("en");
+        let inputs: Vec<NetId> = (0..4)
+            .map(|index| builder.input(&format!("a{index}")))
+            .collect();
+        for (index, input) in inputs.iter().enumerate() {
+            let output = builder.and(*input, enable);
+            builder.output(&format!("y{index}"), output);
+        }
+        (
+            vec!["a0", "a1", "a2", "a3", "en"],
+            vec!["y0", "y1", "y2", "y3"],
+        )
+    })
+}
+
+fn counter_entry(id: &'static str, width: usize, names: &'static [&'static str]) -> DigitalEntry {
+    finish(id, |builder| {
+        let reset = builder.input("reset");
+        let (bits, next) = counter_nets(builder, width);
+        let zero = builder.constant(false);
+        for (index, bit) in bits.iter().enumerate() {
+            let value = builder.mux(next[index], zero, reset);
+            builder.dff_into(value, *bit);
+            builder.output(names[index], *bit);
+        }
+        (vec!["reset"], names.to_vec())
+    })
+}
+
+fn counter8_entry() -> DigitalEntry {
+    counter_entry("logic.counter.8bit_counter", 8, &Q8)
+}
+
+fn ripple_entry() -> DigitalEntry {
+    counter_entry("logic.counter.ripple_counter", 4, &Q4)
+}
+
+fn shift_entry(id: &'static str, width: usize, names: &'static [&'static str]) -> DigitalEntry {
+    finish(id, |builder| {
+        let data = builder.input("din");
+        let reset = builder.input("reset");
+        let bits: Vec<NetId> = (0..width).map(|_| builder.net()).collect();
+        let zero = builder.constant(false);
+        for (index, bit) in bits.iter().enumerate() {
+            let source = if index == 0 { data } else { bits[index - 1] };
+            let next = builder.mux(source, zero, reset);
+            builder.dff_into(next, *bit);
+            builder.output(names[index], *bit);
+        }
+        (vec!["din", "reset"], names.to_vec())
+    })
+}
+
+fn shift8_entry() -> DigitalEntry {
+    shift_entry("logic.counter.8bit_shift_register", 8, &Q8)
+}
+
+fn sipo_entry() -> DigitalEntry {
+    shift_entry("logic.counter.serial_in_parallel_out", 8, &Q8)
+}
+
+fn level_entry(id: &'static str) -> DigitalEntry {
+    finish(id, |builder| {
+        let input = builder.input("a");
+        let enable = builder.input("en");
+        let output = builder.and(input, enable);
+        builder.output("y", output);
+        (vec!["a", "en"], vec!["y"])
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::digital_entry;
@@ -362,6 +639,73 @@ mod tests {
         for index in 0..4 {
             assert_eq!(entry.circuit.output(&format!("q{index}")), Some(false));
         }
+    }
+
+    #[test]
+    fn mux8_selects_index_five() {
+        let mut entry = entry("logic.mux.8_to_1_multiplexer");
+        entry.circuit.set_input("in5", true).expect("input");
+        for label in ["sel0", "sel2"] {
+            entry.circuit.set_input(label, true).expect("input");
+        }
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("y"), Some(true));
+    }
+
+    #[test]
+    fn decoder38_selects_index_five() {
+        let mut entry = entry("logic.mux.3_to_8_decoder");
+        for label in ["a0", "a2"] {
+            entry.circuit.set_input(label, true).expect("input");
+        }
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("y5"), Some(true));
+        assert_eq!(entry.circuit.output("y4"), Some(false));
+    }
+
+    #[test]
+    fn priority_encoder_reports_highest_bit() {
+        let mut entry = entry("logic.mux.priority_encoder");
+        entry.circuit.set_input("d6", true).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("y1"), Some(true));
+        assert_eq!(entry.circuit.output("y2"), Some(true));
+        assert_eq!(entry.circuit.output("y0"), Some(false));
+        assert_eq!(entry.circuit.output("valid"), Some(true));
+    }
+
+    #[test]
+    fn comparator_detects_greater_and_less() {
+        let mut entry = entry("logic.adder.magnitude_comparator");
+        for label in ["a0", "a2"] {
+            entry.circuit.set_input(label, true).expect("input");
+        }
+        entry.circuit.set_input("b1", true).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("gt"), Some(true));
+        assert_eq!(entry.circuit.output("lt"), Some(false));
+    }
+
+    #[test]
+    fn parity_checker_detects_error() {
+        let mut entry = entry("logic.adder.parity_checker");
+        for label in ["a0", "a1", "a2"] {
+            entry.circuit.set_input(label, true).expect("input");
+        }
+        entry.circuit.set_input("parity", false).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("error"), Some(true));
+    }
+
+    #[test]
+    fn bus_buffer_is_gated_by_enable() {
+        let mut entry = entry("logic.adder.bus_buffer");
+        entry.circuit.set_input("a0", true).expect("input");
+        entry.circuit.set_input("a2", true).expect("input");
+        entry.circuit.set_input("en", true).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("y0"), Some(true));
+        assert_eq!(entry.circuit.output("y2"), Some(true));
     }
 
     #[test]
