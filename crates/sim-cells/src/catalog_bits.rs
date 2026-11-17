@@ -31,6 +31,36 @@ pub(crate) fn mux_tree(
     level[0]
 }
 
+/// Returns true when a bit vector is less than a constant.
+pub(crate) fn less_than(builder: &mut DigitalBuilder, bits: &[NetId], value: u32) -> NetId {
+    let mut equal = builder.constant(true);
+    let mut less = builder.constant(false);
+    for (index, bit) in bits.iter().enumerate().rev() {
+        let not_bit = builder.not(*bit);
+        if value & (1 << index) != 0 {
+            let below = builder.and(equal, not_bit);
+            less = builder.or(less, below);
+            equal = builder.and(equal, *bit);
+        } else {
+            equal = builder.and(equal, not_bit);
+        }
+    }
+    less
+}
+
+/// Stores values into existing nets when enabled.
+pub(crate) fn register_bits(
+    builder: &mut DigitalBuilder,
+    outputs: &[NetId],
+    values: &[NetId],
+    enable: NetId,
+) {
+    for (output, value) in outputs.iter().zip(values) {
+        let next = builder.and(*value, enable);
+        builder.dff_into(next, *output);
+    }
+}
+
 /// Returns the increment of a bit vector.
 pub(crate) fn increment(builder: &mut DigitalBuilder, bits: &[NetId]) -> Vec<NetId> {
     let mut carry = builder.constant(true);

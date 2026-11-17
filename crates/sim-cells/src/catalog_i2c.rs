@@ -1,6 +1,6 @@
 //! Digital I2C master with open-drain bus outputs.
 
-use crate::catalog_bits::{equals, increment, mux_tree};
+use crate::catalog_bits::{equals, increment, mux_tree, register_bits};
 use crate::catalog_digital::{DigitalEntry, finish};
 use crate::{DigitalBuilder, NetId};
 
@@ -203,13 +203,6 @@ fn register_all(
     register_bits(builder, &state.bit, &bit, not_reset);
     let next = builder.and(nack, not_reset);
     builder.dff_into(next, state.nack);
-}
-
-fn register_bits(builder: &mut DigitalBuilder, outputs: &[NetId], values: &[NetId], enable: NetId) {
-    for (output, value) in outputs.iter().zip(values) {
-        let next = builder.and(*value, enable);
-        builder.dff_into(next, *output);
-    }
 }
 
 fn i2c_outputs(builder: &mut DigitalBuilder, inputs: I2cInputs, state: I2cState) {

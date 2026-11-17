@@ -200,7 +200,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C6-08 | 15 | 2 | Sel SRAM dan array 128x8 sudah ada; 13 entry belum. |
 | C6-09 | 11 | 0 | Belum ada model MCU. |
 | C6-10 | 5 | 4 | SAR, delta-sigma, flash, dan PWM generator; R-2R DAC belum. |
-| C6-11 | 6 | 3 | UART, SPI, dan I2C ada; CAN, USB, dan Ethernet belum. |
+| C6-11 | 6 | 4 | UART, SPI, I2C, dan CAN ada; USB dan Ethernet belum. |
 | C6-12 | 3 | 3 | Timer, RTC, dan watchdog memakai counter digital 8-bit. |
 | C7-01 | 6 | 6 | Regulator 3 pin generik; negative, current, shunt, adjustable belum. |
 | C7-02 | 8 | 8 | Delapan topologi memakai converter teregulasi dengan efisiensi; verifikasi batch belum. |
@@ -468,8 +468,8 @@ Target: 100 entri.
 - [ ] C6-09 MCU core 11 entri: AVR, PIC, 8051, ARM, RISC-V, ESP, STM32.
 - [ ] C6-10 ADC, DAC, PWM peripheral 5 entri.
 - [~] C6-11 UART, SPI, I2C, CAN, USB, Ethernet 6 entri.
-  - UART, SPI, dan I2C sudah ada di domain digital.
-  - CAN, USB, dan Ethernet belum.
+  - UART, SPI, I2C, dan CAN sudah ada di domain digital.
+  - USB dan Ethernet belum.
   - Reference vector dan verified belum.
 - [~] C6-12 Timer, RTC, watchdog 3 entri.
   - Tiga entry memakai counter digital 8-bit.

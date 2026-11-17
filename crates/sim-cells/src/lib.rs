@@ -6,6 +6,7 @@ mod arithmetic;
 mod basic;
 mod builder;
 mod catalog_bits;
+mod catalog_can;
 pub mod catalog_digital;
 mod catalog_i2c;
 mod catalog_memory;

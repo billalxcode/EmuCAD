@@ -6,7 +6,7 @@ Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
 ## 1. Cakupan
 
 Domain digital memakai `DigitalCircuit` dua-state dengan input dan
-output bernama. Saat ini 62 entry katalog sudah dapat dijalankan:
+output bernama. Saat ini 63 entry katalog sudah dapat dijalankan:
 
 | Kelompok | Entry |
 |---|---|
@@ -22,7 +22,7 @@ output bernama. Saat ini 62 entry katalog sudah dapat dijalankan:
 | Digital source | clock, PRBS, pattern |
 | Programmable | PAL, GAL, CPLD, FPGA logic block, lookup table (LUT 4-input), FSM 3-input |
 | High-Z | open-drain, tri-state, transmission gate, bidirectional buffer, bidirectional/open-drain level |
-| Serial | UART, SPI, dan I2C master |
+| Serial | UART, SPI, I2C master, dan CAN transmitter |
 | Memory | sel SRAM 1-bit dan array SRAM 128x8 (1024 bit) |
 
 ## 2. Perintah
@@ -73,7 +73,7 @@ Port ditentukan per entry, bukan dari jumlah pin katalog. Contoh:
 - Tidak ada timing, setup/hold, atau propagation delay.
 - Memory array memakai sel DFF, bukan transistor, dan belum memiliki
   timing akses, refresh, atau retensi non-volatile.
-- CAN, USB, dan Ethernet belum didukung.
+- USB dan Ethernet belum didukung.
 
 ## 5. High-Z
 
@@ -102,7 +102,22 @@ driver harus memakai sinyal `z` di tingkat rangkaian.
 - `sda` sudah memasukkan ACK slave pada slot ACK, tetapi tidak
   melakukan arbitrase, clock stretching, atau multi-master.
 
-## 7. Memory
+## 7. CAN
+
+`mcu.serial.can` adalah transmitter frame CAN 2.0A:
+
+- Input: `reset`, `start`, `ack`, `id0..id10`, `din0..din63`.
+- Output: `tx`, `busy`, `done`, `nack`.
+- Frame: SOF, 11-bit ID, RTR, IDE, r0, DLC 8, delapan byte data,
+  CRC-15, CRC delimiter, ACK slot, ACK delimiter, EOF, dan intermission.
+- CRC memakai polinomial `0x4599` dan bit stuffing diterapkan dari SOF
+  sampai CRC.
+- Satu tick adalah satu bit CAN; `ack=1` berarti receiver mengakui frame.
+- Input ID dan data harus stabil selama transmisi.
+- Tidak ada bit timing, baud rate, arbitrase, remote frame, extended ID,
+  CAN FD, error frame, atau DLC selain 8.
+
+## 8. Memory
 
 Dua entry memory memakai model digital:
 
@@ -117,13 +132,13 @@ kata. Entry non-volatile (EEPROM, Flash, FRAM, MRAM, NVRAM) belum
 dipetakan karena retensi, erase, dan timing belum dimodelkan. DRAM
 belum dipetakan karena refresh belum dimodelkan.
 
-## 8. Entry Digital yang Belum Didukung
+## 9. Entry Digital yang Belum Didukung
 
-Masih ada 3 entry digital di luar domain ini:
+Masih ada 2 entry digital di luar domain ini:
 
-- CAN, USB, dan Ethernet.
+- USB dan Ethernet.
 
-## 9. Verifikasi
+## 10. Verifikasi
 
 Test domain digital mencakup:
 
@@ -149,6 +164,8 @@ Test domain digital mencakup:
 - Array SRAM menyimpan dan membaca kembali kata pada alamat 5 dan 100.
 - I2C mengirim address dan data MSB-first, menghasilkan START/STOP,
   dan menandai NACK saat ACK tidak diberikan.
+- CAN mengirim frame 2.0A dengan CRC-15 dan satu bit stuff, lalu
+  menandai NACK saat ACK tidak diberikan.
 - PRBS source bergeser setelah reset.
 - Pattern source memuat pola saat reset.
 - LUT 4-input dengan mask AND menghasilkan output yang benar.
@@ -156,7 +173,7 @@ Test domain digital mencakup:
 - Decade counter kembali ke nol setelah sepuluh tick.
 - Shift register memindahkan data.
 
-## 10. Referensi
+## 11. Referensi
 
 - Logic gate, dasar gerbang dua-state:
   https://en.wikipedia.org/wiki/Logic_gate
@@ -170,5 +187,9 @@ Test domain digital mencakup:
   https://en.wikipedia.org/wiki/Static_random-access_memory
 - I2C, bus open-drain dan protokol:
   https://en.wikipedia.org/wiki/I%C2%B2C
+- CAN bus, frame, dan CRC:
+  https://en.wikipedia.org/wiki/CAN_bus
+- CRC-15-CAN, polinomial dan properti:
+  https://www.can-cia.org/can-knowledge/cyclic-redundancy-check-crc-in-can-frames
 - Adder, penjumlahan biner:
   https://en.wikipedia.org/wiki/Adder_(electronics)
