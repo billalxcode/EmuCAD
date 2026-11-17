@@ -1,7 +1,8 @@
 # TODO - Simulasi Semua Komponen
 
-Status: S1-S4 selesai; S0, S5, dan S8 sebagian; S6-S7 terblokir oleh
-model gate-level dan benchmark memory.
+Status: S1-S4 selesai; S0, S5, S6, S7, dan S8 sebagian. S6 sudah
+mencakup 12 dari 15 memory; MCU gate-level, protocol memory, dan
+co-sim S7 belum selesai.
 
 Tujuan: membuat komponen di skematik GUI dapat disimulasikan dengan model
 fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
