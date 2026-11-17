@@ -17,7 +17,8 @@ use crate::protection::{FuseModel, VaristorModel};
 use crate::regulator::RegulatorModel;
 use crate::relay::RelayModel;
 use crate::sensors::{
-    NtcModel, PtcModel, RtdModel, TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
+    LinearLightSensorModel, NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
+    RtdModel, TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
 };
 use crate::source::{CurrentSourceModel, PulseSourceModel, VoltageSourceModel};
 use crate::switch::{IdealSwitchModel, SwitchModel};
@@ -139,6 +140,9 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         DeviceKind::Thermocouple => Box::new(ThermocoupleModel::from_instance(instance)?),
         DeviceKind::TemperatureSensor => Box::new(TemperatureSensorModel::from_instance(instance)?),
         DeviceKind::ThermalSwitch => Box::new(ThermalSwitchModel::from_instance(instance)?),
+        DeviceKind::Photoresistor => Box::new(PhotoresistorModel::from_instance(instance)?),
+        DeviceKind::PhotodiodeSensor => Box::new(PhotodiodeSensorModel::from_instance(instance)?),
+        DeviceKind::LinearLightSensor => Box::new(LinearLightSensorModel::from_instance(instance)?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),
         DeviceKind::DiodeBridge => Box::new(DiodeBridgeModel::from_instance(instance)?),

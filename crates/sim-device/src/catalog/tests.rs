@@ -127,6 +127,9 @@ fn supported_sensor(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::Thermocouple
             | sim_core::DeviceKind::TemperatureSensor
             | sim_core::DeviceKind::ThermalSwitch
+            | sim_core::DeviceKind::Photoresistor
+            | sim_core::DeviceKind::PhotodiodeSensor
+            | sim_core::DeviceKind::LinearLightSensor
     )
 }
 

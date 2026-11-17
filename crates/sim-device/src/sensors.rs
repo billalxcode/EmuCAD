@@ -367,10 +367,172 @@ impl DeviceModel for ThermalSwitchModel {
     }
 }
 
+/// A photoresistor module with a gamma resistance model.
+pub struct PhotoresistorModel {
+    resistance_10lux: f64,
+    gamma: f64,
+    series: f64,
+    illuminance: f64,
+    pins: [NodeId; 3],
+}
+
+impl PhotoresistorModel {
+    pub(crate) fn from_instance(instance: &DeviceInstance) -> Result<Self, SimError> {
+        let params = instance.parameters();
+        Ok(Self {
+            resistance_10lux: positive_parameter(params, "resistance_10lux", Some(10000.0))?,
+            gamma: positive_parameter(params, "gamma", Some(0.8))?,
+            series: positive_parameter(params, "series_resistance", Some(10000.0))?,
+            illuminance: non_negative_parameter(params, "illuminance", 10.0)?,
+            pins: sensor_pins(instance)?,
+        })
+    }
+
+    fn resistance_at(&self) -> f64 {
+        let lux = self.illuminance.max(1e-9);
+        self.resistance_10lux * (lux / 10.0).powf(-self.gamma)
+    }
+
+    fn output(&self, supply: f64) -> (f64, f64) {
+        divider_output(self.resistance_at(), self.series, supply)
+    }
+}
+
+impl DeviceModel for PhotoresistorModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        solution: &Solution,
+        _dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        let supply = supply(solution, self.pins);
+        let (voltage, resistance) = self.output(supply);
+        stamp_output(ctx, self.pins[2], self.pins[1], voltage, resistance)
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        Ok(())
+    }
+}
+
+/// A photodiode module with a transimpedance output.
+pub struct PhotodiodeSensorModel {
+    responsivity: f64,
+    area: f64,
+    feedback: f64,
+    irradiance: f64,
+    offset: f64,
+    output_resistance: f64,
+    pins: [NodeId; 3],
+}
+
+impl PhotodiodeSensorModel {
+    pub(crate) fn from_instance(instance: &DeviceInstance) -> Result<Self, SimError> {
+        let params = instance.parameters();
+        let offset = parameter(params, "offset", 0.0);
+        if !offset.is_finite() {
+            return Err(SimError::InvalidNetlist(
+                "photodiode offset is invalid".to_string(),
+            ));
+        }
+        Ok(Self {
+            responsivity: positive_parameter(params, "responsivity", Some(0.5))?,
+            area: positive_parameter(params, "area", Some(1e-6))?,
+            feedback: positive_parameter(params, "feedback_resistance", Some(1e6))?,
+            irradiance: non_negative_parameter(params, "irradiance", 1.0)?,
+            offset,
+            output_resistance: positive_parameter(params, "output_resistance", Some(100.0))?,
+            pins: sensor_pins(instance)?,
+        })
+    }
+
+    fn output(&self, supply: f64) -> f64 {
+        let current = self.responsivity * self.area * self.irradiance;
+        clamp_output(self.offset + current * self.feedback, supply)
+    }
+}
+
+impl DeviceModel for PhotodiodeSensorModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        solution: &Solution,
+        _dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        let supply = supply(solution, self.pins);
+        stamp_output(
+            ctx,
+            self.pins[2],
+            self.pins[1],
+            self.output(supply),
+            self.output_resistance,
+        )
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        Ok(())
+    }
+}
+
+/// A linear light sensor module in volts per lux.
+pub struct LinearLightSensorModel {
+    sensitivity: f64,
+    offset: f64,
+    illuminance: f64,
+    output_resistance: f64,
+    pins: [NodeId; 3],
+}
+
+impl LinearLightSensorModel {
+    pub(crate) fn from_instance(instance: &DeviceInstance) -> Result<Self, SimError> {
+        let params = instance.parameters();
+        let offset = parameter(params, "offset", 0.0);
+        if !offset.is_finite() {
+            return Err(SimError::InvalidNetlist(
+                "light sensor offset is invalid".to_string(),
+            ));
+        }
+        Ok(Self {
+            sensitivity: positive_parameter(params, "sensitivity", Some(0.001))?,
+            offset,
+            illuminance: non_negative_parameter(params, "illuminance", 1000.0)?,
+            output_resistance: positive_parameter(params, "output_resistance", Some(1000.0))?,
+            pins: sensor_pins(instance)?,
+        })
+    }
+
+    fn output(&self, supply: f64) -> f64 {
+        clamp_output(self.offset + self.sensitivity * self.illuminance, supply)
+    }
+}
+
+impl DeviceModel for LinearLightSensorModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        solution: &Solution,
+        _dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        let supply = supply(solution, self.pins);
+        stamp_output(
+            ctx,
+            self.pins[2],
+            self.pins[1],
+            self.output(supply),
+            self.output_resistance,
+        )
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
-        NtcModel, PtcModel, RtdModel, TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
+        LinearLightSensorModel, NtcModel, PhotodiodeSensorModel, PhotoresistorModel, PtcModel,
+        RtdModel, TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel,
     };
     use sim_core::{DeviceId, DeviceInstance, DeviceKind, NodeId};
     use std::collections::BTreeMap;
@@ -453,5 +615,39 @@ mod tests {
         ))
         .expect("model");
         assert!(cool.output(5.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn photoresistor_resistance_falls_with_light() {
+        let dark = PhotoresistorModel::from_instance(&instance(
+            DeviceKind::Photoresistor,
+            &[("illuminance", 10.0)],
+        ))
+        .expect("dark");
+        let bright = PhotoresistorModel::from_instance(&instance(
+            DeviceKind::Photoresistor,
+            &[("illuminance", 100.0)],
+        ))
+        .expect("bright");
+        assert!((dark.resistance_at() - 10000.0).abs() < 1e-6);
+        assert!(bright.resistance_at() < dark.resistance_at());
+    }
+
+    #[test]
+    fn photodiode_output_matches_transimpedance() {
+        let model =
+            PhotodiodeSensorModel::from_instance(&instance(DeviceKind::PhotodiodeSensor, &[]))
+                .expect("model");
+        assert!((model.output(5.0) - 0.5).abs() < 1e-9);
+    }
+
+    #[test]
+    fn linear_light_output_matches_sensitivity() {
+        let model = LinearLightSensorModel::from_instance(&instance(
+            DeviceKind::LinearLightSensor,
+            &[("sensitivity", 0.001), ("illuminance", 1000.0)],
+        ))
+        .expect("model");
+        assert!((model.output(5.0) - 1.0).abs() < 1e-9);
     }
 }

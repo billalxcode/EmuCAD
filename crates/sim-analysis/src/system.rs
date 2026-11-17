@@ -155,6 +155,9 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::Thermocouple
             | DeviceKind::TemperatureSensor
             | DeviceKind::ThermalSwitch
+            | DeviceKind::Photoresistor
+            | DeviceKind::PhotodiodeSensor
+            | DeviceKind::LinearLightSensor
     )
 }
 

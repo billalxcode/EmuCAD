@@ -2,7 +2,7 @@
 
 Pintu masuk dokumentasi EmuCAD versi 0.1.0.
 
-**Status saat ini:** 975 test lulus, 9 crate, crate simulasi zero external
+**Status saat ini:** 980 test lulus, 9 crate, crate simulasi zero external
 dependency Rust. Dependensi GUI dan binding Python dibatasi pada daftar
 yang disetujui di `AGENTS.md`. Tag `v0.1` tersedia.
 
@@ -72,6 +72,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 63 | [Fidelity dan benchmark](63-fidelity.md) | Label fidelity, audit 60 kelas, dan hasil benchmark |
 | 64 | [Gate-level scope](64-gate-level.md) | Definisi, status, benchmark, dan gap S6/S7 |
 | 65 | [Sensor suhu](65-temperature-sensors.md) | Model NTC, PTC, RTD, thermocouple, semikonduktor, switch |
+| 66 | [Sensor cahaya](66-light-sensors.md) | Model photoresistor, photodiode, dan linear light sensor |
 
 ### 3.2 Fondasi
 
@@ -168,7 +169,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 |---|---|
 | Versi workspace | `0.1.0` |
 | Tag | `v0.1` |
-| Test | 975 lulus |
+| Test | 980 lulus |
 | Crate | 9 |
 | Dependensi eksternal | 0 untuk crate simulasi; `pyo3` hanya di `sim-python` |
 | `unsafe` | Dilarang manual; glue `pyo3` diisolasi di `sim-python` |
@@ -184,15 +185,15 @@ Setiap dokumen muncul satu kali pada peta ini.
 | Crate | Test |
 |---|---|
 | `sim-core` | 62 |
-| `sim-device` | 143 |
+| `sim-device` | 146 |
 | `sim-analysis` | 123 |
 | `sim-cells` | 72 |
 | `sim-avr` | 234 |
 | `sim-board` | 24 |
 | `sim-cli` | 36 |
-| `sim-gui` | 273 |
+| `sim-gui` | 275 |
 | `sim-python` | 8 |
-| **Total** | **975** |
+| **Total** | **980** |
 
 ---
 

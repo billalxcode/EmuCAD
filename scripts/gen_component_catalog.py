@@ -425,9 +425,20 @@ add("sensor.temperature", "Sensor", "TemperatureSensor", 3, "sensitivity", 0.01,
 add("sensor.temperature", "Sensor", "ThermalSwitch", 3, "threshold", 75.0, "C", [
     "thermal switch",
 ])
-add("sensor.light", "Sensor", None, 3, "sensitivity", 1.0, "ratio", [
-    "photoresistor", "photodiode sensor", "phototransistor sensor",
-    "ambient light sensor", "color sensor",
+add("sensor.light", "Sensor", "Photoresistor", 3, "resistance_10lux", 10000.0, "ohm", [
+    "photoresistor",
+])
+add("sensor.light", "Sensor", "PhotodiodeSensor", 3, "responsivity", 0.5, "A/W", [
+    "photodiode sensor",
+])
+add("sensor.light", "Sensor", "LinearLightSensor", 3, "sensitivity", 0.01, "V/lux", [
+    "phototransistor sensor",
+])
+add("sensor.light", "Sensor", "LinearLightSensor", 3, "sensitivity", 0.001, "V/lux", [
+    "ambient light sensor",
+])
+add("sensor.light", "Sensor", "LinearLightSensor", 3, "sensitivity", 0.001, "V/lux", [
+    "color sensor",
 ])
 add("sensor.magnetic", "Sensor", None, 3, "sensitivity", 1.0, "ratio", [
     "Hall sensor", "linear Hall sensor", "reed switch sensor",

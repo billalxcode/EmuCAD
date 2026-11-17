@@ -97,6 +97,12 @@ pub enum DeviceKind {
     TemperatureSensor,
     /// A temperature switch with hysteresis.
     ThermalSwitch,
+    /// A photoresistor module.
+    Photoresistor,
+    /// A photodiode transimpedance module.
+    PhotodiodeSensor,
+    /// A linear light sensor module.
+    LinearLightSensor,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -180,6 +186,9 @@ impl DeviceKind {
             Self::Thermocouple => "thermocouple",
             Self::TemperatureSensor => "temperature_sensor",
             Self::ThermalSwitch => "thermal_switch",
+            Self::Photoresistor => "photoresistor",
+            Self::PhotodiodeSensor => "photodiode_sensor",
+            Self::LinearLightSensor => "linear_light_sensor",
             Self::Diode => "diode",
             _ => "custom",
         }

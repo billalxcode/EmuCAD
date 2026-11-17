@@ -130,11 +130,6 @@ power.supervisor.power_monitor,power,Supervisor,behavioral-electrical,power macr
 power.motor.hbridge,power,MotorDriver,behavioral-electrical,power macromodel,S5-2,P2
 power.motor.halfbridge,power,MotorDriver,behavioral-electrical,power macromodel,S5-2,P2
 power.motor.stepper_driver,power,MotorDriver,behavioral-electrical,power macromodel,S5-2,P2
-sensor.light.photoresistor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
-sensor.light.photodiode_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
-sensor.light.phototransistor_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
-sensor.light.ambient_light_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
-sensor.light.color_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
 sensor.magnetic.hall_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
 sensor.magnetic.linear_hall_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5
 sensor.magnetic.reed_switch_sensor,sensor,Sensor,multidomain,multidomain sensor,S5-5,P5

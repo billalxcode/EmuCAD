@@ -1065,3 +1065,27 @@ fn thermal_switch_switches_at_threshold() {
     assert!((hot - 5.0).abs() < 0.01, "hot={hot}");
     assert!(cold.abs() < 0.01, "cold={cold}");
 }
+
+#[test]
+fn photoresistor_and_photodiode_respond_to_light() {
+    let dim = sensor_output(DeviceKind::Photoresistor, &[("illuminance", 10.0)]);
+    let bright = sensor_output(DeviceKind::Photoresistor, &[("illuminance", 100.0)]);
+    let diode = sensor_output(DeviceKind::PhotodiodeSensor, &[("irradiance", 1.0)]);
+    assert!((dim - 2.5).abs() < 0.1, "dim={dim}");
+    assert!(bright < dim, "bright={bright}");
+    assert!((diode - 0.5).abs() < 0.01, "diode={diode}");
+}
+
+#[test]
+fn linear_light_sensor_scales_with_illuminance() {
+    let first = sensor_output(
+        DeviceKind::LinearLightSensor,
+        &[("sensitivity", 0.001), ("illuminance", 1000.0)],
+    );
+    let second = sensor_output(
+        DeviceKind::LinearLightSensor,
+        &[("sensitivity", 0.001), ("illuminance", 2000.0)],
+    );
+    assert!((first - 1.0).abs() < 0.01, "first={first}");
+    assert!((second - 2.0).abs() < 0.01, "second={second}");
+}

@@ -172,6 +172,29 @@ const FUSE: &[ParameterSpec] = &[
     ParameterSpec::boolean("reset", false),
 ];
 
+const PHOTORESISTOR: &[ParameterSpec] = &[
+    ParameterSpec::number("resistance_10lux", "ohm", 10000.0, 1e-9, 1e12),
+    ParameterSpec::number("gamma", "ratio", 0.8, 1e-3, 1e3),
+    ParameterSpec::number("series_resistance", "ohm", 10000.0, 1e-9, 1e12),
+    ParameterSpec::number("illuminance", "lux", 10.0, 0.0, 1e9),
+];
+
+const PHOTODIODE_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("responsivity", "A/W", 0.5, 1e-12, 1e6),
+    ParameterSpec::number("area", "m^2", 1e-6, 1e-15, 1e6),
+    ParameterSpec::number("feedback_resistance", "ohm", 1e6, 1e-9, 1e12),
+    ParameterSpec::number("irradiance", "W/m^2", 1.0, 0.0, 1e9),
+    ParameterSpec::number("offset", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 100.0, 1e-9, 1e12),
+];
+
+const LINEAR_LIGHT_SENSOR: &[ParameterSpec] = &[
+    ParameterSpec::number("sensitivity", "V/lux", 0.001, 1e-12, 1e6),
+    ParameterSpec::number("offset", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("illuminance", "lux", 1000.0, 0.0, 1e9),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -409,6 +432,9 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::Thermocouple => THERMOCOUPLE,
         DeviceKind::TemperatureSensor => TEMPERATURE_SENSOR,
         DeviceKind::ThermalSwitch => THERMAL_SWITCH,
+        DeviceKind::Photoresistor => PHOTORESISTOR,
+        DeviceKind::PhotodiodeSensor => PHOTODIODE_SENSOR,
+        DeviceKind::LinearLightSensor => LINEAR_LIGHT_SENSOR,
         _ => &[],
     }
 }
@@ -473,6 +499,9 @@ mod tests {
         DeviceKind::Thermocouple,
         DeviceKind::TemperatureSensor,
         DeviceKind::ThermalSwitch,
+        DeviceKind::Photoresistor,
+        DeviceKind::PhotodiodeSensor,
+        DeviceKind::LinearLightSensor,
     ];
 
     #[test]

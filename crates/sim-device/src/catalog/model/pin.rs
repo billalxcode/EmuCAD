@@ -252,7 +252,10 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         | DeviceKind::Rtd
         | DeviceKind::Thermocouple
         | DeviceKind::TemperatureSensor
-        | DeviceKind::ThermalSwitch => SENSOR,
+        | DeviceKind::ThermalSwitch
+        | DeviceKind::Photoresistor
+        | DeviceKind::PhotodiodeSensor
+        | DeviceKind::LinearLightSensor => SENSOR,
         DeviceKind::Scr => SCR,
         DeviceKind::Triac => TRIAC,
         DeviceKind::Diac => DIAC,
