@@ -163,6 +163,7 @@ pub fn digital_entry_with_config(
             crate::catalog_memory::memory_controller_entry("memory.device.memory_controller")
         }
         "memory.device.spi_flash" => crate::catalog_flash::spi_flash_entry(),
+        "memory.device.i2c_eeprom" => crate::catalog_eeprom::i2c_eeprom_entry(),
         _ => return Ok(None),
     };
     Ok(Some(entry))

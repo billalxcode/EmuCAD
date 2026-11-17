@@ -6,7 +6,7 @@ Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
 ## 1. Cakupan
 
 Domain digital memakai `DigitalCircuit` dua-state dengan input dan
-output bernama. Saat ini 74 entry katalog sudah dapat dijalankan:
+output bernama. Saat ini 75 entry katalog sudah dapat dijalankan:
 
 | Kelompok | Entry |
 |---|---|
@@ -23,7 +23,7 @@ output bernama. Saat ini 74 entry katalog sudah dapat dijalankan:
 | Programmable | PAL, GAL, CPLD, FPGA logic block, lookup table (LUT 4-input), FSM 3-input |
 | High-Z | open-drain, tri-state, transmission gate, bidirectional buffer, bidirectional/open-drain level |
 | Serial | UART, SPI, I2C master, dan CAN transmitter |
-| Memory | sel SRAM/DRAM 1-bit, array 128x8, ROM, PROM, module, controller, dan SPI flash |
+| Memory | sel SRAM/DRAM 1-bit, array 128x8, ROM, PROM, module, controller, SPI flash, dan I2C EEPROM |
 
 ## 2. Perintah
 
@@ -119,7 +119,7 @@ driver harus memakai sinyal `z` di tingkat rangkaian.
 
 ## 8. Memory
 
-Tiga belas entry memory memakai model digital:
+Empat belas entry memory memakai model digital:
 
 - `memory.device.sram_cell`: satu bit storage dengan input `we` dan
   `d`, output `q`. Nilai ditahan saat `we=0`.
@@ -144,6 +144,10 @@ Tiga belas entry memory memakai model digital:
   WREN `0x06`, RDSR `0x05`, READ `0x03`, PAGE PROGRAM `0x02`, dan
   CHIP ERASE `0xC7`. `cs` aktif rendah dan satu tick adalah satu bit.
   Program hanya menghapus bit (AND), erase mengisi `0xFF`.
+- `memory.device.i2c_eeprom` adalah device I2C 128 byte dengan alamat
+  `1010aaa`. `scl` dan `sda` adalah level bus, `sda_low` adalah
+  open-drain. Isi disimpan terbalik sehingga power-on membaca `0xFF`.
+  Random read memakai word address dan repeated START.
 
 Array menulis satu kata pada setiap tick ketika `we=1`, lalu membaca
 kata yang dialamatkan secara kombinasional. Array SRAM menghapus semua
@@ -152,8 +156,9 @@ isi. Model non-volatile belum memiliki endurance, wear, atau
 persistensi antar proses simulasi. DRAM hanya tersedia sebagai sel
 1-bit dengan refresh global; array dan timing DRAM belum ada. SPI
 flash memakai model bit-serial tanpa timing, page boundary, write
-protection, atau status WIP. I2C EEPROM dan SD card belum dipetakan
-karena protokol serialnya belum dimodelkan. Controller bersifat
+protection, atau status WIP. I2C EEPROM memakai model transaksional
+tanpa write cycle time, page write, atau write protect. SD card belum
+dipetakan karena protokolnya belum dimodelkan. Controller bersifat
 generik, bukan controller DRAM dengan refresh dan scheduling.
 
 ## 9. Entry Digital yang Belum Didukung
@@ -197,6 +202,8 @@ Test domain digital mencakup:
   di-refresh.
 - SPI flash kosong membaca `0xFF`, program hanya menghapus bit, dan
   chip erase mengembalikan semua byte ke `0xFF`.
+- I2C EEPROM menulis satu byte, membacanya kembali lewat repeated
+  START, dan mengabaikan alamat device yang tidak cocok.
 - I2C mengirim address dan data MSB-first, menghasilkan START/STOP,
   dan menandai NACK saat ACK tidak diberikan.
 - CAN mengirim frame 2.0A dengan CRC-15 dan satu bit stuff, lalu
