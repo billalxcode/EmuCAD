@@ -6,7 +6,7 @@ Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
 ## 1. Cakupan
 
 Domain digital memakai `DigitalCircuit` dua-state dengan input dan
-output bernama. Saat ini 58 entry katalog sudah dapat dijalankan:
+output bernama. Saat ini 59 entry katalog sudah dapat dijalankan:
 
 | Kelompok | Entry |
 |---|---|
@@ -20,14 +20,14 @@ output bernama. Saat ini 58 entry katalog sudah dapat dijalankan:
 | Level | level shifter, line driver, line receiver, optocoupler interface |
 | Timer | timer, RTC, watchdog |
 | Digital source | clock, PRBS, pattern |
-| Programmable | PAL, GAL, CPLD, FPGA logic block, lookup table (LUT 4-input) |
+| Programmable | PAL, GAL, CPLD, FPGA logic block, lookup table (LUT 4-input), FSM 3-input |
 | High-Z | open-drain, tri-state, transmission gate, bidirectional buffer, bidirectional/open-drain level |
 | Serial | UART dan SPI, satu tick per bit |
 
 ## 2. Perintah
 
 ```
-emucad digital <id> [nama=0|1]... [--ticks N] [--pattern V] [--mask V]
+emucad digital <id> [nama=0|1]... [--ticks N] [--pattern V] [--mask V] [--fsm V]
 ```
 
 Contoh:
@@ -40,9 +40,10 @@ emucad digital logic.programmable.lookup_table a0=1 a1=1 --mask 8
 emucad digital source.digital.digital_pattern_source reset=1 --pattern 1 --ticks 1
 ```
 
-`--pattern` dan `--mask` menerima desimal atau hex `0x`. LUT memakai
-empat input `a0..a3` dan mask 16 bit; bit ke-i adalah output untuk
-kombinasi input i.
+`--pattern`, `--mask`, dan `--fsm` menerima desimal atau hex `0x`. LUT
+memakai empat input `a0..a3` dan mask 16 bit; bit ke-i adalah output
+untuk kombinasi input i. FSM memakai dua bit state, satu input, dan
+tabel 16 bit; default `0x0605` adalah pencacah dua bit.
 
 Tanpa `--ticks`, rangkaian hanya di-settle satu kali. Dengan
 `--ticks N`, clock global dijalankan N kali.
@@ -72,10 +73,9 @@ Port ditentukan per entry, bukan dari jumlah pin katalog. Contoh:
 
 ## 5. Entry Digital yang Belum Didukung
 
-Masih ada 5 entry digital di luar domain ini:
+Masih ada 4 entry digital di luar domain ini:
 
-- 1 programmable logic (finite state machine).
-- 4 serial interface (I2C, CAN, USB, Ethernet).
+- I2C, CAN, USB, dan Ethernet.
 
 ## 7. Verifikasi
 
@@ -98,6 +98,7 @@ Test domain digital mencakup:
 - UART mengirim start, delapan bit LSB-first, dan stop; receiver
   mengembalikan byte yang sama.
 - SPI mengirim MSB-first, menerima delapan bit, dan menghasilkan `done`.
+- FSM tiga input mencacah state 0, 1, 2, 3 dengan mask `0x0605`.
 - PRBS source bergeser setelah reset.
 - Pattern source memuat pola saat reset.
 - LUT 4-input dengan mask AND menghasilkan output yang benar.

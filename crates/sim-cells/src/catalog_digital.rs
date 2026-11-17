@@ -10,6 +10,8 @@ pub struct DigitalConfig {
     pub pattern: u8,
     /// Truth table for a four-input LUT.
     pub mask: u16,
+    /// Transition table for the three-input finite state machine.
+    pub fsm: u16,
 }
 
 impl Default for DigitalConfig {
@@ -17,6 +19,7 @@ impl Default for DigitalConfig {
         Self {
             pattern: 0xa5,
             mask: 0x0008,
+            fsm: 0x0605,
         }
     }
 }
@@ -124,6 +127,7 @@ pub fn digital_entry_with_config(
         }
         "mcu.serial.uart" => crate::catalog_uart::uart_entry(),
         "mcu.serial.spi" => crate::catalog_spi::spi_entry(),
+        "logic.programmable.finite_state_machine" => fsm_entry(config.fsm),
         _ => return Ok(None),
     };
     Ok(Some(entry))
@@ -841,26 +845,50 @@ fn pattern_entry(pattern: u8) -> DigitalEntry {
     })
 }
 
+fn lut(builder: &mut DigitalBuilder, inputs: &[NetId], mask: u16) -> NetId {
+    let count = 1usize << inputs.len();
+    let mut level: Vec<NetId> = (0..count)
+        .map(|index| builder.constant(mask & (1 << index) != 0))
+        .collect();
+    for select in inputs {
+        level = level
+            .chunks(2)
+            .map(|pair| builder.mux(pair[0], pair[1], *select))
+            .collect();
+    }
+    level[0]
+}
+
 fn lut_entry(id: &'static str, mask: u16) -> DigitalEntry {
     finish(id, |builder| {
-        let inputs: Vec<NetId> = (0..4)
-            .map(|index| builder.input(&format!("a{index}")))
-            .collect();
-        let mut level: Vec<NetId> = (0..16)
-            .map(|index| builder.constant(mask & (1 << index) != 0))
-            .collect();
-        for (stage, select) in inputs.iter().enumerate() {
-            level = level
-                .chunks(2)
-                .map(|pair| builder.mux(pair[0], pair[1], *select))
-                .collect();
-            if level.len() == 1 {
-                break;
-            }
-            let _ = stage;
-        }
-        builder.output("y", level[0]);
+        let inputs = [
+            builder.input("a0"),
+            builder.input("a1"),
+            builder.input("a2"),
+            builder.input("a3"),
+        ];
+        let output = lut(builder, &inputs, mask);
+        builder.output("y", output);
         (vec!["a0", "a1", "a2", "a3"], vec!["y"])
+    })
+}
+
+fn fsm_entry(mask: u16) -> DigitalEntry {
+    finish("logic.programmable.finite_state_machine", |builder| {
+        let reset = builder.input("reset");
+        let input = builder.input("in");
+        let first = builder.net();
+        let second = builder.net();
+        let next_first = lut(builder, &[first, second, input], mask & 0x00ff);
+        let next_second = lut(builder, &[first, second, input], (mask >> 8) & 0x00ff);
+        let not_reset = builder.not(reset);
+        let next_first = builder.and(next_first, not_reset);
+        let next_second = builder.and(next_second, not_reset);
+        builder.dff_into(next_first, first);
+        builder.dff_into(next_second, second);
+        builder.output("q0", first);
+        builder.output("q1", second);
+        (vec!["reset", "in"], vec!["q0", "q1"])
     })
 }
 
@@ -1132,6 +1160,7 @@ mod tests {
             super::DigitalConfig {
                 pattern: 0,
                 mask: 0x0008,
+                fsm: 0x0605,
             },
         )
         .expect("build")
@@ -1152,6 +1181,7 @@ mod tests {
             super::DigitalConfig {
                 pattern: 0x01,
                 mask: 0,
+                fsm: 0x0605,
             },
         )
         .expect("build")
@@ -1198,6 +1228,29 @@ mod tests {
         assert_eq!(entry.circuit.output("y_b"), Some(true));
         assert_eq!(entry.circuit.output("z_b"), Some(false));
         assert_eq!(entry.circuit.output("z_a"), Some(true));
+    }
+
+    #[test]
+    fn fsm_counter_cycles_through_states() {
+        let mut entry = super::digital_entry_with_config(
+            "logic.programmable.finite_state_machine",
+            super::DigitalConfig {
+                pattern: 0,
+                mask: 0,
+                fsm: 0x0605,
+            },
+        )
+        .expect("build")
+        .expect("entry");
+        entry.circuit.tick().expect("tick");
+        assert_eq!(entry.circuit.output("q0"), Some(true));
+        assert_eq!(entry.circuit.output("q1"), Some(false));
+        entry.circuit.tick().expect("tick");
+        assert_eq!(entry.circuit.output("q1"), Some(true));
+        entry.circuit.tick().expect("tick");
+        entry.circuit.tick().expect("tick");
+        assert_eq!(entry.circuit.output("q0"), Some(false));
+        assert_eq!(entry.circuit.output("q1"), Some(false));
     }
 
     #[test]

@@ -300,11 +300,11 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
     structural, multidomain, RF, dan unsupported.
 - [~] S5-02 Gunakan `sim-cells` untuk logic, flip-flop, counter, dan
   multiplexer bila cocok.
-  - 58 entry digital sudah dapat dijalankan lewat `emucad digital`.
+  - 59 entry digital sudah dapat dijalankan lewat `emucad digital`.
   - Cakupan: 8 mux/decoder/encoder, 8 adder/comparator/parity/buffer,
     10 flip-flop, 10 counter/shift, 6 level/high-Z, 3 timer, 3 digital
     source, 5 programmable logic/LUT, dan UART/SPI.
-  - 5 entry digital lain belum: 1 FSM, I2C, CAN, USB, dan Ethernet.
+  - 4 entry digital lain belum: I2C, CAN, USB, dan Ethernet.
 - [x] S5-03 Tunda MCU dan memory ke fase S6; jangan membuat model
   sementara yang diklaim structural.
 - [x] S5-04 Buat model sensor dengan input lingkungan.
@@ -363,18 +363,18 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
 
 | Kelompok | Entri | Blocker |
 |---|---:|---|
-| Digital logic | 5 | 58 sudah di domain digital; 5 belum, yaitu FSM, I2C, CAN, USB, dan Ethernet. |
+| Digital logic | 4 | 59 sudah di domain digital; 4 belum, yaitu I2C, CAN, USB, dan Ethernet. |
 | Structural MCU dan memory | 26 | Butuh gate-level 11 MCU dan 15 memory; scope ada di `docs/64-gate-level.md`. |
 | RF | 14 | Mixer, filter, antenna, dan coupler butuh S-parameter dan solver dua-port. |
 | Board module | 14 | Board-level module belum punya batas dan referensi yang cukup. |
 | Mixed-signal ADC | 1 | R-2R DAC membutuhkan bus multi-bit; 4 converter lain sudah dipetakan. |
 | Behavioral source | 2 | Behavioral voltage/current membutuhkan parser ekspresi bebas. |
 | R-2R DAC | 1 | Butuh bus multi-bit; katalog hanya menyediakan 4 pin. |
-| **Total** | **63** | |
+| **Total** | **62** | |
 
-Dari 125 entry yang belum analog solver-backed, 58 sudah dapat
+Dari 121 entry yang belum analog solver-backed, 59 sudah dapat
 dijalankan melalui domain digital. Sisa yang belum punya model sama
-sekali adalah 67 entry.
+sekali adalah 62 entry.
 
 **Acceptance S5:** setiap entri non-MCU yang diklaim simulatable punya
 model, input, output, dan referensi yang jelas.

@@ -1,7 +1,7 @@
 # TODO - Komponen 500
 
 Status per 2026-11-16: katalog 500 entri ada, 379 entri dapat
-diinstansiasi lewat registry, dan 121 entri belum punya model solver.
+diinstansiasi lewat registry, dan 121 entri belum punya model solver analog; 59 di antaranya sudah dapat dijalankan di domain digital.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
 dari 379 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
@@ -196,7 +196,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C6-04 | 8 | 8 | Mux 2:1/4:1/8:1, demux, decoder, encoder, dan priority encoder ada. |
 | C6-05 | 8 | 8 | Adder, comparator, parity, bus buffer, dan bidirectional buffer. |
 | C6-06 | 6 | 6 | Level shifter, line driver, receiver, optocoupler, bidirectional, dan open-drain. |
-| C6-07 | 6 | 5 | PAL, GAL, CPLD, FPGA logic block, dan LUT memakai LUT 4-input; FSM belum. |
+| C6-07 | 6 | 6 | PAL, GAL, CPLD, FPGA logic block, LUT, dan FSM 3-input. |
 | C6-08 | 15 | 0 | Belum ada model memory. |
 | C6-09 | 11 | 0 | Belum ada model MCU. |
 | C6-10 | 5 | 4 | SAR, delta-sigma, flash, dan PWM generator; R-2R DAC belum. |

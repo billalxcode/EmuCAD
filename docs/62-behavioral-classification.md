@@ -85,6 +85,7 @@ Urutan implementasi yang disarankan:
    - 4 entry behavioral oscillator memakai phase dan modulasi; PLL belum.
    - 4 entry behavioral converter memakai sampling dan kuantisasi.
    - 4 entry MCU converter memakai model behavioral converter.
+   - 59 entry digital dapat dijalankan di domain digital.
    - Polynomial dan table source memakai model waktu.
    - Dua PLL memakai frequency multiplier dengan phase reset.
    - 14 entry RF lain menunggu S-parameter dan solver dua-port.

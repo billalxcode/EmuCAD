@@ -74,6 +74,10 @@ fn parse_request(args: &[String]) -> Result<Request, String> {
                 request.config.mask = parse_number(value_at(args, index + 1, "mask")?)? as u16;
                 index += 2;
             }
+            "--fsm" => {
+                request.config.fsm = parse_number(value_at(args, index + 1, "fsm")?)? as u16;
+                index += 2;
+            }
             value if value.starts_with("--") => {
                 return Err(format!("unknown option: {value}"));
             }
@@ -156,6 +160,7 @@ mod tests {
         let config = sim_cells::catalog_digital::DigitalConfig {
             pattern: 0,
             mask: 0x0008,
+            fsm: 0x0605,
         };
         let entry = digital_entry_with_config("logic.programmable.lookup_table", config)
             .expect("build")
