@@ -396,6 +396,11 @@ const DISPLAY_MODULE: &[ParameterSpec] = &[
     ParameterSpec::number("input_leakage", "S", 1e-6, 0.0, 1e9),
 ];
 
+const RF_AMPLIFIER: &[ParameterSpec] = &[
+    ParameterSpec::number("gain", "ratio", 10.0, -1e9, 1e9),
+    ParameterSpec::number("input_resistance", "ohm", 1e6, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -665,6 +670,7 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::Peltier => PELTIER,
         DeviceKind::ThermoelectricGenerator => THERMOELECTRIC_GENERATOR,
         DeviceKind::DisplayModule => DISPLAY_MODULE,
+        DeviceKind::RfAmplifier => RF_AMPLIFIER,
         _ => &[],
     }
 }
@@ -761,6 +767,7 @@ mod tests {
         DeviceKind::Peltier,
         DeviceKind::ThermoelectricGenerator,
         DeviceKind::DisplayModule,
+        DeviceKind::RfAmplifier,
     ];
 
     #[test]

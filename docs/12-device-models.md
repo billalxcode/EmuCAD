@@ -3,7 +3,7 @@
 Katalog device yang tersedia di `sim-device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 167.
+dan transmission line sudah diimplementasikan. Total test `sim-device`: 168.
 
 ---
 
@@ -133,6 +133,7 @@ pub fn model_from_instance(
 | Peltier | 2 | Resistance dan Seebeck back EMF | - |
 | Thermoelectric generator | 2 | Thevenin Seebeck source | - |
 | Display module | 4 | Supply load dan input leakage | - |
+| RF amplifier | 3 | VCVS dengan input resistance | [74](74-rf-amplifiers.md) |
 | VCVS | 4 | Linear gain | [47](47-controlled-sources.md) |
 | VCCS | 4 | Linear transconductance | [47](47-controlled-sources.md) |
 | CCCS | 4 | Linear current gain | [48](48-cccs-switch.md) |
@@ -392,8 +393,9 @@ Test device mencakup:
 - Sensor arus current sense resistor, Hall current, dan voltage divider.
 - Sensor proximity inductive, capacitive touch, dan ultrasonic.
 - Actuator LED, lamp, buzzer, motor, heater, Peltier, TEG, dan display.
+- RF amplifier VCVS tiga pin.
 
-Total test `sim-device`: 162 unit + 5 integration = 167.
+Total test `sim-device`: 163 unit + 5 integration = 168.
 
 ---
 

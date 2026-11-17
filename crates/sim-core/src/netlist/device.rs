@@ -161,6 +161,8 @@ pub enum DeviceKind {
     ThermoelectricGenerator,
     /// A four-pin display module.
     DisplayModule,
+    /// A three-pin RF amplifier module.
+    RfAmplifier,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -276,6 +278,7 @@ impl DeviceKind {
             Self::Peltier => "peltier",
             Self::ThermoelectricGenerator => "thermoelectric_generator",
             Self::DisplayModule => "display_module",
+            Self::RfAmplifier => "rf_amplifier",
             Self::Diode => "diode",
             _ => "custom",
         }

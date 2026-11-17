@@ -124,6 +124,7 @@ const UJT: &[PinRole] = &[PinRole::Base1, PinRole::Base2, PinRole::Emitter];
 const PUT: &[PinRole] = &[PinRole::Anode, PinRole::Gate, PinRole::Cathode];
 const SCR: &[PinRole] = &[PinRole::Anode, PinRole::Gate, PinRole::Cathode];
 const SENSOR: &[PinRole] = &[PinRole::PositiveSupply, PinRole::Ground, PinRole::Output];
+const RF_AMPLIFIER: &[PinRole] = &[PinRole::Input, PinRole::Output, PinRole::Ground];
 const DISPLAY: &[PinRole] = &[
     PinRole::PositiveSupply,
     PinRole::Ground,
@@ -293,6 +294,7 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         DeviceKind::Scs => SCS,
         DeviceKind::DcMotor | DeviceKind::Peltier | DeviceKind::ThermoelectricGenerator => SOURCE,
         DeviceKind::DisplayModule => DISPLAY,
+        DeviceKind::RfAmplifier => RF_AMPLIFIER,
         DeviceKind::DiodeBridge => DIODE_BRIDGE,
         DeviceKind::DualDiode => DUAL_DIODE,
         DeviceKind::Switch => SWITCH,

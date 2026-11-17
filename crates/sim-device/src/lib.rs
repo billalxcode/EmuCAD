@@ -21,6 +21,7 @@ mod passive;
 mod protection;
 mod regulator;
 mod relay;
+mod rf;
 mod sensors;
 mod source;
 mod switch;
@@ -53,6 +54,7 @@ pub use passive::{CapacitorModel, InductorModel, ResistorModel};
 pub use protection::{FuseModel, VaristorModel};
 pub use regulator::RegulatorModel;
 pub use relay::RelayModel;
+pub use rf::RfAmplifierModel;
 pub use sensors::{
     CurrentSenseModel, LinearLightSensorModel, LinearSensorModel, LoadCellModel,
     MagneticFieldSensorModel, NtcModel, PhSensorModel, PhotodiodeSensorModel, PhotoresistorModel,

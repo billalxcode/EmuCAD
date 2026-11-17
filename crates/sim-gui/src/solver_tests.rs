@@ -1298,3 +1298,32 @@ fn display_voltage(brightness: f64) -> f64 {
     let result = solve(&circuit);
     result.solution.voltage(NodeId::new(2)).expect("output")
 }
+
+#[test]
+fn rf_amplifier_applies_voltage_gain() {
+    let mut builder = CircuitBuilder::new();
+    let input = builder.node("in").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", input, ground, 1.0);
+    builder
+        .device(
+            "A1",
+            DeviceKind::RfAmplifier,
+            vec![input, output, ground],
+            params(&[("gain", 10.0)]),
+        )
+        .expect("A1");
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![output, ground],
+            params(&[("resistance", 1000.0)]),
+        )
+        .expect("R1");
+    let circuit = builder.build().expect("circuit");
+    let result = solve(&circuit);
+    let voltage = result.solution.voltage(NodeId::new(2)).expect("output");
+    assert!((voltage - 10.0).abs() < 0.01, "voltage={voltage}");
+}

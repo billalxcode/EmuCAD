@@ -17,6 +17,7 @@ use crate::passive::{CapacitorModel, InductorModel, ResistorModel};
 use crate::protection::{FuseModel, VaristorModel};
 use crate::regulator::RegulatorModel;
 use crate::relay::RelayModel;
+use crate::rf::RfAmplifierModel;
 use crate::sensors::{
     CurrentSenseModel, LinearLightSensorModel, LinearSensorModel, LoadCellModel,
     MagneticFieldSensorModel, NtcModel, PhSensorModel, PhotodiodeSensorModel, PhotoresistorModel,
@@ -256,6 +257,7 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
             0.05,
         )?),
         DeviceKind::DisplayModule => Box::new(DisplayModuleModel::from_instance(instance)?),
+        DeviceKind::RfAmplifier => Box::new(RfAmplifierModel::from_instance(instance)?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),
         DeviceKind::DiodeBridge => Box::new(DiodeBridgeModel::from_instance(instance)?),

@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 312 entri dapat
-diinstansiasi lewat registry, dan 188 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 316 entri dapat
+diinstansiasi lewat registry, dan 184 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 312 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 316 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 312 | dapat masuk netlist lewat registry |
+| mapped | 316 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 312 `mapped` bukan 312 model yang benar. Audit menemukan
+Peringatan: 316 `mapped` bukan 316 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -221,7 +221,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C7-17 | 5 | 5 | Motor memakai resistance dan back EMF; solenoid memakai resistor; verifikasi batch belum. |
 | C7-18 | 4 | 4 | Display memakai beban supply dan input leakage; verifikasi batch belum. |
 | C7-19 | 3 | 3 | Heater memakai resistor; Peltier/TEG memakai resistance dan Seebeck; verifikasi batch belum. |
-| C8-01 | 4 | 0 | Belum ada model RF amplifier. |
+| C8-01 | 4 | 4 | RF amplifier, LNA, power amplifier, dan VGA memakai VCVS tiga pin; verifikasi batch belum. |
 | C8-02 | 4 | 0 | Belum ada model RF mixer dan modulator. |
 | C8-03 | 4 | 0 | Belum ada model RF filter. |
 | C8-04 | 3 | 0 | Belum ada model antenna. |
@@ -291,7 +291,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 1014 test workspace lulus pada audit ini.
+- 1016 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -516,7 +516,10 @@ Target: 85 entri.
 
 Target: 43 entri.
 
-- [ ] C8-01 RF amplifier 4 entri.
+- [~] C8-01 RF amplifier 4 entri.
+  - Empat entry memakai model VCVS tiga pin.
+  - Belum ada S-parameter, matching, noise, atau bandwidth.
+  - Reference vector dan verified belum.
 - [ ] C8-02 RF mixer dan modulator 4 entri.
 - [ ] C8-03 RF filter 4 entri.
 - [ ] C8-04 Antenna 3 entri.

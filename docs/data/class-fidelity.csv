@@ -44,7 +44,7 @@ Protection,10,10,compact,protection
 Regulator,6,6,behavioral,power
 Relay,3,3,compact,switch
 Resistor,12,12,ideal,passive
-RfBlock,18,0,unsupported,rf
+RfBlock,18,4,behavioral,rf
 Sensor,35,35,behavioral,sensor
 SerialInterface,6,0,unsupported,mcu
 SolidStateRelay,4,4,compact,switch

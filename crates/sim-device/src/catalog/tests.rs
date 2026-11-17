@@ -129,6 +129,7 @@ fn supported_actuator(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::Peltier
             | sim_core::DeviceKind::ThermoelectricGenerator
             | sim_core::DeviceKind::DisplayModule
+            | sim_core::DeviceKind::RfAmplifier
     )
 }
 

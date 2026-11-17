@@ -571,8 +571,16 @@ add("actuator.heater", "Actuator", "ThermoelectricGenerator", 2, "seebeck", 0.05
     "thermoelectric generator",
 ])
 
-add("rf.amplifier", "RfBlock", None, 3, "gain", 10.0, "ratio", [
-    "RF amplifier", "low noise amplifier", "power amplifier",
+add("rf.amplifier", "RfBlock", "RfAmplifier", 3, "gain", 10.0, "ratio", [
+    "RF amplifier",
+])
+add("rf.amplifier", "RfBlock", "RfAmplifier", 3, "gain", 100.0, "ratio", [
+    "low noise amplifier",
+])
+add("rf.amplifier", "RfBlock", "RfAmplifier", 3, "gain", 2.0, "ratio", [
+    "power amplifier",
+])
+add("rf.amplifier", "RfBlock", "RfAmplifier", 3, "gain", 1.0, "ratio", [
     "variable gain amplifier",
 ])
 add("rf.mixer", "RfBlock", None, 3, "gain", 1.0, "ratio", [
