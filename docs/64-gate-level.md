@@ -68,7 +68,7 @@ jauh di atas budget jika setiap akses disimulasikan penuh.
 | Item | Target | Status |
 |---|---|---|
 | MCU gate-level | 11 | 1 hybrid (AVR) |
-| Memory gate-level | 15 | 1 register file dan 9 macro memory |
+| Memory gate-level | 15 | 1 register file dan 11 macro memory |
 | AVR full chip | Semua peripheral | Sebagian |
 | Mixed-signal scheduler | AVR + analog | Belum |
 | Real-time semua MCU | Desktop | Belum terbukti |

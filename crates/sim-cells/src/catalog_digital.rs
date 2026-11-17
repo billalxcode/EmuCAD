@@ -153,6 +153,12 @@ pub fn digital_entry_with_config(
         }
         "memory.device.rom" => crate::catalog_memory::rom_array_entry("memory.device.rom"),
         "memory.device.prom" => crate::catalog_memory::prom_array_entry("memory.device.prom"),
+        "memory.device.memory_module" => {
+            crate::catalog_memory::memory_module_entry("memory.device.memory_module")
+        }
+        "memory.device.memory_controller" => {
+            crate::catalog_memory::memory_controller_entry("memory.device.memory_controller")
+        }
         _ => return Ok(None),
     };
     Ok(Some(entry))

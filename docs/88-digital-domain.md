@@ -6,7 +6,7 @@ Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
 ## 1. Cakupan
 
 Domain digital memakai `DigitalCircuit` dua-state dengan input dan
-output bernama. Saat ini 70 entry katalog sudah dapat dijalankan:
+output bernama. Saat ini 72 entry katalog sudah dapat dijalankan:
 
 | Kelompok | Entry |
 |---|---|
@@ -23,7 +23,7 @@ output bernama. Saat ini 70 entry katalog sudah dapat dijalankan:
 | Programmable | PAL, GAL, CPLD, FPGA logic block, lookup table (LUT 4-input), FSM 3-input |
 | High-Z | open-drain, tri-state, transmission gate, bidirectional buffer, bidirectional/open-drain level |
 | Serial | UART, SPI, I2C master, dan CAN transmitter |
-| Memory | sel SRAM 1-bit, array 128x8, ROM, dan PROM |
+| Memory | sel SRAM 1-bit, array 128x8, ROM, PROM, module, dan controller |
 
 ## 2. Perintah
 
@@ -119,7 +119,7 @@ driver harus memakai sinyal `z` di tingkat rangkaian.
 
 ## 8. Memory
 
-Sembilan entry memory memakai model digital:
+Sebelas entry memory memakai model digital:
 
 - `memory.device.sram_cell`: satu bit storage dengan input `we` dan
   `d`, output `q`. Nilai ditahan saat `we=0`.
@@ -131,14 +131,20 @@ Sembilan entry memory memakai model digital:
   dengan port `load` untuk mengisi kata. Ini hook simulasi, bukan pin
   fisik ROM. PROM hanya menerima satu load per kata; ROM dapat memuat
   ulang.
+- `memory.device.memory_module` adalah bank 128x8 dengan `cs`, `we`,
+  dan `oe`. Output `z=1` saat bus tidak aktif.
+- `memory.device.memory_controller` adalah controller sinkron generik
+  dengan `req`, `we`, `addr`, `din`, `ready`, dan `valid`. Satu
+  request selesai dalam satu tick dan `ready` tinggi selama satu tick.
 
 Array menulis satu kata pada setiap tick ketika `we=1`, lalu membaca
 kata yang dialamatkan secara kombinasional. Array SRAM menghapus semua
 kata saat `reset`; array non-volatile, ROM, dan PROM mempertahankan
 isi. Model non-volatile belum memiliki erase, endurance, wear, atau
 persistensi antar proses simulasi. DRAM belum dipetakan karena refresh
-belum dimodelkan. Controller, module, SPI flash, I2C EEPROM, dan SD
-card belum dipetakan karena protokolnya belum dimodelkan.
+belum dimodelkan. SPI flash, I2C EEPROM, dan SD card belum dipetakan
+karena protokol serialnya belum dimodelkan. Controller bersifat
+generik, bukan controller DRAM dengan refresh dan scheduling.
 
 ## 9. Entry Digital yang Belum Didukung
 
@@ -173,6 +179,10 @@ Test domain digital mencakup:
 - Array non-volatile mempertahankan kata setelah reset.
 - ROM membaca kata yang dimuat, dan PROM mengabaikan load kedua pada
   kata yang sama.
+- Memory module menulis dan membaca dengan chip select, lalu melepas
+  bus saat tidak dipilih.
+- Memory controller menyelesaikan tulis dan baca lewat handshake
+  `req`/`ready`.
 - I2C mengirim address dan data MSB-first, menghasilkan START/STOP,
   dan menandai NACK saat ACK tidak diberikan.
 - CAN mengirim frame 2.0A dengan CRC-15 dan satu bit stuff, lalu

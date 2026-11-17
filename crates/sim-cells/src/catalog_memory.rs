@@ -1,6 +1,6 @@
 //! Gate-level SRAM cell and digital memory arrays.
 
-use crate::catalog_bits::{equals, mux_tree};
+use crate::catalog_bits::{equals, mux_tree, register_bits};
 use crate::catalog_digital::{DigitalEntry, finish};
 use crate::{DigitalBuilder, NetId};
 
@@ -120,6 +120,198 @@ fn rom_word(
         let next = builder.mux(word[bit], data_in[bit], write);
         builder.dff_into(next, word[bit]);
     }
+}
+
+const MODULE_INPUTS: [&str; 19] = [
+    "reset", "cs", "we", "oe", "addr0", "addr1", "addr2", "addr3", "addr4", "addr5", "addr6",
+    "din0", "din1", "din2", "din3", "din4", "din5", "din6", "din7",
+];
+const MODULE_OUTPUTS: [&str; 9] = [
+    "dout0", "dout1", "dout2", "dout3", "dout4", "dout5", "dout6", "dout7", "z",
+];
+const CONTROLLER_INPUTS: [&str; 18] = [
+    "reset", "req", "we", "addr0", "addr1", "addr2", "addr3", "addr4", "addr5", "addr6", "din0",
+    "din1", "din2", "din3", "din4", "din5", "din6", "din7",
+];
+const CONTROLLER_OUTPUTS: [&str; 10] = [
+    "dout0", "dout1", "dout2", "dout3", "dout4", "dout5", "dout6", "dout7", "ready", "valid",
+];
+
+#[derive(Clone, Copy)]
+struct ControllerInputs {
+    reset: NetId,
+    req: NetId,
+    we: NetId,
+    address: [NetId; ADDRESS_BITS],
+    data_in: [NetId; DATA_BITS],
+}
+
+#[derive(Clone, Copy)]
+struct ControllerState {
+    busy: NetId,
+    write_op: NetId,
+    output: [NetId; DATA_BITS],
+}
+
+pub(crate) fn memory_module_entry(id: &'static str) -> DigitalEntry {
+    finish(id, |builder| {
+        let reset = builder.input("reset");
+        let cs = builder.input("cs");
+        let we = builder.input("we");
+        let oe = builder.input("oe");
+        let address = address_inputs(builder);
+        let data_in = data_inputs(builder);
+        let cells = array_cells(builder);
+        let write = builder.and(cs, we);
+        sram_write(builder, &cells, reset, write, false, &address, &data_in);
+        module_outputs(builder, cs, we, oe, &cells, &address);
+        (MODULE_INPUTS.to_vec(), MODULE_OUTPUTS.to_vec())
+    })
+}
+
+fn module_outputs(
+    builder: &mut DigitalBuilder,
+    cs: NetId,
+    we: NetId,
+    oe: NetId,
+    cells: &[Vec<NetId>],
+    address: &[NetId; ADDRESS_BITS],
+) {
+    let data = array_read(builder, cells, address);
+    let not_we = builder.not(we);
+    let selected = builder.and(cs, oe);
+    let enabled = builder.and(selected, not_we);
+    let not_enabled = builder.not(enabled);
+    for (index, net) in data.iter().enumerate() {
+        let value = builder.and(*net, enabled);
+        builder.output(MODULE_OUTPUTS[index], value);
+    }
+    builder.output("z", not_enabled);
+}
+
+pub(crate) fn memory_controller_entry(id: &'static str) -> DigitalEntry {
+    finish(id, |builder| {
+        let inputs = controller_inputs(builder);
+        let state = controller_state_nets(builder);
+        let cells = array_cells(builder);
+        controller_state(builder, inputs, state, &cells);
+        controller_outputs(builder, state);
+        (CONTROLLER_INPUTS.to_vec(), CONTROLLER_OUTPUTS.to_vec())
+    })
+}
+
+fn controller_inputs(builder: &mut DigitalBuilder) -> ControllerInputs {
+    ControllerInputs {
+        reset: builder.input("reset"),
+        req: builder.input("req"),
+        we: builder.input("we"),
+        address: address_inputs(builder),
+        data_in: data_inputs(builder),
+    }
+}
+
+fn controller_state_nets(builder: &mut DigitalBuilder) -> ControllerState {
+    ControllerState {
+        busy: builder.net(),
+        write_op: builder.net(),
+        output: std::array::from_fn(|_| builder.net()),
+    }
+}
+
+#[derive(Clone, Copy)]
+struct ControllerNext {
+    busy: NetId,
+    write_op: NetId,
+    output: [NetId; DATA_BITS],
+    write: NetId,
+}
+
+fn controller_state(
+    builder: &mut DigitalBuilder,
+    inputs: ControllerInputs,
+    state: ControllerState,
+    cells: &[Vec<NetId>],
+) {
+    let next = controller_next(builder, inputs, state, cells);
+    controller_store(builder, state, next);
+    sram_write(
+        builder,
+        cells,
+        inputs.reset,
+        next.write,
+        false,
+        &inputs.address,
+        &inputs.data_in,
+    );
+}
+
+fn controller_next(
+    builder: &mut DigitalBuilder,
+    inputs: ControllerInputs,
+    state: ControllerState,
+    cells: &[Vec<NetId>],
+) -> ControllerNext {
+    let not_busy = builder.not(state.busy);
+    let accept = builder.and(not_busy, inputs.req);
+    let write = builder.and(accept, inputs.we);
+    let read = array_read(builder, cells, &inputs.address);
+    let busy = controller_busy(builder, accept, inputs.reset);
+    let write_op = write_value(builder, inputs.reset, accept, inputs.we, state.write_op);
+    let output = output_value(builder, inputs.reset, accept, &read, &state.output);
+    ControllerNext {
+        busy,
+        write_op,
+        output,
+        write,
+    }
+}
+
+fn controller_busy(builder: &mut DigitalBuilder, accept: NetId, reset: NetId) -> NetId {
+    let not_reset = builder.not(reset);
+    builder.and(accept, not_reset)
+}
+
+fn controller_store(builder: &mut DigitalBuilder, state: ControllerState, next: ControllerNext) {
+    let one = builder.constant(true);
+    builder.dff_into(next.busy, state.busy);
+    builder.dff_into(next.write_op, state.write_op);
+    register_bits(builder, &state.output, &next.output, one);
+}
+
+fn write_value(
+    builder: &mut DigitalBuilder,
+    reset: NetId,
+    accept: NetId,
+    we: NetId,
+    hold: NetId,
+) -> NetId {
+    let zero = builder.constant(false);
+    let value = builder.mux(hold, we, accept);
+    builder.mux(value, zero, reset)
+}
+
+fn output_value(
+    builder: &mut DigitalBuilder,
+    reset: NetId,
+    accept: NetId,
+    read: &[NetId; DATA_BITS],
+    hold: &[NetId; DATA_BITS],
+) -> [NetId; DATA_BITS] {
+    let zero = builder.constant(false);
+    std::array::from_fn(|index| {
+        let value = builder.mux(hold[index], read[index], accept);
+        builder.mux(value, zero, reset)
+    })
+}
+
+fn controller_outputs(builder: &mut DigitalBuilder, state: ControllerState) {
+    let not_write = builder.not(state.write_op);
+    let valid = builder.and(state.busy, not_write);
+    for (index, net) in state.output.iter().enumerate() {
+        builder.output(CONTROLLER_OUTPUTS[index], *net);
+    }
+    builder.output("ready", state.busy);
+    builder.output("valid", valid);
 }
 
 pub(crate) fn sram_cell_entry(id: &'static str) -> DigitalEntry {
@@ -316,6 +508,44 @@ mod tests {
         load_word(&mut entry, 9, 0x77);
         load_word(&mut entry, 9, 0x11);
         assert_eq!(read_word(&mut entry, 9), 0x77);
+    }
+
+    #[test]
+    fn memory_module_respects_chip_select() {
+        let mut entry = super::memory_module_entry("memory.device.memory_module");
+        set_address(&mut entry, 3);
+        set_data(&mut entry, 0x99);
+        entry.circuit.set_input("cs", true).expect("cs");
+        entry.circuit.set_input("we", true).expect("we");
+        entry.circuit.tick().expect("write");
+        entry.circuit.set_input("we", false).expect("we");
+        entry.circuit.set_input("oe", true).expect("oe");
+        entry.circuit.settle().expect("read");
+        assert_eq!(read_data(&entry), 0x99);
+        assert_eq!(entry.circuit.output("z"), Some(false));
+        entry.circuit.set_input("cs", false).expect("cs");
+        entry.circuit.settle().expect("select off");
+        assert_eq!(entry.circuit.output("z"), Some(true));
+        assert_eq!(read_data(&entry), 0);
+    }
+
+    #[test]
+    fn memory_controller_handshakes_write_and_read() {
+        let mut entry = super::memory_controller_entry("memory.device.memory_controller");
+        set_address(&mut entry, 6);
+        set_data(&mut entry, 0x3c);
+        entry.circuit.set_input("we", true).expect("we");
+        entry.circuit.set_input("req", true).expect("req");
+        entry.circuit.tick().expect("write");
+        assert_eq!(entry.circuit.output("ready"), Some(true));
+        entry.circuit.set_input("req", false).expect("req");
+        entry.circuit.tick().expect("idle");
+        entry.circuit.set_input("we", false).expect("we");
+        entry.circuit.set_input("req", true).expect("req");
+        entry.circuit.tick().expect("read");
+        assert_eq!(entry.circuit.output("ready"), Some(true));
+        assert_eq!(entry.circuit.output("valid"), Some(true));
+        assert_eq!(read_data(&entry), 0x3c);
     }
 
     #[test]
