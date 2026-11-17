@@ -456,6 +456,76 @@ impl DeviceModel for PwlSourceModel {
     }
 }
 
+/// A time polynomial voltage source.
+pub struct PolynomialSourceModel {
+    id: DeviceId,
+    coefficients: [f64; 4],
+    time: f64,
+    step: Option<f64>,
+    branch: Option<usize>,
+    pins: [NodeId; 2],
+}
+
+impl PolynomialSourceModel {
+    pub(crate) fn from_instance(instance: &DeviceInstance) -> Result<Self, SimError> {
+        let pins = pins_exact(instance, 2)?;
+        let params = instance.parameters();
+        Ok(Self {
+            id: instance.id(),
+            coefficients: [
+                finite_parameter(params, "c0", 0.0)?,
+                finite_parameter(params, "c1", 1.0)?,
+                finite_parameter(params, "c2", 0.0)?,
+                finite_parameter(params, "c3", 0.0)?,
+            ],
+            time: 0.0,
+            step: None,
+            branch: None,
+            pins: [pins[0], pins[1]],
+        })
+    }
+
+    fn value_at(&self, time: f64) -> f64 {
+        let mut value = 0.0;
+        let mut power = 1.0;
+        for coefficient in self.coefficients {
+            value += coefficient * power;
+            power *= time;
+        }
+        value
+    }
+}
+
+impl DeviceModel for PolynomialSourceModel {
+    fn stamp(
+        &mut self,
+        ctx: &mut MnaContext,
+        _solution: &Solution,
+        dt: Option<f64>,
+    ) -> Result<(), SimError> {
+        if let Some(dt) = dt {
+            if self.step.is_none() {
+                self.step = Some(dt);
+                self.time = dt;
+            }
+        }
+        self.branch = Some(branch_index(ctx, self.id)?);
+        let value = self.value_at(self.time);
+        stamp_voltage_branch(ctx, self.id, self.pins[0], self.pins[1], value)
+    }
+
+    fn update(&mut self, _solution: &Solution) -> Result<(), SimError> {
+        if let Some(dt) = self.step {
+            self.time += dt;
+        }
+        Ok(())
+    }
+
+    fn terminal_current(&self, solution: &Solution) -> Option<f64> {
+        solution.branch_current(self.branch?)
+    }
+}
+
 #[derive(Clone, Copy)]
 enum NoiseMode {
     Voltage,
@@ -586,8 +656,8 @@ impl DeviceModel for CurrentSourceModel {
 #[cfg(test)]
 mod tests {
     use super::{
-        ExponentialSourceModel, NoiseMode, NoiseSourceModel, PulseMode, PulseSourceModel,
-        PulseTiming, PwlSourceModel, SineMode, SineSourceModel,
+        ExponentialSourceModel, NoiseMode, NoiseSourceModel, PolynomialSourceModel, PulseMode,
+        PulseSourceModel, PulseTiming, PwlSourceModel, SineMode, SineSourceModel,
     };
     use crate::model::DeviceModel;
     use sim_core::{DeviceId, DeviceInstance, DeviceKind, NodeId, Solution};
@@ -709,6 +779,16 @@ mod tests {
         assert!((model.value_at(0.5e-3) - 2.5).abs() < 1e-9);
         assert!((model.value_at(2.5e-3) - 2.5).abs() < 1e-9);
         assert!(model.value_at(4e-3).abs() < 1e-9);
+    }
+
+    #[test]
+    fn polynomial_source_evaluates_coefficients() {
+        let model = PolynomialSourceModel::from_instance(&source_instance(
+            DeviceKind::PolynomialVoltageSource,
+            &[("c0", 1.0), ("c1", 2.0), ("c2", 3.0)],
+        ))
+        .expect("model");
+        assert!((model.value_at(2.0) - 17.0).abs() < 1e-9);
     }
 
     #[test]

@@ -78,8 +78,8 @@ pub use sensors::{
     TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel, ThresholdSwitchModel,
 };
 pub use source::{
-    CurrentSourceModel, ExponentialSourceModel, NoiseSourceModel, PulseSourceModel, PwlSourceModel,
-    SineSourceModel, VoltageSourceModel,
+    CurrentSourceModel, ExponentialSourceModel, NoiseSourceModel, PolynomialSourceModel,
+    PulseSourceModel, PwlSourceModel, SineSourceModel, VoltageSourceModel,
 };
 pub use supervisor::{CurrentReferenceModel, SupervisorModel, VoltageReferenceModel};
 pub use switch::{IdealSwitchModel, SwitchModel};

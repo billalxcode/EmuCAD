@@ -647,6 +647,13 @@ const BEHAVIORAL_PWM_DAC: &[ParameterSpec] = &[
     ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
 ];
 
+const POLYNOMIAL_VOLTAGE_SOURCE: &[ParameterSpec] = &[
+    ParameterSpec::number("c0", "V", 0.0, -1e9, 1e9),
+    ParameterSpec::number("c1", "V/s", 1.0, -1e9, 1e9),
+    ParameterSpec::number("c2", "V/s2", 0.0, -1e9, 1e9),
+    ParameterSpec::number("c3", "V/s3", 0.0, -1e9, 1e9),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -957,6 +964,7 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::BehavioralSarAdc => BEHAVIORAL_SAR_ADC,
         DeviceKind::BehavioralDeltaSigmaAdc => BEHAVIORAL_DELTA_SIGMA_ADC,
         DeviceKind::BehavioralPwmDac => BEHAVIORAL_PWM_DAC,
+        DeviceKind::PolynomialVoltageSource => POLYNOMIAL_VOLTAGE_SOURCE,
         _ => &[],
     }
 }
@@ -1094,6 +1102,7 @@ mod tests {
         DeviceKind::BehavioralSarAdc,
         DeviceKind::BehavioralDeltaSigmaAdc,
         DeviceKind::BehavioralPwmDac,
+        DeviceKind::PolynomialVoltageSource,
     ];
 
     #[test]

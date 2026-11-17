@@ -1,8 +1,6 @@
 id,family,model_class,category,model,phase,priority
 source.behavioral.behavioral_voltage_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
 source.behavioral.behavioral_current_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
-source.behavioral.polynomial_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
-source.behavioral.table_source,source,BehavioralSource,behavioral-electrical,behavioral source,S5-2,P2
 source.digital.digital_clock_source,source,DigitalSource,digital,digital pattern,S5-3,P3
 source.digital.digital_pattern_source,source,DigitalSource,digital,digital pattern,S5-3,P3
 source.digital.prbs_source,source,DigitalSource,digital,digital pattern,S5-3,P3

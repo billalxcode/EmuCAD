@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 371 entri dapat
-diinstansiasi lewat registry, dan 129 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 373 entri dapat
+diinstansiasi lewat registry, dan 127 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 371 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 373 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 371 | dapat masuk netlist lewat registry |
+| mapped | 373 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 371 `mapped` bukan 371 model yang benar. Audit menemukan
+Peringatan: 373 `mapped` bukan 373 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -164,7 +164,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C2-05 | 5 | 5 | Model BVD ada; verifikasi batch belum. |
 | C2-06 | 9 | 9 | 1 ideal; lossy butuh loss; attenuator, splitter, coupler bukan transmission line. |
 | C2-07 | 12 | 11 | 4 DC/AC, pulse V/I, sine V/I, PWL, exponential, dan noise V/I; clock/pattern belum. |
-| C2-08 | 8 | 4 | 4 controlled benar; 4 behavioral belum. |
+| C2-08 | 8 | 6 | 4 controlled, polynomial, dan table; behavioral V/I belum. |
 | C2-09 | 5 | 2 | Battery layak ideal; solar cell salah; 3 entri digital tidak sesuai kategori. |
 | C3-01 | 10 | 10 | 2 rectifier benar; 8 butuh model Schottky, Zener, avalanche, tunnel, PIN, varactor. |
 | C3-02 | 8 | 8 | Semua diode generik; tidak ada model optik atau LED. |
@@ -292,7 +292,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 1062 test workspace lulus pada audit ini.
+- 1063 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -358,8 +358,11 @@ Target: 80 entri.
   - Sine, pulse current, PWL, exponential, dan noise sudah solver-backed.
   - Clock dan pattern belum.
   - Reference vector dan verified belum.
-- [ ] C2-08 Controlled dan behavioral source 8 entri: E, F, G, H, B
+- [~] C2-08 Controlled dan behavioral source 8 entri: E, F, G, H, B
   voltage, B current, polynomial, table.
+  - Polynomial dan table voltage source sudah solver-backed.
+  - Behavioral voltage/current dengan ekspresi bebas belum.
+  - Reference vector dan verified belum.
 - [ ] C2-09 Battery dan energy source 5 entri: battery, fuel cell, solar
   cell, current-limited source, ideal energy port.
 

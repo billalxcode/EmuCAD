@@ -393,7 +393,8 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         | DeviceKind::ExponentialVoltageSource
         | DeviceKind::PwlVoltageSource
         | DeviceKind::NoiseVoltageSource
-        | DeviceKind::NoiseCurrentSource => SOURCE,
+        | DeviceKind::NoiseCurrentSource
+        | DeviceKind::PolynomialVoltageSource => SOURCE,
         DeviceKind::DiodeBridge => DIODE_BRIDGE,
         DeviceKind::DualDiode => DUAL_DIODE,
         DeviceKind::Switch => SWITCH,

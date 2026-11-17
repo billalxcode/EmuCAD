@@ -143,7 +143,12 @@ add("source.controlled", "Vcvs", "Ccvs", 4, "rm", 1.0, "ohm", [
 ])
 add("source.behavioral", "BehavioralSource", None, 2, "gain", 1.0, "ratio", [
     "behavioral voltage source", "behavioral current source",
-    "polynomial source", "table source",
+])
+add("source.behavioral", "BehavioralSource", "PolynomialVoltageSource", 2, "c1", 1.0, "V/s", [
+    "polynomial source",
+])
+add("source.behavioral", "BehavioralSource", "PwlVoltageSource", 2, "v1", 5.0, "V", [
+    "table source",
 ])
 add("source.digital", "DigitalSource", None, 1, "frequency", 1e3, "Hz", [
     "digital clock source", "digital pattern source", "PRBS source",

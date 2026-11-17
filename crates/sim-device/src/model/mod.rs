@@ -32,8 +32,8 @@ use crate::sensors::{
     TemperatureSensorModel, ThermalSwitchModel, ThermocoupleModel, ThresholdSwitchModel,
 };
 use crate::source::{
-    CurrentSourceModel, ExponentialSourceModel, NoiseSourceModel, PulseSourceModel, PwlSourceModel,
-    SineSourceModel, VoltageSourceModel,
+    CurrentSourceModel, ExponentialSourceModel, NoiseSourceModel, PolynomialSourceModel,
+    PulseSourceModel, PwlSourceModel, SineSourceModel, VoltageSourceModel,
 };
 use crate::supervisor::{CurrentReferenceModel, SupervisorModel, VoltageReferenceModel};
 use crate::switch::{IdealSwitchModel, SwitchModel};
@@ -123,6 +123,9 @@ fn passive_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel
         DeviceKind::PwlVoltageSource => Box::new(PwlSourceModel::from_instance(instance)?),
         DeviceKind::NoiseVoltageSource => Box::new(NoiseSourceModel::voltage(instance)?),
         DeviceKind::NoiseCurrentSource => Box::new(NoiseSourceModel::current(instance)?),
+        DeviceKind::PolynomialVoltageSource => {
+            Box::new(PolynomialSourceModel::from_instance(instance)?)
+        }
         DeviceKind::BehavioralIntegrator => Box::new(BehavioralFilterModel::from_instance(
             instance,
             FilterKind::Integrator,

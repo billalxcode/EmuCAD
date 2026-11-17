@@ -243,6 +243,8 @@ pub enum DeviceKind {
     BehavioralDeltaSigmaAdc,
     /// A behavioral PWM DAC block.
     BehavioralPwmDac,
+    /// A time polynomial voltage source.
+    PolynomialVoltageSource,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -399,6 +401,7 @@ impl DeviceKind {
             Self::BehavioralSarAdc => "behavioral_sar_adc",
             Self::BehavioralDeltaSigmaAdc => "behavioral_delta_sigma_adc",
             Self::BehavioralPwmDac => "behavioral_pwm_dac",
+            Self::PolynomialVoltageSource => "polynomial_voltage_source",
             Self::Diode => "diode",
             _ => "custom",
         }
