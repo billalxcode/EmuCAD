@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 339 entri dapat
-diinstansiasi lewat registry, dan 161 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 343 entri dapat
+diinstansiasi lewat registry, dan 157 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 339 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 343 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 339 | dapat masuk netlist lewat registry |
+| mapped | 343 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 339 `mapped` bukan 339 model yang benar. Audit menemukan
+Peringatan: 343 `mapped` bukan 343 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -188,7 +188,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C5-02 | 6 | 6 | Comparator generik; hysteresis, open-collector, delay belum. |
 | C5-03 | 5 | 5 | Mapped ke opamp; topologi instrumentation tidak ada. |
 | C5-04 | 5 | 5 | OTA dan Norton salah model; audio, video, buffer generik. |
-| C5-05 | 5 | 0 | Belum ada model timer, oscillator, PLL. |
+| C5-05 | 5 | 4 | 555, monostable, astable, dan VCO solver-backed; PLL belum. |
 | C5-06 | 4 | 4 | Voltage source 2 pin; current reference salah; topology shunt dan series belum. |
 | C6-01 | 12 | 9 | 8 gate benar; Schmitt tanpa hysteresis; 3 special belum. |
 | C6-02 | 10 | 0 | Belum ada model flip-flop dan latch. |
@@ -292,7 +292,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 1032 test workspace lulus pada audit ini.
+- 1036 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -426,7 +426,10 @@ Target: 40 entri.
 - [ ] C5-02 Comparator 6 entri.
 - [ ] C5-03 Instrumentation dan isolation amplifier 5 entri.
 - [ ] C5-04 OTA, Norton, audio, video amplifier 5 entri.
-- [ ] C5-05 Timer, oscillator, PLL 5 entri.
+- [~] C5-05 Timer, oscillator, PLL 5 entri.
+  - 555, monostable, astable, dan VCO memakai model timer 8 pin.
+  - PLL belum didukung.
+  - Reference vector dan verified belum.
 - [ ] C5-06 Voltage reference 4 entri.
 
 ## 9. Logic, Memory, MCU

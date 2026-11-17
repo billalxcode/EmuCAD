@@ -51,7 +51,7 @@ SolidStateRelay,4,4,compact,switch
 Supervisor,5,5,behavioral,power
 Switch,8,8,compact,switch
 Thyristor,8,8,compact,protection
-Timer,5,0,unsupported,analog
+Timer,5,4,behavioral,analog
 TimerPeripheral,3,0,unsupported,mcu
 Transformer,6,6,compact,passive
 TransmissionLine,9,9,compact,passive

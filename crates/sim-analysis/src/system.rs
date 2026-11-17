@@ -185,6 +185,10 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::LedActuator
             | DeviceKind::Supervisor
             | DeviceKind::MotorDriver
+            | DeviceKind::Timer555
+            | DeviceKind::MonostableTimer
+            | DeviceKind::AstableTimer
+            | DeviceKind::VcoTimer
     )
 }
 

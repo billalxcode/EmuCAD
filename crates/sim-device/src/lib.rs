@@ -29,6 +29,7 @@ mod source;
 mod supervisor;
 mod switch;
 mod thyristor;
+mod timer;
 mod transformer;
 mod transmission;
 mod unijunction;
@@ -70,6 +71,7 @@ pub use source::{CurrentSourceModel, PulseSourceModel, SineSourceModel, VoltageS
 pub use supervisor::{CurrentReferenceModel, SupervisorModel, VoltageReferenceModel};
 pub use switch::{IdealSwitchModel, SwitchModel};
 pub use thyristor::{ThyristorKind, ThyristorModel};
+pub use timer::{AstableTimerModel, MonostableTimerModel, VcoTimerModel};
 pub use transformer::TransformerModel;
 pub use transmission::TransmissionLineModel;
 pub use unijunction::{UnijunctionMode, UnijunctionModel};

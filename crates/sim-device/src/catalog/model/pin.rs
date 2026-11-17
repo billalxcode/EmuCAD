@@ -132,6 +132,16 @@ const DCDC_CONVERTER: &[PinRole] = &[
     PinRole::OutputNegative,
 ];
 const CHARGE_PUMP: &[PinRole] = &[PinRole::Input1, PinRole::OutputPositive, PinRole::Ground];
+const TIMER8: &[PinRole] = &[
+    PinRole::PositiveSupply,
+    PinRole::Ground,
+    PinRole::Output,
+    PinRole::Input1,
+    PinRole::Input2,
+    PinRole::Input,
+    PinRole::ControlPositive,
+    PinRole::ControlNegative,
+];
 const MOTOR_DRIVER: &[PinRole] = &[
     PinRole::PositiveSupply,
     PinRole::Ground,
@@ -314,6 +324,10 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
             SENSOR
         }
         DeviceKind::MotorDriver => MOTOR_DRIVER,
+        DeviceKind::Timer555
+        | DeviceKind::MonostableTimer
+        | DeviceKind::AstableTimer
+        | DeviceKind::VcoTimer => TIMER8,
         DeviceKind::SineVoltageSource | DeviceKind::SineCurrentSource => SOURCE,
         DeviceKind::DiodeBridge => DIODE_BRIDGE,
         DeviceKind::DualDiode => DUAL_DIODE,

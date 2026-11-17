@@ -138,6 +138,10 @@ fn supported_actuator(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::MotorDriver
             | sim_core::DeviceKind::SineVoltageSource
             | sim_core::DeviceKind::SineCurrentSource
+            | sim_core::DeviceKind::Timer555
+            | sim_core::DeviceKind::MonostableTimer
+            | sim_core::DeviceKind::AstableTimer
+            | sim_core::DeviceKind::VcoTimer
     )
 }
 

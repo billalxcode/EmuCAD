@@ -451,6 +451,31 @@ const SINE_CURRENT_SOURCE: &[ParameterSpec] = &[
     ParameterSpec::number("offset", "A", 0.0, -1e6, 1e6),
 ];
 
+const TIMER_555: &[ParameterSpec] = &[
+    ParameterSpec::number("period", "s", 1e-3, 1e-12, 1e6),
+    ParameterSpec::number("duty", "ratio", 0.5, 1e-6, 1.0),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const MONOSTABLE_TIMER: &[ParameterSpec] = &[
+    ParameterSpec::number("period", "s", 1e-3, 1e-12, 1e6),
+    ParameterSpec::number("trigger_threshold", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const ASTABLE_TIMER: &[ParameterSpec] = &[
+    ParameterSpec::number("period", "s", 1e-3, 1e-12, 1e6),
+    ParameterSpec::number("duty", "ratio", 0.5, 1e-6, 1.0),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const VCO_TIMER: &[ParameterSpec] = &[
+    ParameterSpec::number("period", "s", 1e-3, 1e-12, 1e6),
+    ParameterSpec::number("sensitivity", "Hz/V", 1000.0, 0.0, 1e12),
+    ParameterSpec::number("control_center", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -729,6 +754,10 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::MotorDriver => MOTOR_DRIVER,
         DeviceKind::SineVoltageSource => SINE_VOLTAGE_SOURCE,
         DeviceKind::SineCurrentSource => SINE_CURRENT_SOURCE,
+        DeviceKind::Timer555 => TIMER_555,
+        DeviceKind::MonostableTimer => MONOSTABLE_TIMER,
+        DeviceKind::AstableTimer => ASTABLE_TIMER,
+        DeviceKind::VcoTimer => VCO_TIMER,
         _ => &[],
     }
 }
@@ -834,6 +863,10 @@ mod tests {
         DeviceKind::MotorDriver,
         DeviceKind::SineVoltageSource,
         DeviceKind::SineCurrentSource,
+        DeviceKind::Timer555,
+        DeviceKind::MonostableTimer,
+        DeviceKind::AstableTimer,
+        DeviceKind::VcoTimer,
     ];
 
     #[test]

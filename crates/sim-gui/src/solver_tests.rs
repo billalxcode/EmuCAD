@@ -1574,3 +1574,42 @@ fn sine_voltage_source_transient_swings_negative() {
     assert!(peak > 4.5, "peak={peak}");
     assert!(trough < -4.5, "trough={trough}");
 }
+
+#[test]
+fn astable_timer_transient_toggles_output() {
+    let mut builder = CircuitBuilder::new();
+    let supply = builder.node("vcc").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", supply, ground, 5.0);
+    builder
+        .device(
+            "U1",
+            DeviceKind::Timer555,
+            vec![
+                supply, ground, output, ground, ground, ground, ground, ground,
+            ],
+            params(&[("period", 1e-3), ("duty", 0.5)]),
+        )
+        .expect("U1");
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![output, ground],
+            params(&[("resistance", 10000.0)]),
+        )
+        .expect("R1");
+    let circuit = builder.build().expect("circuit");
+    let config = sim_analysis::TransientConfig {
+        dt: 1e-5,
+        steps: 100,
+        use_dc_op: true,
+        ..sim_analysis::TransientConfig::default()
+    };
+    let samples = sim_analysis::transient(&circuit, &config).expect("transient");
+    let high = samples[25].solution.voltage(output).expect("high");
+    let low = samples[75].solution.voltage(output).expect("low");
+    assert!(high > 4.0, "high={high}");
+    assert!(low < 0.5, "low={low}");
+}

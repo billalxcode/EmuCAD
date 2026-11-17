@@ -11,10 +11,6 @@ source.behavioral.table_source,source,BehavioralSource,behavioral-electrical,beh
 source.digital.digital_clock_source,source,DigitalSource,digital,digital pattern,S5-3,P3
 source.digital.digital_pattern_source,source,DigitalSource,digital,digital pattern,S5-3,P3
 source.digital.prbs_source,source,DigitalSource,digital,digital pattern,S5-3,P3
-analog.timer.555_timer,analog,Timer,behavioral-electrical,timer macromodel,S5-2,P2
-analog.timer.monostable_multivibrator,analog,Timer,behavioral-electrical,timer macromodel,S5-2,P2
-analog.timer.astable_multivibrator,analog,Timer,behavioral-electrical,timer macromodel,S5-2,P2
-analog.timer.voltage_controlled_oscillator,analog,Timer,behavioral-electrical,timer macromodel,S5-2,P2
 analog.timer.pll,analog,Timer,behavioral-electrical,timer macromodel,S5-2,P2
 logic.gate_special.open_drain_buffer,logic,LogicGateSpecial,digital,sim-cells digital,S5-3,P3
 logic.gate_special.tristate_buffer,logic,LogicGateSpecial,digital,sim-cells digital,S5-3,P3

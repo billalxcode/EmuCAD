@@ -179,6 +179,14 @@ pub enum DeviceKind {
     SineVoltageSource,
     /// A sine current source.
     SineCurrentSource,
+    /// A 555 timer module.
+    Timer555,
+    /// A monostable timer module.
+    MonostableTimer,
+    /// An astable timer module.
+    AstableTimer,
+    /// A voltage-controlled oscillator module.
+    VcoTimer,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -303,6 +311,10 @@ impl DeviceKind {
             Self::MotorDriver => "motor_driver",
             Self::SineVoltageSource => "sine_voltage_source",
             Self::SineCurrentSource => "sine_current_source",
+            Self::Timer555 => "timer_555",
+            Self::MonostableTimer => "monostable_timer",
+            Self::AstableTimer => "astable_timer",
+            Self::VcoTimer => "vco_timer",
             Self::Diode => "diode",
             _ => "custom",
         }

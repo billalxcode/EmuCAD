@@ -30,6 +30,7 @@ use crate::source::{CurrentSourceModel, PulseSourceModel, SineSourceModel, Volta
 use crate::supervisor::{CurrentReferenceModel, SupervisorModel, VoltageReferenceModel};
 use crate::switch::{IdealSwitchModel, SwitchModel};
 use crate::thyristor::ThyristorModel;
+use crate::timer::{AstableTimerModel, MonostableTimerModel, VcoTimerModel};
 use crate::transformer::TransformerModel;
 use crate::transmission::TransmissionLineModel;
 use crate::unijunction::UnijunctionModel;
@@ -269,6 +270,11 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         DeviceKind::MotorDriver => Box::new(MotorDriverModel::from_instance(instance)?),
         DeviceKind::SineVoltageSource => Box::new(SineSourceModel::voltage(instance)?),
         DeviceKind::SineCurrentSource => Box::new(SineSourceModel::current(instance)?),
+        DeviceKind::Timer555 | DeviceKind::AstableTimer => {
+            Box::new(AstableTimerModel::from_instance(instance)?)
+        }
+        DeviceKind::MonostableTimer => Box::new(MonostableTimerModel::from_instance(instance)?),
+        DeviceKind::VcoTimer => Box::new(VcoTimerModel::from_instance(instance)?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),
         DeviceKind::DiodeBridge => Box::new(DiodeBridgeModel::from_instance(instance)?),

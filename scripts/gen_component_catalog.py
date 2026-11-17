@@ -313,9 +313,20 @@ add("analog.ota", "OpAmp", "OpAmp", 5, "gain", 1000.0, "ratio", [
     "OTA", "Norton amplifier", "audio power amplifier", "video amplifier",
     "buffer amplifier",
 ])
+add("analog.timer", "Timer", "Timer555", 8, "period", 1e-3, "s", [
+    "555 timer",
+])
+add("analog.timer", "Timer", "MonostableTimer", 8, "period", 1e-3, "s", [
+    "monostable multivibrator",
+])
+add("analog.timer", "Timer", "AstableTimer", 8, "period", 1e-3, "s", [
+    "astable multivibrator",
+])
+add("analog.timer", "Timer", "VcoTimer", 8, "period", 1e-3, "s", [
+    "voltage controlled oscillator",
+])
 add("analog.timer", "Timer", None, 8, "period", 1e-3, "s", [
-    "555 timer", "monostable multivibrator", "astable multivibrator",
-    "voltage controlled oscillator", "PLL",
+    "PLL",
 ])
 add("analog.reference", "VoltageReference", "VoltageSource", 2, "voltage", 2.5, "V", [
     "shunt voltage reference", "series voltage reference",
