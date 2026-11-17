@@ -7,8 +7,8 @@ serta mampu menjalankan firmware AVR.
 > **Status v0.1:** 1091 test lulus, 9 crate, crate simulasi zero external
 > dependency; dependensi GUI dan binding Python dibatasi pada daftar yang
 > disetujui di `AGENTS.md`.
-> Tag `v0.1` tersedia. Archive Linux ada di
-> `dist/emucad-x86_64-unknown-linux-gnu.tar.gz`.
+> Rilis biner GitHub mengikuti versi workspace; aset dan SHA512
+> diperbarui setiap merge ke `main`.
 
 Dokumentasi lengkap: [`docs/README.md`](docs/README.md).
 Panduan pengguna: [`docs/43-user-guide.md`](docs/43-user-guide.md).

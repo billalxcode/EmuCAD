@@ -17,7 +17,8 @@ Cakupan utama:
 - Board, pin elektrik, Intel HEX, dan ELF32.
 - CLI dan contoh runnable.
 
-Tag `v0.1` tersedia; publikasi biner dan GitHub release belum.
+Rilis GitHub dibuat oleh workflow `release`; versi mengikuti
+`[workspace.package]` di `Cargo.toml`.
 
 ---
 
