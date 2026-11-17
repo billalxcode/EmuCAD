@@ -419,7 +419,7 @@ model, input, output, dan referensi yang jelas.
   - Lihat `docs/64-gate-level.md` dan `docs/63-fidelity.md`.
 - [~] S6-08 Ukur waktu build dan waktu simulasi per MCU dan memory.
   - AVR dan register file sudah diukur.
-  - Array SRAM 128x8 sudah diuji fungsi, belum diukur performanya.
+  - Array SRAM 128x8 sudah diuji fungsi dan diukur: 25199.5 ns/op pada desktop Linux x86_64.
   - MCU dan memory lain belum ada.
 
 **Acceptance S6:** semua MCU dan memory yang dipilih memiliki model

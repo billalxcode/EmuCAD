@@ -60,6 +60,12 @@ Register file gate-level 32x8:
 - 165407 operasi/detik.
 - 6046 ns per tulis + clock + baca + settle.
 
+Array SRAM 128x8:
+
+- 4665 gate, 1024 DFF.
+- 39683 operasi/detik.
+- 25199.5 ns per akses, termasuk lookup port bernama.
+
 Pada 16 MHz, satu siklus adalah 62.5 ns. Memory macro gate-level masih
 jauh di atas budget jika setiap akses disimulasikan penuh.
 

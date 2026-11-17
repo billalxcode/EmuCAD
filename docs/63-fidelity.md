@@ -95,10 +95,18 @@ Contoh hasil register file gate-level 32 register:
 | 16 | 1744 | 512 | 95913 | 10426 |
 | 64 | 6256 | 2048 | 23580 | 42408 |
 
-Satu operasi benchmark mencakup tulis, clock tick, pembacaan, dan
-settle. Pada clock 16 MHz, budget satu siklus adalah 62.5 ns. Memory
-macro 32x8 berada jauh di atas budget tersebut jika setiap akses
-disimulasikan gate-level penuh.
+Array SRAM 128x8 (1024 bit) pada run yang sama:
+
+| Macro | Gate | DFF | Ops/s | ns/op |
+|---|---:|---:|---:|---:|
+| SRAM 128x8 | 4665 | 1024 | 39683 | 25199.5 |
+
+Benchmark SRAM memakai port bernama katalog, sehingga angka ns/op
+termasuk overhead lookup input dan output. Satu operasi benchmark
+mencakup tulis, clock tick, pembacaan, dan settle. Pada clock 16 MHz,
+budget satu siklus adalah 62.5 ns. Memory macro 32x8 dan SRAM 128x8
+berada jauh di atas budget tersebut jika setiap akses disimulasikan
+gate-level penuh.
 
 Kesimpulan: target real-time semua MCU dengan memory gate-level penuh
 belum terbukti. Fallback Q55 perlu dipakai sampai ada model memory
