@@ -148,6 +148,12 @@ const BEHAVIORAL_FILTER: &[PinRole] = &[
     PinRole::Ground,
     PinRole::Common,
 ];
+const BEHAVIORAL_OSCILLATOR: &[PinRole] = &[
+    PinRole::Input,
+    PinRole::Output,
+    PinRole::PositiveSupply,
+    PinRole::Ground,
+];
 const BEHAVIORAL_MATH: &[PinRole] = &[
     PinRole::Input1,
     PinRole::Input2,
@@ -357,6 +363,10 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         | DeviceKind::BehavioralPeakDetector
         | DeviceKind::BehavioralTrackHold
         | DeviceKind::BehavioralPrecisionRectifier => BEHAVIORAL_MATH,
+        DeviceKind::BehavioralVco
+        | DeviceKind::BehavioralAmplitude
+        | DeviceKind::BehavioralFrequency
+        | DeviceKind::BehavioralPwm => BEHAVIORAL_OSCILLATOR,
         DeviceKind::Timer555
         | DeviceKind::MonostableTimer
         | DeviceKind::AstableTimer

@@ -204,6 +204,10 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::BehavioralPeakDetector
             | DeviceKind::BehavioralTrackHold
             | DeviceKind::BehavioralPrecisionRectifier
+            | DeviceKind::BehavioralVco
+            | DeviceKind::BehavioralAmplitude
+            | DeviceKind::BehavioralFrequency
+            | DeviceKind::BehavioralPwm
     )
 }
 

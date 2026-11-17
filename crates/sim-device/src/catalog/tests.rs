@@ -162,6 +162,10 @@ fn supported_actuator(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::BehavioralPeakDetector
             | sim_core::DeviceKind::BehavioralTrackHold
             | sim_core::DeviceKind::BehavioralPrecisionRectifier
+            | sim_core::DeviceKind::BehavioralVco
+            | sim_core::DeviceKind::BehavioralAmplitude
+            | sim_core::DeviceKind::BehavioralFrequency
+            | sim_core::DeviceKind::BehavioralPwm
     )
 }
 

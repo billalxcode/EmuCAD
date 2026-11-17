@@ -227,6 +227,14 @@ pub enum DeviceKind {
     BehavioralTrackHold,
     /// A behavioral precision rectifier block.
     BehavioralPrecisionRectifier,
+    /// A behavioral VCO block.
+    BehavioralVco,
+    /// A behavioral amplitude modulator block.
+    BehavioralAmplitude,
+    /// A behavioral frequency modulator block.
+    BehavioralFrequency,
+    /// A behavioral PWM block.
+    BehavioralPwm,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -375,6 +383,10 @@ impl DeviceKind {
             Self::BehavioralPeakDetector => "behavioral_peak_detector",
             Self::BehavioralTrackHold => "behavioral_track_hold",
             Self::BehavioralPrecisionRectifier => "behavioral_precision_rectifier",
+            Self::BehavioralVco => "behavioral_vco",
+            Self::BehavioralAmplitude => "behavioral_amplitude",
+            Self::BehavioralFrequency => "behavioral_frequency",
+            Self::BehavioralPwm => "behavioral_pwm",
             Self::Diode => "diode",
             _ => "custom",
         }

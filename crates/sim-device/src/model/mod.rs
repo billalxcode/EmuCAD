@@ -18,6 +18,7 @@ use crate::math::{BehavioralMathModel, MathKind};
 use crate::mosfet::MosfetModel;
 use crate::opamp::OpAmpModel;
 use crate::optocoupler::OptocouplerModel;
+use crate::oscillator::{BehavioralOscillatorModel, OscillatorKind};
 use crate::passive::{CapacitorModel, InductorModel, ResistorModel};
 use crate::protection::{FuseModel, VaristorModel};
 use crate::regulator::RegulatorModel;
@@ -179,6 +180,22 @@ fn passive_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel
         DeviceKind::BehavioralPrecisionRectifier => Box::new(
             BehavioralDetectorModel::from_instance(instance, DetectorKind::Rectifier)?,
         ),
+        DeviceKind::BehavioralVco => Box::new(BehavioralOscillatorModel::from_instance(
+            instance,
+            OscillatorKind::Vco,
+        )?),
+        DeviceKind::BehavioralAmplitude => Box::new(BehavioralOscillatorModel::from_instance(
+            instance,
+            OscillatorKind::Amplitude,
+        )?),
+        DeviceKind::BehavioralFrequency => Box::new(BehavioralOscillatorModel::from_instance(
+            instance,
+            OscillatorKind::Frequency,
+        )?),
+        DeviceKind::BehavioralPwm => Box::new(BehavioralOscillatorModel::from_instance(
+            instance,
+            OscillatorKind::Pwm,
+        )?),
         DeviceKind::CurrentSource => Box::new(CurrentSourceModel::from_instance(instance)?),
         DeviceKind::Vcvs => Box::new(VcvsModel::from_instance(instance)?),
         DeviceKind::Vccs => Box::new(VccsModel::from_instance(instance)?),

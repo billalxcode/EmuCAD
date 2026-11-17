@@ -665,8 +665,19 @@ add("behavioral.detector", "BehavioralBlock", "BehavioralTrackHold", 4, "gain", 
 add("behavioral.detector", "BehavioralBlock", "BehavioralPrecisionRectifier", 4, "gain", 1.0, "ratio", [
     "precision rectifier",
 ])
+add("behavioral.oscillator", "BehavioralBlock", "BehavioralVco", 4, "frequency", 1e3, "Hz", [
+    "VCO",
+])
 add("behavioral.oscillator", "BehavioralBlock", None, 4, "frequency", 1e3, "Hz", [
-    "VCO", "PLL", "amplitude modulator", "frequency modulator",
+    "PLL",
+])
+add("behavioral.oscillator", "BehavioralBlock", "BehavioralAmplitude", 4, "frequency", 1e3, "Hz", [
+    "amplitude modulator",
+])
+add("behavioral.oscillator", "BehavioralBlock", "BehavioralFrequency", 4, "frequency", 1e3, "Hz", [
+    "frequency modulator",
+])
+add("behavioral.oscillator", "BehavioralBlock", "BehavioralPwm", 4, "frequency", 1e3, "Hz", [
     "pulse width modulator",
 ])
 add("behavioral.converter", "BehavioralBlock", None, 4, "resolution", 10.0, "bit", [

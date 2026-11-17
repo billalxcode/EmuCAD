@@ -1771,3 +1771,42 @@ fn detector_output(kind: DeviceKind, input: f64, reference: f64) -> f64 {
     let result = solve(&circuit);
     result.solution.voltage(output).expect("output")
 }
+
+#[test]
+fn behavioral_pwm_transient_toggles_output() {
+    let mut builder = CircuitBuilder::new();
+    let control = builder.node("ctrl").expect("node");
+    let supply = builder.node("vcc").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", control, ground, 2.5);
+    add_input(&mut builder, "V2", supply, ground, 5.0);
+    builder
+        .device(
+            "U1",
+            DeviceKind::BehavioralPwm,
+            vec![control, output, supply, ground],
+            params(&[("frequency", 1e3), ("sensitivity", 0.1)]),
+        )
+        .expect("U1");
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![output, ground],
+            params(&[("resistance", 10000.0)]),
+        )
+        .expect("R1");
+    let circuit = builder.build().expect("circuit");
+    let config = sim_analysis::TransientConfig {
+        dt: 1e-5,
+        steps: 100,
+        use_dc_op: true,
+        ..sim_analysis::TransientConfig::default()
+    };
+    let samples = sim_analysis::transient(&circuit, &config).expect("transient");
+    let high = samples[25].solution.voltage(output).expect("high");
+    let low = samples[75].solution.voltage(output).expect("low");
+    assert!(high > 4.0, "high={high}");
+    assert!(low < 0.5, "low={low}");
+}

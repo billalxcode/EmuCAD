@@ -586,6 +586,38 @@ const BEHAVIORAL_RECTIFIER: &[ParameterSpec] = &[
     ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
 ];
 
+const BEHAVIORAL_VCO: &[ParameterSpec] = &[
+    ParameterSpec::number("frequency", "Hz", 1e3, 1e-9, 1e12),
+    ParameterSpec::number("sensitivity", "Hz/V", 1e3, 0.0, 1e12),
+    ParameterSpec::number("control_center", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const BEHAVIORAL_AMPLITUDE: &[ParameterSpec] = &[
+    ParameterSpec::number("frequency", "Hz", 1e3, 1e-9, 1e12),
+    ParameterSpec::number("sensitivity", "1/V", 1.0, 0.0, 1e9),
+    ParameterSpec::number("control_center", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("amplitude", "V", 1.0, -1e6, 1e6),
+    ParameterSpec::number("offset", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const BEHAVIORAL_FREQUENCY: &[ParameterSpec] = &[
+    ParameterSpec::number("frequency", "Hz", 1e3, 1e-9, 1e12),
+    ParameterSpec::number("sensitivity", "Hz/V", 1e3, 0.0, 1e12),
+    ParameterSpec::number("control_center", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("amplitude", "V", 1.0, -1e6, 1e6),
+    ParameterSpec::number("offset", "V", 0.0, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const BEHAVIORAL_PWM: &[ParameterSpec] = &[
+    ParameterSpec::number("frequency", "Hz", 1e3, 1e-9, 1e12),
+    ParameterSpec::number("sensitivity", "1/V", 0.1, 0.0, 1e9),
+    ParameterSpec::number("control_center", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -888,6 +920,10 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::BehavioralPeakDetector => BEHAVIORAL_PEAK,
         DeviceKind::BehavioralTrackHold => BEHAVIORAL_TRACK_HOLD,
         DeviceKind::BehavioralPrecisionRectifier => BEHAVIORAL_RECTIFIER,
+        DeviceKind::BehavioralVco => BEHAVIORAL_VCO,
+        DeviceKind::BehavioralAmplitude => BEHAVIORAL_AMPLITUDE,
+        DeviceKind::BehavioralFrequency => BEHAVIORAL_FREQUENCY,
+        DeviceKind::BehavioralPwm => BEHAVIORAL_PWM,
         _ => &[],
     }
 }
@@ -1017,6 +1053,10 @@ mod tests {
         DeviceKind::BehavioralPeakDetector,
         DeviceKind::BehavioralTrackHold,
         DeviceKind::BehavioralPrecisionRectifier,
+        DeviceKind::BehavioralVco,
+        DeviceKind::BehavioralAmplitude,
+        DeviceKind::BehavioralFrequency,
+        DeviceKind::BehavioralPwm,
     ];
 
     #[test]
