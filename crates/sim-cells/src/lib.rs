@@ -12,6 +12,7 @@ mod catalog_eeprom;
 mod catalog_flash;
 mod catalog_i2c;
 mod catalog_memory;
+mod catalog_sd;
 mod catalog_spi;
 mod catalog_uart;
 mod cell;

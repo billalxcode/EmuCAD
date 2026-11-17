@@ -164,6 +164,7 @@ pub fn digital_entry_with_config(
         }
         "memory.device.spi_flash" => crate::catalog_flash::spi_flash_entry(),
         "memory.device.i2c_eeprom" => crate::catalog_eeprom::i2c_eeprom_entry(),
+        "memory.device.sd_card" => crate::catalog_sd::sd_card_entry(),
         _ => return Ok(None),
     };
     Ok(Some(entry))

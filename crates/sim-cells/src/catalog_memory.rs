@@ -432,8 +432,12 @@ fn data_inputs(builder: &mut DigitalBuilder) -> [NetId; DATA_BITS] {
 }
 
 pub(crate) fn array_cells(builder: &mut DigitalBuilder) -> Vec<Vec<NetId>> {
-    let mut cells = Vec::with_capacity(WORDS);
-    for _ in 0..WORDS {
+    array_cells_n(builder, WORDS)
+}
+
+pub(crate) fn array_cells_n(builder: &mut DigitalBuilder, words: usize) -> Vec<Vec<NetId>> {
+    let mut cells = Vec::with_capacity(words);
+    for _ in 0..words {
         let mut word = Vec::with_capacity(DATA_BITS);
         for _ in 0..DATA_BITS {
             word.push(builder.net());
@@ -483,6 +487,14 @@ pub(crate) fn array_read(
     builder: &mut DigitalBuilder,
     cells: &[Vec<NetId>],
     address: &[NetId; ADDRESS_BITS],
+) -> [NetId; DATA_BITS] {
+    array_read_n(builder, cells, address)
+}
+
+pub(crate) fn array_read_n(
+    builder: &mut DigitalBuilder,
+    cells: &[Vec<NetId>],
+    address: &[NetId],
 ) -> [NetId; DATA_BITS] {
     std::array::from_fn(|bit| {
         let column: Vec<NetId> = cells.iter().map(|word| word[bit]).collect();

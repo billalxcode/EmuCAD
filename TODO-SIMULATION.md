@@ -366,17 +366,17 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
 | Kelompok | Entri | Blocker |
 |---|---:|---|
 | Digital logic | 2 | 61 sudah di domain digital; 2 belum, yaitu USB dan Ethernet. |
-| Structural MCU dan memory | 12 | 14 dari 15 memory sudah gate-level; butuh 11 MCU dan 1 memory lain. Scope ada di `docs/64-gate-level.md`. |
+| Structural MCU dan memory | 11 | 15 dari 15 memory sudah gate-level; butuh 11 MCU. Scope ada di `docs/64-gate-level.md`. |
 | RF | 14 | Mixer, filter, antenna, dan coupler butuh S-parameter dan solver dua-port. |
 | Board module | 14 | Board-level module belum punya batas dan referensi yang cukup. |
 | Mixed-signal ADC | 1 | R-2R DAC membutuhkan bus multi-bit; 4 converter lain sudah dipetakan. |
 | Behavioral source | 2 | Behavioral voltage/current membutuhkan parser ekspresi bebas. |
 | R-2R DAC | 1 | Butuh bus multi-bit; katalog hanya menyediakan 4 pin. |
-| **Total** | **46** | |
+| **Total** | **45** | |
 
-Dari 121 entry yang belum analog solver-backed, 75 sudah dapat
+Dari 121 entry yang belum analog solver-backed, 76 sudah dapat
 dijalankan melalui domain digital. Sisa yang belum punya model sama
-sekali adalah 46 entry.
+sekali adalah 45 entry.
 
 **Acceptance S5:** setiap entri non-MCU yang diklaim simulatable punya
 model, input, output, dan referensi yang jelas.
@@ -404,12 +404,14 @@ model, input, output, dan referensi yang jelas.
   - Sel DRAM dengan refresh sudah ada; array DRAM belum.
   - SPI flash bit-serial sudah ada.
   - I2C EEPROM dengan random read sudah ada.
-  - SD card belum.
+  - SD card dengan satu blok 512 byte sudah ada.
+  - Seluruh 15 entry memory sudah memiliki model digital.
 - [~] S6-04 Gunakan `sim-cells` untuk sel memory dan logic.
   - AVR datapath, register bank, ALU, dan register file memakai
     `sim-cells`.
-  - Sel SRAM/DRAM dan array katalog (SRAM, non-volatile, ROM, PROM,
-    module, controller, SPI flash, dan I2C EEPROM) memakai `sim-cells`.
+  - Seluruh entry memory katalog (SRAM, non-volatile, ROM, PROM,
+    module, controller, SPI flash, I2C EEPROM, dan SD card) memakai
+    `sim-cells`.
   - Sel memory digital lain belum.
 - [~] S6-05 Tambahkan model interface dan timing.
   - Timing digital AVR dan peripheral sudah diuji sebagian.

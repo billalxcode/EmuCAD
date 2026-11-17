@@ -6,7 +6,7 @@ Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
 ## 1. Cakupan
 
 Domain digital memakai `DigitalCircuit` dua-state dengan input dan
-output bernama. Saat ini 75 entry katalog sudah dapat dijalankan:
+output bernama. Saat ini 76 entry katalog sudah dapat dijalankan:
 
 | Kelompok | Entry |
 |---|---|
@@ -23,7 +23,7 @@ output bernama. Saat ini 75 entry katalog sudah dapat dijalankan:
 | Programmable | PAL, GAL, CPLD, FPGA logic block, lookup table (LUT 4-input), FSM 3-input |
 | High-Z | open-drain, tri-state, transmission gate, bidirectional buffer, bidirectional/open-drain level |
 | Serial | UART, SPI, I2C master, dan CAN transmitter |
-| Memory | sel SRAM/DRAM 1-bit, array 128x8, ROM, PROM, module, controller, SPI flash, dan I2C EEPROM |
+| Memory | sel SRAM/DRAM, array, ROM, PROM, module, controller, SPI flash, I2C EEPROM, dan SD card |
 
 ## 2. Perintah
 
@@ -119,7 +119,7 @@ driver harus memakai sinyal `z` di tingkat rangkaian.
 
 ## 8. Memory
 
-Empat belas entry memory memakai model digital:
+Lima belas entry memory memakai model digital:
 
 - `memory.device.sram_cell`: satu bit storage dengan input `we` dan
   `d`, output `q`. Nilai ditahan saat `we=0`.
@@ -148,6 +148,10 @@ Empat belas entry memory memakai model digital:
   `1010aaa`. `scl` dan `sda` adalah level bus, `sda_low` adalah
   open-drain. Isi disimpan terbalik sehingga power-on membaca `0xFF`.
   Random read memakai word address dan repeated START.
+- `memory.device.sd_card` adalah SD card SPI mode dengan satu blok 512
+  byte. Perintah: CMD0 `0x40`, CMD1 `0x41`, CMD17 `0x51`, CMD24
+  `0x58`. Respons R1, data token `0xFE`, dan respons tulis `0x05`
+  dipakai. Satu tick adalah satu bit dan `cs` aktif rendah.
 
 Array menulis satu kata pada setiap tick ketika `we=1`, lalu membaca
 kata yang dialamatkan secara kombinasional. Array SRAM menghapus semua
@@ -157,9 +161,11 @@ persistensi antar proses simulasi. DRAM hanya tersedia sebagai sel
 1-bit dengan refresh global; array dan timing DRAM belum ada. SPI
 flash memakai model bit-serial tanpa timing, page boundary, write
 protection, atau status WIP. I2C EEPROM memakai model transaksional
-tanpa write cycle time, page write, atau write protect. SD card belum
-dipetakan karena protokolnya belum dimodelkan. Controller bersifat
-generik, bukan controller DRAM dengan refresh dan scheduling.
+tanpa write cycle time, page write, atau write protect. SD card
+memakai satu blok 512 byte tanpa CRC7/CRC16, ACMD41, CMD8, CMD58,
+multi-block, atau timing. Ukuran blok SD tidak mengikuti parameter
+kapasitas katalog. Controller bersifat generik, bukan controller DRAM
+dengan refresh dan scheduling.
 
 ## 9. Entry Digital yang Belum Didukung
 
@@ -204,6 +210,8 @@ Test domain digital mencakup:
   chip erase mengembalikan semua byte ke `0xFF`.
 - I2C EEPROM menulis satu byte, membacanya kembali lewat repeated
   START, dan mengabaikan alamat device yang tidak cocok.
+- SD card menulis dan membaca satu blok 512 byte, menolak read sebelum
+  CMD1, dan menolak perintah yang tidak dikenal.
 - I2C mengirim address dan data MSB-first, menghasilkan START/STOP,
   dan menandai NACK saat ACK tidak diberikan.
 - CAN mengirim frame 2.0A dengan CRC-15 dan satu bit stuff, lalu
