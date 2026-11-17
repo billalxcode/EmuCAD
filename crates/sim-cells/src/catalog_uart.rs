@@ -1,6 +1,6 @@
 //! Digital UART circuit with one tick per bit.
 
-use crate::catalog_bits::{equals4, increment4};
+use crate::catalog_bits::{equals, increment4};
 use crate::catalog_digital::{DigitalEntry, finish};
 use crate::{DigitalBuilder, NetId};
 
@@ -79,7 +79,7 @@ fn tx_busy_next(
     phase: &[NetId; 4],
     load: NetId,
 ) -> NetId {
-    let phase10 = equals4(builder, phase, 10);
+    let phase10 = equals(builder, phase, 10);
     let not_phase10 = builder.not(phase10);
     let keep = builder.and(busy, not_phase10);
     let set = builder.or(load, keep);
@@ -95,7 +95,7 @@ fn tx_phase_next(
     load: NetId,
 ) -> [NetId; 4] {
     let incremented = increment4(builder, phase);
-    let phase10 = equals4(builder, phase, 10);
+    let phase10 = equals(builder, phase, 10);
     let zero = builder.constant(false);
     let active = builder.or(busy, load);
     let not_reset = builder.not(reset);
@@ -121,9 +121,9 @@ fn tx_shift_next(
     let zero = builder.constant(false);
     let one = builder.constant(true);
     let not_reset = builder.not(reset);
-    let phase0 = equals4(builder, phase, 0);
-    let phase9 = equals4(builder, phase, 9);
-    let phase10 = equals4(builder, phase, 10);
+    let phase0 = equals(builder, phase, 0);
+    let phase9 = equals(builder, phase, 9);
+    let phase10 = equals(builder, phase, 10);
     let not_phase0 = builder.not(phase0);
     let not_phase9 = builder.not(phase9);
     let not_phase10 = builder.not(phase10);
@@ -148,9 +148,9 @@ fn tx_output(
 ) -> NetId {
     let one = builder.constant(true);
     let zero = builder.constant(false);
-    let phase0 = equals4(builder, phase, 0);
-    let phase9 = equals4(builder, phase, 9);
-    let phase10 = equals4(builder, phase, 10);
+    let phase0 = equals(builder, phase, 0);
+    let phase9 = equals(builder, phase, 9);
+    let phase10 = equals(builder, phase, 10);
     let not_phase0 = builder.not(phase0);
     let not_phase9 = builder.not(phase9);
     let not_phase10 = builder.not(phase10);
@@ -178,7 +178,7 @@ fn rx_state(builder: &mut DigitalBuilder, reset: NetId, rx: NetId) -> ([NetId; 8
     let not_rx = builder.not(rx);
     let not_active = builder.not(active);
     let start_detect = builder.and(not_active, not_rx);
-    let phase9 = equals4(builder, &phase, 9);
+    let phase9 = equals(builder, &phase, 9);
     let active_next = rx_active_next(builder, reset, active, phase9, start_detect);
     builder.dff_into(active_next, active);
     let phase_next = rx_phase_next(builder, reset, active, &phase, phase9, start_detect);
@@ -246,7 +246,7 @@ fn rx_shift_next(
 ) -> [NetId; 8] {
     let zero = builder.constant(false);
     let not_reset = builder.not(reset);
-    let phase0 = equals4(builder, phase, 0);
+    let phase0 = equals(builder, phase, 0);
     let not_phase0 = builder.not(phase0);
     let not_phase9 = builder.not(phase9);
     let middle = builder.and(not_phase0, not_phase9);

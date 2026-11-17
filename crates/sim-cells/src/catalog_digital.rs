@@ -128,6 +128,12 @@ pub fn digital_entry_with_config(
         "mcu.serial.uart" => crate::catalog_uart::uart_entry(),
         "mcu.serial.spi" => crate::catalog_spi::spi_entry(),
         "logic.programmable.finite_state_machine" => fsm_entry(config.fsm),
+        "memory.device.sram_cell" => {
+            crate::catalog_memory::sram_cell_entry("memory.device.sram_cell")
+        }
+        "memory.device.sram_array" => {
+            crate::catalog_memory::sram_array_entry("memory.device.sram_array")
+        }
         _ => return Ok(None),
     };
     Ok(Some(entry))

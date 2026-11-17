@@ -300,7 +300,8 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
     structural, multidomain, RF, dan unsupported.
 - [~] S5-02 Gunakan `sim-cells` untuk logic, flip-flop, counter, dan
   multiplexer bila cocok.
-  - 59 entry digital sudah dapat dijalankan lewat `emucad digital`.
+  - 59 entry logic dan peripheral sudah dapat dijalankan lewat
+    `emucad digital`.
   - Cakupan: 8 mux/decoder/encoder, 8 adder/comparator/parity/buffer,
     10 flip-flop, 10 counter/shift, 6 level/high-Z, 3 timer, 3 digital
     source, 5 programmable logic/LUT, dan UART/SPI.
@@ -364,17 +365,17 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
 | Kelompok | Entri | Blocker |
 |---|---:|---|
 | Digital logic | 4 | 59 sudah di domain digital; 4 belum, yaitu I2C, CAN, USB, dan Ethernet. |
-| Structural MCU dan memory | 26 | Butuh gate-level 11 MCU dan 15 memory; scope ada di `docs/64-gate-level.md`. |
+| Structural MCU dan memory | 24 | 2 dari 15 memory sudah gate-level; butuh 11 MCU dan 13 memory lain. Scope ada di `docs/64-gate-level.md`. |
 | RF | 14 | Mixer, filter, antenna, dan coupler butuh S-parameter dan solver dua-port. |
 | Board module | 14 | Board-level module belum punya batas dan referensi yang cukup. |
 | Mixed-signal ADC | 1 | R-2R DAC membutuhkan bus multi-bit; 4 converter lain sudah dipetakan. |
 | Behavioral source | 2 | Behavioral voltage/current membutuhkan parser ekspresi bebas. |
 | R-2R DAC | 1 | Butuh bus multi-bit; katalog hanya menyediakan 4 pin. |
-| **Total** | **62** | |
+| **Total** | **60** | |
 
-Dari 121 entry yang belum analog solver-backed, 59 sudah dapat
+Dari 121 entry yang belum analog solver-backed, 61 sudah dapat
 dijalankan melalui domain digital. Sisa yang belum punya model sama
-sekali adalah 62 entry.
+sekali adalah 60 entry.
 
 **Acceptance S5:** setiap entri non-MCU yang diklaim simulatable punya
 model, input, output, dan referensi yang jelas.
@@ -394,11 +395,13 @@ model, input, output, dan referensi yang jelas.
 - [~] S6-03 Implementasikan memory gate-level.
   - Register file digital 32x8/16/64 sudah ada dan diukur.
   - Sel SRAM 6T transistor-level ada sebagai referensi.
+  - Sel SRAM digital 1-bit dan array 128x8 (1024 bit) sudah ada.
   - DRAM, ROM, PROM, EEPROM, Flash, FRAM, MRAM, NVRAM, controller,
     dan module belum.
 - [~] S6-04 Gunakan `sim-cells` untuk sel memory dan logic.
   - AVR datapath, register bank, ALU, dan register file memakai
     `sim-cells`.
+  - Sel dan array SRAM katalog memakai `sim-cells::catalog_memory`.
   - Sel memory digital lain belum.
 - [~] S6-05 Tambahkan model interface dan timing.
   - Timing digital AVR dan peripheral sudah diuji sebagian.
@@ -411,6 +414,7 @@ model, input, output, dan referensi yang jelas.
   - Lihat `docs/64-gate-level.md` dan `docs/63-fidelity.md`.
 - [~] S6-08 Ukur waktu build dan waktu simulasi per MCU dan memory.
   - AVR dan register file sudah diukur.
+  - Array SRAM 128x8 sudah diuji fungsi, belum diukur performanya.
   - MCU dan memory lain belum ada.
 
 **Acceptance S6:** semua MCU dan memory yang dipilih memiliki model

@@ -25,6 +25,8 @@ utama S6.
   kombinasional dan clock DFF.
 - `sim-cells::sequential::sram6t` menyediakan sel SRAM 6T level
   transistor sebagai referensi.
+- `sim-cells::catalog_memory` menyediakan sel SRAM digital 1-bit dan
+  array 128x8 (1024 bit) untuk domain digital.
 - `sim-avr` memakai `sim-cells` untuk datapath, register bank, instruksi,
   ALU, shift, multiply, dan beberapa GPIO.
 - `sim-board` menyediakan board AVR + LED + resistor + button + UART.
@@ -66,7 +68,7 @@ jauh di atas budget jika setiap akses disimulasikan penuh.
 | Item | Target | Status |
 |---|---|---|
 | MCU gate-level | 11 | 1 hybrid (AVR) |
-| Memory gate-level | 15 | 1 macro digital (register file) |
+| Memory gate-level | 15 | 1 register file dan 2 macro SRAM |
 | AVR full chip | Semua peripheral | Sebagian |
 | Mixed-signal scheduler | AVR + analog | Belum |
 | Real-time semua MCU | Desktop | Belum terbukti |

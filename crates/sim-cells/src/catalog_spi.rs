@@ -1,6 +1,6 @@
 //! Digital SPI master circuit with one tick per bit.
 
-use crate::catalog_bits::{equals4, increment4};
+use crate::catalog_bits::{equals, increment4};
 use crate::catalog_digital::{DigitalEntry, finish};
 use crate::{DigitalBuilder, NetId};
 
@@ -88,7 +88,7 @@ fn spi_state(builder: &mut DigitalBuilder) -> SpiState {
 fn spi_registers(builder: &mut DigitalBuilder, inputs: SpiInputs, state: SpiState) {
     let not_busy = builder.not(state.busy);
     let load = builder.and(inputs.start, not_busy);
-    let count8 = equals4(builder, &state.count, 8);
+    let count8 = equals(builder, &state.count, 8);
     let not_count8 = builder.not(count8);
     let not_reset = builder.not(inputs.reset);
     let active = builder.or(state.busy, load);
@@ -114,7 +114,7 @@ fn spi_registers(builder: &mut DigitalBuilder, inputs: SpiInputs, state: SpiStat
 }
 
 fn spi_outputs(builder: &mut DigitalBuilder, state: SpiState) {
-    let count8 = equals4(builder, &state.count, 8);
+    let count8 = equals(builder, &state.count, 8);
     let not_count8 = builder.not(count8);
     let sclk = builder.and(state.busy, not_count8);
     let mosi = builder.and(state.tx_shift[7], state.busy);
