@@ -516,6 +516,21 @@ const NOISE_CURRENT_SOURCE: &[ParameterSpec] = &[
     ParameterSpec::number("seed", "ratio", 1.0, 0.0, 1e15),
 ];
 
+const BEHAVIORAL_FILTER: &[ParameterSpec] = &[
+    ParameterSpec::number("gain", "ratio", 1.0, -1e9, 1e9),
+    ParameterSpec::number("time_constant", "s", 1e-3, 1e-12, 1e9),
+    ParameterSpec::number("output_limit", "V", 15.0, 1e-9, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const BEHAVIORAL_STATE_VARIABLE: &[ParameterSpec] = &[
+    ParameterSpec::number("gain", "ratio", 1.0, -1e9, 1e9),
+    ParameterSpec::number("time_constant", "s", 1e-3, 1e-12, 1e9),
+    ParameterSpec::number("damping", "ratio", 0.7, 0.0, 1e6),
+    ParameterSpec::number("output_limit", "V", 15.0, 1e-9, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -803,6 +818,11 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::PwlVoltageSource => PWL_VOLTAGE_SOURCE,
         DeviceKind::NoiseVoltageSource => NOISE_VOLTAGE_SOURCE,
         DeviceKind::NoiseCurrentSource => NOISE_CURRENT_SOURCE,
+        DeviceKind::BehavioralIntegrator
+        | DeviceKind::BehavioralDifferentiator
+        | DeviceKind::BehavioralLowPass
+        | DeviceKind::BehavioralHighPass => BEHAVIORAL_FILTER,
+        DeviceKind::BehavioralStateVariable => BEHAVIORAL_STATE_VARIABLE,
         _ => &[],
     }
 }
@@ -917,6 +937,11 @@ mod tests {
         DeviceKind::PwlVoltageSource,
         DeviceKind::NoiseVoltageSource,
         DeviceKind::NoiseCurrentSource,
+        DeviceKind::BehavioralIntegrator,
+        DeviceKind::BehavioralDifferentiator,
+        DeviceKind::BehavioralLowPass,
+        DeviceKind::BehavioralHighPass,
+        DeviceKind::BehavioralStateVariable,
     ];
 
     #[test]

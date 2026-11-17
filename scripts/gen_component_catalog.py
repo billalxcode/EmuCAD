@@ -620,9 +620,20 @@ add("rf.coupler", "RfBlock", None, 3, "gain", 1.0, "ratio", [
     "directional coupler", "power splitter", "isolator",
 ])
 
-add("behavioral.filter", "BehavioralBlock", None, 4, "gain", 1.0, "ratio", [
-    "integrator", "differentiator", "first order low pass",
-    "first order high pass", "state variable filter",
+add("behavioral.filter", "BehavioralBlock", "BehavioralIntegrator", 4, "gain", 1.0, "ratio", [
+    "integrator",
+])
+add("behavioral.filter", "BehavioralBlock", "BehavioralDifferentiator", 4, "gain", 1.0, "ratio", [
+    "differentiator",
+])
+add("behavioral.filter", "BehavioralBlock", "BehavioralLowPass", 4, "gain", 1.0, "ratio", [
+    "first order low pass",
+])
+add("behavioral.filter", "BehavioralBlock", "BehavioralHighPass", 4, "gain", 1.0, "ratio", [
+    "first order high pass",
+])
+add("behavioral.filter", "BehavioralBlock", "BehavioralStateVariable", 4, "gain", 1.0, "ratio", [
+    "state variable filter",
 ])
 add("behavioral.math", "BehavioralBlock", None, 4, "gain", 1.0, "ratio", [
     "multiplier", "divider", "logarithmic amplifier", "antilog amplifier",

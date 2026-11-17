@@ -142,6 +142,18 @@ const TIMER8: &[PinRole] = &[
     PinRole::ControlPositive,
     PinRole::ControlNegative,
 ];
+const BEHAVIORAL_FILTER: &[PinRole] = &[
+    PinRole::Input,
+    PinRole::Output,
+    PinRole::Ground,
+    PinRole::Common,
+];
+const BEHAVIORAL_STATE_VARIABLE: &[PinRole] = &[
+    PinRole::Input,
+    PinRole::Output,
+    PinRole::Ground,
+    PinRole::OutputPositive,
+];
 const MOTOR_DRIVER: &[PinRole] = &[
     PinRole::PositiveSupply,
     PinRole::Ground,
@@ -324,6 +336,11 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
             SENSOR
         }
         DeviceKind::MotorDriver => MOTOR_DRIVER,
+        DeviceKind::BehavioralIntegrator
+        | DeviceKind::BehavioralDifferentiator
+        | DeviceKind::BehavioralLowPass
+        | DeviceKind::BehavioralHighPass => BEHAVIORAL_FILTER,
+        DeviceKind::BehavioralStateVariable => BEHAVIORAL_STATE_VARIABLE,
         DeviceKind::Timer555
         | DeviceKind::MonostableTimer
         | DeviceKind::AstableTimer

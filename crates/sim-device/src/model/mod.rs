@@ -9,6 +9,7 @@ use crate::crystal::CrystalModel;
 use crate::diode::DiodeModel;
 use crate::diode_array::{DiodeBridgeModel, DualDiodeModel};
 use crate::driver::MotorDriverModel;
+use crate::filter::{BehavioralFilterModel, FilterKind};
 use crate::igbt::IgbtModel;
 use crate::jfet::JfetModel;
 use crate::logic::LogicGateModel;
@@ -118,6 +119,26 @@ fn passive_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel
         DeviceKind::PwlVoltageSource => Box::new(PwlSourceModel::from_instance(instance)?),
         DeviceKind::NoiseVoltageSource => Box::new(NoiseSourceModel::voltage(instance)?),
         DeviceKind::NoiseCurrentSource => Box::new(NoiseSourceModel::current(instance)?),
+        DeviceKind::BehavioralIntegrator => Box::new(BehavioralFilterModel::from_instance(
+            instance,
+            FilterKind::Integrator,
+        )?),
+        DeviceKind::BehavioralDifferentiator => Box::new(BehavioralFilterModel::from_instance(
+            instance,
+            FilterKind::Differentiator,
+        )?),
+        DeviceKind::BehavioralLowPass => Box::new(BehavioralFilterModel::from_instance(
+            instance,
+            FilterKind::LowPass,
+        )?),
+        DeviceKind::BehavioralHighPass => Box::new(BehavioralFilterModel::from_instance(
+            instance,
+            FilterKind::HighPass,
+        )?),
+        DeviceKind::BehavioralStateVariable => Box::new(BehavioralFilterModel::from_instance(
+            instance,
+            FilterKind::StateVariable,
+        )?),
         DeviceKind::CurrentSource => Box::new(CurrentSourceModel::from_instance(instance)?),
         DeviceKind::Vcvs => Box::new(VcvsModel::from_instance(instance)?),
         DeviceKind::Vccs => Box::new(VccsModel::from_instance(instance)?),

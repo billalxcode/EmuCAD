@@ -197,6 +197,16 @@ pub enum DeviceKind {
     NoiseVoltageSource,
     /// A deterministic current noise source.
     NoiseCurrentSource,
+    /// A behavioral integrator block.
+    BehavioralIntegrator,
+    /// A behavioral differentiator block.
+    BehavioralDifferentiator,
+    /// A behavioral low-pass filter block.
+    BehavioralLowPass,
+    /// A behavioral high-pass filter block.
+    BehavioralHighPass,
+    /// A behavioral state-variable filter block.
+    BehavioralStateVariable,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -330,6 +340,11 @@ impl DeviceKind {
             Self::PwlVoltageSource => "pwl_voltage_source",
             Self::NoiseVoltageSource => "noise_voltage_source",
             Self::NoiseCurrentSource => "noise_current_source",
+            Self::BehavioralIntegrator => "behavioral_integrator",
+            Self::BehavioralDifferentiator => "behavioral_differentiator",
+            Self::BehavioralLowPass => "behavioral_low_pass",
+            Self::BehavioralHighPass => "behavioral_high_pass",
+            Self::BehavioralStateVariable => "behavioral_state_variable",
             Self::Diode => "diode",
             _ => "custom",
         }

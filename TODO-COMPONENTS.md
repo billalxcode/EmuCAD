@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 348 entri dapat
-diinstansiasi lewat registry, dan 152 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 353 entri dapat
+diinstansiasi lewat registry, dan 147 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 348 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 353 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 348 | dapat masuk netlist lewat registry |
+| mapped | 353 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 348 `mapped` bukan 348 model yang benar. Audit menemukan
+Peringatan: 353 `mapped` bukan 353 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -226,7 +226,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C8-03 | 4 | 0 | Belum ada model RF filter. |
 | C8-04 | 3 | 0 | Belum ada model antenna. |
 | C8-05 | 3 | 0 | Belum ada model coupler, splitter, isolator. |
-| C8-06 | 5 | 0 | Belum ada model integrator, differentiator, filter. |
+| C8-06 | 5 | 5 | Integrator, differentiator, low-pass, high-pass, dan state-variable sudah solver-backed. |
 | C8-07 | 5 | 0 | Belum ada model multiplier, divider, log, RMS. |
 | C8-08 | 5 | 0 | Belum ada model comparator, Schmitt, peak detector. |
 | C8-09 | 5 | 0 | Belum ada model VCO, PLL, modulator. |
@@ -292,7 +292,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 1039 test workspace lulus pada audit ini.
+- 1045 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -544,7 +544,10 @@ Target: 43 entri.
 - [ ] C8-03 RF filter 4 entri.
 - [ ] C8-04 Antenna 3 entri.
 - [ ] C8-05 Coupler, splitter, isolator 3 entri.
-- [ ] C8-06 Integrator, differentiator, filter 5 entri.
+- [~] C8-06 Integrator, differentiator, filter 5 entri.
+  - Lima filter memakai model 4 pin dengan state.
+  - Cutoff diturunkan dari time constant.
+  - Reference vector dan verified belum.
 - [ ] C8-07 Multiplier, divider, log, RMS 5 entri.
 - [ ] C8-08 Comparator, Schmitt, peak detector 5 entri.
 - [ ] C8-09 VCO, PLL, modulator 5 entri.

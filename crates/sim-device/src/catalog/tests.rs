@@ -147,6 +147,11 @@ fn supported_actuator(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::PwlVoltageSource
             | sim_core::DeviceKind::NoiseVoltageSource
             | sim_core::DeviceKind::NoiseCurrentSource
+            | sim_core::DeviceKind::BehavioralIntegrator
+            | sim_core::DeviceKind::BehavioralDifferentiator
+            | sim_core::DeviceKind::BehavioralLowPass
+            | sim_core::DeviceKind::BehavioralHighPass
+            | sim_core::DeviceKind::BehavioralStateVariable
     )
 }
 

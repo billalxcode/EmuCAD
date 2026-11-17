@@ -1613,3 +1613,79 @@ fn astable_timer_transient_toggles_output() {
     assert!(high > 4.0, "high={high}");
     assert!(low < 0.5, "low={low}");
 }
+
+#[test]
+fn behavioral_low_pass_passes_dc_with_gain() {
+    let output = filter_dc_output(DeviceKind::BehavioralLowPass, 1.0, 2.0);
+    assert!((output - 2.0).abs() < 0.01, "output={output}");
+}
+
+#[test]
+fn behavioral_high_pass_blocks_dc() {
+    let output = filter_dc_output(DeviceKind::BehavioralHighPass, 1.0, 2.0);
+    assert!(output.abs() < 0.01, "output={output}");
+}
+
+fn filter_dc_output(kind: DeviceKind, input: f64, gain: f64) -> f64 {
+    let mut builder = CircuitBuilder::new();
+    let source = builder.node("in").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", source, ground, input);
+    builder
+        .device(
+            "U1",
+            kind,
+            vec![source, output, ground, ground],
+            params(&[("gain", gain), ("time_constant", 1e-3)]),
+        )
+        .expect("U1");
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![output, ground],
+            params(&[("resistance", 1e6)]),
+        )
+        .expect("R1");
+    let circuit = builder.build().expect("circuit");
+    let result = solve(&circuit);
+    result.solution.voltage(output).expect("output")
+}
+
+#[test]
+fn behavioral_integrator_transient_accumulates() {
+    let mut builder = CircuitBuilder::new();
+    let source = builder.node("in").expect("node");
+    let output = builder.node("out").expect("node");
+    let ground = builder.ground();
+    add_input(&mut builder, "V1", source, ground, 1.0);
+    builder
+        .device(
+            "U1",
+            DeviceKind::BehavioralIntegrator,
+            vec![source, output, ground, ground],
+            params(&[("gain", 1.0), ("time_constant", 1e-3)]),
+        )
+        .expect("U1");
+    builder
+        .device(
+            "R1",
+            DeviceKind::Resistor,
+            vec![output, ground],
+            params(&[("resistance", 10000.0)]),
+        )
+        .expect("R1");
+    let circuit = builder.build().expect("circuit");
+    let config = sim_analysis::TransientConfig {
+        dt: 1e-4,
+        steps: 20,
+        use_dc_op: true,
+        ..sim_analysis::TransientConfig::default()
+    };
+    let samples = sim_analysis::transient(&circuit, &config).expect("transient");
+    let early = samples[2].solution.voltage(output).expect("early");
+    let late = samples[15].solution.voltage(output).expect("late");
+    assert!(late > early, "early={early}, late={late}");
+    assert!(late > 0.5, "late={late}");
+}

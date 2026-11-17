@@ -189,6 +189,11 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::MonostableTimer
             | DeviceKind::AstableTimer
             | DeviceKind::VcoTimer
+            | DeviceKind::BehavioralIntegrator
+            | DeviceKind::BehavioralDifferentiator
+            | DeviceKind::BehavioralLowPass
+            | DeviceKind::BehavioralHighPass
+            | DeviceKind::BehavioralStateVariable
     )
 }
 

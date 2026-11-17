@@ -1,13 +1,14 @@
 //! Generated behavioral component catalog data.
 
 use crate::catalog::{ComponentSpec, ModelClass};
+use sim_core::DeviceKind;
 
 pub(crate) const ENTRIES: &[ComponentSpec] = &[
     ComponentSpec {
         id: "behavioral.filter.integrator",
         name: "integrator",
         class: ModelClass::BehavioralBlock,
-        device: None,
+        device: Some(DeviceKind::BehavioralIntegrator),
         pins: 4,
         parameter: "gain",
         default: 1.0,
@@ -18,7 +19,7 @@ pub(crate) const ENTRIES: &[ComponentSpec] = &[
         id: "behavioral.filter.differentiator",
         name: "differentiator",
         class: ModelClass::BehavioralBlock,
-        device: None,
+        device: Some(DeviceKind::BehavioralDifferentiator),
         pins: 4,
         parameter: "gain",
         default: 1.0,
@@ -29,7 +30,7 @@ pub(crate) const ENTRIES: &[ComponentSpec] = &[
         id: "behavioral.filter.first_order_low_pass",
         name: "first order low pass",
         class: ModelClass::BehavioralBlock,
-        device: None,
+        device: Some(DeviceKind::BehavioralLowPass),
         pins: 4,
         parameter: "gain",
         default: 1.0,
@@ -40,7 +41,7 @@ pub(crate) const ENTRIES: &[ComponentSpec] = &[
         id: "behavioral.filter.first_order_high_pass",
         name: "first order high pass",
         class: ModelClass::BehavioralBlock,
-        device: None,
+        device: Some(DeviceKind::BehavioralHighPass),
         pins: 4,
         parameter: "gain",
         default: 1.0,
@@ -51,7 +52,7 @@ pub(crate) const ENTRIES: &[ComponentSpec] = &[
         id: "behavioral.filter.state_variable_filter",
         name: "state variable filter",
         class: ModelClass::BehavioralBlock,
-        device: None,
+        device: Some(DeviceKind::BehavioralStateVariable),
         pins: 4,
         parameter: "gain",
         default: 1.0,
