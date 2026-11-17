@@ -446,6 +446,8 @@ tanpa menduplikasi schema di Python. Binding terisolasi di satu adapter.
 - Binding tidak menjalankan simulasi; runtime tetap di crate Rust lain.
 - `sim-python` tidak boleh menjadi dependensi crate lain.
 - Fitur `extension-module` menjadi default; test Rust memakai logika murni.
+- Build script memanggil `pyo3_build_config::add_extension_module_link_args`
+  dan menambahkan `-undefined dynamic_lookup` untuk test harness macOS.
 
 ---
 
