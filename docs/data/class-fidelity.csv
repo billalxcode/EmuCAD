@@ -4,7 +4,7 @@ Adc,5,0,unsupported,mcu
 Adder,8,0,unsupported,logic
 AnalogSwitch,5,5,compact,switch
 Battery,2,2,compact,source
-BehavioralBlock,25,23,behavioral,behavioral
+BehavioralBlock,25,24,behavioral,behavioral
 BehavioralSource,11,9,behavioral,source
 Bjt,20,20,compact,transistor
 BoardModule,14,0,unsupported,board
@@ -51,7 +51,7 @@ SolidStateRelay,4,4,compact,switch
 Supervisor,5,5,behavioral,power
 Switch,8,8,compact,switch
 Thyristor,8,8,compact,protection
-Timer,5,4,behavioral,analog
+Timer,5,5,behavioral,analog
 TimerPeripheral,3,0,unsupported,mcu
 Transformer,6,6,compact,passive
 TransmissionLine,9,9,compact,passive

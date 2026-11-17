@@ -379,6 +379,7 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         | DeviceKind::BehavioralAmplitude
         | DeviceKind::BehavioralFrequency
         | DeviceKind::BehavioralPwm => BEHAVIORAL_OSCILLATOR,
+        DeviceKind::BehavioralPll => BEHAVIORAL_OSCILLATOR,
         DeviceKind::BehavioralSampleHold
         | DeviceKind::BehavioralSarAdc
         | DeviceKind::BehavioralDeltaSigmaAdc => BEHAVIORAL_CONVERTER,
@@ -386,7 +387,8 @@ const fn semiconductor_roles(device: &DeviceKind) -> &'static [PinRole] {
         DeviceKind::Timer555
         | DeviceKind::MonostableTimer
         | DeviceKind::AstableTimer
-        | DeviceKind::VcoTimer => TIMER8,
+        | DeviceKind::VcoTimer
+        | DeviceKind::TimerPll => TIMER8,
         DeviceKind::SineVoltageSource
         | DeviceKind::SineCurrentSource
         | DeviceKind::PulseCurrentSource

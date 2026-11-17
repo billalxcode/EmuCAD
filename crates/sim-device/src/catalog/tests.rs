@@ -171,6 +171,8 @@ fn supported_actuator(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::BehavioralDeltaSigmaAdc
             | sim_core::DeviceKind::BehavioralPwmDac
             | sim_core::DeviceKind::PolynomialVoltageSource
+            | sim_core::DeviceKind::TimerPll
+            | sim_core::DeviceKind::BehavioralPll
     )
 }
 

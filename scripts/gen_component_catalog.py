@@ -330,7 +330,7 @@ add("analog.timer", "Timer", "AstableTimer", 8, "period", 1e-3, "s", [
 add("analog.timer", "Timer", "VcoTimer", 8, "period", 1e-3, "s", [
     "voltage controlled oscillator",
 ])
-add("analog.timer", "Timer", None, 8, "period", 1e-3, "s", [
+add("analog.timer", "Timer", "TimerPll", 8, "frequency", 1e3, "Hz", [
     "PLL",
 ])
 add("analog.reference", "VoltageReference", "VoltageSource", 2, "voltage", 2.5, "V", [
@@ -673,7 +673,7 @@ add("behavioral.detector", "BehavioralBlock", "BehavioralPrecisionRectifier", 4,
 add("behavioral.oscillator", "BehavioralBlock", "BehavioralVco", 4, "frequency", 1e3, "Hz", [
     "VCO",
 ])
-add("behavioral.oscillator", "BehavioralBlock", None, 4, "frequency", 1e3, "Hz", [
+add("behavioral.oscillator", "BehavioralBlock", "BehavioralPll", 4, "frequency", 1e3, "Hz", [
     "PLL",
 ])
 add("behavioral.oscillator", "BehavioralBlock", "BehavioralAmplitude", 4, "frequency", 1e3, "Hz", [

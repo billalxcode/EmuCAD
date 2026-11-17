@@ -4,7 +4,6 @@ source.behavioral.behavioral_current_source,source,BehavioralSource,behavioral-e
 source.digital.digital_clock_source,source,DigitalSource,digital,digital pattern,S5-3,P3
 source.digital.digital_pattern_source,source,DigitalSource,digital,digital pattern,S5-3,P3
 source.digital.prbs_source,source,DigitalSource,digital,digital pattern,S5-3,P3
-analog.timer.pll,analog,Timer,behavioral-electrical,timer macromodel,S5-2,P2
 logic.gate_special.open_drain_buffer,logic,LogicGateSpecial,digital,sim-cells digital,S5-3,P3
 logic.gate_special.tristate_buffer,logic,LogicGateSpecial,digital,sim-cells digital,S5-3,P3
 logic.gate_special.transmission_gate,logic,LogicGateSpecial,digital,sim-cells digital,S5-3,P3
@@ -110,7 +109,6 @@ rf.antenna.loop_antenna,rf,RfBlock,rf,RF block,S5-6,P7
 rf.coupler.directional_coupler,rf,RfBlock,rf,RF block,S5-6,P7
 rf.coupler.power_splitter,rf,RfBlock,rf,RF block,S5-6,P7
 rf.coupler.isolator,rf,RfBlock,rf,RF block,S5-6,P7
-behavioral.oscillator.pll,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
 behavioral.converter.r2r_dac_behavioral,behavioral,BehavioralBlock,behavioral-electrical,behavioral equation,S5-2,P2
 board.arduino.arduino_uno_board,board,BoardModule,unsupported,unsupported board,none,P0
 board.arduino.breadboard_power_board,board,BoardModule,unsupported,unsupported board,none,P0

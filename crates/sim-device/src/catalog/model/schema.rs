@@ -654,6 +654,20 @@ const POLYNOMIAL_VOLTAGE_SOURCE: &[ParameterSpec] = &[
     ParameterSpec::number("c3", "V/s3", 0.0, -1e9, 1e9),
 ];
 
+const TIMER_PLL: &[ParameterSpec] = &[
+    ParameterSpec::number("frequency", "Hz", 1e3, 1e-9, 1e12),
+    ParameterSpec::number("multiplier", "ratio", 2.0, 1e-6, 1e6),
+    ParameterSpec::number("threshold", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
+const BEHAVIORAL_PLL: &[ParameterSpec] = &[
+    ParameterSpec::number("frequency", "Hz", 1e3, 1e-9, 1e12),
+    ParameterSpec::number("multiplier", "ratio", 2.0, 1e-6, 1e6),
+    ParameterSpec::number("threshold", "V", 2.5, -1e6, 1e6),
+    ParameterSpec::number("output_resistance", "ohm", 1000.0, 1e-9, 1e12),
+];
+
 const NTC: &[ParameterSpec] = &[
     ParameterSpec::number("resistance", "ohm", 10000.0, 1e-9, 1e12),
     ParameterSpec::number("beta", "K", 3950.0, 1e-3, 1e6),
@@ -965,6 +979,8 @@ const fn semiconductor_parameters(device: &DeviceKind) -> &'static [ParameterSpe
         DeviceKind::BehavioralDeltaSigmaAdc => BEHAVIORAL_DELTA_SIGMA_ADC,
         DeviceKind::BehavioralPwmDac => BEHAVIORAL_PWM_DAC,
         DeviceKind::PolynomialVoltageSource => POLYNOMIAL_VOLTAGE_SOURCE,
+        DeviceKind::TimerPll => TIMER_PLL,
+        DeviceKind::BehavioralPll => BEHAVIORAL_PLL,
         _ => &[],
     }
 }
@@ -1103,6 +1119,8 @@ mod tests {
         DeviceKind::BehavioralDeltaSigmaAdc,
         DeviceKind::BehavioralPwmDac,
         DeviceKind::PolynomialVoltageSource,
+        DeviceKind::TimerPll,
+        DeviceKind::BehavioralPll,
     ];
 
     #[test]

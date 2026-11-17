@@ -245,6 +245,10 @@ pub enum DeviceKind {
     BehavioralPwmDac,
     /// A time polynomial voltage source.
     PolynomialVoltageSource,
+    /// A timer PLL module.
+    TimerPll,
+    /// A behavioral PLL block.
+    BehavioralPll,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -402,6 +406,8 @@ impl DeviceKind {
             Self::BehavioralDeltaSigmaAdc => "behavioral_delta_sigma_adc",
             Self::BehavioralPwmDac => "behavioral_pwm_dac",
             Self::PolynomialVoltageSource => "polynomial_voltage_source",
+            Self::TimerPll => "timer_pll",
+            Self::BehavioralPll => "behavioral_pll",
             Self::Diode => "diode",
             _ => "custom",
         }

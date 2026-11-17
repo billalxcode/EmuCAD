@@ -184,7 +184,7 @@ pub(crate) const ENTRIES: &[ComponentSpec] = &[
         id: "behavioral.oscillator.pll",
         name: "PLL",
         class: ModelClass::BehavioralBlock,
-        device: None,
+        device: Some(DeviceKind::BehavioralPll),
         pins: 4,
         parameter: "frequency",
         default: 1000.0,

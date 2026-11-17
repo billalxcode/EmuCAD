@@ -212,6 +212,8 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::BehavioralSarAdc
             | DeviceKind::BehavioralDeltaSigmaAdc
             | DeviceKind::BehavioralPwmDac
+            | DeviceKind::TimerPll
+            | DeviceKind::BehavioralPll
     )
 }
 

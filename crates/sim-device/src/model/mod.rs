@@ -21,6 +21,7 @@ use crate::opamp::OpAmpModel;
 use crate::optocoupler::OptocouplerModel;
 use crate::oscillator::{BehavioralOscillatorModel, OscillatorKind};
 use crate::passive::{CapacitorModel, InductorModel, ResistorModel};
+use crate::pll::PllModel;
 use crate::protection::{FuseModel, VaristorModel};
 use crate::regulator::RegulatorModel;
 use crate::relay::RelayModel;
@@ -383,6 +384,8 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         }
         DeviceKind::MonostableTimer => Box::new(MonostableTimerModel::from_instance(instance)?),
         DeviceKind::VcoTimer => Box::new(VcoTimerModel::from_instance(instance)?),
+        DeviceKind::TimerPll => Box::new(PllModel::from_timer(instance)?),
+        DeviceKind::BehavioralPll => Box::new(PllModel::from_behavioral(instance)?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),
         DeviceKind::DiodeBridge => Box::new(DiodeBridgeModel::from_instance(instance)?),

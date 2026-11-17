@@ -3,7 +3,7 @@
 Katalog device yang tersedia di `sim-device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 199.
+dan transmission line sudah diimplementasikan. Total test `sim-device`: 202.
 
 ---
 
@@ -156,6 +156,7 @@ pub fn model_from_instance(
 | Behavioral converter | 4 | Sample-hold, SAR, delta-sigma, PWM DAC | [85](85-behavioral-converters.md) |
 | Polynomial source | 2 | Polinomial waktu | [86](86-polynomial-table-sources.md) |
 | Table source | 2 | PWL empat titik | [86](86-polynomial-table-sources.md) |
+| PLL | 4 atau 8 | Frequency multiplier dengan phase reset | [87](87-pll.md) |
 | VCVS | 4 | Linear gain | [47](47-controlled-sources.md) |
 | VCCS | 4 | Linear transconductance | [47](47-controlled-sources.md) |
 | CCCS | 4 | Linear current gain | [48](48-cccs-switch.md) |
@@ -428,8 +429,9 @@ Test device mencakup:
 - Behavioral oscillator 4 pin.
 - Behavioral converter 4 pin.
 - Polynomial dan table voltage source.
+- Timer PLL dan behavioral PLL.
 
-Total test `sim-device`: 194 unit + 5 integration = 199.
+Total test `sim-device`: 197 unit + 5 integration = 202.
 
 ---
 
