@@ -94,6 +94,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 85 | [Behavioral converter](85-behavioral-converters.md) | Model sample-hold, SAR, delta-sigma, dan PWM DAC |
 | 86 | [Polynomial dan table source](86-polynomial-table-sources.md) | Model polynomial dan table voltage source |
 | 87 | [PLL](87-pll.md) | Model frequency multiplier dengan phase reset |
+| 88 | [Domain digital](88-digital-domain.md) | 13 entry digital dengan port bernama dan CLI |
 
 ### 3.2 Fondasi
 

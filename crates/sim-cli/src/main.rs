@@ -4,6 +4,7 @@ mod bench;
 #[cfg(unix)]
 mod bootloader;
 mod catalog;
+mod digital;
 mod monitor;
 mod pacing;
 #[cfg(unix)]
@@ -48,6 +49,7 @@ fn dispatch(command: &str, words: &[String]) -> Result<(), String> {
         }
         "bench" => bench::run(words),
         "catalog" => catalog::run(words),
+        "digital" => digital::run(words),
         "serial" => serial::run(words),
         "usb" => serial::run_usb(words),
         _ => Err(usage()),
@@ -148,5 +150,5 @@ fn number(args: &[&str], index: usize, default: usize) -> Result<usize, String> 
 }
 
 fn usage() -> String {
-    "usage: emucad [--link path] [--socket path] | emucad monitor <hex words...> | emucad disasm <hex words...> | emucad run <file.hex> [steps] [--realtime] | emucad bench [iterations] [nodes] | emucad catalog [--json] | emucad serial [--link path] [--socket path] | emucad usb [--socket path]".to_string()
+    "usage: emucad [--link path] [--socket path] | emucad monitor <hex words...> | emucad disasm <hex words...> | emucad run <file.hex> [steps] [--realtime] | emucad bench [iterations] [nodes] | emucad catalog [--json] | emucad digital <id> [name=0|1] [--ticks N] | emucad serial [--link path] [--socket path] | emucad usb [--socket path]".to_string()
 }

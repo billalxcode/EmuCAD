@@ -298,11 +298,14 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
   - Data per entry ada di `docs/data/behavioral-classification.csv`.
   - Kategori: compact, behavioral, digital, mixed-signal,
     structural, multidomain, RF, dan unsupported.
-- [ ] S5-02 Gunakan `sim-cells` untuk logic, flip-flop, counter, dan
+- [~] S5-02 Gunakan `sim-cells` untuk logic, flip-flop, counter, dan
   multiplexer bila cocok.
-  - Belum diimplementasikan; solver analog baru mendukung
-    `LogicGate` 5 pin.
-  - Butuh domain digital atau model digital multi-pin.
+  - 13 entry digital sudah dapat dijalankan lewat `emucad digital`.
+  - Cakupan: 2 mux, 3 adder, 4 flip-flop, 3 counter, dan 1 shift
+    register.
+  - 50 entry digital lain belum: special gate, level shifter,
+    programmable logic, serial interface, timer peripheral, dan
+    digital source.
 - [x] S5-03 Tunda MCU dan memory ke fase S6; jangan membuat model
   sementara yang diklaim structural.
 - [x] S5-04 Buat model sensor dengan input lingkungan.
@@ -349,7 +352,7 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
     2 sine source, 4 timer/oscillator, 5 waveform/noise source,
     5 behavioral filter, 5 behavioral math, 5 behavioral detector,
     4 behavioral oscillator, 4 behavioral converter, polynomial/table
-    source, dan 2 PLL sudah punya test.
+    source, 2 PLL, dan 13 entry domain digital sudah punya test.
   - Keluarga behavioral lain belum.
 - [~] S5-09 Dokumentasikan batas valid setiap model.
   - Audit kelas dan fidelity ada di `docs/63-fidelity.md`.
@@ -360,14 +363,18 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
 
 | Kelompok | Entri | Blocker |
 |---|---:|---|
-| Digital logic | 63 | Butuh domain digital atau model multi-pin; `sim-cells` belum terhubung ke solver. |
+| Digital logic | 50 | 13 sudah di domain digital; 50 belum, termasuk serial, programmable logic, dan digital source. |
 | Structural MCU dan memory | 26 | Butuh gate-level 11 MCU dan 15 memory; scope ada di `docs/64-gate-level.md`. |
 | RF | 14 | Mixer, filter, antenna, dan coupler butuh S-parameter dan solver dua-port. |
 | Board module | 14 | Board-level module belum punya batas dan referensi yang cukup. |
 | Mixed-signal ADC | 5 | Butuh sampling, kuantisasi, dan antarmuka digital. |
 | Behavioral source | 2 | Behavioral voltage/current membutuhkan parser ekspresi bebas. |
 | R-2R DAC | 1 | Butuh bus multi-bit; katalog hanya menyediakan 4 pin. |
-| **Total** | **125** | |
+| **Total** | **112** | |
+
+Dari 125 entry yang belum analog solver-backed, 13 sudah dapat
+dijalankan melalui domain digital. Sisa yang belum punya model sama
+sekali adalah 112 entry.
 
 **Acceptance S5:** setiap entri non-MCU yang diklaim simulatable punya
 model, input, output, dan referensi yang jelas.

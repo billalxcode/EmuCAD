@@ -191,10 +191,10 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C5-05 | 5 | 5 | 555, monostable, astable, VCO, dan PLL solver-backed. |
 | C5-06 | 4 | 4 | Voltage source 2 pin; current reference salah; topology shunt dan series belum. |
 | C6-01 | 12 | 9 | 8 gate benar; Schmitt tanpa hysteresis; 3 special belum. |
-| C6-02 | 10 | 0 | Belum ada model flip-flop dan latch. |
-| C6-03 | 10 | 0 | Belum ada model counter dan shift register. |
-| C6-04 | 8 | 0 | Belum ada model mux, decoder, encoder. |
-| C6-05 | 8 | 0 | Belum ada model adder, comparator, buffer. |
+| C6-02 | 10 | 4 | D, JK, T, dan SR ada di domain digital; 6 belum. |
+| C6-03 | 10 | 4 | 4-bit, decade, Johnson, dan shift register ada; 6 belum. |
+| C6-04 | 8 | 2 | Mux 2:1 dan 4:1 ada; decoder/encoder belum. |
+| C6-05 | 8 | 3 | Half, full, dan 4-bit adder ada; comparator/parity/buffer belum. |
 | C6-06 | 6 | 0 | Belum ada model level shifter dan interface. |
 | C6-07 | 6 | 0 | Belum ada model programmable logic. |
 | C6-08 | 15 | 0 | Belum ada model memory. |
@@ -441,10 +441,22 @@ Target: 100 entri.
 
 - [ ] C6-01 Gate 12 entri: AND, OR, NOT, NAND, NOR, XOR, XNOR, buffer,
   Schmitt, open drain, tri-state, transmission gate.
-- [ ] C6-02 Flip-flop dan latch 10 entri.
-- [ ] C6-03 Counter dan shift register 10 entri.
-- [ ] C6-04 Mux, decoder, encoder 8 entri.
-- [ ] C6-05 Adder, comparator, buffer 8 entri.
+- [~] C6-02 Flip-flop dan latch 10 entri.
+  - D, JK, T, dan SR sudah ada di domain digital.
+  - Latch, edge-triggered, master-slave, dan multi-bit belum.
+  - Reference vector dan verified belum.
+- [~] C6-03 Counter dan shift register 10 entri.
+  - 4-bit, decade, Johnson, dan shift register sudah ada.
+  - 8-bit, up/down, ripple, SIPO, dan PISO belum.
+  - Reference vector dan verified belum.
+- [~] C6-04 Mux, decoder, encoder 8 entri.
+  - Mux 2:1 dan 4:1 sudah ada.
+  - Mux 8:1, demux, decoder, dan encoder belum.
+  - Reference vector dan verified belum.
+- [~] C6-05 Adder, comparator, buffer 8 entri.
+  - Half, full, dan 4-bit adder sudah ada.
+  - Comparator, parity, dan buffer belum.
+  - Reference vector dan verified belum.
 - [ ] C6-06 Level shifter dan interface 6 entri.
 - [ ] C6-07 Programmable logic dan state machine 6 entri.
 - [ ] C6-08 Memory 15 entri: SRAM, DRAM, ROM, EEPROM, Flash, FRAM, MRAM,
