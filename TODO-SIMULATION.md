@@ -24,8 +24,8 @@ fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 | Item | Jumlah | Status |
 |---|---:|---|
 | Entri katalog | 500 | Ada |
-| Solver-backed | 375 | Ada model device |
-| Behavioral | 125 | Belum punya model solver |
+| Solver-backed | 379 | Ada model device |
+| Behavioral | 121 | Belum punya model solver |
 | Device model | 24 `DeviceKind` | Sebagian sudah ada model |
 | Analisis solver | DC, transient, AC, noise, distorsi, sensitivitas | Ada |
 | Netlist GUI | 1 | Ekstraksi dan DC check |
@@ -36,7 +36,7 @@ fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 
 | ID | Keputusan |
 |---|---|
-| Q01 | 500 entri bertahap; milestone pertama 375 solver-backed |
+| Q01 | 500 entri bertahap; milestone pertama 379 solver-backed |
 | Q02 | Compact model dengan parameter default per kelas |
 | Q03 | Model behavioral boleh dipakai dengan label fidelity |
 | Q04 | Co-sim AVR dan analog dikerjakan paling akhir |
@@ -63,7 +63,7 @@ fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 | Q25 | Hasil simulasi wajib deterministik |
 | Q26 | Structural penuh berarti gate-level untuk semua MCU dan memory |
 | Q27 | ngspice diinstal lokal |
-| Q28 | Passive dan source menjadi prioritas pertama setelah 375 |
+| Q28 | Passive dan source menjadi prioritas pertama setelah 379 |
 | Q29 | Board, enclosure, mounting, dan module boleh unsupported |
 | Q30 | Semua net diprobe pada full rate |
 | Q31 | AVR memakai structural penuh |
@@ -203,7 +203,7 @@ dan komponen unsupported punya alasan yang dapat ditampilkan.
 **Acceptance S1:** rangkaian R-C sederhana menghasilkan node dan device
 yang sama dengan referensi manual.
 
-## 6. Fase S2 - Integrasi Solver 375 Entri
+## 6. Fase S2 - Integrasi Solver 379 Entri
 
 - [x] S2-01 Tambahkan dependency `sim-analysis` ke `sim-gui`.
 - [x] S2-02 Tambahkan domain simulasi: `Avr`, `Analog`, `Mixed`.
@@ -224,7 +224,7 @@ yang sama dengan referensi manual.
     logic gate, dan transmission line lulus.
   - Relay dan logic diuji lewat `CircuitBuilder` langsung.
 
-**Acceptance S2:** minimal 375 entri solver-backed dapat masuk netlist
+**Acceptance S2:** minimal 379 entri solver-backed dapat masuk netlist
 dan menghasilkan DC operating point atau error yang jelas.
 
 ## 7. Fase S3 - Transient dan Probe
@@ -293,7 +293,7 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
 
 ## 9. Fase S5 - Model Compact dan Behavioral Non-MCU
 
-- [x] S5-01 Klasifikasikan 125 entri.
+- [x] S5-01 Klasifikasikan 121 entri.
   - Lihat `docs/62-behavioral-classification.md`.
   - Data per entry ada di `docs/data/behavioral-classification.csv`.
   - Kategori: compact, behavioral, digital, mixed-signal,
@@ -327,6 +327,7 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
   - 2 entry sine source sudah solver-backed.
   - 4 entry timer/oscillator sudah solver-backed; PLL belum.
   - 5 entry waveform/noise source sudah solver-backed.
+  - 4 entry MCU converter memakai behavioral converter.
   - 5 entry behavioral filter sudah solver-backed.
   - 5 entry behavioral math sudah solver-backed.
   - 5 entry behavioral detector sudah solver-backed.
@@ -366,10 +367,10 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
 | Structural MCU dan memory | 26 | Butuh gate-level 11 MCU dan 15 memory; scope ada di `docs/64-gate-level.md`. |
 | RF | 14 | Mixer, filter, antenna, dan coupler butuh S-parameter dan solver dua-port. |
 | Board module | 14 | Board-level module belum punya batas dan referensi yang cukup. |
-| Mixed-signal ADC | 5 | Butuh sampling, kuantisasi, dan antarmuka digital. |
+| Mixed-signal ADC | 1 | R-2R DAC membutuhkan bus multi-bit; 4 converter lain sudah dipetakan. |
 | Behavioral source | 2 | Behavioral voltage/current membutuhkan parser ekspresi bebas. |
 | R-2R DAC | 1 | Butuh bus multi-bit; katalog hanya menyediakan 4 pin. |
-| **Total** | **67** | |
+| **Total** | **63** | |
 
 Dari 125 entry yang belum analog solver-backed, 58 sudah dapat
 dijalankan melalui domain digital. Sisa yang belum punya model sama
@@ -524,7 +525,7 @@ dokumentasi menyebut batas fidelity.
 
 ## 15. Definition of Done
 
-- [ ] Minimal 375 entri solver-backed dapat disimulasikan pada milestone
+- [ ] Minimal 379 entri solver-backed dapat disimulasikan pada milestone
   pertama.
 - [ ] Seluruh 500 entri memiliki status simulasi yang jelas.
 - [ ] Netlist GUI tervalidasi.

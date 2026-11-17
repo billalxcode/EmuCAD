@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 375 entri dapat
-diinstansiasi lewat registry, dan 125 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 379 entri dapat
+diinstansiasi lewat registry, dan 121 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 375 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 379 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 375 | dapat masuk netlist lewat registry |
+| mapped | 379 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 375 `mapped` bukan 375 model yang benar. Audit menemukan
+Peringatan: 379 `mapped` bukan 379 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -199,7 +199,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C6-07 | 6 | 5 | PAL, GAL, CPLD, FPGA logic block, dan LUT memakai LUT 4-input; FSM belum. |
 | C6-08 | 15 | 0 | Belum ada model memory. |
 | C6-09 | 11 | 0 | Belum ada model MCU. |
-| C6-10 | 5 | 0 | Belum ada model ADC, DAC, PWM. |
+| C6-10 | 5 | 4 | SAR, delta-sigma, flash, dan PWM generator; R-2R DAC belum. |
 | C6-11 | 6 | 2 | UART dan SPI ada; I2C, CAN, USB, dan Ethernet belum. |
 | C6-12 | 3 | 3 | Timer, RTC, dan watchdog memakai counter digital 8-bit. |
 | C7-01 | 6 | 6 | Regulator 3 pin generik; negative, current, shunt, adjustable belum. |

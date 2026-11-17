@@ -1,6 +1,6 @@
 model_class,entries,solver_backed,fidelity,families
 Actuator,16,16,behavioral,actuator
-Adc,5,0,unsupported,mcu
+Adc,5,4,behavioral,mcu
 Adder,8,0,unsupported,logic
 AnalogSwitch,5,5,compact,switch
 Battery,2,2,compact,source

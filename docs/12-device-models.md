@@ -428,6 +428,7 @@ Test device mencakup:
 - Behavioral detector 4 pin.
 - Behavioral oscillator 4 pin.
 - Behavioral converter 4 pin.
+- MCU converter memakai model behavioral converter.
 - Polynomial dan table voltage source.
 - Timer PLL dan behavioral PLL.
 

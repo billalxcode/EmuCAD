@@ -389,8 +389,20 @@ add("mcu.core32", "Mcu", None, 8, "clock", 48e6, "Hz", [
     "ARM Cortex-M", "RISC-V MCU", "ESP32", "STM32", "RP2040",
     "generic 32-bit MCU",
 ])
+add("mcu.converter", "Adc", "BehavioralSarAdc", 4, "resolution", 10.0, "bit", [
+    "SAR ADC",
+])
+add("mcu.converter", "Adc", "BehavioralDeltaSigmaAdc", 4, "resolution", 10.0, "bit", [
+    "delta-sigma ADC",
+])
+add("mcu.converter", "Adc", "BehavioralSarAdc", 4, "resolution", 10.0, "bit", [
+    "flash ADC",
+])
 add("mcu.converter", "Adc", None, 4, "resolution", 10.0, "bit", [
-    "SAR ADC", "delta-sigma ADC", "flash ADC", "R-2R DAC", "PWM generator",
+    "R-2R DAC",
+])
+add("mcu.converter", "Adc", "BehavioralPwm", 4, "frequency", 1e3, "Hz", [
+    "PWM generator",
 ])
 add("mcu.serial", "SerialInterface", None, 4, "baud", 9600.0, "baud", [
     "UART", "SPI", "I2C", "CAN", "USB", "Ethernet",
