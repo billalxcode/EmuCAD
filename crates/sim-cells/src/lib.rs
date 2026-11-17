@@ -7,6 +7,7 @@ mod basic;
 mod builder;
 mod catalog_bits;
 pub mod catalog_digital;
+mod catalog_i2c;
 mod catalog_memory;
 mod catalog_spi;
 mod catalog_uart;

@@ -1,6 +1,6 @@
 //! Digital UART circuit with one tick per bit.
 
-use crate::catalog_bits::{equals, increment4};
+use crate::catalog_bits::{equals, increment};
 use crate::catalog_digital::{DigitalEntry, finish};
 use crate::{DigitalBuilder, NetId};
 
@@ -94,7 +94,7 @@ fn tx_phase_next(
     phase: &[NetId; 4],
     load: NetId,
 ) -> [NetId; 4] {
-    let incremented = increment4(builder, phase);
+    let incremented = increment(builder, phase);
     let phase10 = equals(builder, phase, 10);
     let zero = builder.constant(false);
     let active = builder.or(busy, load);
@@ -219,7 +219,7 @@ fn rx_phase_next(
     phase9: NetId,
     start_detect: NetId,
 ) -> [NetId; 4] {
-    let incremented = increment4(builder, phase);
+    let incremented = increment(builder, phase);
     let zero = builder.constant(false);
     let one = builder.constant(true);
     let not_reset = builder.not(reset);

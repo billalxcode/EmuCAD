@@ -127,6 +127,7 @@ pub fn digital_entry_with_config(
         }
         "mcu.serial.uart" => crate::catalog_uart::uart_entry(),
         "mcu.serial.spi" => crate::catalog_spi::spi_entry(),
+        "mcu.serial.i2c" => crate::catalog_i2c::i2c_entry(),
         "logic.programmable.finite_state_machine" => fsm_entry(config.fsm),
         "memory.device.sram_cell" => {
             crate::catalog_memory::sram_cell_entry("memory.device.sram_cell")

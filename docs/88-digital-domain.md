@@ -6,7 +6,7 @@ Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
 ## 1. Cakupan
 
 Domain digital memakai `DigitalCircuit` dua-state dengan input dan
-output bernama. Saat ini 61 entry katalog sudah dapat dijalankan:
+output bernama. Saat ini 62 entry katalog sudah dapat dijalankan:
 
 | Kelompok | Entry |
 |---|---|
@@ -22,7 +22,7 @@ output bernama. Saat ini 61 entry katalog sudah dapat dijalankan:
 | Digital source | clock, PRBS, pattern |
 | Programmable | PAL, GAL, CPLD, FPGA logic block, lookup table (LUT 4-input), FSM 3-input |
 | High-Z | open-drain, tri-state, transmission gate, bidirectional buffer, bidirectional/open-drain level |
-| Serial | UART dan SPI, satu tick per bit |
+| Serial | UART, SPI, dan I2C master |
 | Memory | sel SRAM 1-bit dan array SRAM 128x8 (1024 bit) |
 
 ## 2. Perintah
@@ -73,7 +73,7 @@ Port ditentukan per entry, bukan dari jumlah pin katalog. Contoh:
 - Tidak ada timing, setup/hold, atau propagation delay.
 - Memory array memakai sel DFF, bukan transistor, dan belum memiliki
   timing akses, refresh, atau retensi non-volatile.
-- I2C, CAN, USB, dan Ethernet belum didukung.
+- CAN, USB, dan Ethernet belum didukung.
 
 ## 5. High-Z
 
@@ -87,7 +87,22 @@ Model ini memungkinkan pemakaian buffer dan open-drain secara eksplisit,
 tetapi tidak melakukan resolusi bus otomatis. Penggabungan beberapa
 driver harus memakai sinyal `z` di tingkat rangkaian.
 
-## 6. Memory
+## 6. I2C
+
+`mcu.serial.i2c` adalah master 7-bit address dengan satu byte data:
+
+- Input: `reset`, `start`, `rw`, `ack`, `addr0..addr6`, `din0..din7`.
+- Output: `scl`, `sda`, `busy`, `done`, `nack`.
+- Urutan bit: address MSB-first, `rw`, ACK, data MSB-first, ACK.
+- Master menghasilkan START, clock per bit, ACK sampling, dan STOP.
+- `scl` dan `sda` adalah nilai line dengan pull-up internal; `0` berarti
+  ditarik low. Satu tick adalah satu setengah bit.
+- `ack=1` berarti slave menarik SDA low pada slot ACK. Jika `ack=0`,
+  output `nack` menjadi 1 dan bertahan sampai reset atau START baru.
+- `sda` sudah memasukkan ACK slave pada slot ACK, tetapi tidak
+  melakukan arbitrase, clock stretching, atau multi-master.
+
+## 7. Memory
 
 Dua entry memory memakai model digital:
 
@@ -102,13 +117,13 @@ kata. Entry non-volatile (EEPROM, Flash, FRAM, MRAM, NVRAM) belum
 dipetakan karena retensi, erase, dan timing belum dimodelkan. DRAM
 belum dipetakan karena refresh belum dimodelkan.
 
-## 7. Entry Digital yang Belum Didukung
+## 8. Entry Digital yang Belum Didukung
 
-Masih ada 4 entry digital di luar domain ini:
+Masih ada 3 entry digital di luar domain ini:
 
-- I2C, CAN, USB, dan Ethernet.
+- CAN, USB, dan Ethernet.
 
-## 8. Verifikasi
+## 9. Verifikasi
 
 Test domain digital mencakup:
 
@@ -132,6 +147,8 @@ Test domain digital mencakup:
 - FSM tiga input mencacah state 0, 1, 2, 3 dengan mask `0x0605`.
 - Sel SRAM menahan nilai saat write enable rendah.
 - Array SRAM menyimpan dan membaca kembali kata pada alamat 5 dan 100.
+- I2C mengirim address dan data MSB-first, menghasilkan START/STOP,
+  dan menandai NACK saat ACK tidak diberikan.
 - PRBS source bergeser setelah reset.
 - Pattern source memuat pola saat reset.
 - LUT 4-input dengan mask AND menghasilkan output yang benar.
@@ -139,7 +156,7 @@ Test domain digital mencakup:
 - Decade counter kembali ke nol setelah sepuluh tick.
 - Shift register memindahkan data.
 
-## 9. Referensi
+## 10. Referensi
 
 - Logic gate, dasar gerbang dua-state:
   https://en.wikipedia.org/wiki/Logic_gate
@@ -151,5 +168,7 @@ Test domain digital mencakup:
   https://en.wikipedia.org/wiki/Multiplexer
 - Static random-access memory, sel dan array:
   https://en.wikipedia.org/wiki/Static_random-access_memory
+- I2C, bus open-drain dan protokol:
+  https://en.wikipedia.org/wiki/I%C2%B2C
 - Adder, penjumlahan biner:
   https://en.wikipedia.org/wiki/Adder_(electronics)

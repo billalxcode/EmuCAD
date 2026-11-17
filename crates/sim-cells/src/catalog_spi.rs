@@ -1,6 +1,6 @@
 //! Digital SPI master circuit with one tick per bit.
 
-use crate::catalog_bits::{equals, increment4};
+use crate::catalog_bits::{equals, increment};
 use crate::catalog_digital::{DigitalEntry, finish};
 use crate::{DigitalBuilder, NetId};
 
@@ -165,7 +165,7 @@ fn spi_count(
     active: NetId,
     not_reset: NetId,
 ) {
-    let incremented = increment4(builder, &count);
+    let incremented = increment(builder, &count);
     let zero = builder.constant(false);
     for index in 0..4 {
         let value = builder.mux(incremented[index], zero, count8);
