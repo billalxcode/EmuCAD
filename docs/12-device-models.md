@@ -3,7 +3,7 @@
 Katalog device yang tersedia di `sim-device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 161.
+dan transmission line sudah diimplementasikan. Total test `sim-device`: 164.
 
 ---
 
@@ -125,6 +125,9 @@ pub fn model_from_instance(
 | Current sense resistor | 3 | Shunt dan gain | - |
 | Hall current sensor | 3 | Linear V/A output | - |
 | Voltage divider sensor | 3 | Linear V/V output | - |
+| Inductive proximity sensor | 3 | Threshold switch pada jarak | - |
+| Capacitive touch sensor | 3 | Threshold switch pada kapasitansi | - |
+| Ultrasonic distance sensor | 3 | Linear V/m output | - |
 | VCVS | 4 | Linear gain | [47](47-controlled-sources.md) |
 | VCCS | 4 | Linear transconductance | [47](47-controlled-sources.md) |
 | CCCS | 4 | Linear current gain | [48](48-cccs-switch.md) |
@@ -382,8 +385,9 @@ Test device mencakup:
 - Sensor tekanan strain gauge, load cell, pressure, dan force.
 - Sensor kelembapan dan kimia humidity, gas, pH, dan electrochemical.
 - Sensor arus current sense resistor, Hall current, dan voltage divider.
+- Sensor proximity inductive, capacitive touch, dan ultrasonic.
 
-Total test `sim-device`: 156 unit + 5 integration = 161.
+Total test `sim-device`: 159 unit + 5 integration = 164.
 
 ---
 

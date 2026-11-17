@@ -45,7 +45,7 @@ Regulator,6,6,behavioral,power
 Relay,3,3,compact,switch
 Resistor,12,12,ideal,passive
 RfBlock,18,0,unsupported,rf
-Sensor,35,32,behavioral,sensor
+Sensor,35,35,behavioral,sensor
 SerialInterface,6,0,unsupported,mcu
 SolidStateRelay,4,4,compact,switch
 Supervisor,5,0,unsupported,power

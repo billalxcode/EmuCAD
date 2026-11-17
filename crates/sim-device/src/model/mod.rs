@@ -219,6 +219,19 @@ fn active_model(instance: &DeviceInstance) -> Result<Option<Box<dyn DeviceModel>
         DeviceKind::VoltageDividerSensor => Box::new(LinearSensorModel::from_instance(
             instance, "voltage", 0.2, 0.0,
         )?),
+        DeviceKind::InductiveProximitySensor => Box::new(ThresholdSwitchModel::from_instance(
+            instance, "distance", true, 5.0, 0.5,
+        )?),
+        DeviceKind::CapacitiveTouchSensor => Box::new(ThresholdSwitchModel::from_instance(
+            instance,
+            "capacitance",
+            false,
+            10.0,
+            2.0,
+        )?),
+        DeviceKind::UltrasonicDistanceSensor => Box::new(LinearSensorModel::from_instance(
+            instance, "distance", 1.0, 0.5,
+        )?),
         DeviceKind::LogicGate => Box::new(LogicGateModel::from_instance(instance)?),
         DeviceKind::Diode => Box::new(DiodeModel::from_instance(instance)?),
         DeviceKind::DiodeBridge => Box::new(DiodeBridgeModel::from_instance(instance)?),

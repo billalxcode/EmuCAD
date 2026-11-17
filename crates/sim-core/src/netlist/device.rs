@@ -145,6 +145,12 @@ pub enum DeviceKind {
     HallCurrentSensor,
     /// A voltage divider sensor module.
     VoltageDividerSensor,
+    /// An inductive proximity sensor module.
+    InductiveProximitySensor,
+    /// A capacitive touch sensor module.
+    CapacitiveTouchSensor,
+    /// An ultrasonic distance sensor module.
+    UltrasonicDistanceSensor,
     /// A diode.
     Diode,
     /// A model supplied by another crate or a future device library.
@@ -252,6 +258,9 @@ impl DeviceKind {
             Self::CurrentSenseResistor => "current_sense_resistor",
             Self::HallCurrentSensor => "hall_current_sensor",
             Self::VoltageDividerSensor => "voltage_divider_sensor",
+            Self::InductiveProximitySensor => "inductive_proximity_sensor",
+            Self::CapacitiveTouchSensor => "capacitive_touch_sensor",
+            Self::UltrasonicDistanceSensor => "ultrasonic_distance_sensor",
             Self::Diode => "diode",
             _ => "custom",
         }

@@ -151,6 +151,9 @@ fn supported_sensor(device: &sim_core::DeviceKind) -> bool {
             | sim_core::DeviceKind::CurrentSenseResistor
             | sim_core::DeviceKind::HallCurrentSensor
             | sim_core::DeviceKind::VoltageDividerSensor
+            | sim_core::DeviceKind::InductiveProximitySensor
+            | sim_core::DeviceKind::CapacitiveTouchSensor
+            | sim_core::DeviceKind::UltrasonicDistanceSensor
     )
 }
 

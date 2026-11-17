@@ -503,8 +503,13 @@ add("sensor.current", "Sensor", "HallCurrentSensor", 3, "sensitivity", 0.1, "V/A
 add("sensor.current", "Sensor", "VoltageDividerSensor", 3, "sensitivity", 0.2, "V/V", [
     "voltage divider sensor",
 ])
-add("sensor.proximity", "Sensor", None, 3, "sensitivity", 1.0, "ratio", [
-    "inductive proximity sensor", "capacitive touch sensor",
+add("sensor.proximity", "Sensor", "InductiveProximitySensor", 3, "threshold", 5.0, "mm", [
+    "inductive proximity sensor",
+])
+add("sensor.proximity", "Sensor", "CapacitiveTouchSensor", 3, "threshold", 10.0, "pF", [
+    "capacitive touch sensor",
+])
+add("sensor.proximity", "Sensor", "UltrasonicDistanceSensor", 3, "sensitivity", 1.0, "V/m", [
     "ultrasonic distance sensor",
 ])
 

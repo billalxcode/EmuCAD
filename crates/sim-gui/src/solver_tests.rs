@@ -1167,3 +1167,13 @@ fn current_and_voltage_sensors_respond() {
     assert!((hall - 3.5).abs() < 0.01, "hall={hall}");
     assert!((divider - 2.0).abs() < 0.01, "divider={divider}");
 }
+
+#[test]
+fn proximity_sensors_respond_to_distance_and_capacitance() {
+    let inductive = sensor_output(DeviceKind::InductiveProximitySensor, &[("distance", 1.0)]);
+    let touch = sensor_output(DeviceKind::CapacitiveTouchSensor, &[("capacitance", 20.0)]);
+    let ultrasonic = sensor_output(DeviceKind::UltrasonicDistanceSensor, &[("distance", 2.0)]);
+    assert!((inductive - 5.0).abs() < 0.01, "inductive={inductive}");
+    assert!((touch - 5.0).abs() < 0.01, "touch={touch}");
+    assert!((ultrasonic - 2.5).abs() < 0.01, "ultrasonic={ultrasonic}");
+}

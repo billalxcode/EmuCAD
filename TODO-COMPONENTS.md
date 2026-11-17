@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 289 entri dapat
-diinstansiasi lewat registry, dan 211 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 292 entri dapat
+diinstansiasi lewat registry, dan 208 entri belum punya model solver.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 289 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 292 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 289 | dapat masuk netlist lewat registry |
+| mapped | 292 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 289 `mapped` bukan 289 model yang benar. Audit menemukan
+Peringatan: 292 `mapped` bukan 292 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -291,7 +291,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 - Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
-- 1002 test workspace lulus pada audit ini.
+- 1006 test workspace lulus pada audit ini.
 
 ### 4a.4 Arti untuk Pengerjaan
 
@@ -483,7 +483,10 @@ Target: 85 entri.
   - Current sense resistor memakai shunt dan gain.
   - Hall current dan voltage divider memakai model linier.
   - Reference vector dan verified belum.
-- [ ] C7-14 Proximity, touch, ultrasonic 3 entri.
+- [~] C7-14 Proximity, touch, ultrasonic 3 entri.
+  - Inductive dan capacitive touch memakai threshold switch.
+  - Ultrasonic memakai output linier terhadap jarak.
+  - Reference vector dan verified belum.
 - [ ] C7-15 LED dan lamp 4 entri.
 - [ ] C7-16 Buzzer, speaker, piezo 4 entri.
 - [ ] C7-17 Motor, servo, stepper, solenoid 5 entri.

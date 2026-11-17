@@ -1319,4 +1319,54 @@ mod tests {
         assert!((hall - 3.5).abs() < 1e-9, "hall={hall}");
         assert!((divider - 2.0).abs() < 1e-9, "divider={divider}");
     }
+
+    #[test]
+    fn inductive_proximity_triggers_below_threshold() {
+        let mut model = ThresholdSwitchModel::from_instance(
+            &instance(DeviceKind::InductiveProximitySensor, &[("distance", 10.0)]),
+            "distance",
+            true,
+            5.0,
+            0.5,
+        )
+        .expect("model");
+        assert!(model.output(5.0).abs() < 1e-9);
+        model.input = 4.0;
+        assert!((model.output(5.0) - 5.0).abs() < 1e-9);
+        model.input = 5.4;
+        assert!((model.output(5.0) - 5.0).abs() < 1e-9);
+        model.input = 6.0;
+        assert!(model.output(5.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn capacitive_touch_triggers_above_threshold() {
+        let mut model = ThresholdSwitchModel::from_instance(
+            &instance(DeviceKind::CapacitiveTouchSensor, &[("capacitance", 5.0)]),
+            "capacitance",
+            false,
+            10.0,
+            2.0,
+        )
+        .expect("model");
+        assert!(model.output(5.0).abs() < 1e-9);
+        model.input = 12.0;
+        assert!((model.output(5.0) - 5.0).abs() < 1e-9);
+        model.input = 9.0;
+        assert!((model.output(5.0) - 5.0).abs() < 1e-9);
+        model.input = 7.0;
+        assert!(model.output(5.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn ultrasonic_distance_scales_linearly() {
+        let model = LinearSensorModel::from_instance(
+            &instance(DeviceKind::UltrasonicDistanceSensor, &[("distance", 2.0)]),
+            "distance",
+            1.0,
+            0.5,
+        )
+        .expect("model");
+        assert!((model.output(5.0) - 2.5).abs() < 1e-9);
+    }
 }

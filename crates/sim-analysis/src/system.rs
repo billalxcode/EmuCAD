@@ -179,6 +179,9 @@ fn is_nonlinear(kind: &DeviceKind) -> bool {
             | DeviceKind::CurrentSenseResistor
             | DeviceKind::HallCurrentSensor
             | DeviceKind::VoltageDividerSensor
+            | DeviceKind::InductiveProximitySensor
+            | DeviceKind::CapacitiveTouchSensor
+            | DeviceKind::UltrasonicDistanceSensor
     )
 }
 
