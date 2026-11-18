@@ -1,9 +1,9 @@
 # TODO - Komponen 500
 
-Status per 2026-11-16: katalog 500 entri ada, 375 entri dapat
-diinstansiasi lewat registry, dan 125 entri belum punya model solver.
+Status per 2026-11-16: katalog 500 entri ada, 379 entri dapat
+diinstansiasi lewat registry, dan 121 entri belum punya model solver analog; 59 di antaranya sudah dapat dijalankan di domain digital.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
-dari 375 mapping masih generik atau salah topologi, jadi `mapped` tidak
+dari 379 mapping masih generik atau salah topologi, jadi `mapped` tidak
 sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
@@ -146,11 +146,11 @@ Legend:
 | Level | Jumlah | Arti |
 |---|---:|---|
 | cataloged | 500 | metadata katalog lengkap |
-| mapped | 375 | dapat masuk netlist lewat registry |
+| mapped | 379 | dapat masuk netlist lewat registry |
 | tested per entry | 0 | belum ada test per entry |
 | verified | 0 | belum ada yang lulus semua syarat |
 
-Peringatan: 375 `mapped` bukan 375 model yang benar. Audit menemukan
+Peringatan: 379 `mapped` bukan 379 model yang benar. Audit menemukan
 mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 
 ### 4a.1 Matriks per Batch
@@ -190,17 +190,17 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
 | C5-04 | 5 | 5 | OTA dan Norton salah model; audio, video, buffer generik. |
 | C5-05 | 5 | 5 | 555, monostable, astable, VCO, dan PLL solver-backed. |
 | C5-06 | 4 | 4 | Voltage source 2 pin; current reference salah; topology shunt dan series belum. |
-| C6-01 | 12 | 9 | 8 gate benar; Schmitt tanpa hysteresis; 3 special belum. |
+| C6-01 | 12 | 12 | 8 gate, Schmitt, open-drain, tri-state, dan transmission gate. |
 | C6-02 | 10 | 10 | D, JK, T, SR, latch, edge D, master-slave, dual/quad D, octal latch. |
 | C6-03 | 10 | 10 | 4/8-bit, decade, up/down, ripple, Johnson, shift 4/8-bit, SIPO, PISO. |
 | C6-04 | 8 | 8 | Mux 2:1/4:1/8:1, demux, decoder, encoder, dan priority encoder ada. |
-| C6-05 | 8 | 7 | Adder, comparator, parity, dan bus buffer; bidirectional buffer belum. |
-| C6-06 | 6 | 4 | Level shifter, line driver, receiver, dan optocoupler; 2 belum. |
-| C6-07 | 6 | 5 | PAL, GAL, CPLD, FPGA logic block, dan LUT memakai LUT 4-input; FSM belum. |
-| C6-08 | 15 | 0 | Belum ada model memory. |
+| C6-05 | 8 | 8 | Adder, comparator, parity, bus buffer, dan bidirectional buffer. |
+| C6-06 | 6 | 6 | Level shifter, line driver, receiver, optocoupler, bidirectional, dan open-drain. |
+| C6-07 | 6 | 6 | PAL, GAL, CPLD, FPGA logic block, LUT, dan FSM 3-input. |
+| C6-08 | 15 | 15 | Sel SRAM/DRAM, array, ROM, PROM, module, controller, SPI flash, I2C EEPROM, dan SD card sudah ada. |
 | C6-09 | 11 | 0 | Belum ada model MCU. |
-| C6-10 | 5 | 0 | Belum ada model ADC, DAC, PWM. |
-| C6-11 | 6 | 0 | Belum ada model serial interface. |
+| C6-10 | 5 | 4 | SAR, delta-sigma, flash, dan PWM generator; R-2R DAC belum. |
+| C6-11 | 6 | 5 | UART, SPI, I2C, CAN, dan USB token ada; Ethernet belum. |
 | C6-12 | 3 | 3 | Timer, RTC, dan watchdog memakai counter digital 8-bit. |
 | C7-01 | 6 | 6 | Regulator 3 pin generik; negative, current, shunt, adjustable belum. |
 | C7-02 | 8 | 8 | Delapan topologi memakai converter teregulasi dengan efisiensi; verifikasi batch belum. |
@@ -451,18 +451,34 @@ Target: 100 entri.
   - Delapan entry sudah ada di domain digital.
   - Reference vector dan verified belum.
 - [~] C6-05 Adder, comparator, buffer 8 entri.
-  - Tujuh entry sudah ada; bidirectional buffer belum.
+  - Delapan entry sudah ada.
   - Reference vector dan verified belum.
 - [~] C6-06 Level shifter dan interface 6 entri.
-  - Level shifter, line driver, receiver, dan optocoupler ada.
-  - Bidirectional dan open-drain belum.
+  - Enam entry sudah ada, termasuk high-Z eksplisit.
   - Reference vector dan verified belum.
-- [ ] C6-07 Programmable logic dan state machine 6 entri.
-- [ ] C6-08 Memory 15 entri: SRAM, DRAM, ROM, EEPROM, Flash, FRAM, MRAM,
+- [~] C6-07 Programmable logic dan state machine 6 entri.
+  - Enam entry sudah ada di domain digital, termasuk FSM 3-input.
+  - Reference vector dan verified belum.
+- [~] C6-08 Memory 15 entri: SRAM, DRAM, ROM, EEPROM, Flash, FRAM, MRAM,
   module, controller.
+  - Sel SRAM 1-bit dan array 128x8 sudah ada.
+  - EEPROM, Flash, FRAM, MRAM, dan NVRAM memakai array non-volatile
+    yang bertahan setelah reset.
+  - ROM dan PROM memakai port load simulasi; PROM satu kali per kata.
+  - Memory module memakai cs/we/oe; controller memakai req/ready.
+  - Sel DRAM memakai refresh global dan window retensi 15 tick.
+  - SPI flash memakai perintah WREN, RDSR, READ, PAGE PROGRAM, dan CHIP ERASE.
+  - I2C EEPROM memakai alamat 1010aaa dan repeated START.
+  - SD card memakai satu blok 512 byte, CMD0/CMD1/CMD17/CMD24.
+  - Belum ada endurance, wear, atau persistensi antar proses.
+  - Reference vector dan benchmark SD card belum.
+  - Reference vector dan benchmark array belum.
 - [ ] C6-09 MCU core 11 entri: AVR, PIC, 8051, ARM, RISC-V, ESP, STM32.
 - [ ] C6-10 ADC, DAC, PWM peripheral 5 entri.
-- [ ] C6-11 UART, SPI, I2C, CAN, USB, Ethernet 6 entri.
+- [~] C6-11 UART, SPI, I2C, CAN, USB, Ethernet 6 entri.
+  - UART, SPI, I2C, CAN, dan USB token sudah ada di domain digital.
+  - Ethernet belum.
+  - Reference vector dan verified belum.
 - [~] C6-12 Timer, RTC, watchdog 3 entri.
   - Tiga entry memakai counter digital 8-bit.
   - Watchdog memiliki output timeout.

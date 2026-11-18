@@ -27,6 +27,20 @@ jobs:
       - name: Build release
         run: cargo build --workspace --release
 
+  release-script:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Version
+        run: python3 scripts/release.py --print-version
+      - name: Checksums
+        run: |
+          mkdir -p /tmp/release-check
+          echo test > /tmp/release-check/emucad-v0.1.0-test.tar.gz
+          python3 scripts/release.py --checksums /tmp/release-check
+          cd /tmp/release-check
+          sha512sum -c SHA512SUMS
+
   ngspice:
     runs-on: ubuntu-latest
     steps:

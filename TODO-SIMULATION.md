@@ -1,7 +1,8 @@
 # TODO - Simulasi Semua Komponen
 
-Status: S1-S4 selesai; S0, S5, dan S8 sebagian; S6-S7 terblokir oleh
-model gate-level dan benchmark memory.
+Status: S1-S4 selesai; S0, S5, S6, S7, dan S8 sebagian. S6 sudah
+mencakup 12 dari 15 memory; MCU gate-level, protocol memory, dan
+co-sim S7 belum selesai.
 
 Tujuan: membuat komponen di skematik GUI dapat disimulasikan dengan model
 fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
@@ -24,8 +25,8 @@ fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 | Item | Jumlah | Status |
 |---|---:|---|
 | Entri katalog | 500 | Ada |
-| Solver-backed | 375 | Ada model device |
-| Behavioral | 125 | Belum punya model solver |
+| Solver-backed | 379 | Ada model device |
+| Behavioral | 121 | Belum punya model solver |
 | Device model | 24 `DeviceKind` | Sebagian sudah ada model |
 | Analisis solver | DC, transient, AC, noise, distorsi, sensitivitas | Ada |
 | Netlist GUI | 1 | Ekstraksi dan DC check |
@@ -36,7 +37,7 @@ fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 
 | ID | Keputusan |
 |---|---|
-| Q01 | 500 entri bertahap; milestone pertama 375 solver-backed |
+| Q01 | 500 entri bertahap; milestone pertama 379 solver-backed |
 | Q02 | Compact model dengan parameter default per kelas |
 | Q03 | Model behavioral boleh dipakai dengan label fidelity |
 | Q04 | Co-sim AVR dan analog dikerjakan paling akhir |
@@ -63,7 +64,7 @@ fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 | Q25 | Hasil simulasi wajib deterministik |
 | Q26 | Structural penuh berarti gate-level untuk semua MCU dan memory |
 | Q27 | ngspice diinstal lokal |
-| Q28 | Passive dan source menjadi prioritas pertama setelah 375 |
+| Q28 | Passive dan source menjadi prioritas pertama setelah 379 |
 | Q29 | Board, enclosure, mounting, dan module boleh unsupported |
 | Q30 | Semua net diprobe pada full rate |
 | Q31 | AVR memakai structural penuh |
@@ -203,7 +204,7 @@ dan komponen unsupported punya alasan yang dapat ditampilkan.
 **Acceptance S1:** rangkaian R-C sederhana menghasilkan node dan device
 yang sama dengan referensi manual.
 
-## 6. Fase S2 - Integrasi Solver 375 Entri
+## 6. Fase S2 - Integrasi Solver 379 Entri
 
 - [x] S2-01 Tambahkan dependency `sim-analysis` ke `sim-gui`.
 - [x] S2-02 Tambahkan domain simulasi: `Avr`, `Analog`, `Mixed`.
@@ -224,7 +225,7 @@ yang sama dengan referensi manual.
     logic gate, dan transmission line lulus.
   - Relay dan logic diuji lewat `CircuitBuilder` langsung.
 
-**Acceptance S2:** minimal 375 entri solver-backed dapat masuk netlist
+**Acceptance S2:** minimal 379 entri solver-backed dapat masuk netlist
 dan menghasilkan DC operating point atau error yang jelas.
 
 ## 7. Fase S3 - Transient dan Probe
@@ -293,19 +294,19 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
 
 ## 9. Fase S5 - Model Compact dan Behavioral Non-MCU
 
-- [x] S5-01 Klasifikasikan 125 entri.
+- [x] S5-01 Klasifikasikan 121 entri.
   - Lihat `docs/62-behavioral-classification.md`.
   - Data per entry ada di `docs/data/behavioral-classification.csv`.
   - Kategori: compact, behavioral, digital, mixed-signal,
     structural, multidomain, RF, dan unsupported.
 - [~] S5-02 Gunakan `sim-cells` untuk logic, flip-flop, counter, dan
   multiplexer bila cocok.
-  - 50 entry digital sudah dapat dijalankan lewat `emucad digital`.
-  - Cakupan: 8 mux/decoder/encoder, 7 adder/comparator/parity/buffer,
-    10 flip-flop, 10 counter/shift, 4 level, 3 timer, 3 digital source,
-    dan 5 programmable logic/LUT.
-  - 13 entry digital lain belum: 3 special gate, 1 buffer, 2 level,
-    1 FSM, dan 6 serial interface.
+  - 62 entry logic dan peripheral sudah dapat dijalankan lewat
+    `emucad digital`.
+  - Cakupan: 8 mux/decoder/encoder, 8 adder/comparator/parity/buffer,
+    10 flip-flop, 10 counter/shift, 6 level/high-Z, 3 timer, 3 digital
+    source, 5 programmable logic/LUT, serta UART, SPI, I2C, dan CAN.
+  - 1 entry digital lain belum: Ethernet.
 - [x] S5-03 Tunda MCU dan memory ke fase S6; jangan membuat model
   sementara yang diklaim structural.
 - [x] S5-04 Buat model sensor dengan input lingkungan.
@@ -328,6 +329,7 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
   - 2 entry sine source sudah solver-backed.
   - 4 entry timer/oscillator sudah solver-backed; PLL belum.
   - 5 entry waveform/noise source sudah solver-backed.
+  - 4 entry MCU converter memakai behavioral converter.
   - 5 entry behavioral filter sudah solver-backed.
   - 5 entry behavioral math sudah solver-backed.
   - 5 entry behavioral detector sudah solver-backed.
@@ -363,18 +365,18 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
 
 | Kelompok | Entri | Blocker |
 |---|---:|---|
-| Digital logic | 13 | 50 sudah di domain digital; 13 belum, termasuk special gate, buffer high-Z, FSM, dan serial. |
-| Structural MCU dan memory | 26 | Butuh gate-level 11 MCU dan 15 memory; scope ada di `docs/64-gate-level.md`. |
+| Digital logic | 1 | 62 sudah di domain digital; 1 belum, yaitu Ethernet. |
+| Structural MCU dan memory | 11 | 15 dari 15 memory sudah gate-level; butuh 11 MCU. Scope ada di `docs/64-gate-level.md`. |
 | RF | 14 | Mixer, filter, antenna, dan coupler butuh S-parameter dan solver dua-port. |
 | Board module | 14 | Board-level module belum punya batas dan referensi yang cukup. |
-| Mixed-signal ADC | 5 | Butuh sampling, kuantisasi, dan antarmuka digital. |
+| Mixed-signal ADC | 1 | R-2R DAC membutuhkan bus multi-bit; 4 converter lain sudah dipetakan. |
 | Behavioral source | 2 | Behavioral voltage/current membutuhkan parser ekspresi bebas. |
 | R-2R DAC | 1 | Butuh bus multi-bit; katalog hanya menyediakan 4 pin. |
-| **Total** | **75** | |
+| **Total** | **44** | |
 
-Dari 125 entry yang belum analog solver-backed, 50 sudah dapat
+Dari 121 entry yang belum analog solver-backed, 77 sudah dapat
 dijalankan melalui domain digital. Sisa yang belum punya model sama
-sekali adalah 75 entry.
+sekali adalah 44 entry.
 
 **Acceptance S5:** setiap entri non-MCU yang diklaim simulatable punya
 model, input, output, dan referensi yang jelas.
@@ -394,10 +396,21 @@ model, input, output, dan referensi yang jelas.
 - [~] S6-03 Implementasikan memory gate-level.
   - Register file digital 32x8/16/64 sudah ada dan diukur.
   - Sel SRAM 6T transistor-level ada sebagai referensi.
-  - DRAM, ROM, PROM, EEPROM, Flash, FRAM, MRAM, NVRAM, controller,
-    dan module belum.
+  - Sel SRAM digital 1-bit dan array 128x8 (1024 bit) sudah ada.
+  - Array non-volatile untuk EEPROM, Flash, FRAM, MRAM, dan NVRAM sudah
+    ada dengan retensi setelah reset.
+  - ROM dan PROM memakai array dengan port load; PROM satu kali per kata.
+  - Memory module dan controller generik sudah ada.
+  - Sel DRAM dengan refresh sudah ada; array DRAM belum.
+  - SPI flash bit-serial sudah ada.
+  - I2C EEPROM dengan random read sudah ada.
+  - SD card dengan satu blok 512 byte sudah ada.
+  - Seluruh 15 entry memory sudah memiliki model digital.
 - [~] S6-04 Gunakan `sim-cells` untuk sel memory dan logic.
   - AVR datapath, register bank, ALU, dan register file memakai
+    `sim-cells`.
+  - Seluruh entry memory katalog (SRAM, non-volatile, ROM, PROM,
+    module, controller, SPI flash, I2C EEPROM, dan SD card) memakai
     `sim-cells`.
   - Sel memory digital lain belum.
 - [~] S6-05 Tambahkan model interface dan timing.
@@ -411,6 +424,7 @@ model, input, output, dan referensi yang jelas.
   - Lihat `docs/64-gate-level.md` dan `docs/63-fidelity.md`.
 - [~] S6-08 Ukur waktu build dan waktu simulasi per MCU dan memory.
   - AVR dan register file sudah diukur.
+  - Array SRAM 128x8 sudah diuji fungsi dan diukur: 25199.5 ns/op pada desktop Linux x86_64.
   - MCU dan memory lain belum ada.
 
 **Acceptance S6:** semua MCU dan memory yang dipilih memiliki model
@@ -525,7 +539,7 @@ dokumentasi menyebut batas fidelity.
 
 ## 15. Definition of Done
 
-- [ ] Minimal 375 entri solver-backed dapat disimulasikan pada milestone
+- [ ] Minimal 379 entri solver-backed dapat disimulasikan pada milestone
   pertama.
 - [ ] Seluruh 500 entri memiliki status simulasi yang jelas.
 - [ ] Netlist GUI tervalidasi.

@@ -1,6 +1,6 @@
 # 62 - Klasifikasi Entry Behavioral
 
-Dokumen ini mengklasifikasikan 125 entry katalog yang belum memiliki
+Dokumen ini mengklasifikasikan 121 entry katalog yang belum memiliki
 model solver. Tujuannya menentukan model apa yang harus dibuat pada S5
 dan mana yang harus menunggu fase lain.
 
@@ -30,8 +30,8 @@ Data per entry ada di
 | `structural` | 26 |
 | `rf` | 14 |
 | `unsupported` | 14 |
-| `mixed-signal` | 5 |
-| **Total** | **125** |
+| `mixed-signal` | 1 |
+| **Total** | **121** |
 
 ## 3. Prioritas
 
@@ -84,6 +84,9 @@ Urutan implementasi yang disarankan:
    - 5 entry behavioral detector memakai threshold dan state.
    - 4 entry behavioral oscillator memakai phase dan modulasi; PLL belum.
    - 4 entry behavioral converter memakai sampling dan kuantisasi.
+   - 4 entry MCU converter memakai model behavioral converter.
+   - 77 entry dapat dijalankan di domain digital: 62 logic/peripheral
+     dan 15 memory gate-level.
    - Polynomial dan table source memakai model waktu.
    - Dua PLL memakai frequency multiplier dengan phase reset.
    - 14 entry RF lain menunggu S-parameter dan solver dua-port.
@@ -104,7 +107,7 @@ P1 compact-analog selesai pada level model. Tidak ada entry
 
 ## 6. Acceptance S5-01
 
-- CSV mencakup tepat 125 entry behavioral.
+- CSV mencakup tepat 121 entry behavioral.
 - Setiap entry punya satu kategori yang valid.
 - Setiap kategori punya fase dan prioritas.
 - Tidak ada entry yang hilang atau duplikat.

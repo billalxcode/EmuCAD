@@ -10,6 +10,8 @@ pub struct DigitalConfig {
     pub pattern: u8,
     /// Truth table for a four-input LUT.
     pub mask: u16,
+    /// Transition table for the three-input finite state machine.
+    pub fsm: u16,
 }
 
 impl Default for DigitalConfig {
@@ -17,6 +19,7 @@ impl Default for DigitalConfig {
         Self {
             pattern: 0xa5,
             mask: 0x0008,
+            fsm: 0x0605,
         }
     }
 }
@@ -104,12 +107,71 @@ pub fn digital_entry_with_config(
         "logic.programmable.fpga_logic_block" => {
             lut_entry("logic.programmable.fpga_logic_block", config.mask)
         }
+        "logic.gate_special.open_drain_buffer" => {
+            open_drain_entry("logic.gate_special.open_drain_buffer")
+        }
+        "logic.gate_special.tristate_buffer" => {
+            tristate_entry("logic.gate_special.tristate_buffer")
+        }
+        "logic.gate_special.transmission_gate" => {
+            tristate_entry("logic.gate_special.transmission_gate")
+        }
+        "logic.adder.bidirectional_buffer" => {
+            bidirectional_entry("logic.adder.bidirectional_buffer")
+        }
+        "logic.level.bidirectional_level_shifter" => {
+            bidirectional_entry("logic.level.bidirectional_level_shifter")
+        }
+        "logic.level.open_drain_level_shifter" => {
+            open_drain_entry("logic.level.open_drain_level_shifter")
+        }
+        "mcu.serial.uart" => crate::catalog_uart::uart_entry(),
+        "mcu.serial.spi" => crate::catalog_spi::spi_entry(),
+        "mcu.serial.i2c" => crate::catalog_i2c::i2c_entry(),
+        "mcu.serial.can" => crate::catalog_can::can_entry(),
+        "mcu.serial.usb" => crate::catalog_usb::usb_token_entry(),
+        "logic.programmable.finite_state_machine" => fsm_entry(config.fsm),
+        "memory.device.sram_cell" => {
+            crate::catalog_memory::sram_cell_entry("memory.device.sram_cell")
+        }
+        "memory.device.dram_cell" => {
+            crate::catalog_memory::dram_cell_entry("memory.device.dram_cell")
+        }
+        "memory.device.sram_array" => {
+            crate::catalog_memory::memory_array_entry("memory.device.sram_array", false)
+        }
+        "memory.device.eeprom" => {
+            crate::catalog_memory::memory_array_entry("memory.device.eeprom", true)
+        }
+        "memory.device.flash" => {
+            crate::catalog_memory::memory_array_entry("memory.device.flash", true)
+        }
+        "memory.device.fram" => {
+            crate::catalog_memory::memory_array_entry("memory.device.fram", true)
+        }
+        "memory.device.mram" => {
+            crate::catalog_memory::memory_array_entry("memory.device.mram", true)
+        }
+        "memory.device.nvram" => {
+            crate::catalog_memory::memory_array_entry("memory.device.nvram", true)
+        }
+        "memory.device.rom" => crate::catalog_memory::rom_array_entry("memory.device.rom"),
+        "memory.device.prom" => crate::catalog_memory::prom_array_entry("memory.device.prom"),
+        "memory.device.memory_module" => {
+            crate::catalog_memory::memory_module_entry("memory.device.memory_module")
+        }
+        "memory.device.memory_controller" => {
+            crate::catalog_memory::memory_controller_entry("memory.device.memory_controller")
+        }
+        "memory.device.spi_flash" => crate::catalog_flash::spi_flash_entry(),
+        "memory.device.i2c_eeprom" => crate::catalog_eeprom::i2c_eeprom_entry(),
+        "memory.device.sd_card" => crate::catalog_sd::sd_card_entry(),
         _ => return Ok(None),
     };
     Ok(Some(entry))
 }
 
-fn finish(
+pub(crate) fn finish(
     id: &'static str,
     build: impl FnOnce(&mut DigitalBuilder) -> (Vec<&'static str>, Vec<&'static str>),
 ) -> DigitalEntry {
@@ -821,26 +883,100 @@ fn pattern_entry(pattern: u8) -> DigitalEntry {
     })
 }
 
+fn lut(builder: &mut DigitalBuilder, inputs: &[NetId], mask: u16) -> NetId {
+    let count = 1usize << inputs.len();
+    let mut level: Vec<NetId> = (0..count)
+        .map(|index| builder.constant(mask & (1 << index) != 0))
+        .collect();
+    for select in inputs {
+        level = level
+            .chunks(2)
+            .map(|pair| builder.mux(pair[0], pair[1], *select))
+            .collect();
+    }
+    level[0]
+}
+
 fn lut_entry(id: &'static str, mask: u16) -> DigitalEntry {
     finish(id, |builder| {
-        let inputs: Vec<NetId> = (0..4)
-            .map(|index| builder.input(&format!("a{index}")))
-            .collect();
-        let mut level: Vec<NetId> = (0..16)
-            .map(|index| builder.constant(mask & (1 << index) != 0))
-            .collect();
-        for (stage, select) in inputs.iter().enumerate() {
-            level = level
-                .chunks(2)
-                .map(|pair| builder.mux(pair[0], pair[1], *select))
-                .collect();
-            if level.len() == 1 {
-                break;
-            }
-            let _ = stage;
-        }
-        builder.output("y", level[0]);
+        let inputs = [
+            builder.input("a0"),
+            builder.input("a1"),
+            builder.input("a2"),
+            builder.input("a3"),
+        ];
+        let output = lut(builder, &inputs, mask);
+        builder.output("y", output);
         (vec!["a0", "a1", "a2", "a3"], vec!["y"])
+    })
+}
+
+fn fsm_entry(mask: u16) -> DigitalEntry {
+    finish("logic.programmable.finite_state_machine", |builder| {
+        let reset = builder.input("reset");
+        let input = builder.input("in");
+        let first = builder.net();
+        let second = builder.net();
+        let next_first = lut(builder, &[first, second, input], mask & 0x00ff);
+        let next_second = lut(builder, &[first, second, input], (mask >> 8) & 0x00ff);
+        let not_reset = builder.not(reset);
+        let next_first = builder.and(next_first, not_reset);
+        let next_second = builder.and(next_second, not_reset);
+        builder.dff_into(next_first, first);
+        builder.dff_into(next_second, second);
+        builder.output("q0", first);
+        builder.output("q1", second);
+        (vec!["reset", "in"], vec!["q0", "q1"])
+    })
+}
+
+fn open_drain_entry(id: &'static str) -> DigitalEntry {
+    finish(id, |builder| {
+        let input = builder.input("a");
+        let enable = builder.input("en");
+        let not_input = builder.not(input);
+        let driving = builder.and(enable, not_input);
+        let released = builder.not(driving);
+        let low = builder.constant(false);
+        builder.output("y", low);
+        builder.output("z", released);
+        (vec!["a", "en"], vec!["y", "z"])
+    })
+}
+
+fn tristate_entry(id: &'static str) -> DigitalEntry {
+    finish(id, |builder| {
+        let input = builder.input("a");
+        let enable = builder.input("en");
+        let output = builder.and(input, enable);
+        let released = builder.not(enable);
+        builder.output("y", output);
+        builder.output("z", released);
+        (vec!["a", "en"], vec!["y", "z"])
+    })
+}
+
+fn bidirectional_entry(id: &'static str) -> DigitalEntry {
+    finish(id, |builder| {
+        let a = builder.input("a");
+        let b = builder.input("b");
+        let direction = builder.input("dir");
+        let enable = builder.input("en");
+        let to_a = builder.and(enable, direction);
+        let not_direction = builder.not(direction);
+        let to_b = builder.and(enable, not_direction);
+        let y_a = builder.and(b, to_a);
+        let y_b = builder.and(a, to_b);
+        let z_a = builder.not(to_a);
+        let z_b = builder.not(to_b);
+        builder.output("y_a", y_a);
+        builder.output("z_a", z_a);
+        builder.output("y_b", y_b);
+        builder.output("z_b", z_b);
+        (
+            vec!["a", "b", "dir", "en"],
+            vec!["y_a", "z_a", "y_b", "z_b"],
+        )
     })
 }
 
@@ -1062,6 +1198,7 @@ mod tests {
             super::DigitalConfig {
                 pattern: 0,
                 mask: 0x0008,
+                fsm: 0x0605,
             },
         )
         .expect("build")
@@ -1082,6 +1219,7 @@ mod tests {
             super::DigitalConfig {
                 pattern: 0x01,
                 mask: 0,
+                fsm: 0x0605,
             },
         )
         .expect("build")
@@ -1089,6 +1227,68 @@ mod tests {
         entry.circuit.set_input("reset", true).expect("input");
         entry.circuit.tick().expect("tick");
         assert_eq!(entry.circuit.output("q0"), Some(true));
+    }
+
+    #[test]
+    fn open_drain_releases_when_input_high() {
+        let mut entry = entry("logic.gate_special.open_drain_buffer");
+        entry.circuit.set_input("a", false).expect("input");
+        entry.circuit.set_input("en", true).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("y"), Some(false));
+        assert_eq!(entry.circuit.output("z"), Some(false));
+        entry.circuit.set_input("a", true).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("z"), Some(true));
+    }
+
+    #[test]
+    fn tristate_releases_when_disabled() {
+        let mut entry = entry("logic.gate_special.tristate_buffer");
+        entry.circuit.set_input("a", true).expect("input");
+        entry.circuit.set_input("en", false).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("z"), Some(true));
+        entry.circuit.set_input("en", true).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("y"), Some(true));
+        assert_eq!(entry.circuit.output("z"), Some(false));
+    }
+
+    #[test]
+    fn bidirectional_buffer_drives_one_side() {
+        let mut entry = entry("logic.adder.bidirectional_buffer");
+        entry.circuit.set_input("a", true).expect("input");
+        entry.circuit.set_input("b", false).expect("input");
+        entry.circuit.set_input("dir", false).expect("input");
+        entry.circuit.set_input("en", true).expect("input");
+        entry.circuit.settle().expect("settle");
+        assert_eq!(entry.circuit.output("y_b"), Some(true));
+        assert_eq!(entry.circuit.output("z_b"), Some(false));
+        assert_eq!(entry.circuit.output("z_a"), Some(true));
+    }
+
+    #[test]
+    fn fsm_counter_cycles_through_states() {
+        let mut entry = super::digital_entry_with_config(
+            "logic.programmable.finite_state_machine",
+            super::DigitalConfig {
+                pattern: 0,
+                mask: 0,
+                fsm: 0x0605,
+            },
+        )
+        .expect("build")
+        .expect("entry");
+        entry.circuit.tick().expect("tick");
+        assert_eq!(entry.circuit.output("q0"), Some(true));
+        assert_eq!(entry.circuit.output("q1"), Some(false));
+        entry.circuit.tick().expect("tick");
+        assert_eq!(entry.circuit.output("q1"), Some(true));
+        entry.circuit.tick().expect("tick");
+        entry.circuit.tick().expect("tick");
+        assert_eq!(entry.circuit.output("q0"), Some(false));
+        assert_eq!(entry.circuit.output("q1"), Some(false));
     }
 
     #[test]
