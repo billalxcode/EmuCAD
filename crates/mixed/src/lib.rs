@@ -248,14 +248,51 @@ mod tests {
         resistance: f64,
         capacitance: f64,
     ) {
-        let resistor = BTreeMap::from([("resistance".to_string(), resistance)]);
+        add_resistor(builder, "R1", source, output, resistance);
+        add_capacitor(builder, "C1", output, ground, capacitance);
+    }
+
+    fn add_resistor(
+        builder: &mut CircuitBuilder,
+        name: &str,
+        first: NodeId,
+        second: NodeId,
+        resistance: f64,
+    ) {
+        let params = BTreeMap::from([("resistance".to_string(), resistance)]);
         builder
-            .device("R1", DeviceKind::Resistor, vec![source, output], resistor)
-            .expect("R1");
-        let capacitor = BTreeMap::from([("capacitance".to_string(), capacitance)]);
+            .device(name, DeviceKind::Resistor, vec![first, second], params)
+            .expect("resistor");
+    }
+
+    fn add_capacitor(
+        builder: &mut CircuitBuilder,
+        name: &str,
+        first: NodeId,
+        second: NodeId,
+        capacitance: f64,
+    ) {
+        let params = BTreeMap::from([("capacitance".to_string(), capacitance)]);
         builder
-            .device("C1", DeviceKind::Capacitor, vec![output, ground], capacitor)
-            .expect("C1");
+            .device(name, DeviceKind::Capacitor, vec![first, second], params)
+            .expect("capacitor");
+    }
+
+    fn thevenin_rc_circuit(
+        series: f64,
+        resistance: f64,
+        capacitance: f64,
+    ) -> (Circuit, DeviceId, NodeId) {
+        let mut builder = CircuitBuilder::new();
+        let source = builder.node("in").expect("node");
+        let middle = builder.node("mid").expect("node");
+        let output = builder.node("out").expect("node");
+        let ground = builder.ground();
+        let source_id = add_source(&mut builder, source, ground);
+        add_resistor(&mut builder, "R0", source, middle, series);
+        add_resistor(&mut builder, "R1", middle, output, resistance);
+        add_capacitor(&mut builder, "C1", output, ground, capacitance);
+        (builder.build().expect("circuit"), source_id, output)
     }
 
     fn clock_entry() -> DigitalEntry {
@@ -334,8 +371,8 @@ mod tests {
     }
 
     #[test]
-    fn avr_pin_drives_analog_rc() {
-        let (circuit, source, node) = rc_circuit(1000.0, 1e-6);
+    fn avr_pin_drives_thevenin_rc() {
+        let (circuit, source, node) = thevenin_rc_circuit(45.0, 1000.0, 1e-6);
         let pin = AvrPin {
             port: 0,
             bit: 5,

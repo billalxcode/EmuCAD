@@ -453,8 +453,9 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
 - [~] S7-05 Petakan pin AVR ke node netlist.
   - Board simulation memetakan PB5 dan pin LED.
   - Pemetaan penuh 32 pin belum.
-- [ ] S7-06 Hubungkan pin electrical sebagai Thevenin.
-  - Belum diimplementasikan untuk semua pin.
+- [~] S7-06 Hubungkan pin electrical sebagai Thevenin.
+  - Satu pin AVR output diuji dengan resistor seri 45 ohm menuju RC.
+  - Pemetaan Thevenin untuk semua pin belum.
 - [ ] S7-07 Tambahkan breakpoint saat pin berubah.
   - Belum ada breakpoint pin di co-sim.
 - [~] S7-08 Hubungkan ADC, PWM, timer, dan UART.

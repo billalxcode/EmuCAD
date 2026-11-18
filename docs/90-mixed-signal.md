@@ -65,7 +65,8 @@ Test `analog_feedback_drives_digital_inverter`:
 Test `avr_pin_drives_analog_rc`:
 
 - Program blink AVR menggerakkan PB5.
-- PB5 mengubah sumber tegangan RC 1 kohm dan 1 uF.
+- PB5 dihubungkan lewat resistor seri 45 ohm (Thevenin) ke RC 1 kohm
+  dan 1 uF.
 - Node analog mengikuti level PB5.
 - Program dan pin AVR berjalan bersama transient analog.
 
