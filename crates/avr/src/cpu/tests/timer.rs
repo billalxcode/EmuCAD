@@ -117,3 +117,20 @@ fn timer0_pwm_output_from_cpu() {
     cpu.step().expect("nop");
     assert!(!cpu.pwm_a());
 }
+
+#[test]
+fn set_timer0_prescaler_applies_clock_select() {
+    let mut cpu = Cpu::new(vec![0xCFFF]).expect("cpu");
+    cpu.set_timer0_prescaler(2).expect("prescaler");
+    cpu.step().expect("step");
+    assert_eq!(cpu.io(0x25) & 0x07, 2);
+    assert_eq!(cpu.timer0().counter(), 0);
+}
+
+#[test]
+fn set_timer0_prescaler_rejects_stopped_clock() {
+    let mut cpu = Cpu::new(vec![0xCFFF]).expect("cpu");
+    assert!(cpu.set_timer0_prescaler(0).is_err());
+    assert!(cpu.set_timer0_prescaler(6).is_err());
+    assert_eq!(cpu.io(0x25) & 0x07, 0);
+}

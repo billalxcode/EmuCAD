@@ -9,6 +9,24 @@ impl Cpu {
 }
 
 impl Cpu {
+    /// Returns the Timer0 core for configuration.
+    pub fn timer0(&mut self) -> &mut Timer0 {
+        &mut self.datapath.timers.timer0
+    }
+
+    /// Selects the Timer0 clock source through TCCR0B.
+    pub fn set_timer0_prescaler(&mut self, select: u8) -> Result<(), SimError> {
+        if !(1..=5).contains(&select) {
+            return Err(SimError::InvalidNetlist(
+                "invalid Timer0 clock select".to_string(),
+            ));
+        }
+        self.io[0x25] = select;
+        self.apply_timer0_clock()
+    }
+}
+
+impl Cpu {
     /// Returns the Timer1 core for configuration.
     pub fn timer1(&mut self) -> &mut Timer1 {
         &mut self.datapath.timers.timer1
