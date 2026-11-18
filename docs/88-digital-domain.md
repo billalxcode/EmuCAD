@@ -6,7 +6,7 @@ Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
 ## 1. Cakupan
 
 Domain digital memakai `DigitalCircuit` dua-state dengan input dan
-output bernama. Saat ini 77 entry katalog sudah dapat dijalankan:
+output bernama. Saat ini 78 entry katalog sudah dapat dijalankan:
 
 | Kelompok | Entry |
 |---|---|
@@ -22,7 +22,7 @@ output bernama. Saat ini 77 entry katalog sudah dapat dijalankan:
 | Digital source | clock, PRBS, pattern |
 | Programmable | PAL, GAL, CPLD, FPGA logic block, lookup table (LUT 4-input), FSM 3-input |
 | High-Z | open-drain, tri-state, transmission gate, bidirectional buffer, bidirectional/open-drain level |
-| Serial | UART, SPI, I2C master, CAN transmitter, dan USB token |
+| Serial | UART, SPI, I2C master, CAN, USB token, dan Ethernet frame |
 | Memory | sel SRAM/DRAM, array, ROM, PROM, module, controller, SPI flash, I2C EEPROM, dan SD card |
 
 ## 2. Perintah
@@ -73,7 +73,7 @@ Port ditentukan per entry, bukan dari jumlah pin katalog. Contoh:
 - Tidak ada timing, setup/hold, atau propagation delay.
 - Memory array memakai sel DFF, bukan transistor, dan belum memiliki
   timing akses, refresh, atau retensi non-volatile.
-- Ethernet belum didukung.
+- Tidak ada entry digital yang tersisa.
 
 ## 5. High-Z
 
@@ -132,7 +132,23 @@ driver harus memakai sinyal `z` di tingkat rangkaian.
 - Hanya token packet; data packet, handshake packet, dan device stack
   belum didukung.
 
-## 9. Memory
+## 9. Ethernet
+
+`mcu.serial.ethernet` adalah transmitter frame Ethernet II:
+
+- Input: `reset`, `start`, `dest0..dest47`, `src0..src47`,
+  `type0..type15`, dan `data0..data63`.
+- Output: `tx`, `tx_en`, `busy`, `done`.
+- Frame: preamble 7 x `0x55`, SFD `0xD5`, MAC tujuan 6 byte,
+  MAC sumber 6 byte, EtherType 2 byte, payload 8 byte, padding 38
+  byte nol, dan FCS 4 byte.
+- CRC32 memakai polinomial reflected `0xEDB88320`, inisialisasi semua
+  1, dan hasil di-XOR dengan semua 1 sebelum dikirim little-endian.
+- Satu tick adalah satu bit dan setiap byte dikirim LSB-first.
+- Payload tetap 8 byte; streaming payload, VLAN, dan frame length
+  variable belum didukung.
+
+## 10. Memory
 
 Lima belas entry memory memakai model digital:
 
@@ -182,13 +198,12 @@ multi-block, atau timing. Ukuran blok SD tidak mengikuti parameter
 kapasitas katalog. Controller bersifat generik, bukan controller DRAM
 dengan refresh dan scheduling.
 
-## 10. Entry Digital yang Belum Didukung
+## 11. Entry Digital yang Belum Didukung
 
-Masih ada 1 entry digital di luar domain ini:
+Tidak ada entry digital yang tersisa. Seluruh entry logic,
+peripheral, dan memory sudah masuk domain digital.
 
-- Ethernet.
-
-## 11. Verifikasi
+## 12. Verifikasi
 
 Test domain digital mencakup:
 
@@ -229,6 +244,8 @@ Test domain digital mencakup:
   CMD1, dan menolak perintah yang tidak dikenal.
 - USB token SOF dan IN cocok dengan reference vector, termasuk CRC5,
   NRZI, bit stuffing, dan EOP.
+- Ethernet frame memiliki preamble, header, payload, padding 38 byte,
+  dan FCS CRC32 yang cocok dengan reference vector.
 - I2C mengirim address dan data MSB-first, menghasilkan START/STOP,
   dan menandai NACK saat ACK tidak diberikan.
 - CAN mengirim frame 2.0A dengan CRC-15 dan satu bit stuff, lalu
@@ -240,7 +257,7 @@ Test domain digital mencakup:
 - Decade counter kembali ke nol setelah sepuluh tick.
 - Shift register memindahkan data.
 
-## 12. Referensi
+## 13. Referensi
 
 - Logic gate, dasar gerbang dua-state:
   https://en.wikipedia.org/wiki/Logic_gate
@@ -260,6 +277,8 @@ Test domain digital mencakup:
   https://www.usb.org/document-library/usb-20-specification
 - USB CRC5, contoh dan implementasi:
   https://www.usb.org/sites/default/files/crcdes.pdf
+- Ethernet frame dan FCS:
+  https://en.wikipedia.org/wiki/Ethernet_frame
 - CRC-15-CAN, polinomial dan properti:
   https://www.can-cia.org/can-knowledge/cyclic-redundancy-check-crc-in-can-frames
 - Adder, penjumlahan biner:

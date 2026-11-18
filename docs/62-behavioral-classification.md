@@ -85,7 +85,7 @@ Urutan implementasi yang disarankan:
    - 4 entry behavioral oscillator memakai phase dan modulasi; PLL belum.
    - 4 entry behavioral converter memakai sampling dan kuantisasi.
    - 4 entry MCU converter memakai model behavioral converter.
-   - 77 entry dapat dijalankan di domain digital: 62 logic/peripheral
+   - 78 entry dapat dijalankan di domain digital: 63 logic/peripheral
      dan 15 memory gate-level.
    - Polynomial dan table source memakai model waktu.
    - Dua PLL memakai frequency multiplier dengan phase reset.
