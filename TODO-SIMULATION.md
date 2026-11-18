@@ -456,8 +456,9 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
 - [~] S7-06 Hubungkan pin electrical sebagai Thevenin.
   - Satu pin AVR output diuji dengan resistor seri 45 ohm menuju RC.
   - Pemetaan Thevenin untuk semua pin belum.
-- [ ] S7-07 Tambahkan breakpoint saat pin berubah.
-  - Belum ada breakpoint pin di co-sim.
+- [~] S7-07 Tambahkan breakpoint saat pin berubah.
+  - `run_until_pin_change` berhenti pada perubahan satu pin AVR.
+  - Breakpoint untuk semua pin dan event queue belum.
 - [~] S7-08 Hubungkan ADC, PWM, timer, dan UART.
   - Peripheral AVR sudah ada di `avr`.
   - Satu pin GPIO AVR sudah terhubung ke RC analog lewat `mixed`.

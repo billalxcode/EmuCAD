@@ -140,6 +140,8 @@ pub struct AvrSession {
     analog: TransientSession,
     pin: AvrPin,
     voltage: f64,
+    level: bool,
+    pin_changed: bool,
 }
 
 impl AvrSession {
@@ -157,6 +159,8 @@ impl AvrSession {
             analog,
             pin,
             voltage: 0.0,
+            level: false,
+            pin_changed: false,
         })
     }
 
@@ -179,7 +183,37 @@ impl AvrSession {
             .set_source_voltage(self.pin.source, state.voltage)?;
         let sample = self.analog.step()?;
         self.voltage = sample.solution.voltage(self.pin.node).unwrap_or(0.0);
+        self.update_pin(state.voltage);
         Ok(trace)
+    }
+
+    fn update_pin(&mut self, voltage: f64) {
+        let level = voltage >= self.pin.config.input_threshold;
+        self.pin_changed = level != self.level;
+        self.level = level;
+    }
+
+    /// Returns the current digital pin level.
+    #[must_use]
+    pub fn pin_level(&self) -> bool {
+        self.level
+    }
+
+    /// Returns true when the last step changed the pin level.
+    #[must_use]
+    pub fn pin_changed(&self) -> bool {
+        self.pin_changed
+    }
+
+    /// Runs until the pin changes or the step limit is reached.
+    pub fn run_until_pin_change(&mut self, max_steps: usize) -> Result<Option<AvrTrace>, SimError> {
+        for _ in 0..max_steps {
+            let trace = self.step()?;
+            if self.pin_changed {
+                return Ok(trace);
+            }
+        }
+        Ok(None)
     }
 
     /// Returns the AVR CPU.
@@ -405,6 +439,23 @@ mod tests {
             voltage_low |= voltage < 2.0;
         }
         (high, low, voltage_high, voltage_low)
+    }
+
+    #[test]
+    fn avr_pin_change_breakpoint_stops() {
+        let (circuit, source, node) = thevenin_rc_circuit(45.0, 1000.0, 1e-6);
+        let pin = AvrPin {
+            port: 0,
+            bit: 5,
+            source,
+            node,
+            config: PinElectricalConfig::default(),
+            external_resistance: 1000.0,
+        };
+        let mut session = AvrSession::new(blink_program(), &circuit, &config(1e-5, 10_000), pin)
+            .expect("session");
+        assert!(session.run_until_pin_change(5000).expect("run").is_some());
+        assert!(session.run_until_pin_change(5000).expect("run").is_some());
     }
 
     fn count_toggles(session: &mut MixedSession, steps: usize) -> usize {

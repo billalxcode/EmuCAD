@@ -22,6 +22,9 @@ Prototipe ini membuktikan urutan deterministik:
 - `time()`.
 - `voltage()`.
 - `digital_output()`.
+- `pin_level()`.
+- `pin_changed()`.
+- `run_until_pin_change(max_steps)`.
 
 `PinLink` menghubungkan output digital ke sumber tegangan dan node
 analog. `PinInput` opsional membandingkan node analog dengan threshold
@@ -70,12 +73,18 @@ Test `avr_pin_drives_analog_rc`:
 - Node analog mengikuti level PB5.
 - Program dan pin AVR berjalan bersama transient analog.
 
+Test `avr_pin_change_breakpoint_stops`:
+
+- `run_until_pin_change` berhenti saat level PB5 berubah.
+- Dua breakpoint berturut-turut ditemukan dalam batas langkah.
+
 ## 5. Batas
 
 - Umpan balik analog hanya satu input dan satu threshold.
 - Satu tick digital sama dengan satu `dt` analog.
 - AvrSession hanya satu pin dan satu sumber tegangan.
-- Belum ada queue event, interpolasi, atau breakpoint pin.
+- Breakpoint hanya pada satu pin.
+- Belum ada queue event atau interpolasi.
 - AVR masih hybrid, bukan full-chip structural.
 - Hanya sumber tegangan yang dapat diubah.
 
