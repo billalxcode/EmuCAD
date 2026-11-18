@@ -3,7 +3,7 @@
 Dokumen ini merancang GUI interaktif berbasis egui untuk eksplorasi,
 penempatan komponen, probing, dan pengujian simulasi.
 
-**Status:** G0 dan G1 awal sudah diimplementasikan: crate `sim-gui`, app
+**Status:** G0 dan G1 awal sudah diimplementasikan: crate `gui`, app
 shell, canvas, grid, pan, zoom, status bar, dan test kamera. Library
 komponen awal, placement ghost, selection, drag move, rotate, mirror,
 inspector dasar, wire ortogonal, junction otomatis, warna net,
@@ -24,12 +24,12 @@ Probe net generik memerlukan integrasi netlist; probe PB5 dan arus LED
 sudah berjalan melalui API read-only. Golden RGBA headless sudah ada
 dengan snapshot 320 x 240 dan prosedur di `docs/59-gui-golden.md`.
 Dependensi
-GUI yang disetujui hanya untuk crate `sim-gui`: `egui`, `eframe`,
+GUI yang disetujui hanya untuk crate `gui`: `egui`, `eframe`,
 `serde`, `serde_json`, `rfd`, dan `png`. `egui_plot`,
 `libloading`, dan crate lain tidak diizinkan tanpa keputusan baru.
 
-**Rekomendasi:** buat crate baru `sim-gui` sebagai adapter/composition,
-mirip `sim-cli`. Semua crate simulasi tetap zero external dependency.
+**Rekomendasi:** buat crate baru `gui` sebagai adapter/composition,
+mirip `cli`. Semua crate simulasi tetap zero external dependency.
 `egui_plot` dan crate eksternal lain tidak termasuk pengecualian ini.
 
 ---
@@ -45,7 +45,7 @@ Aturan repository sebelumnya:
 
 `egui` dan `eframe` adalah dependensi eksternal.
 
-**Keputusan:** dependensi eksternal hanya diizinkan di crate `sim-gui`,
+**Keputusan:** dependensi eksternal hanya diizinkan di crate `gui`,
 yaitu `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png`.
 Semua crate lain tetap zero external dependency.
 `egui_plot`, `libloading`, dan crate eksternal lain tidak diizinkan tanpa
@@ -278,7 +278,7 @@ Setiap instance memiliki:
 - Recently used.
 - Filter berdasarkan tipe pin atau domain sinyal.
 - Simbol bawaan untuk MVP; editor simbol belum tersedia.
-- Simbol dimuat dari aset SVG di `crates/sim-gui/assets/symbols/`.
+- Simbol dimuat dari aset SVG di `crates/gui/assets/symbols/`.
 - Parser internal mendukung `path`, `line`, `rect`, `circle`, `ellipse`,
   `polyline`, `polygon`, group, style, dan transform dasar tanpa crate
   renderer baru.
@@ -291,7 +291,7 @@ Setiap instance memiliki:
 - Daftar library memakai `ScrollArea::show_rows` agar 500 entri tetap
   responsif.
 - Sumber, lisensi, dan perubahan aset dicatat di
-  `crates/sim-gui/assets/symbols/NOTICE.md`.
+  `crates/gui/assets/symbols/NOTICE.md`.
 - Aset yang gagal diparse tidak membuat aplikasi panic; test aset wajib
   lulus sebelum commit.
 
@@ -539,20 +539,20 @@ menyusul setelah alur dasar stabil.
 ## 11. Arsitektur
 
 ```text
-sim-gui (binary emucad-gui)
-  +-- sim-board
-  +-- sim-avr
-  +-- sim-analysis
-  +-- sim-device
-  `-- sim-core
+gui (binary emucad-gui)
+  +-- board
+  +-- avr
+  +-- analysis
+  +-- device
+  `-- kernel
 ```
 
 Aturan:
 
-- `sim-gui` adalah adapter/composition.
-- Runtime GUI tetap di `sim-gui`; ekstraksi ke crate bersama ditunda
+- `gui` adalah adapter/composition.
+- Runtime GUI tetap di `gui`; ekstraksi ke crate bersama ditunda
   karena monitor CLI sinkron dan worker GUI memakai batch serta channel.
-- Tidak ada crate simulasi yang bergantung pada `sim-gui`.
+- Tidak ada crate simulasi yang bergantung pada `gui`.
 - Model dokumen tidak memakai tipe egui.
 - Rendering egui hanya ada di layer UI.
 - Fungsi maksimal 20 baris, guard clause, dan test untuk logika.
@@ -574,7 +574,7 @@ Modul usulan:
 | `config` | XDG config dan recent files |
 | `theme` | Warna, LOD, aksesibilitas |
 
-Dependensi eksternal `sim-gui`:
+Dependensi eksternal `gui`:
 
 - `egui` dan `eframe` untuk UI.
 - `serde` dan `serde_json` untuk format proyek.
@@ -773,7 +773,7 @@ Test visual:
 
 ### 17.1 Keputusan utama
 
-1. `sim-gui` memakai `egui`, `eframe`, `serde`, `serde_json`, `rfd`,
+1. `gui` memakai `egui`, `eframe`, `serde`, `serde_json`, `rfd`,
    dan `png`.
 2. Grafik memakai widget internal, bukan `egui_plot`.
 3. Satu edge grid hanya boleh satu kabel.
@@ -847,16 +847,16 @@ Detail ini dibahas saat implementasi G0 dan G7.
 Build dan jalankan GUI:
 
 ```bash
-cargo run -p sim-gui
+cargo run -p gui
 ```
 
 Build release:
 
 ```bash
-cargo build --release -p sim-gui
+cargo build --release -p gui
 ./target/release/emucad-gui
 ```
 
-Crate berada di `crates/sim-gui` dengan binary `emucad-gui`.
+Crate berada di `crates/gui` dengan binary `emucad-gui`.
 
 Backlog eksekusi ada di [`TODO-GUI.md`](../TODO-GUI.md).

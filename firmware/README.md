@@ -31,7 +31,7 @@ eor r16, r18
 rjmp loop
 ```
 
-Encoding manual blink diuji di `crates/sim-avr/tests/blink.rs`.
+Encoding manual blink diuji di `crates/avr/tests/blink.rs`.
 Test membuktikan PORTB bit 5 toggle dan LED board menyala.
 
 ---
@@ -46,7 +46,7 @@ Test membuktikan PORTB bit 5 toggle dan LED board menyala.
 Jalankan demo:
 
 ```bash
-cargo run -p sim-avr --example timer_interrupt
+cargo run -p avr --example timer_interrupt
 ```
 
 ---
@@ -64,7 +64,7 @@ avr-objcopy -O ihex -R .eeprom blink.elf blink.hex
 ./target/debug/emucad run blink.hex 100000
 ```
 
-ELF juga dapat dimuat melalui API `sim_board::ElfImage`, lalu dikonversi
+ELF juga dapat dimuat melalui API `board::ElfImage`, lalu dikonversi
 ke Intel HEX dengan `to_hex()`.
 
 Setelah firmware dikompilasi, upload dapat dilakukan melalui virtual serial

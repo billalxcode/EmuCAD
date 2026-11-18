@@ -11,7 +11,7 @@ Proyek sudah berada pada tahap implementasi matang:
 
 - 8 crate Rust.
 - 751 test.
-- Nol dependensi Rust eksternal di crate simulasi; `sim-gui` memakai
+- Nol dependensi Rust eksternal di crate simulasi; `gui` memakai
   daftar dependensi yang disetujui.
 - Dokumentasi lengkap di `docs/`.
 - Release archive tersedia di `dist/`.

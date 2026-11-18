@@ -80,7 +80,7 @@ meninggalkan permintaan interrupt lama.
 - Sketsa Arduino core `Serial.println("Hello World")` menghasilkan output
   yang benar lewat `/dev/ttyACM0`.
 
-Total test `sim-avr`: 215.
+Total test `avr`: 215.
 
 ---
 

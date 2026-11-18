@@ -154,6 +154,6 @@ bash scripts/check-avr-realtime.sh
 - Threading tidak dijadikan prioritas untuk satu core AVR.
 - Threading hanya dipertimbangkan untuk UI, batch, atau banyak instance.
 - Hot path CPU sekarang fungsional. Primitif struktural tetap tersedia di
-  `sim-cells` dan `sim-avr` untuk validasi dan pengembangan mode struktural.
+  `cells` dan `avr` untuk validasi dan pengembangan mode struktural.
 - Angka benchmark adalah loop sintetis; firmware nyata dengan peripheral
   aktif perlu diukur terpisah.

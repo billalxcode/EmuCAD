@@ -1,15 +1,15 @@
 # 12 - Device Models
 
-Katalog device yang tersedia di `sim-device` dan parameter utamanya.
+Katalog device yang tersedia di `device` dan parameter utamanya.
 
 **Status:** seluruh device inti, device nonlinier, controlled source, switch,
-dan transmission line sudah diimplementasikan. Total test `sim-device`: 202.
+dan transmission line sudah diimplementasikan. Total test `device`: 202.
 
 ---
 
 ## 1a. Katalog generik 500
 
-`sim-device` juga menyediakan katalog 500 model generik melalui
+`device` juga menyediakan katalog 500 model generik melalui
 `catalog()`, `ComponentSpec`, `Family`, dan `ModelClass`. Katalog ini
 menjadi registry untuk Python builder dan pemetaan ke solver.
 
@@ -432,7 +432,7 @@ Test device mencakup:
 - Polynomial dan table voltage source.
 - Timer PLL dan behavioral PLL.
 
-Total test `sim-device`: 197 unit + 5 integration = 202.
+Total test `device`: 197 unit + 5 integration = 202.
 
 ---
 

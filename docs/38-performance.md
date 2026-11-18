@@ -90,7 +90,7 @@ CPU AVR memakai jalur fungsional untuk instruksi panas:
 - Peripheral serial dilewati saat tidak ada transfer aktif dan interrupt UART mati.
 
 Unit struktural ALU, shift, multiply, dan register bank tetap tersedia di
-`sim-cells` dan `sim-avr` untuk test dan pengembangan mode struktural.
+`cells` dan `avr` untuk test dan pengembangan mode struktural.
 Hot path `Cpu` tidak lagi membangun unit-unit itu.
 
 Hasil final, median tiga run, 1.000.000 instruksi, release build:
@@ -176,9 +176,9 @@ Angka ini bukan jaminan untuk mesin lain.
   bridge PTY setelah optimasi.
 - Seluruh test workspace lulus.
 
-Total test `sim-core`: 62.
-Total test `sim-cli`: 26.
-Total test `sim-gui`: 151.
+Total test `kernel`: 62.
+Total test `cli`: 26.
+Total test `gui`: 151.
 Total workspace: 751.
 
 ---

@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Generate crates/sim-device/src/catalog_data/ from the 500 entry plan.
+"""Generate crates/device/src/catalog_data/ from the 500 entry plan.
 
 Run from the repository root:
 
     python3 scripts/gen_component_catalog.py
+    cargo fmt --all
+
+The generator groups each family by the second ID segment, for example
+`analog.opamp` becomes `catalog_data/analog/opamp.rs`.
 """
 
 import re
@@ -58,6 +62,7 @@ def add(prefix, cls, device, pins, param, default, unit, names):
     })
 
 
+# --- passive ---
 add("passive.resistor", "Resistor", "Resistor", 2, "resistance", 1000.0, "ohm", [
     "ideal resistor", "temperature coefficient resistor", "potentiometer",
     "digital potentiometer", "NTC thermistor", "PTC thermistor",
@@ -92,6 +97,7 @@ add("passive.transmission_line", "TransmissionLine", "TransmissionLine", 4,
         "directional coupler",
     ])
 
+# --- source ---
 add("source.independent", "VoltageSource", "VoltageSource", 2, "voltage", 5.0, "V", [
     "DC voltage source",
 ])
@@ -157,6 +163,7 @@ add("source.battery", "Battery", "VoltageSource", 2, "voltage", 1.5, "V", [
     "battery", "solar cell",
 ])
 
+# --- diode ---
 add("diode.rectifier", "Diode", "Diode", 2, "is", 1e-12, "A", [
     "rectifier diode", "fast rectifier diode", "Schottky diode",
     "silicon carbide Schottky diode", "Zener diode", "avalanche diode",
@@ -194,6 +201,7 @@ add("diode.other", "Diode", "Diode", 2, "is", 1e-12, "A", [
     "backward diode", "Gunn diode", "IMPATT diode", "step recovery diode",
 ])
 
+# --- transistor ---
 add("transistor.bjt_npn", "Bjt", "Npn", 3, "beta", 100.0, "ratio", [
     "NPN small signal", "NPN power", "NPN RF", "NPN switching",
     "NPN Darlington", "NPN digital",
@@ -245,6 +253,7 @@ add("transistor.other", "OtherTransistor", "Put", 3, "vd", 0.7, "V", [
     "PUT",
 ])
 
+# --- protection ---
 add("protection.thyristor", "Thyristor", "Scr", 3, "vgt", 2.0, "V", [
     "SCR", "LASCR",
 ])
@@ -279,6 +288,7 @@ add("protection.breaker", "Protection", "Fuse", 2, "trip_current", 10.0, "A", [
     "circuit breaker",
 ])
 
+# --- switch ---
 add("switch.mechanical", "Switch", "IdealSwitch", 2, "ron", 0.1, "ohm", [
     "SPST switch", "SPDT switch", "DPST switch", "DPDT switch", "pushbutton",
     "toggle switch", "DIP switch", "reed switch",
@@ -298,6 +308,7 @@ add("switch.connector", "Connector", "Resistor", 2, "resistance", 0.001, "ohm", 
     "header connector", "terminal block", "jumper", "test point", "IC socket",
 ])
 
+# --- analog ---
 add("analog.opamp", "OpAmp", "OpAmp", 5, "gain", 100000.0, "ratio", [
     "ideal op-amp", "single op-amp", "dual op-amp", "quad op-amp",
     "rail-to-rail op-amp", "precision op-amp", "low noise op-amp",
@@ -338,6 +349,7 @@ add("analog.reference", "VoltageReference", "VoltageSource", 2, "voltage", 2.5, 
     "bandgap reference", "current reference",
 ])
 
+# --- logic ---
 add("logic.gate", "LogicGate", "LogicGate", 5, "vth", 2.5, "V", [
     "AND gate", "OR gate", "NOT gate", "NAND gate", "NOR gate", "XOR gate",
     "XNOR gate", "buffer", "Schmitt trigger",
@@ -376,12 +388,14 @@ add("logic.programmable", "ProgrammableLogic", None, 8, "macrocells", 16.0, "cou
     "look-up table",
 ])
 
+# --- memory ---
 add("memory.device", "Memory", None, 4, "capacity", 1024.0, "bit", [
     "SRAM cell", "SRAM array", "DRAM cell", "ROM", "PROM", "EEPROM",
     "Flash", "FRAM", "MRAM", "NVRAM", "memory controller", "SPI flash",
     "I2C EEPROM", "SD card", "memory module",
 ])
 
+# --- mcu ---
 add("mcu.core8", "Mcu", None, 8, "clock", 16e6, "Hz", [
     "AVR MCU", "ATmega328P", "PIC MCU", "8051 MCU", "AVR peripheral block",
 ])
@@ -411,6 +425,7 @@ add("mcu.timer", "TimerPeripheral", None, 4, "period", 1e-3, "s", [
     "timer", "RTC", "watchdog",
 ])
 
+# --- power ---
 add("power.linear", "Regulator", "Regulator", 3, "output_voltage", 5.0, "V", [
     "linear regulator", "LDO", "adjustable linear regulator",
     "negative linear regulator", "current regulator", "shunt regulator",
@@ -446,6 +461,7 @@ add("power.motor", "MotorDriver", "MotorDriver", 4, "threshold", 2.5, "V", [
     "H-bridge", "half-bridge", "stepper driver",
 ])
 
+# --- sensor ---
 add("sensor.temperature", "Sensor", "Ntc", 3, "resistance", 10000.0, "ohm", [
     "NTC thermistor sensor",
 ])
@@ -552,6 +568,7 @@ add("sensor.proximity", "Sensor", "UltrasonicDistanceSensor", 3, "sensitivity", 
     "ultrasonic distance sensor",
 ])
 
+# --- actuator ---
 add("actuator.led", "Actuator", "LedActuator", 2, "is", 1e-15, "A", [
     "LED", "RGB LED",
 ])
@@ -610,6 +627,7 @@ add("actuator.heater", "Actuator", "ThermoelectricGenerator", 2, "seebeck", 0.05
     "thermoelectric generator",
 ])
 
+# --- rf ---
 add("rf.amplifier", "RfBlock", "RfAmplifier", 3, "gain", 10.0, "ratio", [
     "RF amplifier",
 ])
@@ -637,6 +655,7 @@ add("rf.coupler", "RfBlock", None, 3, "gain", 1.0, "ratio", [
     "directional coupler", "power splitter", "isolator",
 ])
 
+# --- behavioral ---
 add("behavioral.filter", "BehavioralBlock", "BehavioralIntegrator", 4, "gain", 1.0, "ratio", [
     "integrator",
 ])
@@ -713,6 +732,7 @@ add("behavioral.converter", "BehavioralBlock", "BehavioralPwmDac", 4, "time_cons
     "PWM DAC",
 ])
 
+# --- board ---
 add("board.arduino", "BoardModule", None, 8, "voltage", 5.0, "V", [
     "Arduino Uno board", "breadboard power board", "generic MCU board",
 ])
@@ -794,7 +814,7 @@ FAMILIES = [
     "rf", "behavioral", "board",
 ]
 
-root = Path("crates/sim-device/src/catalog_data")
+root = Path("crates/device/src/catalog_data")
 if root.exists():
     shutil.rmtree(root)
 root.mkdir()
@@ -817,19 +837,22 @@ def entry_lines(entries):
     return lines
 
 
-def class_slug(name):
-    return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
+def group_slug(entry):
+    parts = entry["id"].split(".")
+    if len(parts) < 2:
+        return "misc"
+    return parts[1]
 
 
-def data_header(family, entries):
+def data_header(title, entries):
     needs_device = any(entry["device"] != "None" for entry in entries)
     lines = [
-        f"//! Generated {family} component catalog data.",
+        f"//! Generated {title} component catalog data.",
         "",
         "use crate::catalog::{ComponentSpec, ModelClass};",
     ]
     if needs_device:
-        lines.append("use sim_core::DeviceKind;")
+        lines.append("use kernel::DeviceKind;")
     lines.append("")
     return lines
 
@@ -842,21 +865,20 @@ def write_flat_family(family, entries):
     (root / f"{family}.rs").write_text("\n".join(lines))
 
 
-def write_split_family(family, entries):
+def write_grouped_family(family, entries):
     folder = root / family
     folder.mkdir()
-    by_class = {}
+    by_group = {}
     for entry in entries:
-        by_class.setdefault(entry["class"], []).append(entry)
+        by_group.setdefault(group_slug(entry), []).append(entry)
     names = []
-    for class_name, class_entries in by_class.items():
-        name = class_slug(class_name)
-        names.append(name)
-        lines = data_header(f"{family} {name}", class_entries)
+    for group, group_entries in by_group.items():
+        names.append(group)
+        lines = data_header(f"{family} {group}", group_entries)
         lines.append("pub(crate) const ENTRIES: &[ComponentSpec] = &[")
-        lines.extend(entry_lines(class_entries))
+        lines.extend(entry_lines(group_entries))
         lines.extend(["];", ""])
-        (folder / f"{name}.rs").write_text("\n".join(lines))
+        (folder / f"{group}.rs").write_text("\n".join(lines))
     lines = [
         f"//! Generated {family} component catalog data.",
         "",
@@ -881,8 +903,9 @@ def write_split_family(family, entries):
 
 for family in FAMILIES:
     family_entries = by_family[family]
-    if len(family_entries) > 40:
-        write_split_family(family, family_entries)
+    groups = {group_slug(entry) for entry in family_entries}
+    if len(groups) > 1:
+        write_grouped_family(family, family_entries)
     else:
         write_flat_family(family, family_entries)
 
@@ -905,7 +928,7 @@ module_lines = [
     "}",
     "",
 ]
-Path("crates/sim-device/src/catalog_data/mod.rs").write_text("\n".join(module_lines))
+Path("crates/device/src/catalog_data/mod.rs").write_text("\n".join(module_lines))
 
 family_counts = {}
 for entry in entries:

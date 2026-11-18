@@ -1,6 +1,6 @@
 # 14 - CMOS Cells
 
-Dokumentasi pustaka sel CMOS dasar di `sim-cells`.
+Dokumentasi pustaka sel CMOS dasar di `cells`.
 
 ---
 
@@ -261,7 +261,7 @@ Test:
 
 ## 10. Test
 
-Test `sim-cells` mencakup:
+Test `cells` mencakup:
 
 - Inverter VTC.
 - Inverter truth table.
@@ -271,7 +271,7 @@ Test `sim-cells` mencakup:
 - Buffer follow input.
 - Powered cell memiliki supply.
 
-Total test `sim-cells`: 71.
+Total test `cells`: 71.
 
 ---
 

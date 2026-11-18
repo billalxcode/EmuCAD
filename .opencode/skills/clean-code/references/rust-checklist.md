@@ -259,12 +259,12 @@ impl std::error::Error for SimError {}
 
 ## 12. Project-Specific
 
-- [ ] `sim-core` tanpa dependensi crate lain.
-- [ ] `sim-device` tanpa analysis/CLI.
-- [ ] `sim-analysis` tanpa CLI/file.
-- [ ] `sim-avr` tanpa board.
-- [ ] `sim-board` tanpa parser firmware.
-- [ ] `sim-cli` hanya adapter/komposisi.
+- [ ] `kernel` tanpa dependensi crate lain.
+- [ ] `device` tanpa analysis/CLI.
+- [ ] `analysis` tanpa CLI/file.
+- [ ] `avr` tanpa board.
+- [ ] `board` tanpa parser firmware.
+- [ ] `cli` hanya adapter/komposisi.
 - [ ] Waktu simulasi deterministik.
 - [ ] Tidak ada wall-clock di core.
 - [ ] Tidak ada `println!` di core.

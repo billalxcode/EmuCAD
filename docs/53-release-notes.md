@@ -93,12 +93,12 @@ CLI:
 Contoh:
 
 ```bash
-cargo run -p sim-analysis --example rc_analysis
-cargo run -p sim-analysis --example inverter_vtc
-cargo run -p sim-cells --example ring_oscillator
-cargo run -p sim-avr --example cpu_program
-cargo run -p sim-board --example blink
-cargo run -p sim-avr --example uart_hello
+cargo run -p analysis --example rc_analysis
+cargo run -p analysis --example inverter_vtc
+cargo run -p cells --example ring_oscillator
+cargo run -p avr --example cpu_program
+cargo run -p board --example blink
+cargo run -p avr --example uart_hello
 ```
 
 ---

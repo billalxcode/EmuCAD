@@ -1,0 +1,62 @@
+//! Generated passive crystal component catalog data.
+
+use crate::catalog::{ComponentSpec, ModelClass};
+use kernel::DeviceKind;
+
+pub(crate) const ENTRIES: &[ComponentSpec] = &[
+    ComponentSpec {
+        id: "passive.crystal.quartz_crystal",
+        name: "quartz crystal",
+        class: ModelClass::Crystal,
+        device: Some(DeviceKind::Crystal),
+        pins: 2,
+        parameter: "frequency",
+        default: 1000000.0,
+        unit: "Hz",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "passive.crystal.ceramic_resonator",
+        name: "ceramic resonator",
+        class: ModelClass::Crystal,
+        device: Some(DeviceKind::Crystal),
+        pins: 2,
+        parameter: "frequency",
+        default: 1000000.0,
+        unit: "Hz",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "passive.crystal.tuning_fork_crystal",
+        name: "tuning fork crystal",
+        class: ModelClass::Crystal,
+        device: Some(DeviceKind::Crystal),
+        pins: 2,
+        parameter: "frequency",
+        default: 1000000.0,
+        unit: "Hz",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "passive.crystal.tcxo",
+        name: "TCXO",
+        class: ModelClass::Crystal,
+        device: Some(DeviceKind::Crystal),
+        pins: 2,
+        parameter: "frequency",
+        default: 1000000.0,
+        unit: "Hz",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "passive.crystal.vcxo",
+        name: "VCXO",
+        class: ModelClass::Crystal,
+        device: Some(DeviceKind::Crystal),
+        pins: 2,
+        parameter: "frequency",
+        default: 1000000.0,
+        unit: "Hz",
+        variant: 0,
+    },
+];

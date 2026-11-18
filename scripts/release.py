@@ -85,10 +85,10 @@ def copy_common(stage: Path) -> None:
 
 
 LICENSE_FILES = [
-    ("crates/sim-gui/assets/symbols/NOTICE.md", "sim-gui-symbols.md"),
-    ("crates/sim-gui/assets/fonts/NOTICE.md", "sim-gui-fonts.md"),
-    ("crates/sim-gui/assets/fonts/OFL-SourceSans.txt", "OFL-SourceSans.txt"),
-    ("crates/sim-gui/assets/fonts/OFL-SourceCodePro.txt", "OFL-SourceCodePro.txt"),
+    ("crates/gui/assets/symbols/NOTICE.md", "gui-symbols.md"),
+    ("crates/gui/assets/fonts/NOTICE.md", "gui-fonts.md"),
+    ("crates/gui/assets/fonts/OFL-SourceSans.txt", "OFL-SourceSans.txt"),
+    ("crates/gui/assets/fonts/OFL-SourceCodePro.txt", "OFL-SourceCodePro.txt"),
 ]
 
 

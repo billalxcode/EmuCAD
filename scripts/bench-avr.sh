@@ -9,4 +9,4 @@ if ! command -v cargo >/dev/null 2>&1; then
 fi
 
 steps="${1:-1000000}"
-cargo run --release -q -p sim-avr --example avr_bench -- "$steps"
+cargo run --release -q -p avr --example avr_bench -- "$steps"

@@ -1,15 +1,16 @@
 [workspace]
 resolver = "3"
 members = [
-    "crates/sim-core",
-    "crates/sim-device",
-    "crates/sim-analysis",
-    "crates/sim-cells",
-    "crates/sim-avr",
-    "crates/sim-board",
-    "crates/sim-cli",
-    "crates/sim-gui",
-    "crates/sim-python",
+    "crates/kernel",
+    "crates/device",
+    "crates/analysis",
+    "crates/cells",
+    "crates/mixed",
+    "crates/avr",
+    "crates/board",
+    "crates/cli",
+    "crates/gui",
+    "crates/python",
 ]
 
 [workspace.package]

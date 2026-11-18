@@ -1,0 +1,73 @@
+//! Generated protection device component catalog data.
+
+use crate::catalog::{ComponentSpec, ModelClass};
+use kernel::DeviceKind;
+
+pub(crate) const ENTRIES: &[ComponentSpec] = &[
+    ComponentSpec {
+        id: "protection.device.fuse",
+        name: "fuse",
+        class: ModelClass::Protection,
+        device: Some(DeviceKind::Fuse),
+        pins: 2,
+        parameter: "trip_current",
+        default: 1.0,
+        unit: "A",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "protection.device.resettable_ptc_fuse",
+        name: "resettable PTC fuse",
+        class: ModelClass::Protection,
+        device: Some(DeviceKind::Fuse),
+        pins: 2,
+        parameter: "trip_current",
+        default: 1.0,
+        unit: "A",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "protection.device.polyfuse",
+        name: "polyfuse",
+        class: ModelClass::Protection,
+        device: Some(DeviceKind::Fuse),
+        pins: 2,
+        parameter: "trip_current",
+        default: 1.0,
+        unit: "A",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "protection.device.thermal_fuse",
+        name: "thermal fuse",
+        class: ModelClass::Protection,
+        device: Some(DeviceKind::Fuse),
+        pins: 2,
+        parameter: "trip_current",
+        default: 1.0,
+        unit: "A",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "protection.device.tvs_diode",
+        name: "TVS diode",
+        class: ModelClass::Protection,
+        device: Some(DeviceKind::Varistor),
+        pins: 2,
+        parameter: "clamp_voltage",
+        default: 6.0,
+        unit: "V",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "protection.device.metal_oxide_varistor",
+        name: "metal oxide varistor",
+        class: ModelClass::Protection,
+        device: Some(DeviceKind::Varistor),
+        pins: 2,
+        parameter: "clamp_voltage",
+        default: 6.0,
+        unit: "V",
+        variant: 0,
+    },
+];

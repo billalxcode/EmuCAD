@@ -25,40 +25,40 @@ Jika alur kontrol berlawanan, gunakan **Dependency Inversion**:
 ## 2. Pemetaan ke EmuCAD
 
 ```
-sim-cli
-  +-- sim-board
-  |     +-- sim-avr
-  |     |     +-- sim-cells
-  |     |     |     +-- sim-device
-  |     |     |     |     `-- sim-core
-  |     |     |     `-- sim-core
-  |     |     `-- sim-core
-  |     `-- sim-device
-  `-- sim-analysis
-        +-- sim-device
-        `-- sim-core
+cli
+  +-- board
+  |     +-- avr
+  |     |     +-- cells
+  |     |     |     +-- device
+  |     |     |     |     `-- kernel
+  |     |     |     `-- kernel
+  |     |     `-- kernel
+  |     `-- device
+  `-- analysis
+        +-- device
+        `-- kernel
 ```
 
 | Konsep | Padanan |
 |---|---|
-| Entities | `sim-core`: waktu, node, netlist, matrix, error, port |
-| Use Cases | `sim-analysis`: run DC/sweep/transient; `sim-avr`: step CPU |
-| Interface Adapters | `sim-board`: wiring; `sim-cli`: CSV/VCD/CLI; loader firmware |
+| Entities | `kernel`: waktu, node, netlist, matrix, error, port |
+| Use Cases | `analysis`: run DC/sweep/transient; `avr`: step CPU |
+| Interface Adapters | `board`: wiring; `cli`: CSV/VCD/CLI; loader firmware |
 | Frameworks & Drivers | `std`, filesystem, terminal, GTKWave, `avr-gcc` |
-| Main | `crates/sim-cli/src/main.rs` |
+| Main | `crates/cli/src/main.rs` |
 | Ports | Trait di core/analysis (`WaveformSink`, `FirmwareSource`, `UartSink`) |
 | Adapters | Implementasi di CLI/board |
 
 ### Aturan crate
 
-- `sim-core` tidak bergantung pada crate lain.
-- `sim-device` hanya `sim-core`.
-- `sim-analysis` hanya `sim-core` + `sim-device`.
-- `sim-cells` hanya `sim-core` + `sim-device`.
-- `sim-avr` hanya `sim-core` + `sim-device` + `sim-cells`.
-- `sim-board` hanya `sim-core` + `sim-device` + `sim-avr`.
-- `sim-cli` boleh semua.
-- Tidak ada crate yang bergantung pada `sim-cli`.
+- `kernel` tidak bergantung pada crate lain.
+- `device` hanya `kernel`.
+- `analysis` hanya `kernel` + `device`.
+- `cells` hanya `kernel` + `device`.
+- `avr` hanya `kernel` + `device` + `cells`.
+- `board` hanya `kernel` + `device` + `avr`.
+- `cli` boleh semua.
+- Tidak ada crate yang bergantung pada `cli`.
 - Tidak ada siklus.
 - Tidak ada dependensi eksternal.
 
@@ -160,11 +160,11 @@ Hindari:
 
 ## 9. Red Flags Arsitektur
 
-- `sim-core` mengimpor `sim-cli`.
-- `sim-device` menulis CSV.
-- `sim-analysis` membaca file.
-- `sim-avr` tahu `sim-board`.
-- `sim-board` mem-parsing HEX.
+- `kernel` mengimpor `cli`.
+- `device` menulis CSV.
+- `analysis` membaca file.
+- `avr` tahu `board`.
+- `board` mem-parsing HEX.
 - `main.rs` berisi logika.
 - Trait port didefinisikan di crate luar.
 - Siklus crate.

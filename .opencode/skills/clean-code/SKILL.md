@@ -146,12 +146,12 @@ Gunakan `templates/review-report.md` untuk review. Untuk refactor, jelaskan:
 
 ## Aturan Proyek EmuCAD
 
-- `sim-core` tidak boleh bergantung pada crate lain.
-- `sim-device` tidak boleh tahu analysis/CLI.
-- `sim-analysis` tidak boleh tahu CLI/file.
-- `sim-avr` tidak boleh tahu board.
-- `sim-board` tidak boleh mem-parsing firmware.
-- `sim-cli` adalah adapter/komposisi.
+- `kernel` tidak boleh bergantung pada crate lain.
+- `device` tidak boleh tahu analysis/CLI.
+- `analysis` tidak boleh tahu CLI/file.
+- `avr` tidak boleh tahu board.
+- `board` tidak boleh mem-parsing firmware.
+- `cli` adalah adapter/komposisi.
 - Tidak ada crate eksternal.
 - Tidak ada `unsafe`.
 - Tidak ada wall-clock di simulation.

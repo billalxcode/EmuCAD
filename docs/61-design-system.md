@@ -58,7 +58,7 @@ Line height:
 
 ## 4. Warna Semantik
 
-Nilai ada di `crates/sim-gui/src/design.rs`.
+Nilai ada di `crates/gui/src/design.rs`.
 
 | Peran | Dark | Light |
 |---|---|---|
@@ -110,7 +110,7 @@ Gunakan kelipatan 4 px untuk spacing baru.
 
 ## 6. Implementasi
 
-Modul: `crates/sim-gui/src/design.rs`.
+Modul: `crates/gui/src/design.rs`.
 
 - `DARK` dan `LIGHT` menyimpan token warna.
 - `palette(dark)` dan `palette_for(context)` memilih token aktif.

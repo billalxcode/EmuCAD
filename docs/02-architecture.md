@@ -10,7 +10,7 @@ Dokumen ini menjelaskan struktur software, model waktu, netlist, API, dan aturan
 2. **Device tidak mengetahui analisis**; device hanya melakukan stamping.
 3. **Netlist adalah pusat**, bukan MCU.
 4. **Hierarchy untuk desain, flatten untuk solver.**
-5. **Zero external dependency untuk crate simulasi**; hanya `sim-gui` yang boleh memakai `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png`, serta `sim-python` yang boleh memakai `pyo3`.
+5. **Zero external dependency untuk crate simulasi**; hanya `gui` yang boleh memakai `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png`, serta `python` yang boleh memakai `pyo3`.
 6. **Determinisme dulu**, optimasi kemudian.
 7. **Setiap lapisan dapat diuji sendiri.**
 
@@ -19,23 +19,24 @@ Dokumen ini menjelaskan struktur software, model waktu, netlist, API, dan aturan
 ## 2. Struktur Workspace
 
 ```
-embed-emulation/
-|-- Cargo.toml                  # workspace; dependensi eksternal hanya di sim-gui dan sim-python
+emucad/
+|-- Cargo.toml                  # workspace; dependensi eksternal hanya di gui dan python
 |-- rust-toolchain.toml
 |-- LICENSE
 |-- README.md
 |-- TODO.md
 |-- docs/
 |-- crates/
-|   |-- sim-core/
-|   |-- sim-device/
-|   |-- sim-analysis/
-|   |-- sim-cells/
-|   |-- sim-avr/
-|   |-- sim-board/
-|   |-- sim-cli/
-|   |-- sim-gui/
-|   `-- sim-python/
+|   |-- kernel/
+|   |-- device/
+|   |-- analysis/
+|   |-- cells/
+|   |-- avr/
+|   |-- board/
+|   |-- mixed/
+|   |-- cli/
+|   |-- gui/
+|   `-- python/
 |-- examples/
 `-- firmware/
 ```
@@ -44,47 +45,54 @@ embed-emulation/
 
 | Crate | Tanggung jawab | Tidak boleh tahu |
 |---|---|---|
-| `sim-core` | Time, ID, netlist, builder, matrix, LU, error, VCD/CSV dasar | Device spesifik, AVR |
-| `sim-device` | MOSFET, R, C, L, dioda, BJT, JFET, sumber | Analisis, CPU |
-| `sim-analysis` | DC op, sweep, transient, AC, noise, konvergensi | Firmware, board |
-| `sim-cells` | Sel CMOS, gerbang, DFF, SRAM cell, characterization | AVR |
-| `sim-avr` | CPU AVR fast functional core, ISA, peripheral; primitif struktural untuk validasi | Board |
-| `sim-board` | Board netlist, LED, tombol, UART host | Detail CPU |
-| `sim-cli` | Argumen, orkestrasi, output, monitor, catalog JSON | Implementasi internal device |
-| `sim-gui` | UI egui, canvas, persistence, worker simulasi | Implementasi internal device dan solver |
-| `sim-python` | Binding Python untuk katalog dan netlist | Simulasi, GUI, firmware |
+| `kernel` | Time, ID, netlist, builder, matrix, LU, error, VCD/CSV dasar | Device spesifik, AVR |
+| `device` | MOSFET, R, C, L, dioda, BJT, JFET, sumber | Analisis, CPU |
+| `analysis` | DC op, sweep, transient, AC, noise, konvergensi | Firmware, board |
+| `cells` | Sel CMOS, gerbang, DFF, SRAM cell, characterization | AVR |
+| `avr` | CPU AVR fast functional core, ISA, peripheral; primitif struktural untuk validasi | Board |
+| `board` | Board netlist, LED, tombol, UART host | Detail CPU |
+| `mixed` | Scheduler co-sim satu arah digital ke analog | AVR, GUI, CLI |
+| `cli` | Argumen, orkestrasi, output, monitor, catalog JSON | Implementasi internal device |
+| `gui` | UI egui, canvas, persistence, worker simulasi | Implementasi internal device dan solver |
+| `python` | Binding Python untuk katalog dan netlist | Simulasi, GUI, firmware |
 
 ### 2.2 Dependency Graph
 
 ```
-sim-cli
-  |-- sim-board
-  |     |-- sim-avr
-  |     |     |-- sim-cells
-  |     |     |     |-- sim-device
-  |     |     |     |     `-- sim-core
-  |     |     |     `-- sim-core
-  |     |     `-- sim-core
-  |     `-- sim-device / sim-core
-  `-- sim-analysis
-        |-- sim-device
-        `-- sim-core
+cli
+  |-- board
+  |     |-- avr
+  |     |     |-- cells
+  |     |     |     |-- device
+  |     |     |     |     `-- kernel
+  |     |     |     `-- kernel
+  |     |     `-- kernel
+  |     `-- device / kernel
+  `-- analysis
+        |-- device
+        `-- kernel
 
-sim-gui
-  |-- sim-board
-  |-- sim-avr
-  |-- sim-analysis
-  |-- sim-device
-  `-- sim-core
+gui
+  |-- board
+  |-- avr
+  |-- analysis
+  |-- device
+  `-- kernel
 
-sim-python
-  |-- sim-device
-  |     `-- sim-core
-  `-- sim-core
+mixed
+  |-- analysis
+  |-- cells
+  |-- device
+  `-- kernel
+
+python
+  |-- device
+  |     `-- kernel
+  `-- kernel
 ```
 
 Tidak ada crate simulasi yang bergantung pada crate GUI, Python, atau ke
-luar workspace. Hanya `sim-gui` dan `sim-python` yang memakai dependensi
+luar workspace. Hanya `gui` dan `python` yang memakai dependensi
 eksternal yang disetujui.
 
 ---

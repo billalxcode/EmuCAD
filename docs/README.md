@@ -2,7 +2,7 @@
 
 Pintu masuk dokumentasi EmuCAD versi 0.1.0.
 
-**Status saat ini:** 980 test lulus, 9 crate, crate simulasi zero external
+**Status saat ini:** 1122 test lulus, 10 crate, crate simulasi zero external
 dependency Rust. Dependensi GUI dan binding Python dibatasi pada daftar
 yang disetujui di `AGENTS.md`. Tag `v0.1` tersedia.
 
@@ -96,6 +96,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 87 | [PLL](87-pll.md) | Model frequency multiplier dengan phase reset |
 | 88 | [Domain digital](88-digital-domain.md) | 13 entry digital dengan port bernama dan CLI |
 | 89 | [Rilis biner](89-release.md) | Versi workspace, target, arsip, dan SHA512 GitHub Release |
+| 90 | [Mixed-signal](90-mixed-signal.md) | Scheduler satu arah digital ke analog |
 
 ### 3.2 Fondasi
 
@@ -192,10 +193,10 @@ Setiap dokumen muncul satu kali pada peta ini.
 |---|---|
 | Versi workspace | `0.1.0` |
 | Tag | `v0.1` |
-| Test | 980 lulus |
+| Test | 1122 lulus |
 | Crate | 9 |
-| Dependensi eksternal | 0 untuk crate simulasi; `pyo3` hanya di `sim-python` |
-| `unsafe` | Dilarang manual; glue `pyo3` diisolasi di `sim-python` |
+| Dependensi eksternal | 0 untuk crate simulasi; `pyo3` hanya di `python` |
+| `unsafe` | Dilarang manual; glue `pyo3` diisolasi di `python` |
 | Build release | Lulus |
 | Archive Linux | `dist/emucad-x86_64-unknown-linux-gnu.tar.gz` |
 | Golden ngspice | Belum dijalankan |
@@ -207,16 +208,17 @@ Setiap dokumen muncul satu kali pada peta ini.
 
 | Crate | Test |
 |---|---|
-| `sim-core` | 62 |
-| `sim-device` | 146 |
-| `sim-analysis` | 123 |
-| `sim-cells` | 72 |
-| `sim-avr` | 234 |
-| `sim-board` | 24 |
-| `sim-cli` | 36 |
-| `sim-gui` | 275 |
-| `sim-python` | 8 |
-| **Total** | **980** |
+| `kernel` | 62 |
+| `device` | 202 |
+| `analysis` | 124 |
+| `cells` | 125 |
+| `avr` | 234 |
+| `board` | 24 |
+| `mixed` | 1 |
+| `cli` | 40 |
+| `gui` | 302 |
+| `python` | 8 |
+| **Total** | **1122** |
 
 ---
 

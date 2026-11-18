@@ -8,10 +8,10 @@ if ! command -v cargo >/dev/null 2>&1; then
     fi
 fi
 
-cargo build -p sim-python
+cargo build -p python
 
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 ln -s "$PWD/target/debug/libemucad.so" "$tmp_dir/emucad.so"
-PYTHONPATH="$tmp_dir" python3 crates/sim-python/tests/python_smoke.py
+PYTHONPATH="$tmp_dir" python3 crates/python/tests/python_smoke.py
 PYTHONPATH="$tmp_dir" python3 examples/python/build_netlists.py

@@ -4,9 +4,9 @@ Dokumen ini menjelaskan desain target CPU ATmega328P yang dibangun dari
 transistor/gerbang, bukan instruction-set simulator.
 
 > **Status implementasi:** target jangka panjang tetap struktural. Hot path
-> `sim-avr` saat ini memakai functional fast core agar mencapai real-time:
+> `avr` saat ini memakai functional fast core agar mencapai real-time:
 > register array, ALU murni, shift, multiply, dan decode cache. Primitif
-> struktural tetap tersedia di `sim-cells` dan modul `alu`, `shift`,
+> struktural tetap tersedia di `cells` dan modul `alu`, `shift`,
 > `multiply`, serta `register_bank` untuk validasi dan pengembangan mode
 > struktural. GPIO masih memakai circuit gate-level; UART/SPI/TWI/ADC
 > behavioral. CLI dan GUI memakai pacing 16 MHz; loop ALU, mixed, memory,

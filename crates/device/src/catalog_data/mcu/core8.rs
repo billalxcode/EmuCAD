@@ -1,0 +1,61 @@
+//! Generated mcu core8 component catalog data.
+
+use crate::catalog::{ComponentSpec, ModelClass};
+
+pub(crate) const ENTRIES: &[ComponentSpec] = &[
+    ComponentSpec {
+        id: "mcu.core8.avr_mcu",
+        name: "AVR MCU",
+        class: ModelClass::Mcu,
+        device: None,
+        pins: 8,
+        parameter: "clock",
+        default: 16000000.0,
+        unit: "Hz",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "mcu.core8.atmega328p",
+        name: "ATmega328P",
+        class: ModelClass::Mcu,
+        device: None,
+        pins: 8,
+        parameter: "clock",
+        default: 16000000.0,
+        unit: "Hz",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "mcu.core8.pic_mcu",
+        name: "PIC MCU",
+        class: ModelClass::Mcu,
+        device: None,
+        pins: 8,
+        parameter: "clock",
+        default: 16000000.0,
+        unit: "Hz",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "mcu.core8.8051_mcu",
+        name: "8051 MCU",
+        class: ModelClass::Mcu,
+        device: None,
+        pins: 8,
+        parameter: "clock",
+        default: 16000000.0,
+        unit: "Hz",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "mcu.core8.avr_peripheral_block",
+        name: "AVR peripheral block",
+        class: ModelClass::Mcu,
+        device: None,
+        pins: 8,
+        parameter: "clock",
+        default: 16000000.0,
+        unit: "Hz",
+        variant: 0,
+    },
+];

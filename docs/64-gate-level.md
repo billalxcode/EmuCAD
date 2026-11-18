@@ -14,22 +14,22 @@ Gate-level berarti:
 - Peripheral digital yang dapat diaudit sebagai rangkaian gerbang.
 
 Gate-level bukan transistor-level dan bukan TCAD. Model transistor
-seperti `sram6t` di `sim-cells` adalah primitif analog, bukan target
+seperti `sram6t` di `cells` adalah primitif analog, bukan target
 utama S6.
 
 ## 2. Yang Sudah Ada
 
-- `sim-cells` menyediakan gerbang dasar, adder, mux, decoder, counter,
+- `cells` menyediakan gerbang dasar, adder, mux, decoder, counter,
   shift register, register file, dan CPU digital.
-- `sim-cells::digital` menyediakan `DigitalCircuit` dengan evaluasi
+- `cells::digital` menyediakan `DigitalCircuit` dengan evaluasi
   kombinasional dan clock DFF.
-- `sim-cells::sequential::sram6t` menyediakan sel SRAM 6T level
+- `cells::sequential::sram6t` menyediakan sel SRAM 6T level
   transistor sebagai referensi.
-- `sim-cells::catalog_memory` menyediakan sel SRAM digital 1-bit dan
+- `cells::catalog_memory` menyediakan sel SRAM digital 1-bit dan
   array 128x8 (1024 bit) untuk domain digital.
-- `sim-avr` memakai `sim-cells` untuk datapath, register bank, instruksi,
+- `avr` memakai `cells` untuk datapath, register bank, instruksi,
   ALU, shift, multiply, dan beberapa GPIO.
-- `sim-board` menyediakan board AVR + LED + resistor + button + UART.
+- `board` menyediakan board AVR + LED + resistor + button + UART.
 
 ## 3. Batas AVR Saat Ini
 
@@ -76,7 +76,7 @@ jauh di atas budget jika setiap akses disimulasikan penuh.
 | MCU gate-level | 11 | 1 hybrid (AVR) |
 | Memory gate-level | 15 | 1 register file dan 15 macro memory |
 | AVR full chip | Semua peripheral | Sebagian |
-| Mixed-signal scheduler | AVR + analog | Belum |
+| Mixed-signal scheduler | AVR + analog | Prototipe satu arah clock ke sumber tegangan |
 | Real-time semua MCU | Desktop | Belum terbukti |
 
 MCU yang belum dimulai: PIC, 8051, ARM Cortex-M, RISC-V, ESP32, STM32,

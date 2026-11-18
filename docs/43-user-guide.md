@@ -16,9 +16,9 @@ Perintah minimum:
 ```bash
 cargo build --workspace
 cargo test --workspace
-cargo run -p sim-analysis --example rc_analysis
-cargo run -p sim-analysis --example inverter_vtc
-cargo run -p sim-avr --example cpu_program
+cargo run -p analysis --example rc_analysis
+cargo run -p analysis --example inverter_vtc
+cargo run -p avr --example cpu_program
 ```
 
 Contoh `rc_analysis` menjalankan DC, transient, dan AC pada satu rangkaian RC.
@@ -71,9 +71,9 @@ cargo test --workspace
 Untuk satu crate:
 
 ```bash
-cargo test -p sim-analysis
-cargo test -p sim-device
-cargo test -p sim-avr
+cargo test -p analysis
+cargo test -p device
+cargo test -p avr
 ```
 
 ### 3.4 Pemeriksaan lengkap
@@ -102,22 +102,22 @@ dist/emucad-<target>.tar.gz
 
 | Crate | Peran |
 |---|---|
-| `sim-core` | Waktu, satuan, node, device, matrix, error, netlist |
-| `sim-device` | Model device dan stamping MNA |
-| `sim-analysis` | DC, transient, AC, noise, distorsi, sensitivitas |
-| `sim-cells` | Sel CMOS struktural dan pustaka digital |
-| `sim-avr` | CPU AVR, decoder, ALU, register, peripheral |
-| `sim-board` | Board, LED, button, UART host, Intel HEX, ELF, CSV/VCD |
-| `sim-cli` | Binary `emucad`, monitor, disassembler, benchmark |
+| `kernel` | Waktu, satuan, node, device, matrix, error, netlist |
+| `device` | Model device dan stamping MNA |
+| `analysis` | DC, transient, AC, noise, distorsi, sensitivitas |
+| `cells` | Sel CMOS struktural dan pustaka digital |
+| `avr` | CPU AVR, decoder, ALU, register, peripheral |
+| `board` | Board, LED, button, UART host, Intel HEX, ELF, CSV/VCD |
+| `cli` | Binary `emucad`, monitor, disassembler, benchmark |
 
 Aturan dependensi:
 
 ```text
-sim-cli -> sim-board -> sim-avr -> sim-cells -> sim-device -> sim-core
-sim-cli -> sim-analysis -> sim-device -> sim-core
+cli -> board -> avr -> cells -> device -> kernel
+cli -> analysis -> device -> kernel
 ```
 
-`sim-core` tidak bergantung pada crate lain. `sim-cli` adalah adapter dan
+`kernel` tidak bergantung pada crate lain. `cli` adalah adapter dan
 komposisi, bukan tempat logika simulasi.
 
 ---
@@ -288,7 +288,7 @@ Catatan:
 Smoke test upload:
 
 ```bash
-cargo build --release -p sim-cli
+cargo build --release -p cli
 python3 scripts/test-serial-upload.py
 ```
 
@@ -356,8 +356,8 @@ Setup membutuhkan root. Detail ada di
 ### 6.1 DC operating point
 
 ```rust
-use sim_analysis::{DcConfig, dc_operating_point};
-use sim_core::{CircuitBuilder, DeviceKind};
+use analysis::{DcConfig, dc_operating_point};
+use kernel::{CircuitBuilder, DeviceKind};
 use std::collections::BTreeMap;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -380,8 +380,8 @@ fn add(
     builder: &mut CircuitBuilder,
     name: &str,
     kind: DeviceKind,
-    first: sim_core::NodeId,
-    second: sim_core::NodeId,
+    first: kernel::NodeId,
+    second: kernel::NodeId,
     parameter: &str,
     value: f64,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -392,12 +392,12 @@ fn add(
 }
 ```
 
-Contoh lengkap ada di `crates/sim-analysis/examples/inverter_vtc.rs`.
+Contoh lengkap ada di `crates/analysis/examples/inverter_vtc.rs`.
 
 ### 6.2 DC sweep
 
 ```rust
-use sim_analysis::{DcConfig, dc_sweep};
+use analysis::{DcConfig, dc_sweep};
 
 let points = dc_sweep(
     &circuit,
@@ -415,7 +415,7 @@ Setiap titik berisi `sweep` dan `solution`.
 ### 6.3 Transient
 
 ```rust
-use sim_analysis::{TransientConfig, transient};
+use analysis::{TransientConfig, transient};
 
 let config = TransientConfig {
     dt: 1e-6,
@@ -440,8 +440,8 @@ Setiap `TransientSample` menyimpan `time`, `solution`, `residual`, dan
 Metode integrasi:
 
 ```rust
-use sim_analysis::transient_with_method;
-use sim_device::IntegrationMethod;
+use analysis::transient_with_method;
+use device::IntegrationMethod;
 
 let samples = transient_with_method(
     &circuit,
@@ -453,7 +453,7 @@ let samples = transient_with_method(
 Adaptive transient:
 
 ```rust
-use sim_analysis::{AdaptiveConfig, transient_adaptive};
+use analysis::{AdaptiveConfig, transient_adaptive};
 
 let adaptive = AdaptiveConfig {
     initial_dt: 1e-7,
@@ -468,7 +468,7 @@ let samples = transient_adaptive(&circuit, &config, &adaptive)?;
 ### 6.4 AC small-signal
 
 ```rust
-use sim_analysis::ac_analysis;
+use analysis::ac_analysis;
 
 circuit.set_device_parameter("v1", "ac", 1.0)?;
 let result = ac_analysis(&circuit, 1000.0)?;
@@ -486,22 +486,22 @@ distamp dari bias.
 Sweep:
 
 ```rust
-use sim_analysis::ac_sweep;
+use analysis::ac_sweep;
 
 let points = ac_sweep(&circuit, 10.0, 1e6, 50)?;
 ```
 
 Contoh lengkap DC, transient, dan AC ada di
-`crates/sim-analysis/examples/rc_analysis.rs`:
+`crates/analysis/examples/rc_analysis.rs`:
 
 ```bash
-cargo run -p sim-analysis --example rc_analysis
+cargo run -p analysis --example rc_analysis
 ```
 
 ### 6.5 AVR
 
 ```rust
-use sim_avr::Cpu;
+use avr::Cpu;
 
 let program = vec![0xE005, 0xE013, 0x0F01, 0x9598];
 let mut cpu = Cpu::new(program)?;
@@ -517,15 +517,15 @@ println!(
 Contoh lain:
 
 ```bash
-cargo run -p sim-avr --example uart_hello
-cargo run -p sim-avr --example timer_interrupt
+cargo run -p avr --example uart_hello
+cargo run -p avr --example timer_interrupt
 ```
 
 ### 6.6 Board
 
 ```rust
-use sim_avr::{Cpu, ExternalPin, PinElectricalConfig};
-use sim_board::Board;
+use avr::{Cpu, ExternalPin, PinElectricalConfig};
+use board::Board;
 
 let mut cpu = Cpu::new(program)?;
 let mut board = Board::new();
@@ -536,7 +536,7 @@ board.set_pb5_voltage(state.voltage);
 println!("led_on={}", board.led().is_on());
 ```
 
-Contoh lengkap ada di `crates/sim-board/examples/blink.rs`.
+Contoh lengkap ada di `crates/board/examples/blink.rs`.
 
 ---
 
@@ -610,7 +610,7 @@ global.
 2. Kompilasi dengan `avr-gcc` di luar simulator.
 3. Hasilkan Intel HEX dengan `avr-objcopy`.
 4. Jalankan dengan `emucad run`.
-5. Atau muat ELF melalui API `ElfImage` di `sim_board`.
+5. Atau muat ELF melalui API `ElfImage` di `board`.
 
 Contoh perintah toolchain eksternal:
 
@@ -626,7 +626,7 @@ paket Arduino dan menghasilkan firmware yang berjalan di simulator.
 ### 9.2 ELF ke HEX melalui library
 
 ```rust
-use sim_board::ElfImage;
+use board::ElfImage;
 
 let data = std::fs::read("blink.elf")?;
 let image = ElfImage::parse(&data)?;
@@ -638,8 +638,8 @@ std::fs::write("blink.hex", hex)?;
 
 - `firmware/blink.S`: toggle PORTB bit 5.
 - `firmware/timer_interrupt.S`: Timer0 overflow interrupt.
-- `crates/sim-avr/tests/blink.rs`: encoding manual blink.
-- `cargo run -p sim-avr --example timer_interrupt`: demo interrupt.
+- `crates/avr/tests/blink.rs`: encoding manual blink.
+- `cargo run -p avr --example timer_interrupt`: demo interrupt.
 
 ---
 
@@ -647,13 +647,13 @@ std::fs::write("blink.hex", hex)?;
 
 | Format | Lokasi | Kegunaan |
 |---|---|---|
-| CSV | `sim_board::CsvWriter`, `csv_header`, `csv_line` | Trace board dan sinyal |
-| VCD digital | `sim_board::VcdWriter` | PB5 dan LED |
-| VCD analog | `sim_board::AnalogVcdWriter` | Node analog `real` |
-| Intel HEX | `sim_board::HexImage` | Program AVR |
-| ELF32 | `sim_board::ElfImage` | Program dan simbol AVR |
+| CSV | `board::CsvWriter`, `csv_header`, `csv_line` | Trace board dan sinyal |
+| VCD digital | `board::VcdWriter` | PB5 dan LED |
+| VCD analog | `board::AnalogVcdWriter` | Node analog `real` |
+| Intel HEX | `board::HexImage` | Program AVR |
+| ELF32 | `board::ElfImage` | Program dan simbol AVR |
 
-Timebase VCD memakai 1 ns. Format berada di adapter, bukan di `sim-core`.
+Timebase VCD memakai 1 ns. Format berada di adapter, bukan di `kernel`.
 
 ---
 
@@ -662,19 +662,19 @@ Timebase VCD memakai 1 ns. Format berada di adapter, bukan di `sim-core`.
 ### 11.1 Test per crate
 
 ```bash
-cargo test -p sim-core
-cargo test -p sim-device
-cargo test -p sim-analysis
-cargo test -p sim-cells
-cargo test -p sim-avr
-cargo test -p sim-board
-cargo test -p sim-cli
+cargo test -p kernel
+cargo test -p device
+cargo test -p analysis
+cargo test -p cells
+cargo test -p avr
+cargo test -p board
+cargo test -p cli
 ```
 
 ### 11.2 Benchmark
 
 ```bash
-cargo run -p sim-cli -- bench 1000 10
+cargo run -p cli -- bench 1000 10
 ```
 
 Atau setelah build:
@@ -689,7 +689,7 @@ Test determinisme membandingkan hasil dua run dan hasil setelah snapshot.
 Jalankan:
 
 ```bash
-cargo test -p sim-analysis determinism
+cargo test -p analysis determinism
 ```
 
 ---

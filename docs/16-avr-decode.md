@@ -1,6 +1,6 @@
 # 16 - AVR Instruction Decode
 
-Dokumen ini menjelaskan decoder ISA AVR di `sim-avr`.
+Dokumen ini menjelaskan decoder ISA AVR di `avr`.
 
 ---
 
@@ -91,7 +91,7 @@ impl ProgramMemory {
 - Input `carry_in` memakai flag C untuk ADC dan SBC.
 - Output: result, C/borrow, Z, N, V, S, dan H.
 - Overflow memakai formula addition atau subtraction sesuai `subtract`.
-- Hasil ADD, ADC, SUB, dan SBC dibandingkan dengan reference `sim-cells`.
+- Hasil ADD, ADC, SUB, dan SBC dibandingkan dengan reference `cells`.
 - Test menjalankan seluruh 256 nilai operand pertama untuk beberapa operand kedua dan carry.
 - `select_operand` memilih register atau immediate.
 - SUBI dan SBCI memakai subtractor yang sama dengan operand immediate.
@@ -143,9 +143,9 @@ impl ProgramMemory {
 
 ## 11. CPU Integration
 
-CPU kecil di `sim-avr/src/cpu/mod.rs` menghubungkan fetch, register bank, dan
+CPU kecil di `avr/src/cpu/mod.rs` menghubungkan fetch, register bank, dan
 unit ALU menjadi eksekusi instruksi end-to-end. Eksekusi, I/O, timer, dan
-interrupt dipecah menjadi submodule di `sim-avr/src/cpu/`.
+interrupt dipecah menjadi submodule di `avr/src/cpu/`.
 
 - Control masih behavioral di Rust, bukan PLA gate-level.
 - Datapath memakai register bank DFF dan unit arithmetic/logic/shift/multiply struktural.
@@ -219,8 +219,8 @@ Test decoder mencakup:
 - Blink assembly dijalankan dan PORTB bit 5 terbukti toggle.
 - Firmware hasil `avr-gcc` dijalankan di CPU.
 
-Total test `sim-avr`: 215.
-Total test `sim-cli`: 26.
+Total test `avr`: 215.
+Total test `cli`: 26.
 
 ---
 

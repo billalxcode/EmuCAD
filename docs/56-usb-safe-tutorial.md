@@ -17,7 +17,7 @@ script.
 
 ```bash
 ./scripts/build-drivers.sh
-cargo build --release -p sim-cli
+cargo build --release -p cli
 ```
 
 Arsitektur singkat:

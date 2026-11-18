@@ -96,7 +96,7 @@ Suhu harus finite dan lebih besar dari nol.
   tinggi.
 - Suhu nol ditolak.
 
-Total test `sim-analysis`: 116 (108 unit + 8 integration).
+Total test `analysis`: 116 (108 unit + 8 integration).
 Total workspace: 751.
 
 ---

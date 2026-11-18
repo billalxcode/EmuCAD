@@ -41,7 +41,7 @@ bukan sekadar HEAD branch saat workflow rilis berjalan.
 | `windows-latest` | `x86_64-pc-windows-msvc` | `.zip` |
 
 Setiap target membangun `emucad` dan `emucad-gui` dengan
-`cargo build --release -p sim-cli -p sim-gui`.
+`cargo build --release -p cli -p gui`.
 
 ## 4. Isi Arsip
 
@@ -106,7 +106,7 @@ python3 -m py_compile scripts/release.py
 Untuk uji packaging tanpa build release:
 
 ```bash
-cargo build -p sim-cli -p sim-gui
+cargo build -p cli -p gui
 python3 scripts/release.py \
   --version 0.1.0 \
   --target x86_64-unknown-linux-gnu \
@@ -123,4 +123,4 @@ python3 scripts/release.py \
 - Target Linux masih x86_64; belum ada aarch64.
 - Checksum menjamin integritas unduhan, bukan reproduksibilitas bit
   identik dari source yang sama.
-- Rilis tidak menyertakan modul Python `sim-python`.
+- Rilis tidak menyertakan modul Python `python`.

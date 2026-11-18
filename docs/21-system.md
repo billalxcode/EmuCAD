@@ -63,7 +63,7 @@ analog comparator, POR, dan brown-out.
 - Comparator.
 - Power reset state.
 
-Total test `sim-avr` mengikuti total pada `docs/13-analysis.md`.
+Total test `avr` mengikuti total pada `docs/13-analysis.md`.
 
 ---
 

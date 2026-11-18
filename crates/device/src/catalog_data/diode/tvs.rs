@@ -1,0 +1,73 @@
+//! Generated diode tvs component catalog data.
+
+use crate::catalog::{ComponentSpec, ModelClass};
+use kernel::DeviceKind;
+
+pub(crate) const ENTRIES: &[ComponentSpec] = &[
+    ComponentSpec {
+        id: "diode.tvs.tvs_diode",
+        name: "TVS diode",
+        class: ModelClass::Diode,
+        device: Some(DeviceKind::Diode),
+        pins: 2,
+        parameter: "is",
+        default: 1e-12,
+        unit: "A",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "diode.tvs.esd_protection_diode",
+        name: "ESD protection diode",
+        class: ModelClass::Diode,
+        device: Some(DeviceKind::Diode),
+        pins: 2,
+        parameter: "is",
+        default: 1e-12,
+        unit: "A",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "diode.tvs.bidirectional_tvs",
+        name: "bidirectional TVS",
+        class: ModelClass::Diode,
+        device: Some(DeviceKind::Diode),
+        pins: 2,
+        parameter: "is",
+        default: 1e-12,
+        unit: "A",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "diode.tvs.snapback_esd_device",
+        name: "snapback ESD device",
+        class: ModelClass::Diode,
+        device: Some(DeviceKind::Diode),
+        pins: 2,
+        parameter: "is",
+        default: 1e-12,
+        unit: "A",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "diode.tvs.tuning_varactor",
+        name: "tuning varactor",
+        class: ModelClass::Diode,
+        device: Some(DeviceKind::Diode),
+        pins: 2,
+        parameter: "is",
+        default: 1e-12,
+        unit: "A",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "diode.tvs.pin_limiter_diode",
+        name: "PIN limiter diode",
+        class: ModelClass::Diode,
+        device: Some(DeviceKind::Diode),
+        pins: 2,
+        parameter: "is",
+        default: 1e-12,
+        unit: "A",
+        variant: 0,
+    },
+];

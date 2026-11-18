@@ -1,0 +1,28 @@
+[package]
+name = "python"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Python bindings for the EmuCAD component catalog and netlist builder"
+
+[lib]
+name = "emucad"
+crate-type = ["cdylib", "rlib"]
+doctest = false
+
+[dependencies]
+pyo3 = { version = "0.30.1", features = ["abi3-py312"] }
+kernel = { path = "../kernel" }
+device = { path = "../device" }
+
+[build-dependencies]
+pyo3-build-config = "0.30.1"
+
+[features]
+default = ["extension-module"]
+extension-module = ["pyo3/extension-module"]
+
+[lints.rust]
+unsafe_code = "allow"

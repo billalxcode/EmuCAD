@@ -1,0 +1,25 @@
+[package]
+name = "gui"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "emucad-gui"
+path = "src/main.rs"
+
+[dependencies]
+eframe = "0.37.0"
+png = "0.18.1"
+rfd = "0.18.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+avr = { path = "../avr" }
+board = { path = "../board" }
+analysis = { path = "../analysis" }
+kernel = { path = "../kernel" }
+device = { path = "../device" }

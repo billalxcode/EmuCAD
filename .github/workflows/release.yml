@@ -56,7 +56,7 @@ jobs:
         with:
           ref: ${{ needs.prepare.outputs.sha }}
       - name: Build binaries
-        run: cargo build --release -p sim-cli -p sim-gui
+        run: cargo build --release -p cli -p gui
       - name: Package archive
         shell: bash
         env:

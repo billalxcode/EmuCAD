@@ -79,8 +79,8 @@ pub fn host_receive(&mut self) -> Option<u8>;
 - CLI memuat Intel HEX dan menjalankan CPU.
 - CSV board, CSV generik, dan VCD digital/analog.
 
-Total test `sim-board`: 23.
-Total test `sim-cli`: 26.
+Total test `board`: 23.
+Total test `cli`: 26.
 Total workspace: 751.
 
 ---

@@ -13,7 +13,7 @@ Menyediakan katalog komponen yang:
 - Memiliki referensi yang dapat diaudit.
 - Memiliki unit test dan reference vector yang ketat.
 - Dapat diekspor ke Python builder.
-- Tidak menambah dependensi eksternal Rust selain binding `pyo3` di crate `sim-python`.
+- Tidak menambah dependensi eksternal Rust selain binding `pyo3` di crate `python`.
 
 Target angka: 500 entri katalog. Satu entri adalah satu definisi model
 generik, bukan sekadar satu simbol GUI. Status solver ditentukan oleh field
@@ -292,7 +292,7 @@ Python builder tidak menghitung model. Python hanya:
 - Mengirim netlist ke Rust.
 - Menampilkan hasil.
 
-Rust mengekspor katalog melalui binding `sim-python`:
+Rust mengekspor katalog melalui binding `python`:
 
 ```python
 import emucad
@@ -324,7 +324,7 @@ emucad catalog
 emucad catalog --json
 ```
 
-Bangun modul Python dengan `cargo build -p sim-python`. Smoke test tersedia
+Bangun modul Python dengan `cargo build -p python`. Smoke test tersedia
 melalui `bash scripts/test-python.sh`. Contoh lengkap ada di
 `examples/python/build_netlists.py`. Node `0` selalu menjadi ground dan
 tidak perlu dideklarasikan. Builder hanya membangun topologi; simulasi
@@ -332,9 +332,13 @@ tetap dijalankan oleh crate Rust lain.
 
 ## 9. Status Implementasi
 
-Katalog 500 entri sudah ada di `crates/sim-device/src/catalog/` dan
-`crates/sim-device/src/catalog_data/`. File data dihasilkan oleh
-`scripts/gen_component_catalog.py` dan dipecah per family atau class.
+Katalog 500 entri sudah ada di `crates/device/src/catalog/` dan
+`crates/device/src/catalog_data/`. File data dihasilkan oleh
+`scripts/gen_component_catalog.py` dan dipecah per family lalu per
+grup semantik dari segmen kedua ID. Contoh: `analog.opamp` menjadi
+`analog/opamp.rs`, `diode.led` menjadi `diode/led.rs`, dan
+`sensor.temperature` menjadi `sensor/temperature.rs`. Family dengan
+satu grup tetap berupa satu file datar.
 
 Jumlah saat ini:
 
