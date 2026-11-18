@@ -442,8 +442,9 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Kontrol dan peripheral belum full gate-level.
   - Tidak memakai HDL pihak ketiga.
 - [~] S7-03 Definisikan scheduler digital-analog.
-  - Prototipe `mixed` menjalankan satu tick digital, update sumber
-    tegangan, lalu satu langkah transient analog.
+  - Prototipe `mixed` menjalankan input threshold, satu tick digital,
+    update sumber tegangan, lalu satu langkah transient analog.
+  - Loop feedback digital-analog sudah diuji dengan inverter dan RC.
   - AVR dan queue event penuh belum.
 - [ ] S7-04 Buat wrapper AVR structural sebagai device digital.
   - Belum ada device digital di solver analog.
@@ -458,8 +459,8 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Peripheral AVR sudah ada di `avr`.
   - Koneksi ke solver analog belum.
 - [~] S7-09 Jaga determinisme urutan event.
-  - Urutan satu arah digital ke analog diuji di `mixed`.
-  - Event queue gabungan dan arah analog ke digital belum.
+  - Urutan digital ke analog dan analog ke digital diuji di `mixed`.
+  - Event queue gabungan dan interpolasi belum.
 - [x] S7-10 Test AVR + LED + resistor + voltage source.
   - Board test dan GUI simulation sudah mencakup LED, resistor, dan PB5.
 - [x] S7-11 Jalankan GPIO blink gate-level sebagai vertical slice.
