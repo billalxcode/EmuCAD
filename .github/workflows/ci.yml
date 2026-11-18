@@ -27,6 +27,19 @@ jobs:
       - name: Build release
         run: cargo build --workspace --release
 
+  catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: rustup component add rustfmt
+      - name: Regenerate catalog
+        run: python3 scripts/gen_component_catalog.py
+      - name: Format
+        run: cargo fmt --all
+      - name: Check generated catalog
+        run: git diff --exit-code crates/sim-device/src/catalog_data
+
   release-script:
     runs-on: ubuntu-latest
     steps:

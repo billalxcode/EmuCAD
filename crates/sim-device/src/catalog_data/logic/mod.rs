@@ -2,26 +2,26 @@
 
 mod adder;
 mod counter;
-mod flip_flop;
-mod level_shifter;
-mod logic_gate;
-mod logic_gate_special;
-mod multiplexer;
-mod programmable_logic;
+mod flipflop;
+mod gate;
+mod gate_special;
+mod level;
+mod mux;
+mod programmable;
 
 use crate::catalog::ComponentSpec;
 use std::sync::LazyLock;
 
 static CATALOG: LazyLock<Vec<ComponentSpec>> = LazyLock::new(|| {
     let mut entries = Vec::new();
-    entries.extend_from_slice(logic_gate::ENTRIES);
-    entries.extend_from_slice(logic_gate_special::ENTRIES);
-    entries.extend_from_slice(flip_flop::ENTRIES);
+    entries.extend_from_slice(gate::ENTRIES);
+    entries.extend_from_slice(gate_special::ENTRIES);
+    entries.extend_from_slice(flipflop::ENTRIES);
     entries.extend_from_slice(counter::ENTRIES);
-    entries.extend_from_slice(multiplexer::ENTRIES);
+    entries.extend_from_slice(mux::ENTRIES);
     entries.extend_from_slice(adder::ENTRIES);
-    entries.extend_from_slice(level_shifter::ENTRIES);
-    entries.extend_from_slice(programmable_logic::ENTRIES);
+    entries.extend_from_slice(level::ENTRIES);
+    entries.extend_from_slice(programmable::ENTRIES);
     entries
 });
 

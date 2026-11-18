@@ -1,0 +1,73 @@
+//! Generated source independent component catalog data.
+
+use crate::catalog::{ComponentSpec, ModelClass};
+use sim_core::DeviceKind;
+
+pub(crate) const ENTRIES: &[ComponentSpec] = &[
+    ComponentSpec {
+        id: "source.independent.dc_voltage_source",
+        name: "DC voltage source",
+        class: ModelClass::VoltageSource,
+        device: Some(DeviceKind::VoltageSource),
+        pins: 2,
+        parameter: "voltage",
+        default: 5.0,
+        unit: "V",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "source.independent.dc_current_source",
+        name: "DC current source",
+        class: ModelClass::CurrentSource,
+        device: Some(DeviceKind::CurrentSource),
+        pins: 2,
+        parameter: "current",
+        default: 0.001,
+        unit: "A",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "source.independent.ac_voltage_source",
+        name: "AC voltage source",
+        class: ModelClass::VoltageSource,
+        device: Some(DeviceKind::VoltageSource),
+        pins: 2,
+        parameter: "voltage",
+        default: 5.0,
+        unit: "V",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "source.independent.ac_current_source",
+        name: "AC current source",
+        class: ModelClass::CurrentSource,
+        device: Some(DeviceKind::CurrentSource),
+        pins: 2,
+        parameter: "current",
+        default: 0.001,
+        unit: "A",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "source.independent.sine_voltage_source",
+        name: "sine voltage source",
+        class: ModelClass::BehavioralSource,
+        device: Some(DeviceKind::SineVoltageSource),
+        pins: 2,
+        parameter: "amplitude",
+        default: 5.0,
+        unit: "V",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "source.independent.sine_current_source",
+        name: "sine current source",
+        class: ModelClass::BehavioralSource,
+        device: Some(DeviceKind::SineCurrentSource),
+        pins: 2,
+        parameter: "amplitude",
+        default: 0.001,
+        unit: "A",
+        variant: 0,
+    },
+];

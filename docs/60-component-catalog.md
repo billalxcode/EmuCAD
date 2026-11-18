@@ -334,7 +334,11 @@ tetap dijalankan oleh crate Rust lain.
 
 Katalog 500 entri sudah ada di `crates/sim-device/src/catalog/` dan
 `crates/sim-device/src/catalog_data/`. File data dihasilkan oleh
-`scripts/gen_component_catalog.py` dan dipecah per family atau class.
+`scripts/gen_component_catalog.py` dan dipecah per family lalu per
+grup semantik dari segmen kedua ID. Contoh: `analog.opamp` menjadi
+`analog/opamp.rs`, `diode.led` menjadi `diode/led.rs`, dan
+`sensor.temperature` menjadi `sensor/temperature.rs`. Family dengan
+satu grup tetap berupa satu file datar.
 
 Jumlah saat ini:
 

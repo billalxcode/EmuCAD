@@ -1,0 +1,73 @@
+//! Generated diode opto component catalog data.
+
+use crate::catalog::{ComponentSpec, ModelClass};
+use sim_core::DeviceKind;
+
+pub(crate) const ENTRIES: &[ComponentSpec] = &[
+    ComponentSpec {
+        id: "diode.opto.phototransistor",
+        name: "phototransistor",
+        class: ModelClass::Optocoupler,
+        device: Some(DeviceKind::Optocoupler),
+        pins: 4,
+        parameter: "current_transfer_ratio",
+        default: 1.0,
+        unit: "ratio",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "diode.opto.photo_darlington",
+        name: "photo Darlington",
+        class: ModelClass::Optocoupler,
+        device: Some(DeviceKind::Optocoupler),
+        pins: 4,
+        parameter: "current_transfer_ratio",
+        default: 1.0,
+        unit: "ratio",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "diode.opto.optocoupler",
+        name: "optocoupler",
+        class: ModelClass::Optocoupler,
+        device: Some(DeviceKind::Optocoupler),
+        pins: 4,
+        parameter: "current_transfer_ratio",
+        default: 1.0,
+        unit: "ratio",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "diode.opto.photovoltaic_isolator",
+        name: "photovoltaic isolator",
+        class: ModelClass::Optocoupler,
+        device: Some(DeviceKind::Optocoupler),
+        pins: 4,
+        parameter: "current_transfer_ratio",
+        default: 1.0,
+        unit: "ratio",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "diode.opto.slotted_optical_switch",
+        name: "slotted optical switch",
+        class: ModelClass::Optocoupler,
+        device: Some(DeviceKind::Optocoupler),
+        pins: 4,
+        parameter: "current_transfer_ratio",
+        default: 1.0,
+        unit: "ratio",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "diode.opto.reflective_optical_sensor",
+        name: "reflective optical sensor",
+        class: ModelClass::Optocoupler,
+        device: Some(DeviceKind::Optocoupler),
+        pins: 4,
+        parameter: "current_transfer_ratio",
+        default: 1.0,
+        unit: "ratio",
+        variant: 0,
+    },
+];
