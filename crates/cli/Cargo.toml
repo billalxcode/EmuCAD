@@ -1,0 +1,21 @@
+[package]
+name = "cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "emucad"
+path = "src/main.rs"
+
+[dependencies]
+kernel = { path = "../kernel" }
+device = { path = "../device" }
+analysis = { path = "../analysis" }
+cells = { path = "../cells" }
+avr = { path = "../avr" }
+board = { path = "../board" }

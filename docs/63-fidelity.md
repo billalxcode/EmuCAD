@@ -57,7 +57,7 @@ behavioral V/I masih unsupported.
 Perintah:
 
 ```bash
-cargo run --release -p sim-avr --example avr_bench -- 200000
+cargo run --release -p avr --example avr_bench -- 200000
 ```
 
 Contoh hasil pada desktop Linux x86_64:
@@ -76,7 +76,7 @@ Statistik sirkuit untuk program ALU: 120 gate, 3 komponen, 48 DFF,
 
 Angka ini adalah sampel, bukan jaminan. AVR saat ini adalah core
 hybrid: datapath, register bank, dan beberapa unit memakai
-`sim-cells`; kontrol dan peripheral belum seluruhnya gate-level.
+`cells`; kontrol dan peripheral belum seluruhnya gate-level.
 Benchmark ini belum membuktikan AVR full-chip gate-level.
 
 ## 4. Benchmark Memory
@@ -84,7 +84,7 @@ Benchmark ini belum membuktikan AVR full-chip gate-level.
 Perintah:
 
 ```bash
-cargo run --release -p sim-cells --example memory_bench
+cargo run --release -p cells --example memory_bench
 ```
 
 Contoh hasil register file gate-level 32 register:

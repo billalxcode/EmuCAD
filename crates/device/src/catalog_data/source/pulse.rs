@@ -1,0 +1,73 @@
+//! Generated source pulse component catalog data.
+
+use crate::catalog::{ComponentSpec, ModelClass};
+use kernel::DeviceKind;
+
+pub(crate) const ENTRIES: &[ComponentSpec] = &[
+    ComponentSpec {
+        id: "source.pulse.pulse_voltage_source",
+        name: "pulse voltage source",
+        class: ModelClass::VoltageSource,
+        device: Some(DeviceKind::PulseVoltageSource),
+        pins: 2,
+        parameter: "v2",
+        default: 5.0,
+        unit: "V",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "source.pulse.pwl_voltage_source",
+        name: "PWL voltage source",
+        class: ModelClass::BehavioralSource,
+        device: Some(DeviceKind::PwlVoltageSource),
+        pins: 2,
+        parameter: "v1",
+        default: 5.0,
+        unit: "V",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "source.pulse.exponential_voltage_source",
+        name: "exponential voltage source",
+        class: ModelClass::BehavioralSource,
+        device: Some(DeviceKind::ExponentialVoltageSource),
+        pins: 2,
+        parameter: "v2",
+        default: 5.0,
+        unit: "V",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "source.pulse.voltage_noise_source",
+        name: "voltage noise source",
+        class: ModelClass::BehavioralSource,
+        device: Some(DeviceKind::NoiseVoltageSource),
+        pins: 2,
+        parameter: "amplitude",
+        default: 0.001,
+        unit: "V",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "source.pulse.current_noise_source",
+        name: "current noise source",
+        class: ModelClass::BehavioralSource,
+        device: Some(DeviceKind::NoiseCurrentSource),
+        pins: 2,
+        parameter: "amplitude",
+        default: 1e-06,
+        unit: "A",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "source.pulse.pulse_current_source",
+        name: "pulse current source",
+        class: ModelClass::BehavioralSource,
+        device: Some(DeviceKind::PulseCurrentSource),
+        pins: 2,
+        parameter: "v2",
+        default: 0.001,
+        unit: "A",
+        variant: 0,
+    },
+];

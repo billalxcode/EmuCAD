@@ -1,6 +1,6 @@
 # 88 - Domain Digital
 
-Dokumen ini mencatat domain digital minimal di `sim-cells` dan perintah
+Dokumen ini mencatat domain digital minimal di `cells` dan perintah
 `emucad digital`.
 
 ## 1. Cakupan

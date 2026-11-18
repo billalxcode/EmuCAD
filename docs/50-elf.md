@@ -98,7 +98,7 @@ Test memverifikasi:
 - Konversi segment flash ke Intel HEX.
 - Penolakan magic salah, file terpotong, dan machine bukan AVR.
 
-Total test `sim-board`: 23.
+Total test `board`: 23.
 Total workspace: 751.
 
 ---

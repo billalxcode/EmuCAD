@@ -1,17 +1,17 @@
 # 59 - Golden RGBA GUI
 
 Dokumen ini menjelaskan golden image RGBA dan prosedur update untuk
-`sim-gui`.
+`gui`.
 
 ## Status
 
 Golden RGBA sudah tersedia dan berjalan headless di test Linux:
 
-- Renderer: `crates/sim-gui/src/golden.rs`, hanya dikompilasi untuk test.
+- Renderer: `crates/gui/src/golden.rs`, hanya dikompilasi untuk test.
 - Ukuran: 320 x 240 piksel, skala piksel 1.0.
 - Scene: resistor dan LED berbasis SVG, label, dan teks tetap pada tema gelap.
 - Font: Source Sans 3 untuk label dan Source Code Pro untuk teks teknis.
-- Golden: `crates/sim-gui/tests/golden/scene-320x240.rgba`.
+- Golden: `crates/gui/tests/golden/scene-320x240.rgba`.
 - Perbandingan: byte RGBA exact, tanpa toleransi.
 - Diagnostik: piksel, channel, dan nilai byte pertama yang berbeda.
 - Determinisme: test merender dua kali dan memastikan hasil identik.
@@ -23,7 +23,7 @@ lunak. Tidak ada GPU, jaringan, wall-clock, atau dependensi baru.
 ## Menjalankan Test
 
 ```bash
-cargo test -p sim-gui golden
+cargo test -p gui golden
 ```
 
 Test yang berjalan:
@@ -38,14 +38,14 @@ Jika perubahan visual disengaja:
 1. Jalankan renderer untuk menulis golden baru:
 
    ```bash
-   UPDATE_GOLDEN=1 cargo test -p sim-gui golden_scene_matches_snapshot
+   UPDATE_GOLDEN=1 cargo test -p gui golden_scene_matches_snapshot
    ```
 
-2. Periksa file `crates/sim-gui/tests/golden/scene-320x240.rgba`.
+2. Periksa file `crates/gui/tests/golden/scene-320x240.rgba`.
 3. Konversi atau buka file sebagai RGBA 320 x 240 untuk review visual.
 4. Pastikan hanya perubahan yang dimaksud yang terlihat.
 5. Commit golden dan perubahan renderer dalam satu perubahan terpisah.
-6. Jalankan `cargo test -p sim-gui golden` tanpa env update.
+6. Jalankan `cargo test -p gui golden` tanpa env update.
 
 ## Batasan
 
@@ -68,5 +68,5 @@ Jika perubahan visual disengaja:
 ## Referensi
 
 - `docs/57-gui-egui.md`: desain renderer dan test visual.
-- `crates/sim-gui/src/golden.rs`: renderer dan test golden.
+- `crates/gui/src/golden.rs`: renderer dan test golden.
 - `docs/07-verification.md`: kebijakan verifikasi umum.

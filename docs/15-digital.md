@@ -1,6 +1,6 @@
 # 15 - Digital Abstraction
 
-Dokumen ini menjelaskan lapisan logika digital dua-state di `sim-cells`.
+Dokumen ini menjelaskan lapisan logika digital dua-state di `cells`.
 
 ---
 
@@ -10,7 +10,7 @@ Lapisan ini menjalankan blok sekuensial besar seperti register file, counter,
 dan CPU uji tanpa harus menyelesaikan seluruh rangkaian pada level transistor
 untuk setiap clock.
 
-Lapisan ini bukan pengganti model transistor. Sel CMOS di `sim-cells` tetap
+Lapisan ini bukan pengganti model transistor. Sel CMOS di `cells` tetap
 menjadi model elektrik. Lapisan digital dipakai untuk komposisi gate-level
 setelah perilaku sel diverifikasi.
 
@@ -166,4 +166,4 @@ Instruksi:
 - `CpuTrace` mencatat PC, IR, halt, dan snapshot 32 register.
 - Test mencakup arithmetic, branch, loop, JMP, reset, halt, dan trace.
 
-Total test `sim-cells` saat ini: 71.
+Total test `cells` saat ini: 71.

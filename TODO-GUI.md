@@ -11,7 +11,7 @@ di bagian Status Akhir.
 **Keputusan yang sudah disetujui:**
 
 - `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png` hanya boleh
-  dipakai di crate `sim-gui`.
+  dipakai di crate `gui`.
 - Crate simulasi lain tetap zero external dependency.
 - `egui_plot`, `libloading`, dan crate eksternal lain tidak diizinkan
   tanpa keputusan baru.
@@ -66,16 +66,16 @@ di bagian Status Akhir.
 
 ## G0 - Fondasi dan Keputusan
 
-- [x] G0-01 Setujui pengecualian dependensi GUI di `sim-gui`.
+- [x] G0-01 Setujui pengecualian dependensi GUI di `gui`.
 - [x] G0-02 Catat keputusan di `AGENTS.md` dan `docs/57`.
-- [x] G0-03 Buat crate `crates/sim-gui` dengan binary `emucad-gui`.
-- [x] G0-04 Tambahkan `sim-gui` ke workspace dan dependency graph.
-- [x] G0-05 Pin versi semua dependensi `sim-gui`, commit `Cargo.lock`.
+- [x] G0-03 Buat crate `crates/gui` dengan binary `emucad-gui`.
+- [x] G0-04 Tambahkan `gui` ke workspace dan dependency graph.
+- [x] G0-05 Pin versi semua dependensi `gui`, commit `Cargo.lock`.
 - [x] G0-06 Buat app error type dan aturan no-panic untuk input GUI.
-- [x] G0-07 Tambahkan build dan test `sim-gui` ke CI Linux.
+- [x] G0-07 Tambahkan build dan test `gui` ke CI Linux.
 - [x] G0-08 Dokumentasikan perintah build dan run GUI.
 - [x] G0-09 Kunci default routing, persilangan, platform, dan format simpan.
-- [x] G0-10 Perbarui `docs/02-architecture.md` untuk `sim-gui` dan daftar dependensi.
+- [x] G0-10 Perbarui `docs/02-architecture.md` untuk `gui` dan daftar dependensi.
 - [x] G0-11 Kunci grid default 20 px, zoom preset dan halus.
 - [x] G0-12 Kunci palet warna final untuk setiap kelas net.
 - [x] G0-13 Kunci field skema JSON versi 1.
@@ -83,9 +83,9 @@ di bagian Status Akhir.
 - [x] G0-15 Kunci API probe analog read-only dan default N 100 cycle.
 - [x] G0-16 Ekstensi file `.emu.json`; konfigurasi di XDG config.
 
-**Acceptance G0:** `cargo run -p sim-gui` membuka window kosong, CI
+**Acceptance G0:** `cargo run -p gui` membuka window kosong, CI
 membangun crate, dan tidak ada dependensi eksternal di luar daftar
-`sim-gui`.
+`gui`.
 
 ---
 
@@ -209,7 +209,7 @@ fungsi net, dan persilangan tidak menimbulkan koneksi palsu.
 - [x] G6-05 Tampilkan cycle dan status running atau paused.
 - [x] G6-06 Tampilkan error simulasi di UI tanpa panic.
 - [x] G6-07 Test integrasi ATmega328P dan LED.
-- [x] G6-08 Evaluasi ekstraksi runtime bersama dengan `sim-cli`.
+- [x] G6-08 Evaluasi ekstraksi runtime bersama dengan `cli`.
 - [x] G6-09 Implementasikan sampling probe setiap N cycle yang dapat dikonfigurasi.
 - [x] G6-10 Tampilkan output UART TX di monitor GUI.
 - [x] G6-11 Implementasikan input UART RX dari GUI.
@@ -324,7 +324,7 @@ Selesai dan teruji:
 - Simbol library berbasis aset SVG: 6 komponen kurasi dan 500 entri
   katalog. Setiap entri katalog memakai base symbol per kelas plus kode
   varian 3 x 3 yang unik. Aset disimpan di
-  `crates/sim-gui/assets/symbols/` dengan catatan sumber dan lisensi.
+  `crates/gui/assets/symbols/` dengan catatan sumber dan lisensi.
 - Library memiliki 16 kategori keluarga dan definisi pin untuk 1 sampai
   8 pin per entri. Daftar library memakai virtualisasi baris.
 - Design system Adobe Spectrum-inspired: Source Sans 3 untuk UI, Source
@@ -336,7 +336,7 @@ Selesai dan teruji:
   segmen, culling tanpa alokasi daftar wire per frame.
 - Keyboard nudge dengan panah dan Shift, focus ring canvas, toolbar ikon
   ASCII, app error type, dan golden RGBA headless 320 x 240.
-- Semua fungsi `sim-gui` sudah maksimal 20 baris setelah refactor
+- Semua fungsi `gui` sudah maksimal 20 baris setelah refactor
   terpisah.
 - Undo/redo, JSON, autosave, backup, recent files, XDG config, prompt
   reload, command palette, context menu, toast, log, PNG export.
@@ -370,7 +370,7 @@ Tertunda karena batas teknis atau lingkungan:
 
 - [x] Perubahan sesuai task.
 - [x] Test model atau interaction ditambahkan.
-- [x] Tidak ada dependensi eksternal di luar daftar `sim-gui`.
+- [x] Tidak ada dependensi eksternal di luar daftar `gui`.
 - [x] Tidak ada `unsafe`.
 - [x] Setiap fungsi maksimal 20 baris.
 - [x] Guard clause dipakai.

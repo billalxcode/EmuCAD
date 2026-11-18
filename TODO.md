@@ -2,7 +2,7 @@
 
 Daftar tugas lengkap dari hal terkecil sampai rilis. Setiap item harus kecil, dapat diuji, dan tidak menambah dependensi eksternal.
 
-> **Status:** P0 fondasi selesai. P8 selesai penuh. P9 sebagian besar selesai; ELF loader, simbol, ELF ke HEX, dan UART end-to-end selesai. P10 sparse, adaptive step, trapezoidal/Gear, AC linear, noise termal, distorsi kuasi-statis, sensitivitas numerik, suhu device, process corner, BJT, JFET, transmission line, determinisme Linux, fidelity matrix, batasan model, profiling, dan optimasi selesai. Golden suite dan determinisme macOS/Windows belum. P4 harness ngspice dan golden data belum karena ngspice tidak tersedia. P5 characterization, switching, input capacitance, drive strength, dan osilasi ring oscillator selesai; perbandingan ngspice belum. P11 user guide, contoh runnable, workflow CI, dan notices selesai; eksekusi GitHub Actions, tag, dan publikasi belum; packaging dan release notes siap. X-03 panic audit selesai; builder sel mencatat error dan melaporkannya di build. P3 body effect, gmb, Meyer capacitance, overlap, diode nonideal, BJT, JFET, transmission line, VCVS, VCCS, CCVS, CCCS, dan switch selesai; breakdown dan model termal lanjutan belum. P12 selesai: adaptive initial state, Newton transient, dan AC nonlinier. P13 selesai: kapasitansi diode dan MOSFET pada AC; kapasitansi BJT dan JFET belum. P14 selesai: AC controlled sources dan switch. P15 selesai: kapasitansi BJT dan JFET pada AC/transient. P16 selesai: virtual serial upload STK500 via socat. P17 selesai: UART0 register map, TX/RX, dan interrupt otomatis ke serial monitor. P18 riset selesai: virtual USB serial. P19 virtual USB berjalan: bridge C++, ConfigFS ACM, /dev/ttyACM0, STK500v1, upload avrdude, dan sketsa Arduino core `Serial.println("Hello World")` berhasil; verifikasi GUI Arduino IDE dan cleanup gadget belum. P20 desain GUI egui selesai dan implementasi dimulai: crate `sim-gui`, app shell, canvas grid, pan, zoom, status bar, library komponen, placement, selection, drag move, rotate, mirror, inspector, wire ortogonal, junction, warna net, selection wire, delete wire, segment drag, saran jalur L, saran jalur Z, save/load JSON, undo/redo, autosave, backup, recent files, konfigurasi XDG, prompt reload file eksternal, label net, legenda warna, command palette, multi-select, selection box, copy/paste/duplicate, rotate/mirror grup, context menu dasar, monitor UART TX, input UART RX, pola garis net, toast, konfirmasi hapus, export PNG, minimap, log panel, tooltip pin, tema terang, recently used, preview library, drag-and-drop library, ruler grid, probe tegangan PB5, arus LED, animasi aliran sinyal opsional, graph analog PB5, sampling probe N cycle, batas 8 series, API probe read-only, spatial hash hit testing, app error type, toolbar ikon ASCII, golden RGBA headless, net highlight, override warna wire, label net kustom, migrasi JSON v1, simulasi PB5, dan graph digital PB5/LED dengan cursor; dependensi GUI `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png` disetujui hanya untuk `sim-gui`. P21 binding Python selesai untuk katalog dan netlist: crate `sim-python`, `pyo3`, `emucad.catalog`, `emucad.find_component`, `emucad.build_netlist`, error mapping, smoke test, dan dokumentasi; ekspor simulasi ke Python belum. P22 performa AVR selesai untuk loop ALU, mixed, memory, dan Timer0: headroom 2,14-4,50x real-time; pacing CLI/GUI terverifikasi dalam toleransi 1%; benchmark firmware penuh dan Timer1/2 register IO belum.
+> **Status:** P0 fondasi selesai. P8 selesai penuh. P9 sebagian besar selesai; ELF loader, simbol, ELF ke HEX, dan UART end-to-end selesai. P10 sparse, adaptive step, trapezoidal/Gear, AC linear, noise termal, distorsi kuasi-statis, sensitivitas numerik, suhu device, process corner, BJT, JFET, transmission line, determinisme Linux, fidelity matrix, batasan model, profiling, dan optimasi selesai. Golden suite dan determinisme macOS/Windows belum. P4 harness ngspice dan golden data belum karena ngspice tidak tersedia. P5 characterization, switching, input capacitance, drive strength, dan osilasi ring oscillator selesai; perbandingan ngspice belum. P11 user guide, contoh runnable, workflow CI, dan notices selesai; eksekusi GitHub Actions, tag, dan publikasi belum; packaging dan release notes siap. X-03 panic audit selesai; builder sel mencatat error dan melaporkannya di build. P3 body effect, gmb, Meyer capacitance, overlap, diode nonideal, BJT, JFET, transmission line, VCVS, VCCS, CCVS, CCCS, dan switch selesai; breakdown dan model termal lanjutan belum. P12 selesai: adaptive initial state, Newton transient, dan AC nonlinier. P13 selesai: kapasitansi diode dan MOSFET pada AC; kapasitansi BJT dan JFET belum. P14 selesai: AC controlled sources dan switch. P15 selesai: kapasitansi BJT dan JFET pada AC/transient. P16 selesai: virtual serial upload STK500 via socat. P17 selesai: UART0 register map, TX/RX, dan interrupt otomatis ke serial monitor. P18 riset selesai: virtual USB serial. P19 virtual USB berjalan: bridge C++, ConfigFS ACM, /dev/ttyACM0, STK500v1, upload avrdude, dan sketsa Arduino core `Serial.println("Hello World")` berhasil; verifikasi GUI Arduino IDE dan cleanup gadget belum. P20 desain GUI egui selesai dan implementasi dimulai: crate `gui`, app shell, canvas grid, pan, zoom, status bar, library komponen, placement, selection, drag move, rotate, mirror, inspector, wire ortogonal, junction, warna net, selection wire, delete wire, segment drag, saran jalur L, saran jalur Z, save/load JSON, undo/redo, autosave, backup, recent files, konfigurasi XDG, prompt reload file eksternal, label net, legenda warna, command palette, multi-select, selection box, copy/paste/duplicate, rotate/mirror grup, context menu dasar, monitor UART TX, input UART RX, pola garis net, toast, konfirmasi hapus, export PNG, minimap, log panel, tooltip pin, tema terang, recently used, preview library, drag-and-drop library, ruler grid, probe tegangan PB5, arus LED, animasi aliran sinyal opsional, graph analog PB5, sampling probe N cycle, batas 8 series, API probe read-only, spatial hash hit testing, app error type, toolbar ikon ASCII, golden RGBA headless, net highlight, override warna wire, label net kustom, migrasi JSON v1, simulasi PB5, dan graph digital PB5/LED dengan cursor; dependensi GUI `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png` disetujui hanya untuk `gui`. P21 binding Python selesai untuk katalog dan netlist: crate `python`, `pyo3`, `emucad.catalog`, `emucad.find_component`, `emucad.build_netlist`, error mapping, smoke test, dan dokumentasi; ekspor simulasi ke Python belum. P22 performa AVR selesai untuk loop ALU, mixed, memory, dan Timer0: headroom 2,14-4,50x real-time; pacing CLI/GUI terverifikasi dalam toleransi 1%; benchmark firmware penuh dan Timer1/2 register IO belum.
 > **Aturan:** satu item selesai = kode + test + dokumentasi singkat.
 
 ---
@@ -32,13 +32,13 @@ Daftar tugas lengkap dari hal terkecil sampai rilis. Setiap item harus kecil, da
 - [x] P0-03 Verifikasi `rustc --version` dan `cargo --version`.
 - [x] P0-04 Tentukan MSRV dan tulis `rust-toolchain.toml`.
 - [x] P0-05 Buat `Cargo.toml` workspace dengan resolver dan edition.
-- [x] P0-06 Buat crate `sim-core` (`Cargo.toml`, `src/lib.rs`).
-- [x] P0-07 Buat crate `sim-device`.
-- [x] P0-08 Buat crate `sim-analysis`.
-- [x] P0-09 Buat crate `sim-cells`.
-- [x] P0-10 Buat crate `sim-avr`.
-- [x] P0-11 Buat crate `sim-board`.
-- [x] P0-12 Buat crate `sim-cli` dengan binary `emucad`.
+- [x] P0-06 Buat crate `kernel` (`Cargo.toml`, `src/lib.rs`).
+- [x] P0-07 Buat crate `device`.
+- [x] P0-08 Buat crate `analysis`.
+- [x] P0-09 Buat crate `cells`.
+- [x] P0-10 Buat crate `avr`.
+- [x] P0-11 Buat crate `board`.
+- [x] P0-12 Buat crate `cli` dengan binary `emucad`.
 - [x] P0-13 Pastikan seluruh `Cargo.toml` tidak punya dependensi eksternal.
 - [x] P0-14 Tambahkan `LICENSE` (MIT) dengan copyright Billal Fauzan.
 - [x] P0-15 Lisensi akhir: hanya MIT (Apache dihapus).
@@ -872,10 +872,10 @@ dikembangkan ke Windows/macOS.
 Desain: [`docs/57-gui-egui.md`](docs/57-gui-egui.md).
 Backlog detail: [`TODO-GUI.md`](TODO-GUI.md).
 
-- [x] P20-01 Setujui pengecualian `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png` untuk `sim-gui`.
+- [x] P20-01 Setujui pengecualian `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png` untuk `gui`.
 - [x] P20-02 Tulis desain canvas, grid, wire, probe, dan grafik.
 - [x] P20-03 Tulis backlog GUI bertahap G0 sampai G10.
-- [x] P20-04 Buat crate `sim-gui` dan app shell egui.
+- [x] P20-04 Buat crate `gui` dan app shell egui.
 - [x] P20-05 Implementasikan kanvas grid 90 persen dan navigasi.
 - [x] P20-06 Implementasikan library, penempatan, dan editing komponen.
 - [x] P20-07 Implementasikan kabel ortogonal, junction, dan warna net.
@@ -893,8 +893,8 @@ menjalankan simulasi, menampilkan grafik, dan menyimpan proyek.
 Desain: [`docs/60-component-catalog.md`](docs/60-component-catalog.md).
 Backlog detail: [`TODO-COMPONENTS.md`](TODO-COMPONENTS.md).
 
-- [x] P21-01 Setujui pengecualian `pyo3` hanya untuk `sim-python`.
-- [x] P21-02 Buat crate `sim-python` dan daftarkan di workspace.
+- [x] P21-01 Setujui pengecualian `pyo3` hanya untuk `python`.
+- [x] P21-02 Buat crate `python` dan daftarkan di workspace.
 - [x] P21-03 Ekspor 500 entri katalog dan pencarian komponen.
 - [x] P21-04 Implementasikan builder netlist dengan validasi pin, node, dan parameter.
 - [x] P21-05 Petakan error Rust menjadi `ValueError` Python.
@@ -942,7 +942,7 @@ representatif dan tetap lulus seluruh test fungsional.
 - [x] X-01 Pastikan setiap crate punya dokumentasi modul.
 - [x] X-02 Pastikan setiap error punya pesan jelas.
 - [x] X-03 Pastikan tidak ada panic pada input pengguna.
-- [x] X-04 Pastikan dependensi eksternal hanya `egui`/`eframe` di `sim-gui` dan `pyo3` di `sim-python`.
+- [x] X-04 Pastikan dependensi eksternal hanya `egui`/`eframe` di `gui` dan `pyo3` di `python`.
 - [x] X-05 Jalankan fmt sebelum commit.
 - [x] X-06 Jalankan clippy sebelum commit.
 - [x] X-07 Jalankan test sebelum commit.
@@ -1002,7 +1002,7 @@ Sebuah task dianggap selesai jika:
 
 - [x] Kode ditulis.
 - [x] Test ditulis dan lulus.
-- [x] Tidak ada dependensi eksternal selain `egui`/`eframe` di `sim-gui` dan `pyo3` di `sim-python`.
+- [x] Tidak ada dependensi eksternal selain `egui`/`eframe` di `gui` dan `pyo3` di `python`.
 - [x] Dokumentasi diperbarui.
 - [x] `cargo fmt` bersih.
 - [x] `cargo clippy` bersih.

@@ -45,8 +45,8 @@ Simbol library GUI memakai aset SVG dari sumber berikut:
   renderer. Kode ini membedakan 500 entri tanpa lisensi tambahan.
 
 Teks lisensi lengkap, daftar aset, dan URL sumber ada di
-`crates/sim-gui/assets/symbols/NOTICE.md`. Paket rilis menyalin file itu
-ke `share/licenses/sim-gui-symbols.md`.
+`crates/gui/assets/symbols/NOTICE.md`. Paket rilis menyalin file itu
+ke `share/licenses/gui-symbols.md`.
 
 ## 4. Font GUI
 
@@ -56,7 +56,7 @@ GUI membundel font open-source dari Adobe:
 - Source Code Pro Regular: nilai teknis, pin, koordinat, dan log.
 
 Keduanya memakai SIL Open Font License 1.1. Teks lisensi dan URL sumber
-ada di `crates/sim-gui/assets/fonts/NOTICE.md`. Paket rilis menyalin
+ada di `crates/gui/assets/fonts/NOTICE.md`. Paket rilis menyalin
 `NOTICE.md`, `OFL-SourceSans.txt`, dan `OFL-SourceCodePro.txt` ke
 `share/licenses/`.
 

@@ -21,8 +21,8 @@ Prasyarat:
 Perintah:
 
 ```bash
-cargo build -p sim-gui
-cargo run -p sim-gui
+cargo build -p gui
+cargo run -p gui
 ```
 
 Binary hasil build:
@@ -260,7 +260,7 @@ Tutup window yang tidak diinginkan sebelum export.
 Jalankan dari terminal untuk melihat pesan:
 
 ```bash
-cargo run -p sim-gui
+cargo run -p gui
 ```
 
 Pastikan backend grafis dan driver GPU tersedia.

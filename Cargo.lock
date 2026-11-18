@@ -152,6 +152,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "683d7910e743518b0e34f1186f92494becacb047c7b6bf616c96772180fef923"
 
 [[package]]
+name = "analysis"
+version = "0.1.0"
+dependencies = [
+ "device",
+ "kernel",
+]
+
+[[package]]
 name = "android-activity"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -414,6 +422,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
 
 [[package]]
+name = "avr"
+version = "0.1.0"
+dependencies = [
+ "cells",
+ "device",
+ "kernel",
+]
+
+[[package]]
 name = "bit-set"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -469,6 +486,15 @@ dependencies = [
  "futures-io",
  "futures-lite",
  "piper",
+]
+
+[[package]]
+name = "board"
+version = "0.1.0"
+dependencies = [
+ "avr",
+ "device",
+ "kernel",
 ]
 
 [[package]]
@@ -573,6 +599,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "cells"
+version = "0.1.0"
+dependencies = [
+ "analysis",
+ "device",
+ "kernel",
+]
+
+[[package]]
 name = "cfg-if"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -591,6 +626,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ced0551234e87afee12411d535648dd89d2e7f34c78b753395567aff3d447ff"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "cli"
+version = "0.1.0"
+dependencies = [
+ "analysis",
+ "avr",
+ "board",
+ "cells",
+ "device",
+ "kernel",
 ]
 
 [[package]]
@@ -707,6 +754,13 @@ name = "cursor-icon"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f27ae1dd37df86211c42e150270f82743308803d90a6f6e6651cd730d5e1732f"
+
+[[package]]
+name = "device"
+version = "0.1.0"
+dependencies = [
+ "kernel",
+]
 
 [[package]]
 name = "dispatch"
@@ -1371,6 +1425,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "gui"
+version = "0.1.0"
+dependencies = [
+ "analysis",
+ "avr",
+ "board",
+ "device",
+ "eframe",
+ "kernel",
+ "png",
+ "rfd",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "guillotiere"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1671,6 +1741,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "kernel"
+version = "0.1.0"
+
+[[package]]
 name = "khronos-egl"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1820,6 +1894,16 @@ checksum = "b63fbc4a50860e98e7b2aa7804ded1db5cbc3aff9193adaff57a6931bf7c4b4c"
 dependencies = [
  "adler2",
  "simd-adler32",
+]
+
+[[package]]
+name = "mixed"
+version = "0.1.0"
+dependencies = [
+ "analysis",
+ "cells",
+ "device",
+ "kernel",
 ]
 
 [[package]]
@@ -2660,6 +2744,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "python"
+version = "0.1.0"
+dependencies = [
+ "device",
+ "kernel",
+ "pyo3",
+ "pyo3-build-config",
+]
+
+[[package]]
 name = "quick-error"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2983,100 +3077,6 @@ checksum = "c4db69cba1110affc0e9f7bcd48bbf87b3f4fc7c61fc9155afd4c469eb3d6c1b"
 dependencies = [
  "errno",
  "libc",
-]
-
-[[package]]
-name = "sim-analysis"
-version = "0.1.0"
-dependencies = [
- "sim-core",
- "sim-device",
-]
-
-[[package]]
-name = "sim-avr"
-version = "0.1.0"
-dependencies = [
- "sim-cells",
- "sim-core",
- "sim-device",
-]
-
-[[package]]
-name = "sim-board"
-version = "0.1.0"
-dependencies = [
- "sim-avr",
- "sim-core",
- "sim-device",
-]
-
-[[package]]
-name = "sim-cells"
-version = "0.1.0"
-dependencies = [
- "sim-analysis",
- "sim-core",
- "sim-device",
-]
-
-[[package]]
-name = "sim-cli"
-version = "0.1.0"
-dependencies = [
- "sim-analysis",
- "sim-avr",
- "sim-board",
- "sim-cells",
- "sim-core",
- "sim-device",
-]
-
-[[package]]
-name = "sim-core"
-version = "0.1.0"
-
-[[package]]
-name = "sim-device"
-version = "0.1.0"
-dependencies = [
- "sim-core",
-]
-
-[[package]]
-name = "sim-gui"
-version = "0.1.0"
-dependencies = [
- "eframe",
- "png",
- "rfd",
- "serde",
- "serde_json",
- "sim-analysis",
- "sim-avr",
- "sim-board",
- "sim-core",
- "sim-device",
-]
-
-[[package]]
-name = "sim-mixed"
-version = "0.1.0"
-dependencies = [
- "sim-analysis",
- "sim-cells",
- "sim-core",
- "sim-device",
-]
-
-[[package]]
-name = "sim-python"
-version = "0.1.0"
-dependencies = [
- "pyo3",
- "pyo3-build-config",
- "sim-core",
- "sim-device",
 ]
 
 [[package]]

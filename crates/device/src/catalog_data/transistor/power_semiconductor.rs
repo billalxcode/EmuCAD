@@ -1,0 +1,73 @@
+//! Generated transistor power_semiconductor component catalog data.
+
+use crate::catalog::{ComponentSpec, ModelClass};
+use kernel::DeviceKind;
+
+pub(crate) const ENTRIES: &[ComponentSpec] = &[
+    ComponentSpec {
+        id: "transistor.power_semiconductor.igbt",
+        name: "IGBT",
+        class: ModelClass::OtherTransistor,
+        device: Some(DeviceKind::Igbt),
+        pins: 3,
+        parameter: "vth",
+        default: 5.0,
+        unit: "V",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "transistor.power_semiconductor.igbt_with_diode",
+        name: "IGBT with diode",
+        class: ModelClass::OtherTransistor,
+        device: Some(DeviceKind::Igbt),
+        pins: 3,
+        parameter: "vth",
+        default: 5.0,
+        unit: "V",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "transistor.power_semiconductor.gan_hemt",
+        name: "GaN HEMT",
+        class: ModelClass::OtherTransistor,
+        device: Some(DeviceKind::JfetN),
+        pins: 3,
+        parameter: "vto",
+        default: -2.0,
+        unit: "V",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "transistor.power_semiconductor.sic_schottky_fet",
+        name: "SiC Schottky FET",
+        class: ModelClass::OtherTransistor,
+        device: Some(DeviceKind::JfetN),
+        pins: 3,
+        parameter: "vto",
+        default: -2.0,
+        unit: "V",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "transistor.power_semiconductor.sic_mosfet",
+        name: "SiC MOSFET",
+        class: ModelClass::OtherTransistor,
+        device: Some(DeviceKind::Nmos),
+        pins: 3,
+        parameter: "vto",
+        default: 2.0,
+        unit: "V",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "transistor.power_semiconductor.cascode_gan",
+        name: "cascode GaN",
+        class: ModelClass::OtherTransistor,
+        device: Some(DeviceKind::Nmos),
+        pins: 3,
+        parameter: "vto",
+        default: 2.0,
+        unit: "V",
+        variant: 0,
+    },
+];

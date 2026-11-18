@@ -115,7 +115,7 @@ Terminal lain:
 
 | Komponen | Bahasa | Tanggung jawab |
 |---|---|---|
-| `sim-cli` | Rust | CLI, CPU, flash, STK500 |
+| `cli` | Rust | CLI, CPU, flash, STK500 |
 | `emucad-usb` | C++ | Bridge tty gadget ke Unix socket |
 | `dummy_hcd` | C kernel | Host controller dan UDC virtual |
 | `usb_f_acm` | C kernel | Gadget function ACM |

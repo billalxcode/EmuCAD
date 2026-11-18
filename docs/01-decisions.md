@@ -65,7 +65,7 @@ Dokumen ini mencatat seluruh keputusan desain yang diambil selama brainstorming,
 | D53 | Debug CPU | CLI monitor |
 | D54 | Model kapasitansi transistor | Meyer |
 | D55 | Proses | PTM 350 nm generik, kalibrasi pin-level |
-| D56 | Binding Python | `pyo3` hanya di `sim-python`; katalog dan netlist |
+| D56 | Binding Python | `pyo3` hanya di `python`; katalog dan netlist |
 
 ---
 
@@ -433,18 +433,18 @@ peripheral, lalu membuktikan kompatibilitas dengan core Arduino.
 
 ### D56 - Binding Python dengan PyO3
 
-**Keputusan:** crate baru `sim-python` memakai `pyo3` untuk mengekspor katalog
+**Keputusan:** crate baru `python` memakai `pyo3` untuk mengekspor katalog
 dan builder netlist ke Python. Crates lain tetap zero external dependency.
-Crate ini hanya bergantung pada `sim-core` dan `sim-device`.
+Crate ini hanya bergantung pada `kernel` dan `device`.
 
 **Alasan:** Python builder membutuhkan akses langsung ke katalog dan netlist
 tanpa menduplikasi schema di Python. Binding terisolasi di satu adapter.
 
 **Implikasi:**
-- `pyo3` dan crate turunannya hanya boleh muncul di `sim-python`.
+- `pyo3` dan crate turunannya hanya boleh muncul di `python`.
 - Kode FFI hasil makro `pyo3` adalah satu-satunya pengecualian aturan unsafe.
 - Binding tidak menjalankan simulasi; runtime tetap di crate Rust lain.
-- `sim-python` tidak boleh menjadi dependensi crate lain.
+- `python` tidak boleh menjadi dependensi crate lain.
 - Fitur `extension-module` menjadi default; test Rust memakai logika murni.
 - Build script memanggil `pyo3_build_config::add_extension_module_link_args`
   dan menambahkan `-undefined dynamic_lookup` untuk test harness macOS.
@@ -465,7 +465,7 @@ tanpa menduplikasi schema di Python. Binding terisolasi di satu adapter.
 | C08 | Seluruh ISA + peripheral dasar vs bertahap per blok | Milestone besar dipecah menjadi blok dan test |
 | C09 | Real-time vs transistor-level penuh | Offline correctness; real-time bukan target |
 | C10 | 100% semua aspek vs keterbatasan verifikasi | Fidelity matrix + toleransi + dokumentasi batasan |
-| C11 | Zero dependency vs binding Python | `pyo3` hanya di `sim-python`; crate lain tetap std-only |
+| C11 | Zero dependency vs binding Python | `pyo3` hanya di `python`; crate lain tetap std-only |
 
 ---
 

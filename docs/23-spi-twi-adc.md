@@ -72,7 +72,7 @@ Test CPU membuktikan:
 
 ## 5. Test
 
-Total test `sim-avr` mengikuti `docs/13-analysis.md`.
+Total test `avr` mengikuti `docs/13-analysis.md`.
 
 ---
 

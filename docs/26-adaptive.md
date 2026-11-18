@@ -54,7 +54,7 @@ pub fn transient_adaptive_with_solver(
 - Tolerance tidak valid ditolak.
 - Zero steps menghasilkan output kosong.
 
-Total test `sim-analysis`: 116 (108 unit + 8 integration).
+Total test `analysis`: 116 (108 unit + 8 integration).
 Total workspace: 751.
 
 ---

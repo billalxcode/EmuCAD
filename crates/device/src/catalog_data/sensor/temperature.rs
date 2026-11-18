@@ -1,0 +1,73 @@
+//! Generated sensor temperature component catalog data.
+
+use crate::catalog::{ComponentSpec, ModelClass};
+use kernel::DeviceKind;
+
+pub(crate) const ENTRIES: &[ComponentSpec] = &[
+    ComponentSpec {
+        id: "sensor.temperature.ntc_thermistor_sensor",
+        name: "NTC thermistor sensor",
+        class: ModelClass::Sensor,
+        device: Some(DeviceKind::Ntc),
+        pins: 3,
+        parameter: "resistance",
+        default: 10000.0,
+        unit: "ohm",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "sensor.temperature.ptc_thermistor_sensor",
+        name: "PTC thermistor sensor",
+        class: ModelClass::Sensor,
+        device: Some(DeviceKind::Ptc),
+        pins: 3,
+        parameter: "resistance",
+        default: 1000.0,
+        unit: "ohm",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "sensor.temperature.rtd",
+        name: "RTD",
+        class: ModelClass::Sensor,
+        device: Some(DeviceKind::Rtd),
+        pins: 3,
+        parameter: "resistance",
+        default: 100.0,
+        unit: "ohm",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "sensor.temperature.thermocouple",
+        name: "thermocouple",
+        class: ModelClass::Sensor,
+        device: Some(DeviceKind::Thermocouple),
+        pins: 3,
+        parameter: "sensitivity",
+        default: 4.1e-05,
+        unit: "V/C",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "sensor.temperature.semiconductor_temperature_sensor",
+        name: "semiconductor temperature sensor",
+        class: ModelClass::Sensor,
+        device: Some(DeviceKind::TemperatureSensor),
+        pins: 3,
+        parameter: "sensitivity",
+        default: 0.01,
+        unit: "V/C",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "sensor.temperature.thermal_switch",
+        name: "thermal switch",
+        class: ModelClass::Sensor,
+        device: Some(DeviceKind::ThermalSwitch),
+        pins: 3,
+        parameter: "threshold",
+        default: 75.0,
+        unit: "C",
+        variant: 0,
+    },
+];

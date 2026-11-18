@@ -1,6 +1,6 @@
 # 90 - Mixed-Signal One-Way Scheduler
 
-Dokumen ini mencatat prototipe `sim-mixed` untuk co-simulation digital
+Dokumen ini mencatat prototipe `mixed` untuk co-simulation digital
 dan analog.
 
 ## 1. Tujuan
@@ -46,7 +46,7 @@ Test `clock_toggles_source_and_preserves_capacitor_state`:
 - Hanya satu arah digital ke analog.
 - Satu tick digital sama dengan satu `dt` analog.
 - Belum ada queue event, interpolasi, atau breakpoint pin.
-- Belum terhubung ke AVR atau `sim-board`.
+- Belum terhubung ke AVR atau `board`.
 - Hanya sumber tegangan yang dapat diubah.
 - Tidak ada pembacaan analog kembali ke digital.
 

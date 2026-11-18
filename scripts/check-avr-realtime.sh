@@ -8,6 +8,6 @@ if ! command -v cargo >/dev/null 2>&1; then
     fi
 fi
 
-cargo build --release -p sim-cli
+cargo build --release -p cli
 python3 scripts/check-avr-realtime.py
-cargo test --release -p sim-gui worker_realtime_pacing_matches_clock -- --ignored
+cargo test --release -p gui worker_realtime_pacing_matches_clock -- --ignored

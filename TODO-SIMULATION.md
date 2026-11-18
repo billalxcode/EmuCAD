@@ -17,8 +17,8 @@ fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 - Komponen tanpa model harus ditolak atau ditandai, bukan diberi angka
   palsu.
 - Semua hasil harus deterministik dan dapat diuji.
-- GUI tetap adapter; solver tetap di `sim-analysis` dan model device tetap
-  di `sim-device`.
+- GUI tetap adapter; solver tetap di `analysis` dan model device tetap
+  di `device`.
 
 ## 2. Baseline
 
@@ -51,7 +51,7 @@ fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 | Q12 | RF block ditunda ke fase AC/RF |
 | Q13 | Memory dan MCU memakai structural penuh |
 | Q14 | Switch dan relay memakai model ideal + delay sederhana |
-| Q15 | Adapter netlist ditempatkan di modul `sim-gui` |
+| Q15 | Adapter netlist ditempatkan di modul `gui` |
 | Q16 | Parameter dan pilihan analisis disimpan di JSON proyek |
 | Q17 | Transient memakai adaptive step dengan batas aman |
 | Q18 | Validasi wajib menambahkan golden ngspice |
@@ -94,7 +94,7 @@ fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 | Q55 | Jika benchmark gagal, real-time boleh diturunkan |
 | Q56 | Verifikasi memakai instruction, peripheral, dan timing |
 | Q57 | Perbaikan data dan mapping dikerjakan sebelum harness |
-| Q58 | Unit test model di sim-device; circuit test di sim-analysis |
+| Q58 | Unit test model di device; circuit test di analysis |
 | Q59 | Reference vector memakai CSV sumber dan Rust const |
 | Q60 | 500 model generik ditambah 50 part-specific prioritas |
 | Q61 | Target sebelum simulasi adalah C2 verified |
@@ -138,7 +138,7 @@ Gerbang kelayakan sebelum implementasi besar:
 ## 4. Fase S0 - Kontrak dan Metadata
 
 - [x] S0-01 Definisikan `PinRole` untuk peran listrik.
-  - `PinRole` dan `device_pin_roles` ada di `sim-device`.
+  - `PinRole` dan `device_pin_roles` ada di `device`.
   - Semua device solver-backed punya role dan jumlahnya cocok
     dengan pin katalog.
   - Inspector menampilkan role per pin.
@@ -150,7 +150,7 @@ Gerbang kelayakan sebelum implementasi besar:
   - `SimulationBinding` menghubungkan catalog ID, `DeviceKind`, role
     pin, schema parameter, dan label fidelity.
   - `simulation_binding` dan `simulation_bindings` tersedia di
-    `sim-device`.
+    `device`.
 - [x] S0-04 Definisikan aturan ground.
   - Satu net ground eksplisit; ground ganda tidak terhubung ditolak.
 - [x] S0-05 Definisikan aturan supply.
@@ -206,7 +206,7 @@ yang sama dengan referensi manual.
 
 ## 6. Fase S2 - Integrasi Solver 379 Entri
 
-- [x] S2-01 Tambahkan dependency `sim-analysis` ke `sim-gui`.
+- [x] S2-01 Tambahkan dependency `analysis` ke `gui`.
 - [x] S2-02 Tambahkan domain simulasi: `Avr`, `Analog`, `Mixed`.
   - Domain disimpan di JSON proyek dan ditampilkan di panel.
   - Analog menjalankan solver; AVR diarahkan ke board runner; Mixed
@@ -299,7 +299,7 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
   - Data per entry ada di `docs/data/behavioral-classification.csv`.
   - Kategori: compact, behavioral, digital, mixed-signal,
     structural, multidomain, RF, dan unsupported.
-- [~] S5-02 Gunakan `sim-cells` untuk logic, flip-flop, counter, dan
+- [~] S5-02 Gunakan `cells` untuk logic, flip-flop, counter, dan
   multiplexer bila cocok.
   - 63 entry logic dan peripheral sudah dapat dijalankan lewat
     `emucad digital`.
@@ -389,7 +389,7 @@ model, input, output, dan referensi yang jelas.
     interface, dan timing.
   - Bukan transistor-level atau HDL pihak ketiga.
 - [~] S6-02 Tulis gate-level dari nol sebagai komponen Rust.
-  - AVR memakai `sim-cells` untuk datapath dan register, tetapi kontrol
+  - AVR memakai `cells` untuk datapath dan register, tetapi kontrol
     dan peripheral masih hybrid.
   - PIC, 8051, ARM Cortex-M, RISC-V, ESP32, STM32, dan RP2040 belum.
   - Tidak memakai HDL pihak ketiga.
@@ -406,12 +406,12 @@ model, input, output, dan referensi yang jelas.
   - I2C EEPROM dengan random read sudah ada.
   - SD card dengan satu blok 512 byte sudah ada.
   - Seluruh 15 entry memory sudah memiliki model digital.
-- [~] S6-04 Gunakan `sim-cells` untuk sel memory dan logic.
+- [~] S6-04 Gunakan `cells` untuk sel memory dan logic.
   - AVR datapath, register bank, ALU, dan register file memakai
-    `sim-cells`.
+    `cells`.
   - Seluruh entry memory katalog (SRAM, non-volatile, ROM, PROM,
     module, controller, SPI flash, I2C EEPROM, dan SD card) memakai
-    `sim-cells`.
+    `cells`.
   - Sel memory digital lain belum.
 - [~] S6-05 Tambahkan model interface dan timing.
   - Timing digital AVR dan peripheral sudah diuji sebagian.
@@ -442,7 +442,7 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Kontrol dan peripheral belum full gate-level.
   - Tidak memakai HDL pihak ketiga.
 - [~] S7-03 Definisikan scheduler digital-analog.
-  - Prototipe `sim-mixed` menjalankan satu tick digital, update sumber
+  - Prototipe `mixed` menjalankan satu tick digital, update sumber
     tegangan, lalu satu langkah transient analog.
   - AVR dan queue event penuh belum.
 - [ ] S7-04 Buat wrapper AVR structural sebagai device digital.
@@ -455,10 +455,10 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
 - [ ] S7-07 Tambahkan breakpoint saat pin berubah.
   - Belum ada breakpoint pin di co-sim.
 - [~] S7-08 Hubungkan ADC, PWM, timer, dan UART.
-  - Peripheral AVR sudah ada di `sim-avr`.
+  - Peripheral AVR sudah ada di `avr`.
   - Koneksi ke solver analog belum.
 - [~] S7-09 Jaga determinisme urutan event.
-  - Urutan satu arah digital ke analog diuji di `sim-mixed`.
+  - Urutan satu arah digital ke analog diuji di `mixed`.
   - Event queue gabungan dan arah analog ke digital belum.
 - [x] S7-10 Test AVR + LED + resistor + voltage source.
   - Board test dan GUI simulation sudah mencakup LED, resistor, dan PB5.
@@ -478,7 +478,7 @@ simulasi dengan sumber gate-level yang dapat diaudit.
 
 - [~] S8-01 Buat reference circuit untuk setiap keluarga.
   - Divider, RC, dan RL punya reference analitik di
-    `crates/sim-analysis/tests/reference.rs`.
+    `crates/analysis/tests/reference.rs`.
   - Keluarga lain memakai test unit, belum semua punya reference
     analitik terpadu.
 - [~] S8-02 Bandingkan dengan solusi analitik.
@@ -490,7 +490,7 @@ simulasi dengan sumber gate-level yang dapat diaudit.
   - Job belum dieksekusi lokal karena akses Docker socket ditolak;
     hasil CI belum diverifikasi.
 - [~] S8-04 Tambahkan instruction suite, peripheral suite, dan timing test.
-  - Suite AVR sudah ada di `sim-avr`.
+  - Suite AVR sudah ada di `avr`.
   - Timing suite lintas MCU belum.
 - [~] S8-05 Ukur performa real-time semua MCU di desktop dan akurasi 500 komponen.
   - AVR dan memory macro sudah diukur.

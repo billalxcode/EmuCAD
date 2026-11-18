@@ -1,0 +1,73 @@
+//! Generated analog comparator component catalog data.
+
+use crate::catalog::{ComponentSpec, ModelClass};
+use kernel::DeviceKind;
+
+pub(crate) const ENTRIES: &[ComponentSpec] = &[
+    ComponentSpec {
+        id: "analog.comparator.comparator",
+        name: "comparator",
+        class: ModelClass::Comparator,
+        device: Some(DeviceKind::Comparator),
+        pins: 5,
+        parameter: "gain",
+        default: 10000.0,
+        unit: "ratio",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "analog.comparator.open_collector_comparator",
+        name: "open collector comparator",
+        class: ModelClass::Comparator,
+        device: Some(DeviceKind::Comparator),
+        pins: 5,
+        parameter: "gain",
+        default: 10000.0,
+        unit: "ratio",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "analog.comparator.pushpull_comparator",
+        name: "push-pull comparator",
+        class: ModelClass::Comparator,
+        device: Some(DeviceKind::Comparator),
+        pins: 5,
+        parameter: "gain",
+        default: 10000.0,
+        unit: "ratio",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "analog.comparator.window_comparator",
+        name: "window comparator",
+        class: ModelClass::Comparator,
+        device: Some(DeviceKind::Comparator),
+        pins: 5,
+        parameter: "gain",
+        default: 10000.0,
+        unit: "ratio",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "analog.comparator.hysteresis_comparator",
+        name: "hysteresis comparator",
+        class: ModelClass::Comparator,
+        device: Some(DeviceKind::Comparator),
+        pins: 5,
+        parameter: "gain",
+        default: 10000.0,
+        unit: "ratio",
+        variant: 0,
+    },
+    ComponentSpec {
+        id: "analog.comparator.high_speed_comparator",
+        name: "high speed comparator",
+        class: ModelClass::Comparator,
+        device: Some(DeviceKind::Comparator),
+        pins: 5,
+        parameter: "gain",
+        default: 10000.0,
+        unit: "ratio",
+        variant: 0,
+    },
+];

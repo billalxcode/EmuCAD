@@ -1,0 +1,15 @@
+[package]
+name = "mixed"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+kernel = { path = "../kernel" }
+device = { path = "../device" }
+analysis = { path = "../analysis" }
+cells = { path = "../cells" }

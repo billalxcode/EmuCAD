@@ -1,6 +1,6 @@
 # 10 - Math API
 
-Dokumentasi API matematika di `sim-core` untuk fondasi P1.
+Dokumentasi API matematika di `kernel` untuk fondasi P1.
 
 ---
 
@@ -16,7 +16,7 @@ Modul ini menyediakan primitif numerik yang dipakai oleh netlist, device, dan an
 - Tolerance helper.
 - Error type.
 
-Semua modul berada di crate `sim-core` dan tidak memakai dependensi eksternal.
+Semua modul berada di crate `kernel` dan tidak memakai dependensi eksternal.
 
 ---
 
@@ -32,10 +32,10 @@ Semua modul berada di crate `sim-core` dan tidak memakai dependensi eksternal.
 | `tolerance.rs` | `approx_eq`, `max_abs`, `l2_norm` |
 | `error.rs` | `SimError` |
 
-Re-export tersedia dari `sim_core`:
+Re-export tersedia dari `kernel`:
 
 ```rust
-use sim_core::{
+use kernel::{
     BranchId, Capacitance, Complex64, Current, DenseMatrix, DeviceId, NodeId,
     Resistance, SimError, Time, Voltage,
 };
@@ -206,7 +206,7 @@ Error yang mungkin:
 ## 8. Tolerance
 
 ```rust
-use sim_core::tolerance::{approx_eq, l2_norm, max_abs};
+use kernel::tolerance::{approx_eq, l2_norm, max_abs};
 
 assert!(approx_eq(1.0, 1.0 + 1e-12, 1e-9, 1e-12));
 assert_eq!(max_abs(&[1.0, -5.0, 3.0]), 5.0);

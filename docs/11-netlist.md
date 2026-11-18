@@ -1,6 +1,6 @@
 # 11 - Netlist Core
 
-Dokumentasi netlist core P2 di `sim-core`.
+Dokumentasi netlist core P2 di `kernel`.
 
 ---
 
@@ -32,10 +32,10 @@ Netlist core belum melakukan stamping MNA atau perhitungan listrik. Itu masuk P3
 | `netlist/macros.rs` | Macro `circuit!` |
 | `netlist/tests.rs` | Test integrasi netlist |
 
-Re-export dari `sim_core`:
+Re-export dari `kernel`:
 
 ```rust
-use sim_core::{
+use kernel::{
     Circuit, CircuitBuilder, DeviceKind, Node, NodeId, NodeKind, Subcircuit,
 };
 ```
@@ -102,7 +102,7 @@ pub trait Device {
 Contoh inverter:
 
 ```rust
-use sim_core::{CircuitBuilder, DeviceKind};
+use kernel::{CircuitBuilder, DeviceKind};
 use std::collections::BTreeMap;
 
 let mut builder = CircuitBuilder::new();
@@ -305,7 +305,7 @@ Test netlist mencakup:
 - Snapshot.
 - Ground node 0.
 
-Total test `sim-core`: 62.
+Total test `kernel`: 62.
 
 ---
 

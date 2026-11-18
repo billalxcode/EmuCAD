@@ -38,7 +38,7 @@ jobs:
       - name: Format
         run: cargo fmt --all
       - name: Check generated catalog
-        run: git diff --exit-code crates/sim-device/src/catalog_data
+        run: git diff --exit-code crates/device/src/catalog_data
 
   release-script:
     runs-on: ubuntu-latest

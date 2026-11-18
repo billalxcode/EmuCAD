@@ -4,7 +4,7 @@
 yang memodelkan transistor, gerbang CMOS, CPU AVR, peripheral, dan board,
 serta mampu menjalankan firmware AVR.
 
-> **Status v0.1:** 1125 test lulus, 10 crate, crate simulasi zero external
+> **Status v0.1:** 1122 test lulus, 10 crate, crate simulasi zero external
 > dependency; dependensi GUI dan binding Python dibatasi pada daftar yang
 > disetujui di `AGENTS.md`.
 > Rilis biner GitHub mengikuti versi workspace; aset dan SHA512
@@ -15,14 +15,17 @@ Panduan pengguna: [`docs/43-user-guide.md`](docs/43-user-guide.md).
 Panduan GUI: [`docs/58-gui-user-guide.md`](docs/58-gui-user-guide.md).
 Fidelity dan batasan: [`docs/24-fidelity.md`](docs/24-fidelity.md).
 
-## Kompatibilitas Rebrand
+## Struktur Crate
 
-- Binary baru: `emucad`, `emucad-gui`, dan `emucad-usb`.
-- Config lama di `~/.config/embed-emu/gui.json` dibaca dan dimigrasikan
-  ke `~/.config/emucad/gui.json`.
-- Proyek lama dengan format `embed-emu-gui` tetap dapat dibuka.
-- File baru ditulis dengan format `emucad-gui`.
-- Nama crate internal tetap `sim-*` agar API dan arsitektur tidak pecah.
+Seluruh crate memakai nama pendek tanpa prefix:
+
+- `kernel`, `device`, `analysis`, `cells`, `avr`, `board`, `mixed`.
+- `cli` menghasilkan binary `emucad`.
+- `gui` menghasilkan binary `emucad-gui`.
+- `python` menghasilkan extension module `emucad`.
+
+Config GUI disimpan di `~/.config/emucad/gui.json`. Format proyek
+memakai `emucad-gui`.
 
 ---
 
@@ -38,7 +41,7 @@ Satu binary native Rust yang:
 - Berjalan tanpa VM, browser, atau simulator eksternal saat runtime.
 - Hanya memakai Rust standard library dan crate internal workspace; binding
   Python memakai `pyo3` di crate terpisah.
-- Tidak memakai `unsafe` manual; glue FFI `pyo3` diisolasi di `sim-python`.
+- Tidak memakai `unsafe` manual; glue FFI `pyo3` diisolasi di `python`.
 
 Target akhirnya adalah **firmware-observable equivalence** untuk board
 profile tertentu, bukan replika silikon identik.
@@ -73,13 +76,13 @@ cargo test --workspace
 ### 3.2 Contoh runnable
 
 ```bash
-cargo run -p sim-analysis --example rc_analysis
-cargo run -p sim-analysis --example inverter_vtc
-cargo run -p sim-cells --example ring_oscillator
-cargo run -p sim-avr --example cpu_program
-cargo run -p sim-board --example blink
-cargo run -p sim-avr --example uart_hello
-cargo run -p sim-avr --example timer_interrupt
+cargo run -p analysis --example rc_analysis
+cargo run -p analysis --example inverter_vtc
+cargo run -p cells --example ring_oscillator
+cargo run -p avr --example cpu_program
+cargo run -p board --example blink
+cargo run -p avr --example uart_hello
+cargo run -p avr --example timer_interrupt
 ```
 
 ### 3.3 CLI
@@ -114,21 +117,21 @@ bash .opencode/skills/clean-code/scripts/check.sh
 
 | Crate | Peran |
 |---|---|
-| `sim-core` | Waktu, satuan, node, device, matrix, error, netlist |
-| `sim-device` | Model device dan stamping MNA |
-| `sim-analysis` | DC, transient, AC, noise, distorsi, sensitivitas |
-| `sim-cells` | Sel CMOS struktural dan pustaka digital |
-| `sim-avr` | CPU AVR fast functional core, decoder, peripheral, primitif struktural |
-| `sim-board` | Board, LED, button, UART host, Intel HEX, ELF, CSV/VCD |
-| `sim-cli` | Binary `emucad`, monitor, disassembler, benchmark, catalog JSON |
-| `sim-python` | Binding Python untuk katalog dan builder netlist |
+| `kernel` | Waktu, satuan, node, device, matrix, error, netlist |
+| `device` | Model device dan stamping MNA |
+| `analysis` | DC, transient, AC, noise, distorsi, sensitivitas |
+| `cells` | Sel CMOS struktural dan pustaka digital |
+| `avr` | CPU AVR fast functional core, decoder, peripheral, primitif struktural |
+| `board` | Board, LED, button, UART host, Intel HEX, ELF, CSV/VCD |
+| `cli` | Binary `emucad`, monitor, disassembler, benchmark, catalog JSON |
+| `python` | Binding Python untuk katalog dan builder netlist |
 | `drivers/` | Scaffold driver virtual USB C++ (opsional, di luar crate) |
 
 Aturan utama:
 
-- `sim-core` tidak bergantung pada crate lain.
-- `sim-cli` adalah adapter dan komposisi.
-- `sim-python` adalah adapter binding Python untuk katalog dan netlist.
+- `kernel` tidak bergantung pada crate lain.
+- `cli` adalah adapter dan komposisi.
+- `python` adalah adapter binding Python untuk katalog dan netlist.
 - Format CSV, VCD, HEX, dan ELF berada di adapter.
 - Logika simulasi tidak berada di `main.rs`.
 
@@ -167,7 +170,7 @@ Dokumen yang sering dipakai:
 
 Sudah:
 
-- 1125 test workspace.
+- 1122 test workspace.
 - fmt, clippy, test, dan build release lulus.
 - Paket Linux dapat dibuat.
 - Determinisme Linux diuji.

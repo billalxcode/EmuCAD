@@ -1,6 +1,6 @@
 # 25 - Sparse Matrix
 
-Dokumen ini menjelaskan modul sparse matrix di `sim-core`.
+Dokumen ini menjelaskan modul sparse matrix di `kernel`.
 
 ---
 
@@ -55,7 +55,7 @@ sebagai heuristic statis. Ini belum melakukan update degree selama eliminasi.
 - Degree ordering.
 - Konversi dense.
 
-Total test `sim-core`: 62.
+Total test `kernel`: 62.
 
 ---
 

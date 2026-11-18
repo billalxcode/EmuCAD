@@ -45,7 +45,7 @@ def main() -> int:
     if not binary.exists():
         binary = ROOT / "target/debug/emucad"
     if not binary.exists():
-        print("error: build the CLI first with cargo build -p sim-cli")
+        print("error: build the CLI first with cargo build -p cli")
         return 2
     with tempfile.TemporaryDirectory() as temp:
         link = Path(temp) / "tty"

@@ -4,7 +4,7 @@ Status per 2026-11-16: katalog 500 entri ada, 379 entri dapat
 diinstansiasi lewat registry, dan 121 entri belum punya model solver analog; 59 di antaranya sudah dapat dijalankan di domain digital.
 Tidak ada entri yang memenuhi seluruh syarat batch `verified`. Sebagian
 dari 379 mapping masih generik atau salah topologi, jadi `mapped` tidak
-sama dengan `selesai`. Binding Python `sim-python` menyediakan katalog
+sama dengan `selesai`. Binding Python `python` menyediakan katalog
 dan builder topologi; simulasi tetap berjalan di crate Rust.
 
 Tujuan: membangun katalog 500 model komponen yang terverifikasi, dapat
@@ -42,7 +42,7 @@ Urutan yang disarankan:
 - [x] C0-07 Tentukan rasio model generik dan part-specific.
   - 500 model generik, ditambah 50 part-specific prioritas di C10.
 - [x] C0-08 Tentukan lingkup Python builder: batch atau interaktif.
-- [x] C0-09 Setujui lokasi katalog di `sim-device` tanpa crate baru.
+- [x] C0-09 Setujui lokasi katalog di `device` tanpa crate baru.
 - [x] C0-10 Setujui nama, unit SI, dan aturan versioning.
 
 ## 3. Aturan Batch
@@ -69,7 +69,7 @@ Batch yang gagal salah satu syarat tetap berstatus `tested`, bukan
 | ID | Keputusan |
 |---|---|
 | D-01 | Perbaikan data dan mapping dikerjakan sebelum harness verifikasi. |
-| D-02 | Unit test model di `sim-device`; circuit dan conservation test di `sim-analysis`. |
+| D-02 | Unit test model di `device`; circuit dan conservation test di `analysis`. |
 | D-03 | Reference vector memakai CSV sumber dan Rust const hasil generator. |
 | D-04 | Rasio akhir: 500 model generik dan 50 part-specific prioritas. |
 | D-05 | Target sebelum kembali ke TODO-SIMULATION adalah C2 verified. |
@@ -101,7 +101,7 @@ Setiap parameter minimal punya:
 
 ## 4. Infrastruktur
 
-- [x] C1-01 Buat modul katalog di `crates/sim-device`.
+- [x] C1-01 Buat modul katalog di `crates/device`.
 - [~] C1-02 Definisikan struct `ComponentSpec` dan parameter typed.
   - Struct ada, tetapi parameter masih satu nama string plus default.
   - Schema multi-parameter dan tipe belum ada.
@@ -118,7 +118,7 @@ Setiap parameter minimal punya:
 - [x] C1-11 Tambah CI Linux untuk katalog dan test model.
 - [~] C1-12 Tambah laporan coverage per kategori dan status.
   - CLI baru melaporkan total; per kategori dan status belum.
-- [x] C1-21 Buat crate `sim-python` dengan `pyo3` untuk katalog dan
+- [x] C1-21 Buat crate `python` dengan `pyo3` untuk katalog dan
   builder netlist.
 - [x] C1-22 Tambah smoke test Python dan validasi jumlah pin registry.
 
@@ -289,7 +289,7 @@ mapping generik, pin count salah, dan parameter yang tidak sesuai model.
   current source, pulse source, VCVS, VCCS, CCCS, CCVS, switch, ideal
   switch, relay, transmission line, diode, BJT, JFET, MOSFET, opamp,
   comparator, regulator, dan logic gate.
-- Test circuit di `sim-analysis`: voltage divider, RC dan RLC, diode
+- Test circuit di `analysis`: voltage divider, RC dan RLC, diode
   clamp, BJT, JFET, MOSFET, transmission line, switch, pulse source,
   noise, distorsi, sensitivitas, corner, dan determinisme.
 - 1066 test workspace lulus pada audit ini.
@@ -621,7 +621,7 @@ Target: 14 entri.
 
 ## 14. Python Builder
 
-Keputusan: binding langsung memakai `pyo3` di crate `sim-python`, bukan
+Keputusan: binding langsung memakai `pyo3` di crate `python`, bukan
 subprocess. Python memakai dict untuk request dan response.
 
 - [x] C11-01 Kunci schema request dan response.

@@ -20,10 +20,10 @@ Baca file ini sebelum mengubah kode, dokumen, atau konfigurasi.
 ## 2. Aturan Tidak Bisa Dinegosiasikan
 
 1. Zero external dependency untuk semua crate, dengan pengecualian:
-   - `sim-gui` boleh memakai `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png`.
-   - `sim-python` boleh memakai `pyo3` dan turunannya untuk binding Python.
+   - `gui` boleh memakai `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png`.
+   - `python` boleh memakai `pyo3` dan turunannya untuk binding Python.
    `egui_plot`, `libloading`, dan crate eksternal lain tidak diizinkan tanpa keputusan baru.
-2. Tidak ada `unsafe` manual. Pengecualian hanya untuk kode FFI yang dihasilkan `pyo3` di `sim-python`; crate lain tetap `forbid(unsafe_code)`.
+2. Tidak ada `unsafe` manual. Pengecualian hanya untuk kode FFI yang dihasilkan `pyo3` di `python`; crate lain tetap `forbid(unsafe_code)`.
 3. Semua teks baru atau yang diubah harus ASCII.
 4. Tidak ada em dash, en dash, kutip melengkung, elipsis Unicode, panah Unicode, atau bullet Unicode.
 5. Setiap fungsi maksimal 20 baris.
@@ -107,57 +107,57 @@ Cara memecah:
 Graph dependensi crate:
 
 ```
-sim-cli
-  +-- sim-board
-  |   +-- sim-avr
-  |   |   +-- sim-cells
-  |   |   |   +-- sim-device
-  |   |   |   |   `-- sim-core
-  |   |   |   `-- sim-core
-  |   |   `-- sim-core
-  |   `-- sim-device
-  `-- sim-analysis
-      +-- sim-device
-      `-- sim-core
+cli
+  +-- board
+  |   +-- avr
+  |   |   +-- cells
+  |   |   |   +-- device
+  |   |   |   |   `-- kernel
+  |   |   |   `-- kernel
+  |   |   `-- kernel
+  |   `-- device
+  `-- analysis
+      +-- device
+      `-- kernel
 
-sim-gui
-  +-- sim-board
-  +-- sim-avr
-  +-- sim-analysis
-  +-- sim-device
-  `-- sim-core
+gui
+  +-- board
+  +-- avr
+  +-- analysis
+  +-- device
+  `-- kernel
 
-sim-python
-  +-- sim-device
-  |   `-- sim-core
-  `-- sim-core
+python
+  +-- device
+  |   `-- kernel
+  `-- kernel
 
-sim-mixed
-  +-- sim-analysis
-  +-- sim-cells
-  +-- sim-device
-  `-- sim-core
+mixed
+  +-- analysis
+  +-- cells
+  +-- device
+  `-- kernel
 ```
 
 Aturan:
 
-- `sim-core` tidak bergantung pada crate lain.
-- `sim-device` hanya bergantung pada `sim-core`.
-- `sim-analysis` hanya bergantung pada `sim-core` dan `sim-device`.
-- `sim-cells` hanya bergantung pada `sim-core` dan `sim-device`.
-- `sim-avr` hanya bergantung pada `sim-core`, `sim-device`, dan `sim-cells`.
-- `sim-board` hanya bergantung pada `sim-core`, `sim-device`, dan `sim-avr`.
-- `sim-mixed` hanya bergantung pada `sim-core`, `sim-device`, `sim-analysis`, dan `sim-cells`.
-- `sim-mixed` adalah scheduler co-sim satu arah; adapter boleh memakainya.
-- `sim-cli` adalah adapter dan komposisi.
-- `sim-gui` adalah adapter dan komposisi.
-- `sim-python` adalah adapter binding Python untuk katalog dan netlist.
-- `sim-gui` boleh memakai `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png`; crate lain tidak boleh.
-- `sim-python` boleh memakai `pyo3`; crate lain tidak boleh.
-- Tidak ada crate yang bergantung pada `sim-cli`, `sim-gui`, atau `sim-python`.
+- `kernel` tidak bergantung pada crate lain.
+- `device` hanya bergantung pada `kernel`.
+- `analysis` hanya bergantung pada `kernel` dan `device`.
+- `cells` hanya bergantung pada `kernel` dan `device`.
+- `avr` hanya bergantung pada `kernel`, `device`, dan `cells`.
+- `board` hanya bergantung pada `kernel`, `device`, dan `avr`.
+- `mixed` hanya bergantung pada `kernel`, `device`, `analysis`, dan `cells`.
+- `mixed` adalah scheduler co-sim satu arah; adapter boleh memakainya.
+- `cli` adalah adapter dan komposisi.
+- `gui` adalah adapter dan komposisi.
+- `python` adalah adapter binding Python untuk katalog dan netlist.
+- `gui` boleh memakai `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png`; crate lain tidak boleh.
+- `python` boleh memakai `pyo3`; crate lain tidak boleh.
+- Tidak ada crate yang bergantung pada `cli`, `gui`, atau `python`.
 - Tidak ada siklus.
 - `main.rs` tidak berisi logika simulasi.
-- `sim-core` tidak memakai `println!`, filesystem, atau wall-clock.
+- `kernel` tidak memakai `println!`, filesystem, atau wall-clock.
 - Format CSV, VCD, HEX, dan ELF berada di adapter, bukan di core.
 - Pin, UART, timer, dan firmware loader adalah port/adapter.
 - Inti harus bisa diuji tanpa board, CLI, file, atau `avr-gcc`.
@@ -199,8 +199,8 @@ Jika boundary perlu diubah, jelaskan alasan dan dampaknya sebelum menulis kode.
 - Gunakan guard clause.
 - Jaga fungsi maksimal 20 baris.
 - Reuse fungsi yang ada.
-- Jangan menambah dependensi eksternal di luar daftar `sim-gui` dan `sim-python`.
-- Jangan memakai `unsafe` manual; pengecualian hanya glue `pyo3` di `sim-python`.
+- Jangan menambah dependensi eksternal di luar daftar `gui` dan `python`.
+- Jangan memakai `unsafe` manual; pengecualian hanya glue `pyo3` di `python`.
 
 ### Langkah 6 - Verifikasi
 
@@ -237,7 +237,7 @@ Berhenti dan tanya jika:
 
 - Permintaan bertentangan dengan aturan di file ini.
 - Perubahan akan melanggar boundary crate.
-- Perlu menambah dependensi eksternal di luar daftar `sim-gui` dan `sim-python`.
+- Perlu menambah dependensi eksternal di luar daftar `gui` dan `python`.
 - Perlu mengubah API publik tanpa migrasi.
 - Perilaku saat ini tidak dipahami dan belum ada test.
 - Fungsi yang akan diubah sudah lebih dari 20 baris dan pemecahannya tidak jelas.
@@ -257,8 +257,8 @@ Jangan menebak. Jangan mengarang. Jangan memaksa.
 - [ ] Setiap fungsi maksimal 20 baris.
 - [ ] Fungsi existing sudah dicari dan digunakan ulang.
 - [ ] Tidak ada duplikasi fungsi.
-- [ ] Tidak ada dependensi eksternal di luar daftar `sim-gui` dan `sim-python`.
-- [ ] Tidak ada `unsafe` manual; hanya glue `pyo3` di `sim-python`.
+- [ ] Tidak ada dependensi eksternal di luar daftar `gui` dan `python`.
+- [ ] Tidak ada `unsafe` manual; hanya glue `pyo3` di `python`.
 - [ ] ASCII-only untuk file yang diubah.
 - [ ] `fmt`, `clippy`, dan `test` lulus.
 - [ ] Dokumentasi diperbarui jika perlu.
@@ -372,10 +372,10 @@ Aturan:
 Contoh:
 
 ```
-feat(sim-core): add time conversion
-fix(sim-analysis): handle singular matrix
+feat(kernel): add time conversion
+fix(analysis): handle singular matrix
 docs(agents): add workflow rules
-refactor(sim-device): extract mosfet region helpers
+refactor(device): extract mosfet region helpers
 ```
 
 ---
@@ -406,8 +406,8 @@ Jangan menulis "kode ini buruk" tanpa alasan dan solusi.
 
 ## 13. Larangan
 
-- Jangan menambah crate eksternal di luar daftar `sim-gui` dan `sim-python`.
-- Jangan memakai `unsafe` manual; pengecualian hanya glue `pyo3` di `sim-python`.
+- Jangan menambah crate eksternal di luar daftar `gui` dan `python`.
+- Jangan memakai `unsafe` manual; pengecualian hanya glue `pyo3` di `python`.
 - Jangan memakai wall-clock di simulation.
 - Jangan memakai `println!` di core.
 - Jangan memakai `unwrap()` pada input pengguna.

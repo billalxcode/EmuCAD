@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate crates/sim-device/src/catalog_data/ from the 500 entry plan.
+"""Generate crates/device/src/catalog_data/ from the 500 entry plan.
 
 Run from the repository root:
 
@@ -814,7 +814,7 @@ FAMILIES = [
     "rf", "behavioral", "board",
 ]
 
-root = Path("crates/sim-device/src/catalog_data")
+root = Path("crates/device/src/catalog_data")
 if root.exists():
     shutil.rmtree(root)
 root.mkdir()
@@ -852,7 +852,7 @@ def data_header(title, entries):
         "use crate::catalog::{ComponentSpec, ModelClass};",
     ]
     if needs_device:
-        lines.append("use sim_core::DeviceKind;")
+        lines.append("use kernel::DeviceKind;")
     lines.append("")
     return lines
 
@@ -928,7 +928,7 @@ module_lines = [
     "}",
     "",
 ]
-Path("crates/sim-device/src/catalog_data/mod.rs").write_text("\n".join(module_lines))
+Path("crates/device/src/catalog_data/mod.rs").write_text("\n".join(module_lines))
 
 family_counts = {}
 for entry in entries:
