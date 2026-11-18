@@ -5,6 +5,7 @@ members = [
     "crates/sim-device",
     "crates/sim-analysis",
     "crates/sim-cells",
+    "crates/sim-mixed",
     "crates/sim-avr",
     "crates/sim-board",
     "crates/sim-cli",

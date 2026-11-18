@@ -3060,6 +3060,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "sim-mixed"
+version = "0.1.0"
+dependencies = [
+ "sim-analysis",
+ "sim-cells",
+ "sim-core",
+ "sim-device",
+]
+
+[[package]]
 name = "sim-python"
 version = "0.1.0"
 dependencies = [

@@ -97,6 +97,19 @@ impl SimulationSystem {
             .collect()
     }
 
+    /// Updates a writable model parameter by device index.
+    pub(crate) fn set_parameter(
+        &mut self,
+        index: usize,
+        name: &str,
+        value: f64,
+    ) -> Result<(), SimError> {
+        let model = self.models.get_mut(index).ok_or_else(|| {
+            SimError::InvalidNetlist(format!("device index out of range: {index}"))
+        })?;
+        model.set_parameter(name, value)
+    }
+
     /// Updates all model states after convergence.
     pub(crate) fn update(&mut self, solution: &Solution) -> Result<(), SimError> {
         for model in &mut self.models {

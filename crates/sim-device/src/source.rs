@@ -45,6 +45,16 @@ impl DeviceModel for VoltageSourceModel {
     fn terminal_current(&self, solution: &Solution) -> Option<f64> {
         solution.branch_current(self.branch?)
     }
+
+    fn set_parameter(&mut self, name: &str, value: f64) -> Result<(), SimError> {
+        if name != "voltage" {
+            return Err(SimError::InvalidNetlist(format!(
+                "voltage source parameter {name} is not writable"
+            )));
+        }
+        self.voltage = value;
+        Ok(())
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -650,6 +660,16 @@ impl DeviceModel for CurrentSourceModel {
 
     fn terminal_current(&self, _solution: &Solution) -> Option<f64> {
         Some(self.current)
+    }
+
+    fn set_parameter(&mut self, name: &str, value: f64) -> Result<(), SimError> {
+        if name != "current" {
+            return Err(SimError::InvalidNetlist(format!(
+                "current source parameter {name} is not writable"
+            )));
+        }
+        self.current = value;
+        Ok(())
     }
 }
 

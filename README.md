@@ -4,7 +4,7 @@
 yang memodelkan transistor, gerbang CMOS, CPU AVR, peripheral, dan board,
 serta mampu menjalankan firmware AVR.
 
-> **Status v0.1:** 1123 test lulus, 9 crate, crate simulasi zero external
+> **Status v0.1:** 1125 test lulus, 10 crate, crate simulasi zero external
 > dependency; dependensi GUI dan binding Python dibatasi pada daftar yang
 > disetujui di `AGENTS.md`.
 > Rilis biner GitHub mengikuti versi workspace; aset dan SHA512
@@ -155,6 +155,7 @@ Dokumen yang sering dipakai:
 | [`docs/58-gui-user-guide.md`](docs/58-gui-user-guide.md) | Panduan pengguna GUI |
 | [`docs/59-gui-golden.md`](docs/59-gui-golden.md) | Status dan prosedur golden RGBA GUI |
 | [`docs/60-component-catalog.md`](docs/60-component-catalog.md) | Katalog 500 komponen, akurasi, dan schema |
+| [`docs/90-mixed-signal.md`](docs/90-mixed-signal.md) | Scheduler co-sim satu arah digital ke analog |
 | [`docs/61-design-system.md`](docs/61-design-system.md) | Design system GUI, font, warna, dan spacing |
 | [`TODO-COMPONENTS.md`](TODO-COMPONENTS.md) | Backlog katalog komponen dan Python builder |
 | [`TODO.md`](TODO.md) | Pekerjaan yang tersisa |
@@ -166,7 +167,7 @@ Dokumen yang sering dipakai:
 
 Sudah:
 
-- 1123 test workspace.
+- 1125 test workspace.
 - fmt, clippy, test, dan build release lulus.
 - Paket Linux dapat dibuat.
 - Determinisme Linux diuji.

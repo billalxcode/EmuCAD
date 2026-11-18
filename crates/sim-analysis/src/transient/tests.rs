@@ -7,7 +7,7 @@ use crate::test_support::{
     pulse_divider, rc_circuit, rc_circuit_no_source, reverse_diode_rc, rl_circuit,
     switching_inverter,
 };
-use sim_core::NodeId;
+use sim_core::{Device, NodeId};
 use sim_device::IntegrationMethod;
 
 #[test]
@@ -24,6 +24,36 @@ fn rc_charges_toward_supply() {
     let last = samples.last().expect("last");
     let voltage = last.solution.voltage(output).expect("output");
     assert!((voltage - 3.16).abs() < 0.15, "voltage={voltage}");
+}
+
+#[test]
+fn source_update_keeps_capacitor_state() {
+    let (circuit, output) = rc_circuit();
+    let source = circuit
+        .devices()
+        .iter()
+        .find(|device| device.name() == "v1")
+        .expect("source")
+        .id();
+    let config = TransientConfig {
+        dt: 1e-6,
+        steps: 1000,
+        gmin: 1e-12,
+        use_dc_op: false,
+        initial_voltages: Vec::new(),
+    };
+    let mut session = super::TransientSession::new(&circuit, &config).expect("session");
+    let mut sample = session.step().expect("step");
+    for _ in 0..199 {
+        sample = session.step().expect("step");
+    }
+    let before = sample.solution.voltage(output).expect("before");
+    session.set_source_voltage(source, 0.0).expect("update");
+    for _ in 0..200 {
+        sample = session.step().expect("step");
+    }
+    let after = sample.solution.voltage(output).expect("after");
+    assert!(after < before - 0.1, "before={before} after={after}");
 }
 
 #[test]

@@ -131,6 +131,12 @@ sim-python
   +-- sim-device
   |   `-- sim-core
   `-- sim-core
+
+sim-mixed
+  +-- sim-analysis
+  +-- sim-cells
+  +-- sim-device
+  `-- sim-core
 ```
 
 Aturan:
@@ -141,6 +147,8 @@ Aturan:
 - `sim-cells` hanya bergantung pada `sim-core` dan `sim-device`.
 - `sim-avr` hanya bergantung pada `sim-core`, `sim-device`, dan `sim-cells`.
 - `sim-board` hanya bergantung pada `sim-core`, `sim-device`, dan `sim-avr`.
+- `sim-mixed` hanya bergantung pada `sim-core`, `sim-device`, `sim-analysis`, dan `sim-cells`.
+- `sim-mixed` adalah scheduler co-sim satu arah; adapter boleh memakainya.
 - `sim-cli` adalah adapter dan komposisi.
 - `sim-gui` adalah adapter dan komposisi.
 - `sim-python` adalah adapter binding Python untuk katalog dan netlist.

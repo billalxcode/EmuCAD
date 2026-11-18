@@ -2,7 +2,7 @@
 
 Pintu masuk dokumentasi EmuCAD versi 0.1.0.
 
-**Status saat ini:** 980 test lulus, 9 crate, crate simulasi zero external
+**Status saat ini:** 1125 test lulus, 10 crate, crate simulasi zero external
 dependency Rust. Dependensi GUI dan binding Python dibatasi pada daftar
 yang disetujui di `AGENTS.md`. Tag `v0.1` tersedia.
 
@@ -96,6 +96,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 87 | [PLL](87-pll.md) | Model frequency multiplier dengan phase reset |
 | 88 | [Domain digital](88-digital-domain.md) | 13 entry digital dengan port bernama dan CLI |
 | 89 | [Rilis biner](89-release.md) | Versi workspace, target, arsip, dan SHA512 GitHub Release |
+| 90 | [Mixed-signal](90-mixed-signal.md) | Scheduler satu arah digital ke analog |
 
 ### 3.2 Fondasi
 

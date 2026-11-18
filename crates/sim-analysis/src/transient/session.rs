@@ -3,6 +3,7 @@
 use super::steps::{next_time, sample, solve_step, step_time};
 use super::validation::validate_config;
 use super::*;
+use sim_core::{Device, DeviceId, DeviceKind};
 
 /// A transient simulation that can be advanced one step at a time.
 pub struct TransientSession {
@@ -82,6 +83,22 @@ impl TransientSession {
         Ok(())
     }
 
+    /// Updates the voltage of an independent voltage source in place.
+    pub fn set_source_voltage(&mut self, device: DeviceId, value: f64) -> Result<(), SimError> {
+        let index = self
+            .circuit
+            .devices()
+            .iter()
+            .position(|entry| entry.id() == device)
+            .ok_or_else(|| SimError::InvalidNetlist(format!("unknown device: {}", device.raw())))?;
+        if self.circuit.devices()[index].kind() != &DeviceKind::VoltageSource {
+            return Err(SimError::InvalidNetlist(
+                "set_source_voltage requires a voltage source".to_string(),
+            ));
+        }
+        self.system.set_parameter(index, "voltage", value)
+    }
+
     /// Returns true when all configured steps are done.
     #[must_use]
     pub fn is_finished(&self) -> bool {
@@ -110,7 +127,7 @@ impl TransientSession {
 #[cfg(test)]
 mod tests {
     use super::TransientSession;
-    use sim_core::{CircuitBuilder, DeviceKind};
+    use sim_core::{CircuitBuilder, DeviceKind, NodeId};
     use std::collections::BTreeMap;
 
     fn rc_circuit() -> sim_core::Circuit {
@@ -118,15 +135,24 @@ mod tests {
         let source = builder.node("in").expect("node");
         let output = builder.node("out").expect("node");
         let ground = builder.ground();
-        let source_params = BTreeMap::from([("voltage".to_string(), 5.0)]);
+        add_source(&mut builder, source, ground);
+        add_passives(&mut builder, source, output, ground);
+        builder.build().expect("circuit")
+    }
+
+    fn add_source(builder: &mut CircuitBuilder, source: NodeId, ground: NodeId) {
+        let params = BTreeMap::from([("voltage".to_string(), 5.0)]);
         builder
             .device(
                 "V1",
                 DeviceKind::VoltageSource,
                 vec![source, ground],
-                source_params,
+                params,
             )
             .expect("V1");
+    }
+
+    fn add_passives(builder: &mut CircuitBuilder, source: NodeId, output: NodeId, ground: NodeId) {
         let resistor = BTreeMap::from([("resistance".to_string(), 1000.0)]);
         builder
             .device("R1", DeviceKind::Resistor, vec![source, output], resistor)
@@ -135,7 +161,6 @@ mod tests {
         builder
             .device("C1", DeviceKind::Capacitor, vec![output, ground], capacitor)
             .expect("C1");
-        builder.build().expect("circuit")
     }
 
     #[test]

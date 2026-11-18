@@ -95,6 +95,13 @@ pub trait DeviceModel {
     fn terminal_current(&self, _solution: &Solution) -> Option<f64> {
         None
     }
+
+    /// Updates a writable parameter without rebuilding the model.
+    fn set_parameter(&mut self, name: &str, _value: f64) -> Result<(), SimError> {
+        Err(SimError::InvalidNetlist(format!(
+            "parameter {name} is not writable"
+        )))
+    }
 }
 
 /// Builds a model from a structural device instance.
