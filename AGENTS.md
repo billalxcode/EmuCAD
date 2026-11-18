@@ -134,6 +134,7 @@ python
 
 mixed
   +-- analysis
+  +-- avr
   +-- cells
   +-- device
   `-- kernel
@@ -147,8 +148,8 @@ Aturan:
 - `cells` hanya bergantung pada `kernel` dan `device`.
 - `avr` hanya bergantung pada `kernel`, `device`, dan `cells`.
 - `board` hanya bergantung pada `kernel`, `device`, dan `avr`.
-- `mixed` hanya bergantung pada `kernel`, `device`, `analysis`, dan `cells`.
-- `mixed` adalah scheduler co-sim satu arah; adapter boleh memakainya.
+- `mixed` hanya bergantung pada `kernel`, `device`, `analysis`, `cells`, dan `avr`.
+- `mixed` adalah scheduler co-sim dua arah; adapter boleh memakainya.
 - `cli` adalah adapter dan komposisi.
 - `gui` adalah adapter dan komposisi.
 - `python` adalah adapter binding Python untuk katalog dan netlist.

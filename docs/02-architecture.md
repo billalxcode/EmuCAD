@@ -51,7 +51,7 @@ emucad/
 | `cells` | Sel CMOS, gerbang, DFF, SRAM cell, characterization | AVR |
 | `avr` | CPU AVR fast functional core, ISA, peripheral; primitif struktural untuk validasi | Board |
 | `board` | Board netlist, LED, tombol, UART host | Detail CPU |
-| `mixed` | Scheduler co-sim satu arah digital ke analog | AVR, GUI, CLI |
+| `mixed` | Scheduler co-sim digital-analog dan wrapper AVR satu pin | GUI, CLI |
 | `cli` | Argumen, orkestrasi, output, monitor, catalog JSON | Implementasi internal device |
 | `gui` | UI egui, canvas, persistence, worker simulasi | Implementasi internal device dan solver |
 | `python` | Binding Python untuk katalog dan netlist | Simulasi, GUI, firmware |
@@ -81,6 +81,7 @@ gui
 
 mixed
   |-- analysis
+  |-- avr
   |-- cells
   |-- device
   `-- kernel

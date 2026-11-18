@@ -27,6 +27,16 @@ Prototipe ini membuktikan urutan deterministik:
 analog. `PinInput` opsional membandingkan node analog dengan threshold
 untuk menggerakkan input digital. Sumber harus berupa `VoltageSource`.
 
+`AvrSession` membungkus `avr::Cpu`, satu pin AVR, dan satu sumber
+tegangan analog. Setiap langkah menjalankan satu instruksi AVR dan
+satu langkah transient analog:
+
+- Tegangan node sebelumnya dipakai sebagai Thevenin pin input.
+- Pin AVR yang dikonfigurasi output menggerakkan sumber tegangan.
+- Pin AVR yang dikonfigurasi input membaca level dari node analog.
+
+Wrapper ini memakai core AVR hybrid, bukan full-chip structural.
+
 ## 3. Update Sumber
 
 `TransientSession::set_source_voltage` mengubah nilai sumber tegangan
@@ -52,12 +62,20 @@ Test `analog_feedback_drives_digital_inverter`:
 - Loop menghasilkan osilasi relaksasi deterministik.
 - Tegangan tetap dalam rentang 0 V sampai 5 V.
 
+Test `avr_pin_drives_analog_rc`:
+
+- Program blink AVR menggerakkan PB5.
+- PB5 mengubah sumber tegangan RC 1 kohm dan 1 uF.
+- Node analog mengikuti level PB5.
+- Program dan pin AVR berjalan bersama transient analog.
+
 ## 5. Batas
 
 - Umpan balik analog hanya satu input dan satu threshold.
 - Satu tick digital sama dengan satu `dt` analog.
+- AvrSession hanya satu pin dan satu sumber tegangan.
 - Belum ada queue event, interpolasi, atau breakpoint pin.
-- Belum terhubung ke AVR atau `board`.
+- AVR masih hybrid, bukan full-chip structural.
 - Hanya sumber tegangan yang dapat diubah.
 
 ## 6. Hubungan dengan S7

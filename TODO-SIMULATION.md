@@ -446,8 +446,10 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
     update sumber tegangan, lalu satu langkah transient analog.
   - Loop feedback digital-analog sudah diuji dengan inverter dan RC.
   - AVR dan queue event penuh belum.
-- [ ] S7-04 Buat wrapper AVR structural sebagai device digital.
-  - Belum ada device digital di solver analog.
+- [~] S7-04 Buat wrapper AVR structural sebagai device digital.
+  - Prototipe `AvrSession` menghubungkan satu pin AVR hybrid ke sumber
+    tegangan dan node analog.
+  - Wrapper full-chip structural belum.
 - [~] S7-05 Petakan pin AVR ke node netlist.
   - Board simulation memetakan PB5 dan pin LED.
   - Pemetaan penuh 32 pin belum.
@@ -457,7 +459,8 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Belum ada breakpoint pin di co-sim.
 - [~] S7-08 Hubungkan ADC, PWM, timer, dan UART.
   - Peripheral AVR sudah ada di `avr`.
-  - Koneksi ke solver analog belum.
+  - Satu pin GPIO AVR sudah terhubung ke RC analog lewat `mixed`.
+  - ADC, PWM, timer, dan UART ke solver analog belum.
 - [~] S7-09 Jaga determinisme urutan event.
   - Urutan digital ke analog dan analog ke digital diuji di `mixed`.
   - Event queue gabungan dan interpolasi belum.

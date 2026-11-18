@@ -12,4 +12,5 @@ workspace = true
 kernel = { path = "../kernel" }
 device = { path = "../device" }
 analysis = { path = "../analysis" }
+avr = { path = "../avr" }
 cells = { path = "../cells" }

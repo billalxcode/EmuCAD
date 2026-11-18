@@ -76,7 +76,7 @@ jauh di atas budget jika setiap akses disimulasikan penuh.
 | MCU gate-level | 11 | 1 hybrid (AVR) |
 | Memory gate-level | 15 | 1 register file dan 15 macro memory |
 | AVR full chip | Semua peripheral | Sebagian |
-| Mixed-signal scheduler | AVR + analog | Prototipe clock, feedback threshold, dan RC |
+| Mixed-signal scheduler | AVR + analog | Prototipe clock, feedback threshold, RC, dan satu pin AVR |
 | Real-time semua MCU | Desktop | Belum terbukti |
 
 MCU yang belum dimulai: PIC, 8051, ARM Cortex-M, RISC-V, ESP32, STM32,

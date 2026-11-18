@@ -3,6 +3,7 @@
 #![forbid(unsafe_code)]
 
 use analysis::{TransientConfig, TransientSession};
+use avr::{AvrTrace, Cpu, ExternalPin, PinElectricalConfig};
 use cells::catalog_digital::DigitalEntry;
 use kernel::{Circuit, DeviceId, NodeId, SimError, Time};
 
@@ -116,10 +117,95 @@ impl MixedSession {
     }
 }
 
+/// One AVR pin linked to an analog source and node.
+#[derive(Clone, Copy)]
+pub struct AvrPin {
+    /// AVR port index: 0 for B, 1 for C, 2 for D.
+    pub port: u8,
+    /// Bit index within the port.
+    pub bit: u8,
+    /// Analog voltage source driven by the pin.
+    pub source: DeviceId,
+    /// Analog node returned to the caller.
+    pub node: NodeId,
+    /// AVR pin electrical configuration.
+    pub config: PinElectricalConfig,
+    /// External Thevenin resistance seen by the pin.
+    pub external_resistance: f64,
+}
+
+/// A functional AVR CPU driving one analog pin.
+pub struct AvrSession {
+    cpu: Cpu,
+    analog: TransientSession,
+    pin: AvrPin,
+    voltage: f64,
+}
+
+impl AvrSession {
+    /// Builds a session around one AVR program and analog pin.
+    pub fn new(
+        program: Vec<u16>,
+        circuit: &Circuit,
+        config: &TransientConfig,
+        pin: AvrPin,
+    ) -> Result<Self, SimError> {
+        let cpu = Cpu::new(program)?;
+        let analog = TransientSession::new(circuit, config)?;
+        Ok(Self {
+            cpu,
+            analog,
+            pin,
+            voltage: 0.0,
+        })
+    }
+
+    /// Steps one AVR instruction and one analog step.
+    pub fn step(&mut self) -> Result<Option<AvrTrace>, SimError> {
+        let external = ExternalPin::Thevenin {
+            voltage: self.voltage,
+            resistance: self.pin.external_resistance,
+        };
+        self.cpu
+            .set_pin_voltage(self.pin.port, self.pin.bit, external, &self.pin.config)?;
+        let trace = self.cpu.step()?;
+        let state = self.cpu.pin_electrical(
+            self.pin.port,
+            self.pin.bit,
+            ExternalPin::HighZ,
+            &self.pin.config,
+        )?;
+        self.analog
+            .set_source_voltage(self.pin.source, state.voltage)?;
+        let sample = self.analog.step()?;
+        self.voltage = sample.solution.voltage(self.pin.node).unwrap_or(0.0);
+        Ok(trace)
+    }
+
+    /// Returns the AVR CPU.
+    #[must_use]
+    pub fn cpu(&self) -> &Cpu {
+        &self.cpu
+    }
+
+    /// Returns the last analog node voltage.
+    #[must_use]
+    pub fn voltage(&self) -> f64 {
+        self.voltage
+    }
+
+    /// Returns the analog simulation time.
+    #[must_use]
+    pub fn time(&self) -> Time {
+        self.analog.time()
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{MixedSession, PinInput, PinLink};
+    use super::{AvrPin, AvrSession, MixedSession, PinInput, PinLink};
     use analysis::TransientConfig;
+    use avr::PinElectricalConfig;
     use cells::DigitalBuilder;
     use cells::catalog_digital::{DigitalEntry, digital_entry};
     use kernel::{Circuit, CircuitBuilder, DeviceId, DeviceKind, NodeId};
@@ -239,6 +325,49 @@ mod tests {
             .expect("session");
         let toggles = count_toggles(&mut session, 1000);
         assert!(toggles >= 4, "toggles={toggles}");
+    }
+
+    fn blink_program() -> Vec<u16> {
+        vec![
+            0xE200, 0xB904, 0xB905, 0xEF1F, 0x951A, 0xF7F1, 0xE220, 0x2702, 0xCFF9,
+        ]
+    }
+
+    #[test]
+    fn avr_pin_drives_analog_rc() {
+        let (circuit, source, node) = rc_circuit(1000.0, 1e-6);
+        let pin = AvrPin {
+            port: 0,
+            bit: 5,
+            source,
+            node,
+            config: PinElectricalConfig::default(),
+            external_resistance: 1000.0,
+        };
+        let mut session =
+            AvrSession::new(blink_program(), &circuit, &config(1e-5, 5000), pin).expect("session");
+        let (high, low, voltage_high, voltage_low) = run_avr(&mut session, 5000);
+        assert!(high, "PB5 never went high");
+        assert!(low, "PB5 never went low");
+        assert!(voltage_high, "analog node never rose");
+        assert!(voltage_low, "analog node never fell");
+    }
+
+    fn run_avr(session: &mut AvrSession, steps: usize) -> (bool, bool, bool, bool) {
+        let mut high = false;
+        let mut low = false;
+        let mut voltage_high = false;
+        let mut voltage_low = false;
+        for _ in 0..steps {
+            session.step().expect("step");
+            let portb = session.cpu().io(0x05);
+            high |= portb & 0x20 != 0;
+            low |= portb & 0x20 == 0;
+            let voltage = session.voltage();
+            voltage_high |= voltage > 3.0;
+            voltage_low |= voltage < 2.0;
+        }
+        (high, low, voltage_high, voltage_low)
     }
 
     fn count_toggles(session: &mut MixedSession, steps: usize) -> usize {

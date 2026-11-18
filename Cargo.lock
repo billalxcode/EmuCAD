@@ -1901,6 +1901,7 @@ name = "mixed"
 version = "0.1.0"
 dependencies = [
  "analysis",
+ "avr",
  "cells",
  "device",
  "kernel",
