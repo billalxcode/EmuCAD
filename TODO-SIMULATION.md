@@ -452,6 +452,7 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Wrapper full-chip structural belum.
 - [~] S7-05 Petakan pin AVR ke node netlist.
   - Board simulation memetakan PB5 dan pin LED.
+  - `AvrSession::with_pins` mendukung beberapa link pin dalam satu CPU.
   - Pemetaan penuh 32 pin belum.
 - [~] S7-06 Hubungkan pin electrical sebagai Thevenin.
   - Satu pin AVR output diuji dengan resistor seri 45 ohm menuju RC.

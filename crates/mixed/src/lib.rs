@@ -134,98 +134,152 @@ pub struct AvrPin {
     pub external_resistance: f64,
 }
 
-/// A functional AVR CPU driving one analog pin.
+/// Internal state for one AVR pin link.
+#[derive(Clone, Copy)]
+struct AvrPinState {
+    link: AvrPin,
+    voltage: f64,
+    level: bool,
+    changed: bool,
+}
+
+/// A functional AVR CPU driving one or more analog pins.
 pub struct AvrSession {
     cpu: Cpu,
     analog: TransientSession,
-    pin: AvrPin,
-    voltage: f64,
-    level: bool,
-    pin_changed: bool,
+    pins: Vec<AvrPinState>,
 }
 
 impl AvrSession {
-    /// Builds a session around one AVR program and analog pin.
+    /// Builds a session around one AVR program and one analog pin.
     pub fn new(
         program: Vec<u16>,
         circuit: &Circuit,
         config: &TransientConfig,
         pin: AvrPin,
     ) -> Result<Self, SimError> {
+        Self::with_pins(program, circuit, config, vec![pin])
+    }
+
+    /// Builds a session around one AVR program and several analog pins.
+    pub fn with_pins(
+        program: Vec<u16>,
+        circuit: &Circuit,
+        config: &TransientConfig,
+        pins: Vec<AvrPin>,
+    ) -> Result<Self, SimError> {
+        if pins.is_empty() {
+            return Err(SimError::InvalidNetlist(
+                "AVR session requires at least one pin".to_string(),
+            ));
+        }
         let cpu = Cpu::new(program)?;
         let analog = TransientSession::new(circuit, config)?;
-        Ok(Self {
-            cpu,
-            analog,
-            pin,
-            voltage: 0.0,
-            level: false,
-            pin_changed: false,
-        })
+        let pins = pins
+            .into_iter()
+            .map(|link| AvrPinState {
+                link,
+                voltage: 0.0,
+                level: false,
+                changed: false,
+            })
+            .collect();
+        Ok(Self { cpu, analog, pins })
     }
 
     /// Steps one AVR instruction and one analog step.
     pub fn step(&mut self) -> Result<Option<AvrTrace>, SimError> {
-        let external = ExternalPin::Thevenin {
-            voltage: self.voltage,
-            resistance: self.pin.external_resistance,
-        };
-        self.cpu
-            .set_pin_voltage(self.pin.port, self.pin.bit, external, &self.pin.config)?;
+        self.apply_inputs()?;
         let trace = self.cpu.step()?;
-        let state = self.cpu.pin_electrical(
-            self.pin.port,
-            self.pin.bit,
-            ExternalPin::HighZ,
-            &self.pin.config,
-        )?;
-        self.analog
-            .set_source_voltage(self.pin.source, state.voltage)?;
+        let driven = self.drive_sources()?;
         let sample = self.analog.step()?;
-        self.voltage = sample.solution.voltage(self.pin.node).unwrap_or(0.0);
-        self.update_pin(state.voltage);
+        self.update_pins(&driven, &sample);
         Ok(trace)
     }
 
-    fn update_pin(&mut self, voltage: f64) {
-        let level = voltage >= self.pin.config.input_threshold;
-        self.pin_changed = level != self.level;
-        self.level = level;
+    fn apply_inputs(&mut self) -> Result<(), SimError> {
+        for index in 0..self.pins.len() {
+            let link = self.pins[index].link;
+            let external = ExternalPin::Thevenin {
+                voltage: self.pins[index].voltage,
+                resistance: link.external_resistance,
+            };
+            self.cpu
+                .set_pin_voltage(link.port, link.bit, external, &link.config)?;
+        }
+        Ok(())
     }
 
-    /// Returns the current digital pin level.
+    fn drive_sources(&mut self) -> Result<Vec<f64>, SimError> {
+        let mut driven = Vec::with_capacity(self.pins.len());
+        for index in 0..self.pins.len() {
+            let link = self.pins[index].link;
+            let state =
+                self.cpu
+                    .pin_electrical(link.port, link.bit, ExternalPin::HighZ, &link.config)?;
+            self.analog.set_source_voltage(link.source, state.voltage)?;
+            driven.push(state.voltage);
+        }
+        Ok(driven)
+    }
+
+    fn update_pins(&mut self, driven: &[f64], sample: &analysis::TransientSample) {
+        for (index, value) in driven.iter().enumerate() {
+            let link = self.pins[index].link;
+            let voltage = sample.solution.voltage(link.node).unwrap_or(0.0);
+            let level = *value >= link.config.input_threshold;
+            let state = &mut self.pins[index];
+            state.changed = level != state.level;
+            state.level = level;
+            state.voltage = voltage;
+        }
+    }
+
+    /// Returns one digital pin level.
     #[must_use]
-    pub fn pin_level(&self) -> bool {
-        self.level
+    pub fn pin_level(&self, index: usize) -> Option<bool> {
+        self.pins.get(index).map(|pin| pin.level)
     }
 
-    /// Returns true when the last step changed the pin level.
+    /// Returns true when the indexed pin changed on the last step.
     #[must_use]
-    pub fn pin_changed(&self) -> bool {
-        self.pin_changed
+    pub fn pin_changed(&self, index: usize) -> Option<bool> {
+        self.pins.get(index).map(|pin| pin.changed)
     }
 
-    /// Runs until the pin changes or the step limit is reached.
+    /// Returns true when any pin changed on the last step.
+    #[must_use]
+    pub fn any_pin_changed(&self) -> bool {
+        self.pins.iter().any(|pin| pin.changed)
+    }
+
+    /// Runs until any pin changes or the step limit is reached.
     pub fn run_until_pin_change(&mut self, max_steps: usize) -> Result<Option<AvrTrace>, SimError> {
         for _ in 0..max_steps {
             let trace = self.step()?;
-            if self.pin_changed {
+            if self.any_pin_changed() {
                 return Ok(trace);
             }
         }
         Ok(None)
     }
 
+    /// Returns one analog node voltage.
+    #[must_use]
+    pub fn node_voltage(&self, index: usize) -> Option<f64> {
+        self.pins.get(index).map(|pin| pin.voltage)
+    }
+
+    /// Returns the first analog node voltage.
+    #[must_use]
+    pub fn voltage(&self) -> f64 {
+        self.pins.first().map(|pin| pin.voltage).unwrap_or(0.0)
+    }
+
     /// Returns the AVR CPU.
     #[must_use]
     pub fn cpu(&self) -> &Cpu {
         &self.cpu
-    }
-
-    /// Returns the last analog node voltage.
-    #[must_use]
-    pub fn voltage(&self) -> f64 {
-        self.voltage
     }
 
     /// Returns the analog simulation time.
@@ -250,9 +304,10 @@ mod tests {
         let source = builder.node("in").expect("node");
         let output = builder.node("out").expect("node");
         let ground = builder.ground();
-        let source_id = add_source(&mut builder, source, ground);
+        let source_id = add_source(&mut builder, "V1", source, ground);
         add_passives(
             &mut builder,
+            "",
             source,
             output,
             ground,
@@ -262,28 +317,34 @@ mod tests {
         (builder.build().expect("circuit"), source_id, output)
     }
 
-    fn add_source(builder: &mut CircuitBuilder, source: NodeId, ground: NodeId) -> DeviceId {
+    fn add_source(
+        builder: &mut CircuitBuilder,
+        name: &str,
+        source: NodeId,
+        ground: NodeId,
+    ) -> DeviceId {
         let params = BTreeMap::from([("voltage".to_string(), 0.0)]);
         builder
             .device(
-                "V1",
+                name,
                 DeviceKind::VoltageSource,
                 vec![source, ground],
                 params,
             )
-            .expect("V1")
+            .expect("source")
     }
 
     fn add_passives(
         builder: &mut CircuitBuilder,
+        prefix: &str,
         source: NodeId,
         output: NodeId,
         ground: NodeId,
         resistance: f64,
         capacitance: f64,
     ) {
-        add_resistor(builder, "R1", source, output, resistance);
-        add_capacitor(builder, "C1", output, ground, capacitance);
+        add_resistor(builder, &format!("{prefix}R1"), source, output, resistance);
+        add_capacitor(builder, &format!("{prefix}C1"), output, ground, capacitance);
     }
 
     fn add_resistor(
@@ -322,11 +383,28 @@ mod tests {
         let middle = builder.node("mid").expect("node");
         let output = builder.node("out").expect("node");
         let ground = builder.ground();
-        let source_id = add_source(&mut builder, source, ground);
+        let source_id = add_source(&mut builder, "V1", source, ground);
         add_resistor(&mut builder, "R0", source, middle, series);
         add_resistor(&mut builder, "R1", middle, output, resistance);
         add_capacitor(&mut builder, "C1", output, ground, capacitance);
         (builder.build().expect("circuit"), source_id, output)
+    }
+
+    fn dual_rc_circuit() -> (Circuit, Vec<(DeviceId, NodeId)>) {
+        let mut builder = CircuitBuilder::new();
+        let source_a = builder.node("a_in").expect("node");
+        let node_a = builder.node("a_out").expect("node");
+        let source_b = builder.node("b_in").expect("node");
+        let node_b = builder.node("b_out").expect("node");
+        let ground = builder.ground();
+        let a_id = add_source(&mut builder, "V1", source_a, ground);
+        let b_id = add_source(&mut builder, "V2", source_b, ground);
+        add_passives(&mut builder, "a_", source_a, node_a, ground, 1000.0, 1e-6);
+        add_passives(&mut builder, "b_", source_b, node_b, ground, 2000.0, 1e-6);
+        (
+            builder.build().expect("circuit"),
+            vec![(a_id, node_a), (b_id, node_b)],
+        )
     }
 
     fn clock_entry() -> DigitalEntry {
@@ -439,6 +517,53 @@ mod tests {
             voltage_low |= voltage < 2.0;
         }
         (high, low, voltage_high, voltage_low)
+    }
+
+    #[test]
+    fn avr_multiple_links_share_one_cpu() {
+        let (circuit, links) = dual_rc_circuit();
+        let pins = dual_pins(&links);
+        let mut session =
+            AvrSession::with_pins(blink_program(), &circuit, &config(1e-5, 5000), pins)
+                .expect("session");
+        let (high, low) = run_dual(&mut session, 5000);
+        assert!(high, "analog nodes never rose");
+        assert!(low, "analog nodes never fell");
+        assert_eq!(
+            session.pin_level(0),
+            Some(session.pin_level(1).expect("pin"))
+        );
+    }
+
+    fn dual_pins(links: &[(DeviceId, NodeId)]) -> Vec<AvrPin> {
+        links
+            .iter()
+            .map(|(source, node)| AvrPin {
+                port: 0,
+                bit: 5,
+                source: *source,
+                node: *node,
+                config: PinElectricalConfig::default(),
+                external_resistance: 1000.0,
+            })
+            .collect()
+    }
+
+    fn run_dual(session: &mut AvrSession, steps: usize) -> (bool, bool) {
+        let mut high = [false; 2];
+        let mut low = [false; 2];
+        for _ in 0..steps {
+            session.step().expect("step");
+            for index in 0..2 {
+                let voltage = session.node_voltage(index).expect("node");
+                high[index] |= voltage > 3.0;
+                low[index] |= voltage < 2.0;
+            }
+        }
+        (
+            high.iter().all(|value| *value),
+            low.iter().all(|value| *value),
+        )
     }
 
     #[test]

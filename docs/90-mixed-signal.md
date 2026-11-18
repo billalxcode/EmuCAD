@@ -22,8 +22,12 @@ Prototipe ini membuktikan urutan deterministik:
 - `time()`.
 - `voltage()`.
 - `digital_output()`.
-- `pin_level()`.
-- `pin_changed()`.
+- `with_pins(...)` untuk beberapa link pin.
+- `pin_level(index)`.
+- `pin_changed(index)`.
+- `any_pin_changed()`.
+- `node_voltage(index)`.
+- `voltage()` untuk link pertama.
 - `run_until_pin_change(max_steps)`.
 
 `PinLink` menghubungkan output digital ke sumber tegangan dan node
@@ -78,12 +82,18 @@ Test `avr_pin_change_breakpoint_stops`:
 - `run_until_pin_change` berhenti saat level PB5 berubah.
 - Dua breakpoint berturut-turut ditemukan dalam batas langkah.
 
+Test `avr_multiple_links_share_one_cpu`:
+
+- Satu CPU AVR menggerakkan dua link analog.
+- Kedua node RC mengikuti level PB5.
+- `pin_level(0)` dan `pin_level(1)` konsisten.
+
 ## 5. Batas
 
 - Umpan balik analog hanya satu input dan satu threshold.
 - Satu tick digital sama dengan satu `dt` analog.
-- AvrSession hanya satu pin dan satu sumber tegangan.
-- Breakpoint hanya pada satu pin.
+- AvrSession dapat memakai beberapa link, tetapi belum memetakan 32 pin.
+- Breakpoint berlaku untuk semua link yang terdaftar.
 - Belum ada queue event atau interpolasi.
 - AVR masih hybrid, bukan full-chip structural.
 - Hanya sumber tegangan yang dapat diubah.
