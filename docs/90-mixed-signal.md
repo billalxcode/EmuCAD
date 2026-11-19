@@ -75,9 +75,10 @@ counter setelah setiap instruksi, sehingga event dapat dibaca tanpa
 mengambil flag yang dipakai firmware atau interupsi.
 
 `CoSimEvent` mencatat `kind`, `cycles`, dan `time`. Queue menggabungkan
-event pin, Timer0, dan UART TX. Event CPU memakai waktu analog awal
-langkah, sedangkan event pin memakai waktu akhir langkah. Pemanggil
-harus mengambil event secara berkala agar queue tidak tumbuh terus.
+event pin, Timer0, UART TX, dan konversi ADC. Event CPU memakai waktu
+analog awal langkah, sedangkan event pin memakai waktu akhir langkah.
+Pemanggil harus mengambil event secara berkala agar queue tidak tumbuh
+terus.
 
 `AvrSession` membungkus `avr::Cpu`, satu atau beberapa pin AVR, dan
 opsional beberapa link ADC, beberapa link PWM, serta satu link UART. Setiap
@@ -92,7 +93,7 @@ analog:
 - Byte RX dikirim ke USART sebelum instruksi CPU.
 - Byte TX yang selesai dikirim dikumpulkan setelah instruksi CPU.
 - Event Timer0 pada langkah tersebut dicatat tanpa menghapus flag model.
-- Event pin, Timer0, dan UART TX masuk queue dengan timestamp.
+- Event pin, Timer0, UART TX, dan ADC masuk queue dengan timestamp.
 
 Wrapper ini memakai core AVR hybrid, bukan full-chip structural.
 
@@ -145,6 +146,7 @@ Test `analog_node_feeds_avr_adc`:
 - Node analog tetap pada 2.5 V dengan reference 5.0 V.
 - Konversi menghasilkan kode sekitar 512.
 - Flag konversi set dan status busy clear.
+- Event `AdcConversion` mencatat channel 0 dan kode hasil.
 
 Test `multiple_adc_channels_sample_independent_nodes`:
 
@@ -260,7 +262,7 @@ S7-09:
 - Thevenin pin input dan breakpoint perubahan pin.
 - ADC multi-channel, PWM Timer0 multi-load, dan UART byte-level.
 - Breakpoint event Timer0 untuk overflow dan compare.
-- Queue event gabungan untuk pin, Timer0, dan UART TX.
+- Queue event gabungan untuk pin, Timer0, UART TX, dan ADC.
 - Test regresi untuk satu arah, loop feedback, dan bridge ADC/PWM/UART.
 
 S7-04 tetap hybrid, bukan full-chip structural. S7-05 sudah mencakup

@@ -34,6 +34,7 @@ pub struct Adc {
     duration: u32,
     busy: bool,
     first_conversion: bool,
+    conversion_count: u32,
 }
 
 impl Adc {
@@ -53,6 +54,7 @@ impl Adc {
             duration: 0,
             busy: false,
             first_conversion: true,
+            conversion_count: 0,
         }
     }
 
@@ -148,6 +150,12 @@ impl Adc {
         self.busy
     }
 
+    /// Returns the number of completed conversions since construction.
+    #[must_use]
+    pub const fn conversion_count(&self) -> u32 {
+        self.conversion_count
+    }
+
     /// Returns the selected ADC channel.
     #[must_use]
     pub fn channel(&self) -> u8 {
@@ -172,6 +180,7 @@ impl Adc {
         self.busy = false;
         self.elapsed = 0;
         self.first_conversion = false;
+        self.conversion_count = self.conversion_count.wrapping_add(1);
         self.adcsra &= !START;
         self.adcsra |= FLAG;
     }

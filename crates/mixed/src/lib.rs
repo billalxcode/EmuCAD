@@ -271,6 +271,13 @@ struct Timer0EventState {
     compare_count: u32,
 }
 
+/// Last-step event state and monotonic counter snapshots.
+#[derive(Clone, Copy, Default)]
+struct EventState {
+    timer0: Timer0EventState,
+    adc_conversion_count: u32,
+}
+
 /// One deterministic co-simulation event.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct CoSimEvent {
@@ -298,6 +305,13 @@ pub enum CoSimEventKind {
     Timer0Compare,
     /// A UART frame completed with one byte.
     UartTx(u8),
+    /// An ADC conversion completed.
+    AdcConversion {
+        /// Selected ADC channel.
+        channel: u8,
+        /// Converted 10-bit code.
+        code: u16,
+    },
 }
 
 impl UartLink {
@@ -349,7 +363,7 @@ pub struct AvrSession {
     uart: Option<UartLink>,
     adc_voltages: Vec<f64>,
     pwm_voltages: Vec<f64>,
-    timer0_events: Timer0EventState,
+    event_state: EventState,
     events: VecDeque<CoSimEvent>,
 }
 
@@ -453,7 +467,7 @@ impl AvrSession {
             pwm_voltages: vec![0.0; pwms.len()],
             pwms,
             uart: None,
-            timer0_events: Timer0EventState::default(),
+            event_state: EventState::default(),
             events: VecDeque::new(),
         }
     }
@@ -474,6 +488,7 @@ impl AvrSession {
         self.update_timer0_events();
         self.record_timer0_events();
         self.drain_uart_tx();
+        self.record_adc_conversions();
         let driven = self.drive_sources()?;
         self.drive_pwms()?;
         let sample = self.analog.step()?;
@@ -513,12 +528,24 @@ impl AvrSession {
     }
 
     fn record_timer0_events(&mut self) {
-        if self.timer0_events.overflow {
+        if self.event_state.timer0.overflow {
             self.push_event(CoSimEventKind::Timer0Overflow);
         }
-        if self.timer0_events.compare {
+        if self.event_state.timer0.compare {
             self.push_event(CoSimEventKind::Timer0Compare);
         }
+    }
+
+    fn record_adc_conversions(&mut self) {
+        let (count, channel, code) = {
+            let adc = self.cpu.adc();
+            let code = u16::from(adc.read_data_low()) | (u16::from(adc.read_data_high()) << 8);
+            (adc.conversion_count(), adc.channel(), code)
+        };
+        if count.wrapping_sub(self.event_state.adc_conversion_count) != 0 {
+            self.push_event(CoSimEventKind::AdcConversion { channel, code });
+        }
+        self.event_state.adc_conversion_count = count;
     }
 
     fn push_event(&mut self, kind: CoSimEventKind) {
@@ -534,7 +561,7 @@ impl AvrSession {
             let timer = self.cpu.timer0();
             (timer.overflow_count(), timer.compare_count())
         };
-        let events = &mut self.timer0_events;
+        let events = &mut self.event_state.timer0;
         events.overflow = overflow.wrapping_sub(events.overflow_count) != 0;
         events.compare = compare.wrapping_sub(events.compare_count) != 0;
         events.overflow_count = overflow;
@@ -544,13 +571,13 @@ impl AvrSession {
     /// Returns true when Timer0 overflowed on the last step.
     #[must_use]
     pub fn timer0_overflow(&self) -> bool {
-        self.timer0_events.overflow
+        self.event_state.timer0.overflow
     }
 
     /// Returns true when Timer0 matched its compare value on the last step.
     #[must_use]
     pub fn timer0_compare(&self) -> bool {
-        self.timer0_events.compare
+        self.event_state.timer0.compare
     }
 
     /// Takes the oldest queued co-simulation event.
@@ -581,8 +608,8 @@ impl AvrSession {
 
     fn timer0_event(&self, event: Timer0Event) -> bool {
         match event {
-            Timer0Event::Overflow => self.timer0_events.overflow,
-            Timer0Event::Compare => self.timer0_events.compare,
+            Timer0Event::Overflow => self.event_state.timer0.overflow,
+            Timer0Event::Compare => self.event_state.timer0.compare,
         }
     }
 
@@ -1207,6 +1234,11 @@ mod tests {
         assert!((session.adc_voltage().unwrap_or(0.0) - 2.5).abs() < 0.01);
         let code = convert_adc(&mut session, 0);
         assert!((500..=520).contains(&code), "code={code}");
+        let event = session.take_event().expect("adc event");
+        assert_eq!(
+            event.kind,
+            CoSimEventKind::AdcConversion { channel: 0, code }
+        );
     }
 
     fn adc_session(circuit: Circuit, adc: AdcLink) -> AvrSession {
