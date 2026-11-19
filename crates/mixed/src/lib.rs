@@ -167,6 +167,24 @@ pub struct UartLink {
     tx: VecDeque<u8>,
 }
 
+/// Timer0 event observed by one co-simulation step.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Timer0Event {
+    /// The counter wrapped from 0xFF to 0x00.
+    Overflow,
+    /// The counter matched the compare value.
+    Compare,
+}
+
+/// Last-step Timer0 flags and event counter snapshots.
+#[derive(Clone, Copy, Default)]
+struct Timer0EventState {
+    overflow: bool,
+    compare: bool,
+    overflow_count: u32,
+    compare_count: u32,
+}
+
 impl UartLink {
     /// Builds an empty UART link.
     #[must_use]
@@ -216,6 +234,7 @@ pub struct AvrSession {
     uart: Option<UartLink>,
     adc_voltage: f64,
     pwm_voltage: f64,
+    timer0_events: Timer0EventState,
 }
 
 impl AvrSession {
@@ -249,16 +268,29 @@ impl AvrSession {
         pwm: Option<PwmLink>,
     ) -> Result<Self, SimError> {
         validate_links(&pins, adc, pwm)?;
-        Ok(Self {
-            cpu: Cpu::new(program)?,
-            analog: TransientSession::new(circuit, config)?,
+        let cpu = Cpu::new(program)?;
+        let analog = TransientSession::new(circuit, config)?;
+        Ok(Self::assemble(cpu, analog, pins, adc, pwm))
+    }
+
+    fn assemble(
+        cpu: Cpu,
+        analog: TransientSession,
+        pins: Vec<AvrPin>,
+        adc: Option<AdcLink>,
+        pwm: Option<PwmLink>,
+    ) -> Self {
+        Self {
+            cpu,
+            analog,
             pins: pin_states(pins),
             adc,
             pwm,
             uart: None,
             adc_voltage: 0.0,
             pwm_voltage: 0.0,
-        })
+            timer0_events: Timer0EventState::default(),
+        }
     }
 
     /// Attaches an external byte stream to the AVR USART.
@@ -275,6 +307,7 @@ impl AvrSession {
         self.apply_inputs()?;
         let trace = self.cpu.step()?;
         self.drain_uart_tx();
+        self.update_timer0_events();
         let driven = self.drive_sources()?;
         self.drive_pwm()?;
         let sample = self.analog.step()?;
@@ -309,6 +342,52 @@ impl AvrSession {
             if let Some(link) = self.uart.as_mut() {
                 link.tx.push_back(value);
             }
+        }
+    }
+
+    fn update_timer0_events(&mut self) {
+        let (overflow, compare) = {
+            let timer = self.cpu.timer0();
+            (timer.overflow_count(), timer.compare_count())
+        };
+        let events = &mut self.timer0_events;
+        events.overflow = overflow.wrapping_sub(events.overflow_count) != 0;
+        events.compare = compare.wrapping_sub(events.compare_count) != 0;
+        events.overflow_count = overflow;
+        events.compare_count = compare;
+    }
+
+    /// Returns true when Timer0 overflowed on the last step.
+    #[must_use]
+    pub fn timer0_overflow(&self) -> bool {
+        self.timer0_events.overflow
+    }
+
+    /// Returns true when Timer0 matched its compare value on the last step.
+    #[must_use]
+    pub fn timer0_compare(&self) -> bool {
+        self.timer0_events.compare
+    }
+
+    /// Runs until the requested Timer0 event or the step limit is reached.
+    pub fn run_until_timer0_event(
+        &mut self,
+        event: Timer0Event,
+        max_steps: usize,
+    ) -> Result<Option<AvrTrace>, SimError> {
+        for _ in 0..max_steps {
+            let trace = self.step()?;
+            if self.timer0_event(event) {
+                return Ok(trace);
+            }
+        }
+        Ok(None)
+    }
+
+    fn timer0_event(&self, event: Timer0Event) -> bool {
+        match event {
+            Timer0Event::Overflow => self.timer0_events.overflow,
+            Timer0Event::Compare => self.timer0_events.compare,
         }
     }
 
@@ -496,7 +575,10 @@ fn pin_states(pins: Vec<AvrPin>) -> Vec<AvrPinState> {
 
 #[cfg(test)]
 mod tests {
-    use super::{AdcLink, AvrPin, AvrSession, MixedSession, PinInput, PinLink, PwmLink, UartLink};
+    use super::{
+        AdcLink, AvrPin, AvrSession, MixedSession, PinInput, PinLink, PwmLink, Timer0Event,
+        UartLink,
+    };
     use analysis::TransientConfig;
     use avr::PinElectricalConfig;
     use cells::DigitalBuilder;
@@ -866,7 +948,7 @@ mod tests {
         assert_eq!(session.uart_link().expect("uart link").rx_len(), 0);
     }
 
-    fn uart_session(program: Vec<u16>) -> AvrSession {
+    fn pin_session(program: Vec<u16>) -> AvrSession {
         let (circuit, source, node) = thevenin_rc_circuit(45.0, 1000.0, 1e-6);
         let pin = AvrPin {
             port: 0,
@@ -876,9 +958,34 @@ mod tests {
             config: PinElectricalConfig::default(),
             external_resistance: 1000.0,
         };
-        AvrSession::new(program, &circuit, &config(1e-5, 1000), pin)
-            .expect("session")
-            .with_uart(UartLink::new())
+        AvrSession::new(program, &circuit, &config(1e-5, 1000), pin).expect("session")
+    }
+
+    fn uart_session(program: Vec<u16>) -> AvrSession {
+        pin_session(program).with_uart(UartLink::new())
+    }
+
+    #[test]
+    fn timer0_compare_event_stops_session() {
+        let mut session = pin_session(vec![0xCFFF]);
+        configure_timer0(&mut session, 4);
+        session.cpu_mut().timer0().set_ctc(true);
+        let first = session.run_until_timer0_event(Timer0Event::Compare, 10);
+        assert!(first.expect("run").is_some());
+        assert_eq!(session.cpu().cycles(), 4);
+        let second = session.run_until_timer0_event(Timer0Event::Compare, 10);
+        assert!(second.expect("run").is_some());
+        assert_eq!(session.cpu().cycles(), 8);
+    }
+
+    #[test]
+    fn timer0_overflow_event_stops_session() {
+        let mut session = pin_session(vec![0xCFFF]);
+        configure_timer0(&mut session, 200);
+        let trace = session.run_until_timer0_event(Timer0Event::Overflow, 200);
+        assert!(trace.expect("run").is_some());
+        assert_eq!(session.cpu().cycles(), 256);
+        assert!(session.timer0_overflow());
     }
 
     #[test]
@@ -915,12 +1022,16 @@ mod tests {
     }
 
     fn configure_pwm(session: &mut AvrSession) {
+        configure_timer0(session, 128);
+        session.cpu_mut().timer0().set_pwm(false);
+    }
+
+    fn configure_timer0(session: &mut AvrSession, compare: u8) {
         session
             .cpu_mut()
             .set_timer0_prescaler(1)
             .expect("prescaler");
-        session.cpu_mut().timer0().set_compare(128);
-        session.cpu_mut().timer0().set_pwm(false);
+        session.cpu_mut().timer0().set_compare(compare);
     }
 
     fn run_pwm(session: &mut AvrSession, steps: usize) -> (f64, f64) {

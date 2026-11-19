@@ -14,6 +14,8 @@ pub struct Timer0 {
     pwm_output: bool,
     overflow: bool,
     compare_match: bool,
+    overflow_count: u32,
+    compare_count: u32,
 }
 
 impl Timer0 {
@@ -30,6 +32,8 @@ impl Timer0 {
             pwm_output: false,
             overflow: false,
             compare_match: false,
+            overflow_count: 0,
+            compare_count: 0,
         })
     }
 
@@ -121,7 +125,21 @@ impl Timer0 {
         value
     }
 
+    /// Returns the number of overflow events since construction.
+    #[must_use]
+    pub const fn overflow_count(&self) -> u32 {
+        self.overflow_count
+    }
+
+    /// Returns the number of compare events since construction.
+    #[must_use]
+    pub const fn compare_count(&self) -> u32 {
+        self.compare_count
+    }
+
     /// Resets the counter, prescaler, and flags.
+    ///
+    /// Event counters are preserved so observers keep their history.
     pub fn reset(&mut self) -> Result<(), SimError> {
         self.counter = 0;
         self.prescaler = 0;
@@ -134,9 +152,13 @@ impl Timer0 {
         let previous = self.counter;
         self.counter = self.counter.wrapping_add(1);
         self.update_pwm();
-        self.overflow |= previous == 0xFF;
+        if previous == 0xFF {
+            self.overflow = true;
+            self.overflow_count = self.overflow_count.wrapping_add(1);
+        }
         if self.counter == self.compare {
             self.compare_match = true;
+            self.compare_count = self.compare_count.wrapping_add(1);
             if self.ctc {
                 self.counter = 0;
             }
@@ -211,6 +233,19 @@ mod tests {
         timer.reset().expect("reset");
         assert_eq!(timer.counter(), 0);
         assert!(!timer.take_compare());
+    }
+
+    #[test]
+    fn event_counters_track_repeated_events() {
+        let mut compare = timer();
+        compare.set_compare(3);
+        compare.set_ctc(true);
+        compare.tick(8).expect("tick");
+        assert_eq!(compare.compare_count(), 2);
+        let mut overflow = timer();
+        overflow.set_compare(200);
+        overflow.tick(256).expect("tick");
+        assert_eq!(overflow.overflow_count(), 1);
     }
 
     #[test]

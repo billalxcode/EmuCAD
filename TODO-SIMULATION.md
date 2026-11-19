@@ -467,9 +467,11 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - `AdcLink` membaca node analog ke channel ADC.
   - `PwmLink` menggerakkan node analog dari Timer0 PWM channel A.
   - `UartLink` mengirim byte TX ke buffer eksternal dan menerima byte RX.
-  - Event timer dan UART level garis belum terhubung ke solver analog.
+  - `run_until_timer0_event` menyediakan breakpoint overflow dan compare.
+  - UART level garis dan queue event gabungan belum.
 - [~] S7-09 Jaga determinisme urutan event.
   - Urutan digital ke analog dan analog ke digital diuji di `mixed`.
+  - Breakpoint event Timer0 tersedia per langkah.
   - Event queue gabungan dan interpolasi belum.
 - [x] S7-10 Test AVR + LED + resistor + voltage source.
   - Board test dan GUI simulation sudah mencakup LED, resistor, dan PB5.

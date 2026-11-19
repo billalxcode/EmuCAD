@@ -33,6 +33,8 @@ Prototipe ini membuktikan urutan deterministik:
 - `pin_level(index)`, `pin_changed(index)`, dan `any_pin_changed()`.
 - `node_voltage(index)` dan `voltage()` untuk link pertama.
 - `adc_voltage()`, `pwm_voltage()`, `uart_link()`, dan `uart_link_mut()`.
+- `timer0_overflow()`, `timer0_compare()`, dan
+  `run_until_timer0_event(event, max_steps)`.
 - `run_until_pin_change(max_steps)`.
 
 `PinLink` menghubungkan output digital ke sumber tegangan dan node
@@ -53,6 +55,11 @@ mengantrekan byte untuk AVR, sedangkan `take_tx` mengambil byte yang
 sudah selesai dikirim. Bridge mengirim satu byte RX saat RXC clear dan
 mengumpulkan byte TX setelah frame selesai.
 
+`Timer0Event` memilih `Overflow` atau `Compare`. Timer0 menyimpan
+counter event monotonik sejak konstruksi. `AvrSession` mengambil selisih
+counter setelah setiap instruksi, sehingga event dapat dibaca tanpa
+mengambil flag yang dipakai firmware atau interupsi.
+
 `AvrSession` membungkus `avr::Cpu`, satu atau beberapa pin AVR, dan
 opsional satu link ADC, satu link PWM, serta satu link UART. Setiap
 langkah menjalankan satu instruksi AVR dan satu langkah transient
@@ -65,6 +72,7 @@ analog:
 - Output PWM menggerakkan sumber tegangan analog.
 - Byte RX dikirim ke USART sebelum instruksi CPU.
 - Byte TX yang selesai dikirim dikumpulkan setelah instruksi CPU.
+- Event Timer0 pada langkah tersebut dicatat tanpa menghapus flag model.
 
 Wrapper ini memakai core AVR hybrid, bukan full-chip structural.
 
@@ -136,6 +144,18 @@ Test `uart_receive_reaches_avr_register`:
 - Firmware membaca UDR0 dengan `lds` ke register.
 - RXC clear setelah pembacaan.
 
+Test `timer0_compare_event_stops_session`:
+
+- Timer0 CTC compare 4 dengan clock clk/1.
+- Breakpoint pertama berhenti pada 4 siklus CPU, kedua pada 8.
+- Event berulang terdeteksi tanpa menghapus flag.
+
+Test `timer0_overflow_event_stops_session`:
+
+- Timer0 normal mode compare 200.
+- Overflow terdeteksi pada 256 siklus CPU.
+- `timer0_overflow` true pada langkah berhenti.
+
 ## 5. Batas
 
 - Umpan balik analog hanya satu input dan satu threshold.
@@ -143,8 +163,9 @@ Test `uart_receive_reaches_avr_register`:
 - AvrSession dapat memakai beberapa link pin, satu link ADC, satu link
   PWM, dan satu link UART.
 - Belum ada pemetaan penuh 32 pin.
-- Breakpoint berlaku untuk semua link yang terdaftar.
-- Belum ada queue event atau interpolasi.
+- Breakpoint pin berlaku untuk semua link yang terdaftar.
+- Event timer tersedia per langkah; queue gabungan dan interpolasi
+  belum.
 - AVR masih hybrid, bukan full-chip structural.
 - Hanya sumber tegangan yang dapat diubah.
 - PWM baru mencakup Timer0 channel A.
@@ -163,8 +184,9 @@ S7-09:
 - Wrapper AVR hybrid dengan beberapa link pin.
 - Thevenin pin input dan breakpoint perubahan pin.
 - ADC satu channel, PWM Timer0 channel A, dan UART byte-level.
+- Breakpoint event Timer0 untuk overflow dan compare.
 - Test regresi untuk satu arah, loop feedback, dan bridge ADC/PWM/UART.
 
 S7-04 tetap hybrid, bukan full-chip structural. S7-05 baru mencakup
-link pin manual, bukan pemetaan 32 pin. S7-08 belum mencakup event
-timer dan UART level garis.
+link pin manual, bukan pemetaan 32 pin. S7-08 belum mencakup UART level
+garis; S7-09 belum mencakup queue gabungan dan interpolasi.
