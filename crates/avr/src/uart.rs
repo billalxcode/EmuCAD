@@ -21,7 +21,7 @@ enum RxLineState {
     Stop,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 struct RxState {
     data: u8,
     rxc: bool,
@@ -38,28 +38,8 @@ struct RxState {
     line_ones: u8,
     line_parity_ok: bool,
     count: u32,
-}
-
-impl Default for RxState {
-    fn default() -> Self {
-        Self {
-            data: 0,
-            rxc: false,
-            active: false,
-            shift: 0,
-            bits: 0,
-            line: true,
-            line_active: false,
-            line_elapsed: 0,
-            line_state: RxLineState::Idle,
-            line_timer: 0,
-            line_shift: 0,
-            line_bits: 0,
-            line_ones: 0,
-            line_parity_ok: true,
-            count: 0,
-        }
-    }
+    ninth: bool,
+    line_ninth: bool,
 }
 
 /// Behavioral model of the AVR USART.
@@ -96,7 +76,10 @@ impl Uart {
             tx_queue: VecDeque::new(),
             udre: true,
             txc: false,
-            rx: RxState::default(),
+            rx: RxState {
+                line: true,
+                ..RxState::default()
+            },
         }
     }
 
@@ -156,8 +139,15 @@ impl Uart {
         self.rx.count
     }
 
+    /// Returns the ninth received data bit.
+    #[must_use]
+    pub const fn rx_ninth(&self) -> bool {
+        self.rx.ninth
+    }
+
     fn complete_rx(&mut self, value: u8) {
         self.rx.data = value;
+        self.rx.ninth = false;
         self.rx.rxc = true;
         self.rx.count = self.rx.count.wrapping_add(1);
     }
@@ -279,8 +269,11 @@ impl Uart {
             return false;
         }
         let data_bits = self.data_bits();
-        if position <= 8 && position <= data_bits {
-            return (self.tx_data >> (position - 1)) & 1 != 0;
+        if position <= data_bits {
+            if position <= 8 {
+                return (self.tx_data >> (position - 1)) & 1 != 0;
+            }
+            return self.ucsr_b & 0x01 != 0;
         }
         if self.parity_enabled() && position == data_bits + 1 {
             return self.tx_parity();
@@ -298,9 +291,12 @@ impl Uart {
     }
 
     fn tx_parity(&self) -> bool {
-        let ones = (0..self.data_bits().min(8))
+        let mut ones = (0..self.data_bits().min(8))
             .filter(|bit| (self.tx_data >> bit) & 1 != 0)
             .count() as u32;
+        if self.data_bits() == 9 && self.ucsr_b & 0x01 != 0 {
+            ones += 1;
+        }
         self.parity_value(ones)
     }
 
@@ -369,6 +365,7 @@ impl Uart {
         self.rx.line_shift = 0;
         self.rx.line_ones = 0;
         self.rx.line_parity_ok = true;
+        self.rx.line_ninth = false;
     }
 
     fn rx_line_data(&mut self, samples: u32) {
@@ -377,18 +374,27 @@ impl Uart {
             return;
         }
         self.rx.line_timer = 0;
-        if self.rx.line {
-            self.rx.line_shift |= 1 << self.rx.line_bits;
-            self.rx.line_ones ^= 1;
-        }
+        self.rx_line_bit();
         self.rx.line_bits += 1;
-        if self.rx.line_bits == self.data_bits().min(8) as u8 {
+        if self.rx.line_bits == self.data_bits().min(9) as u8 {
             self.rx.line_state = if self.parity_enabled() {
                 RxLineState::Parity
             } else {
                 RxLineState::Stop
             };
         }
+    }
+
+    fn rx_line_bit(&mut self) {
+        if !self.rx.line {
+            return;
+        }
+        if self.rx.line_bits < 8 {
+            self.rx.line_shift |= 1 << self.rx.line_bits;
+        } else {
+            self.rx.line_ninth = true;
+        }
+        self.rx.line_ones ^= 1;
     }
 
     fn rx_line_parity(&mut self, samples: u32) {
@@ -408,6 +414,7 @@ impl Uart {
         }
         if self.rx.line && self.rx.line_parity_ok {
             self.complete_rx(self.rx.line_shift);
+            self.rx.ninth = self.rx.line_ninth;
         }
         self.rx.line_state = RxLineState::Idle;
     }
@@ -694,6 +701,39 @@ mod tests {
         uart.tick(NORMAL_MODE_FACTOR);
         uart.set_rx_line(true);
         uart.tick(NORMAL_MODE_FACTOR);
+    }
+
+    #[test]
+    fn nine_bit_transmitter_uses_txb8() {
+        let mut uart = Uart::new();
+        uart.write_control(1, 0x0D);
+        uart.write_control(2, 0x06);
+        uart.write_tx(0x01);
+        uart.tick(NORMAL_MODE_FACTOR * 9);
+        assert!(uart.tx_line());
+        uart.write_control(1, 0x0C);
+        assert!(!uart.tx_line());
+    }
+
+    #[test]
+    fn line_receiver_decodes_nine_data_bits() {
+        let mut uart = enabled_uart();
+        uart.write_control(1, 0x1C);
+        uart.set_rx_line(true);
+        uart.tick(NORMAL_MODE_FACTOR);
+        uart.set_rx_line(false);
+        uart.tick(NORMAL_MODE_FACTOR);
+        for bit in 0..8 {
+            uart.set_rx_line((0x5A >> bit) & 1 != 0);
+            uart.tick(NORMAL_MODE_FACTOR);
+        }
+        uart.set_rx_line(true);
+        uart.tick(NORMAL_MODE_FACTOR);
+        uart.set_rx_line(true);
+        uart.tick(NORMAL_MODE_FACTOR);
+        assert!(uart.rx_ready());
+        assert_eq!(uart.read_rx(), 0x5A);
+        assert!(uart.rx_ninth());
     }
 
     #[test]

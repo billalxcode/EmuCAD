@@ -81,10 +81,10 @@ Nilai `high` dan `low` harus finite. Garis TX mengikuti timing frame
 UART.
 
 `UartRxLink` mengambil satu node analog dengan threshold dan
-mengumpankannya ke receiver 8N1 bertiming. Sampling memakai 16x clock
-normal atau 8x saat double speed. Delapan data bit dan parity even/odd
-mengikuti UCSR0C. Buffer byte `UartLink` tetap tersedia untuk jalur RX
-byte-level.
+mengumpankannya ke receiver bertiming. Sampling memakai 16x clock normal
+atau 8x saat double speed. Jumlah data bit (5 sampai 9), parity even/odd,
+dan stop bit mengikuti UCSR0C/UCSR0B. Buffer byte `UartLink` tetap
+tersedia untuk jalur RX byte-level.
 
 `Timer0Event` memilih `Overflow` atau `Compare`. Timer0 menyimpan
 counter event monotonik sejak konstruksi. `AvrSession` mengambil selisih
@@ -113,8 +113,8 @@ analog:
 - Garis TX UART menggerakkan sumber analog mengikuti level frame.
 - Garis RX UART diset dari sampel analog sebelumnya sebelum instruksi.
 - Event Timer0 pada langkah tersebut dicatat tanpa menghapus flag model.
-- Event pin, Timer0, UART TX, UART RX, edge PWM, edge garis TX UART,
-  dan ADC masuk queue dengan timestamp.
+- Event pin, Timer0, UART TX, UART RX (`UartRx` atau `UartRx9`), edge
+  PWM, edge garis TX UART, dan ADC masuk queue dengan timestamp.
 
 Wrapper ini memakai core AVR hybrid, bukan full-chip structural.
 
@@ -249,6 +249,21 @@ Test `line_receiver_checks_even_parity`:
 - Frame dengan parity benar diterima.
 - Frame dengan parity salah tidak menyalakan RXC.
 
+Test `nine_bit_transmitter_uses_txb8`:
+
+- Frame 9 data bit memakai TXB8 sebagai bit kesembilan.
+- Perubahan TXB8 mengubah level garis pada posisi bit tersebut.
+
+Test `line_receiver_decodes_nine_data_bits`:
+
+- Frame 9 data bit diterima.
+- RXC menyala dan bit kesembilan tersedia lewat `rx_ninth()`.
+
+Test `uart_nine_bit_loopback_marks_ninth`:
+
+- Loopback TX ke RX dengan frame 9 data bit berhasil.
+- Event `UartRx9(0x5A)` tercatat.
+
 Test `timer0_compare_event_stops_session`:
 
 - Timer0 CTC compare 4 dengan clock clk/1.
@@ -306,8 +321,8 @@ Test `avr_pin_map_links_all_io`:
 - AVR masih hybrid, bukan full-chip structural.
 - Hanya sumber tegangan yang dapat diubah.
 - PWM baru mencakup Timer0 channel A.
-- UART level garis mendukung 8 data bit dan parity even/odd.
-- Frame 9 data bit, parity 9-bit, dan flow control belum.
+- UART level garis mendukung 5 sampai 9 data bit dan parity even/odd.
+- Flow control hardware belum dimodelkan.
 - Buffer RX byte-level menahan byte berikutnya selama RXC masih set.
 
 ## 6. Hubungan dengan S7
@@ -330,5 +345,5 @@ S7-09:
 
 S7-04 tetap hybrid, bukan full-chip structural. S7-05 sudah mencakup
 semua pin IO yang dimodelkan, tetapi belum pin daya, reset, atau paket
-32 pin penuh. S7-08 belum mencakup UART 9-bit dan flow control; S7-09
-belum mencakup interpolasi dan timestamp sub-langkah.
+32 pin penuh. S7-08 belum mencakup flow control hardware; S7-09 belum
+mencakup interpolasi dan timestamp sub-langkah.

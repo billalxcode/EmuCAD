@@ -331,6 +331,8 @@ pub enum CoSimEventKind {
     UartTx(u8),
     /// A UART byte was received.
     UartRx(u8),
+    /// A UART byte with the ninth data bit set was received.
+    UartRx9(u8),
     /// An ADC conversion completed.
     AdcConversion {
         /// Selected ADC channel.
@@ -678,7 +680,11 @@ impl AvrSession {
         let count = self.cpu.uart().rx_count();
         if count.wrapping_sub(self.uart_state.rx_count) != 0 {
             let value = self.cpu.uart().rx_byte();
-            self.push_event(CoSimEventKind::UartRx(value));
+            if self.cpu.uart().rx_ninth() {
+                self.push_event(CoSimEventKind::UartRx9(value));
+            } else {
+                self.push_event(CoSimEventKind::UartRx(value));
+            }
         }
         self.uart_state.rx_count = count;
     }
@@ -1752,6 +1758,21 @@ mod tests {
         session.cpu_mut().uart().write_tx(0x5A);
         assert_eq!(receive_uart(&mut session, 400), Some(0x5A));
         assert_eq!(take_uart_rx(&mut session), Some(0x5A));
+    }
+
+    #[test]
+    fn uart_nine_bit_loopback_marks_ninth() {
+        let mut session = uart_loop_session();
+        session.cpu_mut().uart().write_control(1, 0x1D);
+        session.cpu_mut().uart().write_tx(0x5A);
+        assert_eq!(receive_uart(&mut session, 400), Some(0x5A));
+        assert!(session.cpu_mut().uart().rx_ninth());
+        let events = session.drain_events();
+        assert!(
+            events
+                .iter()
+                .any(|event| event.kind == CoSimEventKind::UartRx9(0x5A))
+        );
     }
 
     fn take_uart_rx(session: &mut AvrSession) -> Option<u8> {
