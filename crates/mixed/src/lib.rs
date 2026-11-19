@@ -943,6 +943,33 @@ impl AvrSession {
         Ok(None)
     }
 
+    /// Runs until one pin node reaches the threshold or the limit is reached.
+    pub fn run_until_pin_voltage(
+        &mut self,
+        index: usize,
+        threshold: f64,
+        max_steps: usize,
+    ) -> Result<Option<AvrTrace>, SimError> {
+        self.validate_pin_index(index)?;
+        validate_threshold(threshold)?;
+        for _ in 0..max_steps {
+            let trace = self.step()?;
+            if self.pins[index].voltage >= threshold {
+                return Ok(trace);
+            }
+        }
+        Ok(None)
+    }
+
+    fn validate_pin_index(&self, index: usize) -> Result<(), SimError> {
+        if self.pins.get(index).is_some() {
+            return Ok(());
+        }
+        Err(SimError::InvalidNetlist(format!(
+            "pin index out of range: {index}"
+        )))
+    }
+
     /// Returns one analog node voltage.
     #[must_use]
     pub fn node_voltage(&self, index: usize) -> Option<f64> {
@@ -971,6 +998,15 @@ impl AvrSession {
     pub fn time(&self) -> Time {
         self.analog.time()
     }
+}
+
+fn validate_threshold(threshold: f64) -> Result<(), SimError> {
+    if !threshold.is_finite() {
+        return Err(SimError::InvalidNetlist(
+            "voltage threshold must be finite".to_string(),
+        ));
+    }
+    Ok(())
 }
 
 fn adc_code(voltage: f64, reference: f64) -> u16 {
@@ -1400,6 +1436,19 @@ mod tests {
             high.iter().all(|value| *value),
             low.iter().all(|value| *value),
         )
+    }
+
+    #[test]
+    fn run_until_pin_voltage_stops_at_threshold() {
+        let (circuit, source, node) = thevenin_rc_circuit(45.0, 1000.0, 1e-6);
+        let pin = test_pin(0, 5, (source, node));
+        let mut session = AvrSession::new(blink_program(), &circuit, &config(1e-5, 10_000), pin)
+            .expect("session");
+        let trace = session.run_until_pin_voltage(0, 3.0, 5000);
+        assert!(trace.expect("run").is_some());
+        assert!(session.node_voltage(0).unwrap_or(0.0) >= 3.0);
+        assert!(session.run_until_pin_voltage(1, 3.0, 1).is_err());
+        assert!(session.run_until_pin_voltage(0, f64::NAN, 1).is_err());
     }
 
     #[test]

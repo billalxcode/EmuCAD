@@ -46,6 +46,7 @@ Prototipe ini membuktikan urutan deterministik:
 - `take_event()`, `event_count()`, dan `drain_events()` untuk queue
   event.
 - `run_until_pin_change(max_steps)`.
+- `run_until_pin_voltage(index, threshold, max_steps)`.
 
 `AvrPinMap` memetakan pin berdasarkan pasangan port dan bit untuk 3
 port x 8 bit. `add` menolak lokasi ganda atau di luar rentang, sedangkan
@@ -152,6 +153,12 @@ Test `avr_pin_change_breakpoint_stops`:
 
 - `run_until_pin_change` berhenti saat level PB5 berubah.
 - Dua breakpoint berturut-turut ditemukan dalam batas langkah.
+
+Test `run_until_pin_voltage_stops_at_threshold`:
+
+- Node PB5 dijalankan sampai mencapai 3.0 V.
+- Breakpoint berhenti dengan tegangan node di atas threshold.
+- Index pin dan threshold tidak valid ditolak.
 
 Test `avr_multiple_links_share_one_cpu`:
 
@@ -285,6 +292,7 @@ Test `avr_pin_map_links_all_io`:
 - Pin daya, reset, dan paket 32 pin penuh belum dipetakan.
 - Index pin pada session mengikuti urutan `links`, bukan nomor package.
 - Breakpoint pin berlaku untuk semua link yang terdaftar.
+- Breakpoint tegangan pin berhenti saat node mencapai threshold.
 - Queue event gabungan tersedia dengan resolusi satu langkah.
 - Interpolasi dan timestamp sub-langkah belum ada.
 - AVR masih hybrid, bukan full-chip structural.
@@ -303,7 +311,8 @@ S7-09:
 - Update sumber tanpa reset state analog.
 - Umpan balik analog ke digital lewat threshold.
 - Wrapper AVR hybrid dengan beberapa link pin dan peta 24 pin IO.
-- Thevenin pin input dan breakpoint perubahan pin.
+- Thevenin pin input, breakpoint perubahan pin, dan breakpoint tegangan
+  pin.
 - ADC multi-channel, PWM Timer0 multi-load, serta UART TX dan RX
   line-level.
 - Breakpoint event Timer0 untuk overflow dan compare.
