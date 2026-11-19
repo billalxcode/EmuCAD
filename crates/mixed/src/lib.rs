@@ -5,7 +5,7 @@
 use std::collections::VecDeque;
 
 use analysis::{TransientConfig, TransientSession};
-use avr::{AvrTrace, Cpu, ExternalPin, PinElectricalConfig};
+use avr::{Adc, AvrTrace, Cpu, ExternalPin, PinElectricalConfig};
 use cells::catalog_digital::DigitalEntry;
 use kernel::{Circuit, DeviceId, NodeId, SimError, Time};
 
@@ -764,7 +764,39 @@ fn adc_code(voltage: f64, reference: f64) -> u16 {
     (ratio * 1023.0).round() as u16
 }
 
+fn validate_adcs(adcs: &[AdcLink]) -> Result<(), SimError> {
+    for (index, link) in adcs.iter().enumerate() {
+        validate_adc_link(link)?;
+        if adcs[..index]
+            .iter()
+            .any(|other| other.channel == link.channel)
+        {
+            return Err(SimError::InvalidNetlist(format!(
+                "ADC channel already mapped: {}",
+                link.channel
+            )));
+        }
+    }
+    Ok(())
+}
+
+fn validate_adc_link(link: &AdcLink) -> Result<(), SimError> {
+    if usize::from(link.channel) >= Adc::CHANNELS {
+        return Err(SimError::InvalidNetlist(format!(
+            "ADC channel out of range: {}",
+            link.channel
+        )));
+    }
+    if !link.reference.is_finite() || link.reference <= 0.0 {
+        return Err(SimError::InvalidNetlist(
+            "ADC reference must be positive".to_string(),
+        ));
+    }
+    Ok(())
+}
+
 fn validate_links(pins: &[AvrPin], adcs: &[AdcLink], pwms: &[PwmLink]) -> Result<(), SimError> {
+    validate_adcs(adcs)?;
     if pins.is_empty() && adcs.is_empty() && pwms.is_empty() {
         return Err(SimError::InvalidNetlist(
             "AVR session requires at least one link".to_string(),
@@ -794,7 +826,7 @@ mod tests {
     use avr::PinElectricalConfig;
     use cells::DigitalBuilder;
     use cells::catalog_digital::{DigitalEntry, digital_entry};
-    use kernel::{Circuit, CircuitBuilder, DeviceId, DeviceKind, NodeId};
+    use kernel::{Circuit, CircuitBuilder, DeviceId, DeviceKind, NodeId, SimError};
     use std::collections::BTreeMap;
 
     fn rc_circuit(resistance: f64, capacitance: f64) -> (Circuit, DeviceId, NodeId) {
@@ -1200,6 +1232,36 @@ mod tests {
             None,
         )
         .expect("session")
+    }
+
+    #[test]
+    fn adc_links_reject_duplicate_and_invalid() {
+        let (circuit, node_a, node_b) = dual_fixed_circuit(1.25, 3.75);
+        let duplicate = vec![adc_link(0, node_a), adc_link(0, node_b)];
+        assert!(try_adc_session(&circuit, duplicate).is_err());
+        let invalid = vec![AdcLink {
+            channel: 16,
+            node: node_a,
+            reference: 5.0,
+        }];
+        assert!(try_adc_session(&circuit, invalid).is_err());
+        let zero = vec![AdcLink {
+            channel: 0,
+            node: node_a,
+            reference: 0.0,
+        }];
+        assert!(try_adc_session(&circuit, zero).is_err());
+    }
+
+    fn try_adc_session(circuit: &Circuit, adcs: Vec<AdcLink>) -> Result<AvrSession, SimError> {
+        AvrSession::with_pwm_links(
+            vec![0xCFFF],
+            circuit,
+            &config(1e-5, 10),
+            Vec::new(),
+            adcs,
+            Vec::new(),
+        )
     }
 
     #[test]

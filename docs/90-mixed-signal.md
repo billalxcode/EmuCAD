@@ -53,7 +53,8 @@ analog. `PinInput` opsional membandingkan node analog dengan threshold
 untuk menggerakkan input digital. Sumber harus berupa `VoltageSource`.
 
 `AdcLink` memetakan satu channel ADC ke node analog dan reference
-voltage. Satu session dapat memakai beberapa link ADC. Setiap langkah
+voltage. Satu session dapat memakai beberapa link ADC. Channel harus
+unik, berada di bawah 16, dan reference harus positif. Setiap langkah
 menghitung kode 10-bit dari rasio tegangan node terhadap reference,
 lalu menyimpannya sebagai input channel sebelum instruksi CPU berjalan.
 
@@ -149,6 +150,12 @@ Test `multiple_adc_channels_sample_independent_nodes`:
 - Dua node analog berada pada 1.25 V dan 3.75 V.
 - Setiap channel membaca node yang berbeda.
 - Konversi menghasilkan kode sekitar 256 dan 767.
+
+Test `adc_links_reject_duplicate_and_invalid`:
+
+- Dua link dengan channel yang sama ditolak.
+- Channel 16 ditolak.
+- Reference nol ditolak.
 
 Test `timer_pwm_drives_analog_node`:
 

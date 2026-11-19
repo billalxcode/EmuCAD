@@ -37,6 +37,9 @@ pub struct Adc {
 }
 
 impl Adc {
+    /// Number of ADC channels available on the model.
+    pub const CHANNELS: usize = MAX_CHANNELS;
+
     /// Builds an ADC in its reset state with no channel inputs configured.
     #[must_use]
     pub fn new() -> Self {

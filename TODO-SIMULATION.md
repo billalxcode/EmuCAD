@@ -468,6 +468,7 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Satu pin GPIO AVR sudah terhubung ke RC analog lewat `mixed`.
   - `AdcLink` membaca node analog ke channel ADC; beberapa channel
     dapat aktif dalam satu session.
+  - Channel ganda, channel di luar rentang, dan reference nol ditolak.
   - `PwmLink` menggerakkan node analog dari Timer0 PWM channel A;
     beberapa node dapat memakai output yang sama.
   - `UartLink` mengirim byte TX ke buffer eksternal dan menerima byte RX.
