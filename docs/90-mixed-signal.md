@@ -47,6 +47,8 @@ Prototipe ini membuktikan urutan deterministik:
   event.
 - `run_until_pin_change(max_steps)`.
 - `run_until_pin_voltage(index, threshold, max_steps)`.
+- `run_until_voltage(probe, threshold, max_steps)` dengan `AnalogProbe`
+  untuk pin, ADC, atau PWM.
 
 `AvrPinMap` memetakan pin berdasarkan pasangan port dan bit untuk 3
 port x 8 bit. `add` menolak lokasi ganda atau di luar rentang, sedangkan
@@ -159,6 +161,12 @@ Test `run_until_pin_voltage_stops_at_threshold`:
 - Node PB5 dijalankan sampai mencapai 3.0 V.
 - Breakpoint berhenti dengan tegangan node di atas threshold.
 - Index pin dan threshold tidak valid ditolak.
+
+Test `run_until_voltage_supports_adc_and_pwm_nodes`:
+
+- Probe ADC berhenti saat node mencapai 2.4 V.
+- Probe PWM berhenti saat node mencapai 2.5 V.
+- Probe dengan index tidak valid ditolak.
 
 Test `avr_multiple_links_share_one_cpu`:
 
@@ -292,7 +300,7 @@ Test `avr_pin_map_links_all_io`:
 - Pin daya, reset, dan paket 32 pin penuh belum dipetakan.
 - Index pin pada session mengikuti urutan `links`, bukan nomor package.
 - Breakpoint pin berlaku untuk semua link yang terdaftar.
-- Breakpoint tegangan pin berhenti saat node mencapai threshold.
+- Breakpoint tegangan berlaku untuk node pin, ADC, dan PWM.
 - Queue event gabungan tersedia dengan resolusi satu langkah.
 - Interpolasi dan timestamp sub-langkah belum ada.
 - AVR masih hybrid, bukan full-chip structural.
@@ -311,8 +319,8 @@ S7-09:
 - Update sumber tanpa reset state analog.
 - Umpan balik analog ke digital lewat threshold.
 - Wrapper AVR hybrid dengan beberapa link pin dan peta 24 pin IO.
-- Thevenin pin input, breakpoint perubahan pin, dan breakpoint tegangan
-  pin.
+- Thevenin pin input, breakpoint perubahan pin, serta breakpoint
+  tegangan pin, ADC, dan PWM.
 - ADC multi-channel, PWM Timer0 multi-load, serta UART TX dan RX
   line-level.
 - Breakpoint event Timer0 untuk overflow dan compare.

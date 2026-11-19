@@ -464,6 +464,7 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
 - [~] S7-07 Tambahkan breakpoint saat pin berubah.
   - `run_until_pin_change` berhenti pada perubahan salah satu pin AVR.
   - `run_until_pin_voltage` berhenti saat node pin mencapai threshold.
+  - `run_until_voltage` mendukung probe pin, ADC, dan PWM.
   - Breakpoint untuk semua pin dan event queue belum.
 - [~] S7-08 Hubungkan ADC, PWM, timer, dan UART.
   - Peripheral AVR sudah ada di `avr`.

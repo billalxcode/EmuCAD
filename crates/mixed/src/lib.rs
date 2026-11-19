@@ -302,6 +302,17 @@ pub struct CoSimEvent {
     pub kind: CoSimEventKind,
 }
 
+/// Analog node observed by a voltage breakpoint.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum AnalogProbe {
+    /// Pin link index.
+    Pin(usize),
+    /// ADC link index.
+    Adc(usize),
+    /// PWM link index.
+    Pwm(usize),
+}
+
 /// Kind of event recorded by an AVR session.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CoSimEventKind {
@@ -950,24 +961,50 @@ impl AvrSession {
         threshold: f64,
         max_steps: usize,
     ) -> Result<Option<AvrTrace>, SimError> {
-        self.validate_pin_index(index)?;
+        self.run_until_voltage(AnalogProbe::Pin(index), threshold, max_steps)
+    }
+
+    /// Runs until one analog probe reaches the threshold or the limit is reached.
+    pub fn run_until_voltage(
+        &mut self,
+        probe: AnalogProbe,
+        threshold: f64,
+        max_steps: usize,
+    ) -> Result<Option<AvrTrace>, SimError> {
+        self.validate_probe(probe)?;
         validate_threshold(threshold)?;
         for _ in 0..max_steps {
             let trace = self.step()?;
-            if self.pins[index].voltage >= threshold {
+            if self.probe_voltage(probe) >= threshold {
                 return Ok(trace);
             }
         }
         Ok(None)
     }
 
-    fn validate_pin_index(&self, index: usize) -> Result<(), SimError> {
-        if self.pins.get(index).is_some() {
+    fn validate_probe(&self, probe: AnalogProbe) -> Result<(), SimError> {
+        let exists = match probe {
+            AnalogProbe::Pin(index) => index < self.pins.len(),
+            AnalogProbe::Adc(index) => index < self.adc_voltages.len(),
+            AnalogProbe::Pwm(index) => index < self.pwm_voltages.len(),
+        };
+        if exists {
             return Ok(());
         }
-        Err(SimError::InvalidNetlist(format!(
-            "pin index out of range: {index}"
-        )))
+        Err(SimError::InvalidNetlist(
+            "analog probe out of range".to_string(),
+        ))
+    }
+
+    fn probe_voltage(&self, probe: AnalogProbe) -> f64 {
+        match probe {
+            AnalogProbe::Pin(index) => self
+                .pins
+                .get(index)
+                .map_or(f64::NEG_INFINITY, |pin| pin.voltage),
+            AnalogProbe::Adc(index) => self.adc_voltage_at(index).unwrap_or(f64::NEG_INFINITY),
+            AnalogProbe::Pwm(index) => self.pwm_voltage_at(index).unwrap_or(f64::NEG_INFINITY),
+        }
     }
 
     /// Returns one analog node voltage.
@@ -1109,8 +1146,8 @@ fn pin_states(pins: Vec<AvrPin>) -> Vec<AvrPinState> {
 #[cfg(test)]
 mod tests {
     use super::{
-        AVR_IO_PIN_COUNT, AdcLink, AvrPin, AvrPinMap, AvrSession, CoSimEventKind, MixedSession,
-        PinInput, PinLink, PwmLink, Timer0Event, UartLink, UartRxLink, UartTxLink,
+        AVR_IO_PIN_COUNT, AdcLink, AnalogProbe, AvrPin, AvrPinMap, AvrSession, CoSimEventKind,
+        MixedSession, PinInput, PinLink, PwmLink, Timer0Event, UartLink, UartRxLink, UartTxLink,
     };
     use analysis::TransientConfig;
     use avr::PinElectricalConfig;
@@ -1449,6 +1486,18 @@ mod tests {
         assert!(session.node_voltage(0).unwrap_or(0.0) >= 3.0);
         assert!(session.run_until_pin_voltage(1, 3.0, 1).is_err());
         assert!(session.run_until_pin_voltage(0, f64::NAN, 1).is_err());
+    }
+
+    #[test]
+    fn run_until_voltage_supports_adc_and_pwm_nodes() {
+        let (circuit, node) = fixed_circuit(2.5);
+        let mut adc = adc_bridge_session(circuit, vec![adc_link(0, node)]);
+        let adc_trace = adc.run_until_voltage(AnalogProbe::Adc(0), 2.4, 10);
+        assert!(adc_trace.expect("adc run").is_some());
+        let mut pwm = pwm_session(10_000.0, 1e-7);
+        let pwm_trace = pwm.run_until_voltage(AnalogProbe::Pwm(0), 2.5, 800);
+        assert!(pwm_trace.expect("pwm run").is_some());
+        assert!(pwm.run_until_voltage(AnalogProbe::Adc(0), 2.5, 1).is_err());
     }
 
     #[test]
