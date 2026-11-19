@@ -466,7 +466,8 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Satu pin GPIO AVR sudah terhubung ke RC analog lewat `mixed`.
   - `AdcLink` membaca node analog ke channel ADC.
   - `PwmLink` menggerakkan node analog dari Timer0 PWM channel A.
-  - UART dan event timer belum terhubung ke solver analog.
+  - `UartLink` mengirim byte TX ke buffer eksternal dan menerima byte RX.
+  - Event timer dan UART level garis belum terhubung ke solver analog.
 - [~] S7-09 Jaga determinisme urutan event.
   - Urutan digital ke analog dan analog ke digital diuji di `mixed`.
   - Event queue gabungan dan interpolasi belum.

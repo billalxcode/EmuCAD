@@ -28,10 +28,11 @@ Prototipe ini membuktikan urutan deterministik:
 - `new(...)` untuk satu pin.
 - `with_pins(...)` untuk beberapa link pin.
 - `with_links(...)` untuk pin, ADC, dan PWM.
+- `with_uart(link)` untuk endpoint UART eksternal.
 - `step()`, `time()`, `cpu()`, dan `cpu_mut()`.
 - `pin_level(index)`, `pin_changed(index)`, dan `any_pin_changed()`.
 - `node_voltage(index)` dan `voltage()` untuk link pertama.
-- `adc_voltage()` dan `pwm_voltage()`.
+- `adc_voltage()`, `pwm_voltage()`, `uart_link()`, dan `uart_link_mut()`.
 - `run_until_pin_change(max_steps)`.
 
 `PinLink` menghubungkan output digital ke sumber tegangan dan node
@@ -47,15 +48,23 @@ instruksi CPU berjalan.
 analog dan node pengamatan. Nilai `high` dan `low` menentukan tegangan
 sumber saat PWM aktif atau tidak.
 
+`UartLink` adalah buffer byte eksternal untuk USART. `push_rx`
+mengantrekan byte untuk AVR, sedangkan `take_tx` mengambil byte yang
+sudah selesai dikirim. Bridge mengirim satu byte RX saat RXC clear dan
+mengumpulkan byte TX setelah frame selesai.
+
 `AvrSession` membungkus `avr::Cpu`, satu atau beberapa pin AVR, dan
-opsional satu link ADC serta satu link PWM. Setiap langkah menjalankan
-satu instruksi AVR dan satu langkah transient analog:
+opsional satu link ADC, satu link PWM, serta satu link UART. Setiap
+langkah menjalankan satu instruksi AVR dan satu langkah transient
+analog:
 
 - Tegangan node sebelumnya dipakai sebagai Thevenin pin input.
 - Pin AVR yang dikonfigurasi output menggerakkan sumber tegangan.
 - Pin AVR yang dikonfigurasi input membaca level dari node analog.
 - Input ADC memakai tegangan node dari langkah sebelumnya.
 - Output PWM menggerakkan sumber tegangan analog.
+- Byte RX dikirim ke USART sebelum instruksi CPU.
+- Byte TX yang selesai dikirim dikumpulkan setelah instruksi CPU.
 
 Wrapper ini memakai core AVR hybrid, bukan full-chip structural.
 
@@ -115,19 +124,33 @@ Test `timer_pwm_drives_analog_node`:
 - Output PWM menggerakkan RC 10 kohm dan 100 nF.
 - Node analog mencapai level rendah dan tinggi.
 
+Test `uart_transmit_reaches_external_link`:
+
+- USART diaktifkan dan satu byte dimuat ke transmitter.
+- Setelah frame selesai, `take_tx` mengembalikan byte tersebut.
+- Buffer TX kosong setelah byte diambil.
+
+Test `uart_receive_reaches_avr_register`:
+
+- Byte eksternal diantrekan lewat `push_rx`.
+- Firmware membaca UDR0 dengan `lds` ke register.
+- RXC clear setelah pembacaan.
+
 ## 5. Batas
 
 - Umpan balik analog hanya satu input dan satu threshold.
 - Satu tick digital sama dengan satu `dt` analog.
-- AvrSession dapat memakai beberapa link pin, satu link ADC, dan satu
-  link PWM.
+- AvrSession dapat memakai beberapa link pin, satu link ADC, satu link
+  PWM, dan satu link UART.
 - Belum ada pemetaan penuh 32 pin.
 - Breakpoint berlaku untuk semua link yang terdaftar.
 - Belum ada queue event atau interpolasi.
 - AVR masih hybrid, bukan full-chip structural.
 - Hanya sumber tegangan yang dapat diubah.
 - PWM baru mencakup Timer0 channel A.
-- UART belum terhubung ke solver analog.
+- UART bridge bekerja pada level byte, bukan level garis atau timing
+  baud analog.
+- Buffer RX menahan byte berikutnya selama RXC masih set.
 
 ## 6. Hubungan dengan S7
 
@@ -139,9 +162,9 @@ S7-09:
 - Umpan balik analog ke digital lewat threshold.
 - Wrapper AVR hybrid dengan beberapa link pin.
 - Thevenin pin input dan breakpoint perubahan pin.
-- ADC satu channel dan PWM Timer0 channel A.
-- Test regresi untuk satu arah, loop feedback, dan bridge ADC/PWM.
+- ADC satu channel, PWM Timer0 channel A, dan UART byte-level.
+- Test regresi untuk satu arah, loop feedback, dan bridge ADC/PWM/UART.
 
 S7-04 tetap hybrid, bukan full-chip structural. S7-05 baru mencakup
-link pin manual, bukan pemetaan 32 pin. S7-08 belum mencakup UART dan
-event timer.
+link pin manual, bukan pemetaan 32 pin. S7-08 belum mencakup event
+timer dan UART level garis.

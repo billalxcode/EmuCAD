@@ -2,6 +2,8 @@
 
 #![forbid(unsafe_code)]
 
+use std::collections::VecDeque;
+
 use analysis::{TransientConfig, TransientSession};
 use avr::{AvrTrace, Cpu, ExternalPin, PinElectricalConfig};
 use cells::catalog_digital::DigitalEntry;
@@ -158,6 +160,43 @@ pub struct PwmLink {
     pub low: f64,
 }
 
+/// External byte stream attached to the AVR USART.
+#[derive(Clone, Debug, Default)]
+pub struct UartLink {
+    rx: VecDeque<u8>,
+    tx: VecDeque<u8>,
+}
+
+impl UartLink {
+    /// Builds an empty UART link.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Queues one byte for the AVR receiver.
+    pub fn push_rx(&mut self, value: u8) {
+        self.rx.push_back(value);
+    }
+
+    /// Takes one byte transmitted by the AVR.
+    pub fn take_tx(&mut self) -> Option<u8> {
+        self.tx.pop_front()
+    }
+
+    /// Returns the number of bytes waiting for the AVR receiver.
+    #[must_use]
+    pub fn rx_len(&self) -> usize {
+        self.rx.len()
+    }
+
+    /// Returns the number of bytes transmitted by the AVR.
+    #[must_use]
+    pub fn tx_len(&self) -> usize {
+        self.tx.len()
+    }
+}
+
 /// Internal state for one AVR pin link.
 #[derive(Clone, Copy)]
 struct AvrPinState {
@@ -174,6 +213,7 @@ pub struct AvrSession {
     pins: Vec<AvrPinState>,
     adc: Option<AdcLink>,
     pwm: Option<PwmLink>,
+    uart: Option<UartLink>,
     adc_voltage: f64,
     pwm_voltage: f64,
 }
@@ -215,16 +255,26 @@ impl AvrSession {
             pins: pin_states(pins),
             adc,
             pwm,
+            uart: None,
             adc_voltage: 0.0,
             pwm_voltage: 0.0,
         })
     }
 
+    /// Attaches an external byte stream to the AVR USART.
+    #[must_use]
+    pub fn with_uart(mut self, link: UartLink) -> Self {
+        self.uart = Some(link);
+        self
+    }
+
     /// Steps one AVR instruction and one analog step.
     pub fn step(&mut self) -> Result<Option<AvrTrace>, SimError> {
         self.apply_adc();
+        self.apply_uart_rx();
         self.apply_inputs()?;
         let trace = self.cpu.step()?;
+        self.drain_uart_tx();
         let driven = self.drive_sources()?;
         self.drive_pwm()?;
         let sample = self.analog.step()?;
@@ -232,6 +282,34 @@ impl AvrSession {
         self.update_adc(&sample);
         self.update_pwm(&sample);
         Ok(trace)
+    }
+
+    fn apply_uart_rx(&mut self) {
+        let Some(value) = self.pending_uart_rx() else {
+            return;
+        };
+        if self.cpu.uart().rx_ready() {
+            return;
+        }
+        self.cpu.uart().receive(value);
+        if let Some(link) = self.uart.as_mut() {
+            link.rx.pop_front();
+        }
+    }
+
+    fn pending_uart_rx(&self) -> Option<u8> {
+        self.uart.as_ref().and_then(|link| link.rx.front().copied())
+    }
+
+    fn drain_uart_tx(&mut self) {
+        if self.uart.is_none() {
+            return;
+        }
+        while let Some(value) = self.cpu.uart().take_tx_byte() {
+            if let Some(link) = self.uart.as_mut() {
+                link.tx.push_back(value);
+            }
+        }
     }
 
     fn apply_adc(&mut self) {
@@ -274,6 +352,17 @@ impl AvrSession {
     #[must_use]
     pub fn pwm_voltage(&self) -> Option<f64> {
         self.pwm.map(|_| self.pwm_voltage)
+    }
+
+    /// Returns the attached UART link.
+    #[must_use]
+    pub fn uart_link(&self) -> Option<&UartLink> {
+        self.uart.as_ref()
+    }
+
+    /// Returns the attached UART link for external byte access.
+    pub fn uart_link_mut(&mut self) -> Option<&mut UartLink> {
+        self.uart.as_mut()
     }
 
     fn apply_inputs(&mut self) -> Result<(), SimError> {
@@ -407,7 +496,7 @@ fn pin_states(pins: Vec<AvrPin>) -> Vec<AvrPinState> {
 
 #[cfg(test)]
 mod tests {
-    use super::{AdcLink, AvrPin, AvrSession, MixedSession, PinInput, PinLink, PwmLink};
+    use super::{AdcLink, AvrPin, AvrSession, MixedSession, PinInput, PinLink, PwmLink, UartLink};
     use analysis::TransientConfig;
     use avr::PinElectricalConfig;
     use cells::DigitalBuilder;
@@ -745,6 +834,51 @@ mod tests {
         assert!(adc.flag());
         assert!(!adc.busy());
         u16::from(adc.read_data_low()) | (u16::from(adc.read_data_high()) << 8)
+    }
+
+    #[test]
+    fn uart_transmit_reaches_external_link() {
+        let mut session = uart_session(vec![0xCFFF]);
+        session.cpu_mut().uart().write_control(1, 0x08);
+        session.cpu_mut().uart().write_tx(0x41);
+        for _ in 0..100 {
+            session.step().expect("step");
+        }
+        let link = session.uart_link_mut().expect("uart link");
+        assert_eq!(link.tx_len(), 1);
+        assert_eq!(link.take_tx(), Some(0x41));
+        assert_eq!(link.tx_len(), 0);
+        assert_eq!(link.take_tx(), None);
+    }
+
+    #[test]
+    fn uart_receive_reaches_avr_register() {
+        let mut session = uart_session(vec![0x9100, 0x00C6, 0x9110, 0x00C6, 0xCFFF]);
+        let link = session.uart_link_mut().expect("uart link");
+        link.push_rx(0x5A);
+        link.push_rx(0xC3);
+        assert_eq!(link.rx_len(), 2);
+        session.step().expect("first byte");
+        session.step().expect("second byte");
+        assert_eq!(session.cpu().register(16), 0x5A);
+        assert_eq!(session.cpu().register(17), 0xC3);
+        assert!(!session.cpu_mut().uart().rx_ready());
+        assert_eq!(session.uart_link().expect("uart link").rx_len(), 0);
+    }
+
+    fn uart_session(program: Vec<u16>) -> AvrSession {
+        let (circuit, source, node) = thevenin_rc_circuit(45.0, 1000.0, 1e-6);
+        let pin = AvrPin {
+            port: 0,
+            bit: 5,
+            source,
+            node,
+            config: PinElectricalConfig::default(),
+            external_resistance: 1000.0,
+        };
+        AvrSession::new(program, &circuit, &config(1e-5, 1000), pin)
+            .expect("session")
+            .with_uart(UartLink::new())
     }
 
     #[test]
