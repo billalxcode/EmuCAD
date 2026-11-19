@@ -203,6 +203,7 @@ Test `avr_pin_map_links_all_io`:
   PWM, dan satu link UART.
 - Pemetaan 24 pin IO model (3 port x 8 bit) tersedia.
 - Pin daya, reset, dan paket 32 pin penuh belum dipetakan.
+- Index pin pada session mengikuti urutan `links`, bukan nomor package.
 - Breakpoint pin berlaku untuk semua link yang terdaftar.
 - Queue event gabungan tersedia dengan resolusi satu langkah.
 - Interpolasi dan timestamp sub-langkah belum ada.
