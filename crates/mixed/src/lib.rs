@@ -272,10 +272,23 @@ struct Timer0EventState {
 }
 
 /// Last-step event state and monotonic counter snapshots.
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy)]
 struct EventState {
     timer0: Timer0EventState,
     adc_conversion_count: u32,
+    pwm_level: bool,
+    uart_tx_level: bool,
+}
+
+impl Default for EventState {
+    fn default() -> Self {
+        Self {
+            timer0: Timer0EventState::default(),
+            adc_conversion_count: 0,
+            pwm_level: false,
+            uart_tx_level: true,
+        }
+    }
 }
 
 /// One deterministic co-simulation event.
@@ -313,6 +326,16 @@ pub enum CoSimEventKind {
         channel: u8,
         /// Converted 10-bit code.
         code: u16,
+    },
+    /// Timer0 PWM output changed level.
+    PwmEdge {
+        /// New PWM level.
+        high: bool,
+    },
+    /// UART TX line changed level.
+    UartTxEdge {
+        /// New TX line level.
+        high: bool,
     },
 }
 
@@ -569,9 +592,11 @@ impl AvrSession {
         let trace = self.cpu.step()?;
         self.update_timer0_events();
         self.record_timer0_events();
+        self.record_pwm_event();
         self.drain_uart_tx();
         self.record_adc_conversions();
         self.record_uart_rx();
+        self.record_uart_tx_edge();
         Ok(trace)
     }
 
@@ -647,6 +672,27 @@ impl AvrSession {
         self.uart_state.rx_count = count;
     }
 
+    fn record_pwm_event(&mut self) {
+        let high = self.cpu.pwm_a();
+        if high == self.event_state.pwm_level {
+            return;
+        }
+        self.push_event(CoSimEventKind::PwmEdge { high });
+        self.event_state.pwm_level = high;
+    }
+
+    fn record_uart_tx_edge(&mut self) {
+        if self.uart_state.tx.is_none() {
+            return;
+        }
+        let high = self.cpu.uart().tx_line();
+        if high == self.event_state.uart_tx_level {
+            return;
+        }
+        self.push_event(CoSimEventKind::UartTxEdge { high });
+        self.event_state.uart_tx_level = high;
+    }
+
     fn push_event(&mut self, kind: CoSimEventKind) {
         self.events.push_back(CoSimEvent {
             cycles: self.cpu.cycles(),
@@ -688,6 +734,11 @@ impl AvrSession {
     #[must_use]
     pub fn event_count(&self) -> usize {
         self.events.len()
+    }
+
+    /// Removes and returns all queued co-simulation events.
+    pub fn drain_events(&mut self) -> Vec<CoSimEvent> {
+        self.events.drain(..).collect()
     }
 
     /// Runs until the requested Timer0 event or the step limit is reached.
@@ -1560,9 +1611,21 @@ mod tests {
 
     #[test]
     fn uart_tx_line_drives_analog_node() {
+        let mut session = uart_tx_session();
+        session.cpu_mut().uart().write_control(1, 0x08);
+        session.cpu_mut().uart().write_tx(0x55);
+        let (low, high) = run_uart_tx(&mut session, 100);
+        assert!(low < 1.0, "low={low}");
+        assert!(high > 4.0, "high={high}");
+        let edges = take_uart_tx_edges(&mut session);
+        assert!(edges.contains(&true));
+        assert!(edges.contains(&false));
+    }
+
+    fn uart_tx_session() -> AvrSession {
         let (circuit, tx_source, tx_node, pin_source, pin_node) = uart_tx_circuit();
         let pin = test_pin(0, 5, (pin_source, pin_node));
-        let mut session = AvrSession::new(vec![0xCFFF], &circuit, &config(1e-5, 1000), pin)
+        AvrSession::new(vec![0xCFFF], &circuit, &config(1e-5, 1000), pin)
             .expect("session")
             .with_uart_tx(UartTxLink {
                 source: tx_source,
@@ -1570,12 +1633,18 @@ mod tests {
                 high: 5.0,
                 low: 0.0,
             })
-            .expect("uart tx");
-        session.cpu_mut().uart().write_control(1, 0x08);
-        session.cpu_mut().uart().write_tx(0x55);
-        let (low, high) = run_uart_tx(&mut session, 100);
-        assert!(low < 1.0, "low={low}");
-        assert!(high > 4.0, "high={high}");
+            .expect("uart tx")
+    }
+
+    fn take_uart_tx_edges(session: &mut AvrSession) -> Vec<bool> {
+        session
+            .drain_events()
+            .into_iter()
+            .filter_map(|event| match event.kind {
+                CoSimEventKind::UartTxEdge { high } => Some(high),
+                _ => None,
+            })
+            .collect()
     }
 
     #[test]
@@ -1749,6 +1818,20 @@ mod tests {
         let (low, high) = run_pwm(&mut session, 800);
         assert!(low < 2.7, "low={low}");
         assert!(high > 2.3, "high={high}");
+        let edges = take_pwm_edges(&mut session);
+        assert!(edges.contains(&true));
+        assert!(edges.contains(&false));
+    }
+
+    fn take_pwm_edges(session: &mut AvrSession) -> Vec<bool> {
+        session
+            .drain_events()
+            .into_iter()
+            .filter_map(|event| match event.kind {
+                CoSimEventKind::PwmEdge { high } => Some(high),
+                _ => None,
+            })
+            .collect()
     }
 
     #[test]

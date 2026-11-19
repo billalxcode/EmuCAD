@@ -43,7 +43,8 @@ Prototipe ini membuktikan urutan deterministik:
   `uart_tx_voltage()`, dan `uart_rx_voltage()`.
 - `timer0_overflow()`, `timer0_compare()`, dan
   `run_until_timer0_event(event, max_steps)`.
-- `take_event()` dan `event_count()` untuk queue event.
+- `take_event()`, `event_count()`, dan `drain_events()` untuk queue
+  event.
 - `run_until_pin_change(max_steps)`.
 
 `AvrPinMap` memetakan pin berdasarkan pasangan port dan bit untuk 3
@@ -87,7 +88,8 @@ counter setelah setiap instruksi, sehingga event dapat dibaca tanpa
 mengambil flag yang dipakai firmware atau interupsi.
 
 `CoSimEvent` mencatat `kind`, `cycles`, dan `time`. Queue menggabungkan
-event pin, Timer0, UART TX, UART RX, dan konversi ADC. Event CPU memakai waktu
+event pin, Timer0, UART TX, UART RX, edge PWM, edge garis TX UART, dan
+konversi ADC. Event CPU memakai waktu
 analog awal langkah, sedangkan event pin memakai waktu akhir langkah.
 Pemanggil harus mengambil event secara berkala agar queue tidak tumbuh
 terus.
@@ -107,8 +109,8 @@ analog:
 - Garis TX UART menggerakkan sumber analog mengikuti level frame.
 - Garis RX UART diset dari sampel analog sebelumnya sebelum instruksi.
 - Event Timer0 pada langkah tersebut dicatat tanpa menghapus flag model.
-- Event pin, Timer0, UART TX, UART RX, dan ADC masuk queue dengan
-  timestamp.
+- Event pin, Timer0, UART TX, UART RX, edge PWM, edge garis TX UART,
+  dan ADC masuk queue dengan timestamp.
 
 Wrapper ini memakai core AVR hybrid, bukan full-chip structural.
 
@@ -180,6 +182,7 @@ Test `timer_pwm_drives_analog_node`:
 - Timer0 memakai fast PWM, compare 128, dan clock clk/1.
 - Output PWM menggerakkan RC 10 kohm dan 100 nF.
 - Node analog mencapai level rendah dan tinggi.
+- Event `PwmEdge` mencatat transisi tinggi dan rendah.
 
 Test `timer_pwm_drives_multiple_analog_nodes`:
 
@@ -210,6 +213,7 @@ Test `uart_tx_line_drives_analog_node`:
 - Garis TX UART dihubungkan ke sumber analog.
 - Start bit dan level data menggerakkan node analog.
 - Node mencapai level rendah dan tinggi selama frame.
+- Event `UartTxEdge` mencatat transisi garis TX.
 
 Test `uart_tx_line_loops_back_to_rx`:
 
@@ -291,7 +295,8 @@ S7-09:
 - ADC multi-channel, PWM Timer0 multi-load, serta UART TX dan RX
   line-level.
 - Breakpoint event Timer0 untuk overflow dan compare.
-- Queue event gabungan untuk pin, Timer0, UART TX/RX, dan ADC.
+- Queue event gabungan untuk pin, Timer0, UART TX/RX, edge PWM, edge
+  garis TX UART, dan ADC.
 - Test regresi untuk satu arah, loop feedback, dan bridge ADC/PWM/UART.
 
 S7-04 tetap hybrid, bukan full-chip structural. S7-05 sudah mencakup

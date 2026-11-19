@@ -477,13 +477,14 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - `UartTxLink` menggerakkan sumber analog dari garis TX UART.
   - `UartRxLink` menerima frame 8N1 dari node analog.
   - Event `UartRx` mencatat byte yang diterima.
+  - Edge PWM dan edge garis TX UART masuk ke queue event.
   - `run_until_timer0_event` menyediakan breakpoint overflow dan compare.
   - `AdcConversion` mencatat channel dan kode hasil konversi.
   - UART level garis dan queue event gabungan belum.
 - [~] S7-09 Jaga determinisme urutan event.
   - Urutan digital ke analog dan analog ke digital diuji di `mixed`.
   - Breakpoint event Timer0 tersedia per langkah.
-  - Queue menggabungkan event pin, Timer0, dan UART TX.
+  - Queue menggabungkan event pin, Timer0, UART, edge PWM, dan ADC.
   - Interpolasi dan timestamp sub-langkah belum.
 - [x] S7-10 Test AVR + LED + resistor + voltage source.
   - Board test dan GUI simulation sudah mencakup LED, resistor, dan PB5.
