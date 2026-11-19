@@ -32,12 +32,14 @@ Prototipe ini membuktikan urutan deterministik:
 - `with_bridges(...)` untuk beberapa link ADC dan PWM opsional.
 - `with_pwm_links(...)` untuk beberapa link ADC dan PWM.
 - `with_uart(link)` untuk endpoint UART eksternal.
+- `with_uart_tx(link)` untuk garis TX UART ke sumber analog.
 - `step()`, `time()`, `cpu()`, dan `cpu_mut()`.
 - `pin_level(index)`, `pin_changed(index)`, `any_pin_changed()`, dan
   `pin_count()`.
 - `node_voltage(index)` dan `voltage()` untuk link pertama.
 - `adc_voltage()`, `adc_voltage_at(index)`, `pwm_voltage()`,
-  `pwm_voltage_at(index)`, `uart_link()`, dan `uart_link_mut()`.
+  `pwm_voltage_at(index)`, `uart_link()`, `uart_link_mut()`, dan
+  `uart_tx_voltage()`.
 - `timer0_overflow()`, `timer0_compare()`, dan
   `run_until_timer0_event(event, max_steps)`.
 - `take_event()` dan `event_count()` untuk queue event.
@@ -69,6 +71,10 @@ mengantrekan byte untuk AVR, sedangkan `take_tx` mengambil byte yang
 sudah selesai dikirim. Bridge mengirim satu byte RX saat RXC clear dan
 mengumpulkan byte TX setelah frame selesai.
 
+`UartTxLink` menghubungkan garis TX UART ke sumber tegangan analog.
+Nilai `high` dan `low` harus finite. Garis TX mengikuti timing frame
+UART, sedangkan RX masih memakai buffer byte `UartLink`.
+
 `Timer0Event` memilih `Overflow` atau `Compare`. Timer0 menyimpan
 counter event monotonik sejak konstruksi. `AvrSession` mengambil selisih
 counter setelah setiap instruksi, sehingga event dapat dibaca tanpa
@@ -92,6 +98,7 @@ analog:
 - Output PWM menggerakkan sumber tegangan analog.
 - Byte RX dikirim ke USART sebelum instruksi CPU.
 - Byte TX yang selesai dikirim dikumpulkan setelah instruksi CPU.
+- Garis TX UART menggerakkan sumber analog mengikuti level frame.
 - Event Timer0 pada langkah tersebut dicatat tanpa menghapus flag model.
 - Event pin, Timer0, UART TX, dan ADC masuk queue dengan timestamp.
 
@@ -190,6 +197,12 @@ Test `uart_receive_reaches_avr_register`:
 - Firmware membaca UDR0 dengan `lds` ke register.
 - RXC clear setelah pembacaan.
 
+Test `uart_tx_line_drives_analog_node`:
+
+- Garis TX UART dihubungkan ke sumber analog.
+- Start bit dan level data menggerakkan node analog.
+- Node mencapai level rendah dan tinggi selama frame.
+
 Test `timer0_compare_event_stops_session`:
 
 - Timer0 CTC compare 4 dengan clock clk/1.
@@ -246,8 +259,7 @@ Test `avr_pin_map_links_all_io`:
 - AVR masih hybrid, bukan full-chip structural.
 - Hanya sumber tegangan yang dapat diubah.
 - PWM baru mencakup Timer0 channel A.
-- UART bridge bekerja pada level byte, bukan level garis atau timing
-  baud analog.
+- TX UART tersedia pada level garis; RX masih level byte.
 - Buffer RX menahan byte berikutnya selama RXC masih set.
 
 ## 6. Hubungan dengan S7
@@ -260,7 +272,8 @@ S7-09:
 - Umpan balik analog ke digital lewat threshold.
 - Wrapper AVR hybrid dengan beberapa link pin dan peta 24 pin IO.
 - Thevenin pin input dan breakpoint perubahan pin.
-- ADC multi-channel, PWM Timer0 multi-load, dan UART byte-level.
+- ADC multi-channel, PWM Timer0 multi-load, UART TX line-level, dan
+  UART RX byte-level.
 - Breakpoint event Timer0 untuk overflow dan compare.
 - Queue event gabungan untuk pin, Timer0, UART TX, dan ADC.
 - Test regresi untuk satu arah, loop feedback, dan bridge ADC/PWM/UART.
