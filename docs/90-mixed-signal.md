@@ -27,16 +27,23 @@ Prototipe ini membuktikan urutan deterministik:
 
 - `new(...)` untuk satu pin.
 - `with_pins(...)` untuk beberapa link pin.
+- `with_pin_map(...)` untuk peta 3 port x 8 bit.
 - `with_links(...)` untuk pin, ADC, dan PWM.
 - `with_uart(link)` untuk endpoint UART eksternal.
 - `step()`, `time()`, `cpu()`, dan `cpu_mut()`.
-- `pin_level(index)`, `pin_changed(index)`, dan `any_pin_changed()`.
+- `pin_level(index)`, `pin_changed(index)`, `any_pin_changed()`, dan
+  `pin_count()`.
 - `node_voltage(index)` dan `voltage()` untuk link pertama.
 - `adc_voltage()`, `pwm_voltage()`, `uart_link()`, dan `uart_link_mut()`.
 - `timer0_overflow()`, `timer0_compare()`, dan
   `run_until_timer0_event(event, max_steps)`.
 - `take_event()` dan `event_count()` untuk queue event.
 - `run_until_pin_change(max_steps)`.
+
+`AvrPinMap` memetakan pin berdasarkan pasangan port dan bit untuk 3
+port x 8 bit. `add` menolak lokasi ganda atau di luar rentang, sedangkan
+`links` mengembalikan pin dalam urutan port dan bit. `with_pin_map`
+membangun session dari peta yang sudah tervalidasi.
 
 `PinLink` menghubungkan output digital ke sumber tegangan dan node
 analog. `PinInput` opsional membandingkan node analog dengan threshold
@@ -176,13 +183,26 @@ Test `pin_event_queue_records_level`:
 - Event `PinChanged` untuk index 0 dan level tinggi masuk queue.
 - Timestamp event lebih besar dari nol.
 
+Test `pin_map_tracks_one_pin_per_location`:
+
+- Satu lokasi port dan bit menyimpan satu pin.
+- Duplikat, port 3, dan bit 8 ditolak.
+- `get`, `remove`, `len`, dan `is_empty` konsisten.
+
+Test `avr_pin_map_links_all_io`:
+
+- Peta berisi 24 pin IO dari port B, C, dan D.
+- Urutan link dimulai dari port 0 bit 0 dan berakhir port 2 bit 7.
+- Session berjalan dengan 24 link pin.
+
 ## 5. Batas
 
 - Umpan balik analog hanya satu input dan satu threshold.
 - Satu tick digital sama dengan satu `dt` analog.
 - AvrSession dapat memakai beberapa link pin, satu link ADC, satu link
   PWM, dan satu link UART.
-- Belum ada pemetaan penuh 32 pin.
+- Pemetaan 24 pin IO model (3 port x 8 bit) tersedia.
+- Pin daya, reset, dan paket 32 pin penuh belum dipetakan.
 - Breakpoint pin berlaku untuk semua link yang terdaftar.
 - Queue event gabungan tersedia dengan resolusi satu langkah.
 - Interpolasi dan timestamp sub-langkah belum ada.
@@ -201,13 +221,14 @@ S7-09:
 - Urutan langkah deterministik.
 - Update sumber tanpa reset state analog.
 - Umpan balik analog ke digital lewat threshold.
-- Wrapper AVR hybrid dengan beberapa link pin.
+- Wrapper AVR hybrid dengan beberapa link pin dan peta 24 pin IO.
 - Thevenin pin input dan breakpoint perubahan pin.
 - ADC satu channel, PWM Timer0 channel A, dan UART byte-level.
 - Breakpoint event Timer0 untuk overflow dan compare.
 - Queue event gabungan untuk pin, Timer0, dan UART TX.
 - Test regresi untuk satu arah, loop feedback, dan bridge ADC/PWM/UART.
 
-S7-04 tetap hybrid, bukan full-chip structural. S7-05 baru mencakup
-link pin manual, bukan pemetaan 32 pin. S7-08 belum mencakup UART level
-garis; S7-09 belum mencakup interpolasi dan timestamp sub-langkah.
+S7-04 tetap hybrid, bukan full-chip structural. S7-05 sudah mencakup
+semua pin IO yang dimodelkan, tetapi belum pin daya, reset, atau paket
+32 pin penuh. S7-08 belum mencakup UART level garis; S7-09 belum
+mencakup interpolasi dan timestamp sub-langkah.

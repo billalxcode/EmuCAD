@@ -136,6 +136,92 @@ pub struct AvrPin {
     pub external_resistance: f64,
 }
 
+const AVR_PORT_COUNT: u8 = 3;
+const AVR_PORT_WIDTH: u8 = 8;
+
+/// Number of IO pins modeled by the AVR.
+pub const AVR_IO_PIN_COUNT: usize = AVR_PORT_COUNT as usize * AVR_PORT_WIDTH as usize;
+
+/// Pin-to-node map for all modeled AVR ports.
+#[derive(Clone, Copy)]
+pub struct AvrPinMap {
+    pins: [Option<AvrPin>; AVR_IO_PIN_COUNT],
+}
+
+impl Default for AvrPinMap {
+    fn default() -> Self {
+        Self {
+            pins: [None; AVR_IO_PIN_COUNT],
+        }
+    }
+}
+
+impl AvrPinMap {
+    /// Builds an empty pin map.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Adds one pin and rejects duplicate or invalid locations.
+    pub fn add(&mut self, pin: AvrPin) -> Result<(), SimError> {
+        let index = pin_index(pin.port, pin.bit)?;
+        if self.pins[index].is_some() {
+            return Err(SimError::InvalidNetlist(format!(
+                "AVR pin port {} bit {} already mapped",
+                pin.port, pin.bit
+            )));
+        }
+        self.pins[index] = Some(pin);
+        Ok(())
+    }
+
+    /// Returns the pin at one port and bit.
+    #[must_use]
+    pub fn get(&self, port: u8, bit: u8) -> Option<AvrPin> {
+        let index = pin_index(port, bit).ok()?;
+        self.pins[index]
+    }
+
+    /// Removes and returns the pin at one port and bit.
+    pub fn remove(&mut self, port: u8, bit: u8) -> Option<AvrPin> {
+        let index = pin_index(port, bit).ok()?;
+        self.pins[index].take()
+    }
+
+    /// Returns the number of mapped pins.
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.pins.iter().flatten().count()
+    }
+
+    /// Returns true when no pin is mapped.
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /// Returns mapped pins in port and bit order.
+    #[must_use]
+    pub fn links(&self) -> Vec<AvrPin> {
+        self.pins.iter().flatten().copied().collect()
+    }
+}
+
+fn pin_index(port: u8, bit: u8) -> Result<usize, SimError> {
+    if port >= AVR_PORT_COUNT {
+        return Err(SimError::InvalidNetlist(format!(
+            "AVR port out of range: {port}"
+        )));
+    }
+    if bit >= AVR_PORT_WIDTH {
+        return Err(SimError::InvalidNetlist(format!(
+            "AVR bit out of range: {bit}"
+        )));
+    }
+    Ok(usize::from(port) * usize::from(AVR_PORT_WIDTH) + usize::from(bit))
+}
+
 /// Analog node sampled by the AVR ADC.
 #[derive(Clone, Copy)]
 pub struct AdcLink {
@@ -286,6 +372,16 @@ impl AvrSession {
         pins: Vec<AvrPin>,
     ) -> Result<Self, SimError> {
         Self::with_links(program, circuit, config, pins, None, None)
+    }
+
+    /// Builds a session from a validated pin map.
+    pub fn with_pin_map(
+        program: Vec<u16>,
+        circuit: &Circuit,
+        config: &TransientConfig,
+        map: &AvrPinMap,
+    ) -> Result<Self, SimError> {
+        Self::with_pins(program, circuit, config, map.links())
     }
 
     /// Builds a session with pin, ADC, and PWM links.
@@ -553,6 +649,12 @@ impl AvrSession {
         self.pins.get(index).map(|pin| pin.level)
     }
 
+    /// Returns the number of mapped pins in the session.
+    #[must_use]
+    pub fn pin_count(&self) -> usize {
+        self.pins.len()
+    }
+
     /// Returns true when the indexed pin changed on the last step.
     #[must_use]
     pub fn pin_changed(&self, index: usize) -> Option<bool> {
@@ -641,8 +743,8 @@ fn pin_states(pins: Vec<AvrPin>) -> Vec<AvrPinState> {
 #[cfg(test)]
 mod tests {
     use super::{
-        AdcLink, AvrPin, AvrSession, CoSimEventKind, MixedSession, PinInput, PinLink, PwmLink,
-        Timer0Event, UartLink,
+        AVR_IO_PIN_COUNT, AdcLink, AvrPin, AvrPinMap, AvrSession, CoSimEventKind, MixedSession,
+        PinInput, PinLink, PwmLink, Timer0Event, UartLink,
     };
     use analysis::TransientConfig;
     use avr::PinElectricalConfig;
@@ -766,6 +868,39 @@ mod tests {
         let ground = builder.ground();
         add_source(&mut builder, "V1", output, ground, voltage);
         (builder.build().expect("circuit"), output)
+    }
+
+    fn multi_pin_circuit(count: usize) -> (Circuit, Vec<(DeviceId, NodeId)>) {
+        let mut builder = CircuitBuilder::new();
+        let ground = builder.ground();
+        let mut links = Vec::with_capacity(count);
+        for index in 0..count {
+            let node = builder.node(format!("p{index}")).expect("node");
+            let source = add_source(&mut builder, &format!("V{index}"), node, ground, 0.0);
+            links.push((source, node));
+        }
+        (builder.build().expect("circuit"), links)
+    }
+
+    fn test_pin(port: u8, bit: u8, link: (DeviceId, NodeId)) -> AvrPin {
+        AvrPin {
+            port,
+            bit,
+            source: link.0,
+            node: link.1,
+            config: PinElectricalConfig::default(),
+            external_resistance: 1000.0,
+        }
+    }
+
+    fn full_pin_map(links: &[(DeviceId, NodeId)]) -> AvrPinMap {
+        let mut map = AvrPinMap::new();
+        for (index, link) in links.iter().enumerate() {
+            let port = (index / 8) as u8;
+            let bit = (index % 8) as u8;
+            map.add(test_pin(port, bit, *link)).expect("pin");
+        }
+        map
     }
 
     fn clock_entry() -> DigitalEntry {
@@ -1084,6 +1219,42 @@ mod tests {
             }
         );
         assert!(event.time > kernel::Time::ZERO);
+    }
+
+    #[test]
+    fn pin_map_tracks_one_pin_per_location() {
+        let (_, links) = multi_pin_circuit(1);
+        let pin = test_pin(0, 5, links[0]);
+        let mut map = AvrPinMap::new();
+        assert!(map.is_empty());
+        map.add(pin).expect("add");
+        assert_eq!(map.len(), 1);
+        assert_eq!(map.get(0, 5).map(|value| value.bit), Some(5));
+        assert!(map.add(pin).is_err());
+        let mut invalid = pin;
+        invalid.port = 3;
+        assert!(map.add(invalid).is_err());
+        invalid.port = 0;
+        invalid.bit = 8;
+        assert!(map.add(invalid).is_err());
+        assert!(map.get(3, 0).is_none());
+        assert!(map.remove(0, 5).is_some());
+        assert!(map.is_empty());
+    }
+
+    #[test]
+    fn avr_pin_map_links_all_io() {
+        let (circuit, links) = multi_pin_circuit(AVR_IO_PIN_COUNT);
+        let map = full_pin_map(&links);
+        assert_eq!(map.len(), AVR_IO_PIN_COUNT);
+        let pins = map.links();
+        assert_eq!(pins.first().map(|pin| (pin.port, pin.bit)), Some((0, 0)));
+        assert_eq!(pins.last().map(|pin| (pin.port, pin.bit)), Some((2, 7)));
+        let mut session =
+            AvrSession::with_pin_map(blink_program(), &circuit, &config(1e-5, 1000), &map)
+                .expect("session");
+        session.step().expect("step");
+        assert_eq!(session.pin_count(), AVR_IO_PIN_COUNT);
     }
 
     #[test]
