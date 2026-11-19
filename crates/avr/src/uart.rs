@@ -3,10 +3,57 @@
 use std::collections::VecDeque;
 
 const TX_ENABLE: u8 = 1 << 3;
+const RX_ENABLE: u8 = 1 << 4;
 #[cfg(test)]
 const FRAME_BITS: u32 = 10;
 const NORMAL_MODE_FACTOR: u32 = 16;
 const DOUBLE_SPEED_FACTOR: u32 = 8;
+const NORMAL_SAMPLES: u32 = 16;
+const DOUBLE_SAMPLES: u32 = 8;
+
+#[derive(Clone, Copy, Default, PartialEq, Eq)]
+enum RxLineState {
+    #[default]
+    Idle,
+    Start,
+    Data,
+    Stop,
+}
+
+#[derive(Clone, Copy)]
+struct RxState {
+    data: u8,
+    rxc: bool,
+    active: bool,
+    shift: u8,
+    bits: u8,
+    line: bool,
+    line_active: bool,
+    line_elapsed: u32,
+    line_state: RxLineState,
+    line_timer: u32,
+    line_shift: u8,
+    line_bits: u8,
+}
+
+impl Default for RxState {
+    fn default() -> Self {
+        Self {
+            data: 0,
+            rxc: false,
+            active: false,
+            shift: 0,
+            bits: 0,
+            line: true,
+            line_active: false,
+            line_elapsed: 0,
+            line_state: RxLineState::Idle,
+            line_timer: 0,
+            line_shift: 0,
+            line_bits: 0,
+        }
+    }
+}
 
 /// Behavioral model of the AVR USART.
 pub struct Uart {
@@ -22,11 +69,7 @@ pub struct Uart {
     tx_queue: VecDeque<u8>,
     udre: bool,
     txc: bool,
-    rx_data: u8,
-    rxc: bool,
-    rx_active: bool,
-    rx_shift: u8,
-    rx_bits: u8,
+    rx: RxState,
 }
 
 impl Uart {
@@ -46,11 +89,7 @@ impl Uart {
             tx_queue: VecDeque::new(),
             udre: true,
             txc: false,
-            rx_data: 0,
-            rxc: false,
-            rx_active: false,
-            rx_shift: 0,
-            rx_bits: 0,
+            rx: RxState::default(),
         }
     }
 
@@ -89,52 +128,64 @@ impl Uart {
     /// Returns the last received byte without clearing RXC.
     #[must_use]
     pub const fn rx_byte(&self) -> u8 {
-        self.rx_data
+        self.rx.data
     }
 
     /// Returns the received byte and clears RXC.
     pub fn read_rx(&mut self) -> u8 {
-        let value = self.rx_data;
-        self.rxc = false;
+        let value = self.rx.data;
+        self.rx.rxc = false;
         value
     }
 
     /// Records an externally received byte and sets RXC.
     pub fn receive(&mut self, value: u8) {
-        self.rx_data = value;
-        self.rxc = true;
+        self.rx.data = value;
+        self.rx.rxc = true;
     }
 
     /// Shifts one received serial bit into the receiver.
     pub fn receive_bit(&mut self, level: bool) {
-        if !self.rx_active {
+        if !self.rx.active {
             self.start_rx(level);
             return;
         }
-        if self.rx_bits >= 8 {
+        if self.rx.bits >= 8 {
             return;
         }
         self.shift_rx(level);
+    }
+
+    /// Sets the sampled RX line level for timed 8N1 reception.
+    pub fn set_rx_line(&mut self, level: bool) {
+        self.rx.line = level;
+        self.rx.line_active = true;
+    }
+
+    /// Returns true when the timed RX line receiver is active.
+    #[must_use]
+    pub const fn rx_line_active(&self) -> bool {
+        self.rx.line_active
     }
 
     fn start_rx(&mut self, level: bool) {
         if level {
             return;
         }
-        self.rx_active = true;
-        self.rx_bits = 0;
-        self.rx_shift = 0;
+        self.rx.active = true;
+        self.rx.bits = 0;
+        self.rx.shift = 0;
     }
 
     fn shift_rx(&mut self, level: bool) {
         if level {
-            self.rx_shift |= 1 << self.rx_bits;
+            self.rx.shift |= 1 << self.rx.bits;
         }
-        self.rx_bits += 1;
-        if self.rx_bits == 8 {
-            self.rx_data = self.rx_shift;
-            self.rxc = true;
-            self.rx_active = false;
+        self.rx.bits += 1;
+        if self.rx.bits == 8 {
+            self.rx.data = self.rx.shift;
+            self.rx.rxc = true;
+            self.rx.active = false;
         }
     }
 
@@ -150,6 +201,7 @@ impl Uart {
             return;
         }
         self.advance_tx(cycles);
+        self.advance_rx_line(cycles);
     }
 
     /// Returns true when the TX data register is empty (UDRE).
@@ -178,7 +230,7 @@ impl Uart {
     /// Returns true when a received byte is available (RXC).
     #[must_use]
     pub fn rx_ready(&self) -> bool {
-        self.rxc
+        self.rx.rxc
     }
 
     /// Takes and clears TXC.
@@ -190,8 +242,8 @@ impl Uart {
 
     /// Takes and clears RXC.
     pub fn take_rx_ready(&mut self) -> bool {
-        let value = self.rxc;
-        self.rxc = false;
+        let value = self.rx.rxc;
+        self.rx.rxc = false;
         value
     }
 
@@ -209,6 +261,91 @@ impl Uart {
     #[must_use]
     pub fn tx_activity(&self) -> bool {
         self.tx_active
+    }
+
+    fn advance_rx_line(&mut self, cycles: u32) {
+        if !self.rx.line_active || self.ucsr_b & RX_ENABLE == 0 {
+            return;
+        }
+        let period = self.rx_sample_period();
+        self.rx.line_elapsed = self.rx.line_elapsed.saturating_add(cycles);
+        while self.rx.line_elapsed >= period {
+            self.rx.line_elapsed -= period;
+            self.sample_rx_line();
+        }
+    }
+
+    fn rx_sample_period(&self) -> u32 {
+        let samples = if self.ucsr_a & 0x02 != 0 {
+            DOUBLE_SAMPLES
+        } else {
+            NORMAL_SAMPLES
+        };
+        (self.cycles_per_bit() / samples).max(1)
+    }
+
+    fn sample_rx_line(&mut self) {
+        let samples = if self.ucsr_a & 0x02 != 0 {
+            DOUBLE_SAMPLES
+        } else {
+            NORMAL_SAMPLES
+        };
+        match self.rx.line_state {
+            RxLineState::Idle => self.rx_idle(),
+            RxLineState::Start => self.rx_start(samples),
+            RxLineState::Data => self.rx_line_data(samples),
+            RxLineState::Stop => self.rx_stop(samples),
+        }
+    }
+
+    fn rx_idle(&mut self) {
+        if self.rx.line {
+            return;
+        }
+        self.rx.line_state = RxLineState::Start;
+        self.rx.line_timer = 0;
+    }
+
+    fn rx_start(&mut self, samples: u32) {
+        self.rx.line_timer += 1;
+        if self.rx.line_timer < samples / 2 {
+            return;
+        }
+        if self.rx.line {
+            self.rx.line_state = RxLineState::Idle;
+            return;
+        }
+        self.rx.line_state = RxLineState::Data;
+        self.rx.line_timer = 0;
+        self.rx.line_bits = 0;
+        self.rx.line_shift = 0;
+    }
+
+    fn rx_line_data(&mut self, samples: u32) {
+        self.rx.line_timer += 1;
+        if self.rx.line_timer < samples {
+            return;
+        }
+        self.rx.line_timer = 0;
+        if self.rx.line {
+            self.rx.line_shift |= 1 << self.rx.line_bits;
+        }
+        self.rx.line_bits += 1;
+        if self.rx.line_bits == 8 {
+            self.rx.line_state = RxLineState::Stop;
+        }
+    }
+
+    fn rx_stop(&mut self, samples: u32) {
+        self.rx.line_timer += 1;
+        if self.rx.line_timer < samples {
+            return;
+        }
+        if self.rx.line {
+            self.rx.data = self.rx.line_shift;
+            self.rx.rxc = true;
+        }
+        self.rx.line_state = RxLineState::Idle;
     }
 
     fn advance_tx(&mut self, cycles: u32) {
@@ -467,5 +604,21 @@ mod tests {
         assert!(uart.tx_activity());
         uart.tick(1);
         assert!(!uart.tx_activity());
+    }
+    #[test]
+    fn line_receiver_decodes_8n1_frame() {
+        let mut uart = enabled_uart();
+        uart.set_rx_line(true);
+        uart.tick(NORMAL_MODE_FACTOR);
+        uart.set_rx_line(false);
+        uart.tick(NORMAL_MODE_FACTOR);
+        for bit in 0..8 {
+            uart.set_rx_line((0x5A >> bit) & 1 != 0);
+            uart.tick(NORMAL_MODE_FACTOR);
+        }
+        uart.set_rx_line(true);
+        uart.tick(NORMAL_MODE_FACTOR);
+        assert!(uart.rx_ready());
+        assert_eq!(uart.read_rx(), 0x5A);
     }
 }

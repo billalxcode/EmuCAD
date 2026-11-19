@@ -116,6 +116,7 @@ impl Cpu {
 
     fn serial_busy(&self) -> bool {
         self.datapath.uart.tx_active()
+            || self.datapath.uart.rx_line_active()
             || self.datapath.serial.spi.busy()
             || self.datapath.serial.twi.busy()
             || self.datapath.serial.adc.busy()

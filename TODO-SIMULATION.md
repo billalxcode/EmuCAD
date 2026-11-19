@@ -475,6 +475,7 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Sumber PWM ganda dan tegangan tidak finite ditolak.
   - `UartLink` mengirim byte TX ke buffer eksternal dan menerima byte RX.
   - `UartTxLink` menggerakkan sumber analog dari garis TX UART.
+  - `UartRxLink` menerima frame 8N1 dari node analog.
   - `run_until_timer0_event` menyediakan breakpoint overflow dan compare.
   - `AdcConversion` mencatat channel dan kode hasil konversi.
   - UART level garis dan queue event gabungan belum.

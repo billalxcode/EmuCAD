@@ -327,11 +327,35 @@ pub struct UartTxLink {
     pub low: f64,
 }
 
-#[derive(Default)]
+/// Analog node sampled as the AVR UART RX line.
+#[derive(Clone, Copy)]
+pub struct UartRxLink {
+    /// Analog node sampled for the RX line.
+    pub node: NodeId,
+    /// Voltage threshold for a high line.
+    pub threshold: f64,
+}
+
 struct UartState {
     link: Option<UartLink>,
     tx: Option<UartTxLink>,
     tx_voltage: f64,
+    rx: Option<UartRxLink>,
+    rx_level: bool,
+    rx_voltage: f64,
+}
+
+impl Default for UartState {
+    fn default() -> Self {
+        Self {
+            link: None,
+            tx: None,
+            tx_voltage: 0.0,
+            rx: None,
+            rx_level: true,
+            rx_voltage: 0.0,
+        }
+    }
 }
 
 impl UartLink {
@@ -506,16 +530,21 @@ impl AvrSession {
         Ok(self)
     }
 
+    /// Attaches an analog node to the AVR UART RX line.
+    pub fn with_uart_rx(mut self, link: UartRxLink) -> Result<Self, SimError> {
+        if !link.threshold.is_finite() || link.threshold <= 0.0 {
+            return Err(SimError::InvalidNetlist(
+                "UART RX threshold must be positive".to_string(),
+            ));
+        }
+        self.uart_state.rx = Some(link);
+        self.uart_state.rx_level = true;
+        Ok(self)
+    }
+
     /// Steps one AVR instruction and one analog step.
     pub fn step(&mut self) -> Result<Option<AvrTrace>, SimError> {
-        self.apply_adcs();
-        self.apply_uart_rx();
-        self.apply_inputs()?;
-        let trace = self.cpu.step()?;
-        self.update_timer0_events();
-        self.record_timer0_events();
-        self.drain_uart_tx();
-        self.record_adc_conversions();
+        let trace = self.step_cpu()?;
         let driven = self.drive_sources()?;
         self.drive_uart_tx()?;
         self.drive_pwms()?;
@@ -524,10 +553,27 @@ impl AvrSession {
         self.update_adcs(&sample);
         self.update_pwms(&sample);
         self.update_uart_tx(&sample);
+        self.update_uart_rx_line(&sample);
+        Ok(trace)
+    }
+
+    fn step_cpu(&mut self) -> Result<Option<AvrTrace>, SimError> {
+        self.apply_adcs();
+        self.apply_uart_rx();
+        self.apply_uart_rx_line();
+        self.apply_inputs()?;
+        let trace = self.cpu.step()?;
+        self.update_timer0_events();
+        self.record_timer0_events();
+        self.drain_uart_tx();
+        self.record_adc_conversions();
         Ok(trace)
     }
 
     fn apply_uart_rx(&mut self) {
+        if self.uart_state.rx.is_some() {
+            return;
+        }
         let Some(value) = self.pending_uart_rx() else {
             return;
         };
@@ -545,6 +591,13 @@ impl AvrSession {
             .link
             .as_ref()
             .and_then(|link| link.rx.front().copied())
+    }
+
+    fn apply_uart_rx_line(&mut self) {
+        if self.uart_state.rx.is_none() {
+            return;
+        }
+        self.cpu.uart().set_rx_line(self.uart_state.rx_level);
     }
 
     fn drain_uart_tx(&mut self) {
@@ -692,6 +745,15 @@ impl AvrSession {
         self.uart_state.tx_voltage = sample.solution.voltage(link.node).unwrap_or(0.0);
     }
 
+    fn update_uart_rx_line(&mut self, sample: &analysis::TransientSample) {
+        let Some(link) = self.uart_state.rx else {
+            return;
+        };
+        let voltage = sample.solution.voltage(link.node).unwrap_or(0.0);
+        self.uart_state.rx_voltage = voltage;
+        self.uart_state.rx_level = voltage >= link.threshold;
+    }
+
     /// Returns the first ADC node voltage.
     #[must_use]
     pub fn adc_voltage(&self) -> Option<f64> {
@@ -731,6 +793,12 @@ impl AvrSession {
     #[must_use]
     pub fn uart_tx_voltage(&self) -> Option<f64> {
         self.uart_state.tx.map(|_| self.uart_state.tx_voltage)
+    }
+
+    /// Returns the last UART RX analog node voltage.
+    #[must_use]
+    pub fn uart_rx_voltage(&self) -> Option<f64> {
+        self.uart_state.rx.map(|_| self.uart_state.rx_voltage)
     }
 
     fn apply_inputs(&mut self) -> Result<(), SimError> {
@@ -941,7 +1009,7 @@ fn pin_states(pins: Vec<AvrPin>) -> Vec<AvrPinState> {
 mod tests {
     use super::{
         AVR_IO_PIN_COUNT, AdcLink, AvrPin, AvrPinMap, AvrSession, CoSimEventKind, MixedSession,
-        PinInput, PinLink, PwmLink, Timer0Event, UartLink, UartTxLink,
+        PinInput, PinLink, PwmLink, Timer0Event, UartLink, UartRxLink, UartTxLink,
     };
     use analysis::TransientConfig;
     use avr::PinElectricalConfig;
@@ -1494,6 +1562,43 @@ mod tests {
         let (low, high) = run_uart_tx(&mut session, 100);
         assert!(low < 1.0, "low={low}");
         assert!(high > 4.0, "high={high}");
+    }
+
+    #[test]
+    fn uart_tx_line_loops_back_to_rx() {
+        let mut session = uart_loop_session();
+        session.cpu_mut().uart().write_control(1, 0x18);
+        session.cpu_mut().uart().write_tx(0x5A);
+        assert_eq!(receive_uart(&mut session, 400), Some(0x5A));
+    }
+
+    fn uart_loop_session() -> AvrSession {
+        let (circuit, tx_source, tx_node, pin_source, pin_node) = uart_tx_circuit();
+        let pin = test_pin(0, 5, (pin_source, pin_node));
+        AvrSession::new(vec![0xCFFF], &circuit, &config(1e-5, 1000), pin)
+            .expect("session")
+            .with_uart_tx(UartTxLink {
+                source: tx_source,
+                node: tx_node,
+                high: 5.0,
+                low: 0.0,
+            })
+            .expect("uart tx")
+            .with_uart_rx(UartRxLink {
+                node: tx_node,
+                threshold: 2.5,
+            })
+            .expect("uart rx")
+    }
+
+    fn receive_uart(session: &mut AvrSession, steps: usize) -> Option<u8> {
+        for _ in 0..steps {
+            session.step().expect("step");
+            if session.cpu_mut().uart().rx_ready() {
+                return Some(session.cpu_mut().uart().read_rx());
+            }
+        }
+        None
     }
 
     fn run_uart_tx(session: &mut AvrSession, steps: usize) -> (f64, f64) {
