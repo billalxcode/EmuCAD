@@ -17,6 +17,7 @@ enum RxLineState {
     Idle,
     Start,
     Data,
+    Parity,
     Stop,
 }
 
@@ -34,6 +35,8 @@ struct RxState {
     line_timer: u32,
     line_shift: u8,
     line_bits: u8,
+    line_ones: u8,
+    line_parity_ok: bool,
     count: u32,
 }
 
@@ -52,6 +55,8 @@ impl Default for RxState {
             line_timer: 0,
             line_shift: 0,
             line_bits: 0,
+            line_ones: 0,
+            line_parity_ok: true,
             count: 0,
         }
     }
@@ -266,7 +271,37 @@ impl Uart {
             return true;
         }
         let position = self.tx_elapsed / self.tx_bit_cycles;
-        frame_level(position, self.tx_data)
+        self.tx_level(position)
+    }
+
+    fn tx_level(&self, position: u32) -> bool {
+        if position == 0 {
+            return false;
+        }
+        let data_bits = self.data_bits();
+        if position <= 8 && position <= data_bits {
+            return (self.tx_data >> (position - 1)) & 1 != 0;
+        }
+        if self.parity_enabled() && position == data_bits + 1 {
+            return self.tx_parity();
+        }
+        true
+    }
+
+    fn parity_enabled(&self) -> bool {
+        self.ucsr_c & 0x30 != 0
+    }
+
+    fn parity_value(&self, ones: u32) -> bool {
+        let odd = self.ucsr_c & 0x30 == 0x30;
+        if odd { ones % 2 == 0 } else { ones % 2 == 1 }
+    }
+
+    fn tx_parity(&self) -> bool {
+        let ones = (0..self.data_bits().min(8))
+            .filter(|bit| (self.tx_data >> bit) & 1 != 0)
+            .count() as u32;
+        self.parity_value(ones)
     }
 
     /// Returns true while a frame is being shifted out.
@@ -306,6 +341,7 @@ impl Uart {
             RxLineState::Idle => self.rx_idle(),
             RxLineState::Start => self.rx_start(samples),
             RxLineState::Data => self.rx_line_data(samples),
+            RxLineState::Parity => self.rx_line_parity(samples),
             RxLineState::Stop => self.rx_stop(samples),
         }
     }
@@ -331,6 +367,8 @@ impl Uart {
         self.rx.line_timer = 0;
         self.rx.line_bits = 0;
         self.rx.line_shift = 0;
+        self.rx.line_ones = 0;
+        self.rx.line_parity_ok = true;
     }
 
     fn rx_line_data(&mut self, samples: u32) {
@@ -341,11 +379,26 @@ impl Uart {
         self.rx.line_timer = 0;
         if self.rx.line {
             self.rx.line_shift |= 1 << self.rx.line_bits;
+            self.rx.line_ones ^= 1;
         }
         self.rx.line_bits += 1;
-        if self.rx.line_bits == 8 {
-            self.rx.line_state = RxLineState::Stop;
+        if self.rx.line_bits == self.data_bits().min(8) as u8 {
+            self.rx.line_state = if self.parity_enabled() {
+                RxLineState::Parity
+            } else {
+                RxLineState::Stop
+            };
         }
+    }
+
+    fn rx_line_parity(&mut self, samples: u32) {
+        self.rx.line_timer += 1;
+        if self.rx.line_timer < samples {
+            return;
+        }
+        self.rx.line_timer = 0;
+        self.rx.line_parity_ok = self.rx.line == self.parity_value(u32::from(self.rx.line_ones));
+        self.rx.line_state = RxLineState::Stop;
     }
 
     fn rx_stop(&mut self, samples: u32) {
@@ -353,7 +406,7 @@ impl Uart {
         if self.rx.line_timer < samples {
             return;
         }
-        if self.rx.line {
+        if self.rx.line && self.rx.line_parity_ok {
             self.complete_rx(self.rx.line_shift);
         }
         self.rx.line_state = RxLineState::Idle;
@@ -413,16 +466,6 @@ impl Default for Uart {
     fn default() -> Self {
         Self::new()
     }
-}
-
-fn frame_level(position: u32, data: u8) -> bool {
-    if position == 0 {
-        return false;
-    }
-    if position >= 9 {
-        return true;
-    }
-    (data >> (position - 1)) & 1 != 0
 }
 
 #[cfg(test)]
@@ -616,6 +659,43 @@ mod tests {
         uart.tick(1);
         assert!(!uart.tx_activity());
     }
+    #[test]
+    fn parity_bit_is_transmitted_in_even_mode() {
+        let mut uart = enabled_uart();
+        uart.write_control(2, 0x26);
+        uart.write_tx(0x01);
+        uart.tick(NORMAL_MODE_FACTOR * 9);
+        assert!(uart.tx_line());
+        uart.tick(NORMAL_MODE_FACTOR * 2);
+        uart.write_tx(0x03);
+        uart.tick(NORMAL_MODE_FACTOR * 9);
+        assert!(!uart.tx_line());
+    }
+
+    #[test]
+    fn line_receiver_checks_even_parity() {
+        let mut uart = enabled_uart();
+        uart.write_control(2, 0x26);
+        send_line_frame(&mut uart, 0x01, true);
+        assert!(uart.rx_ready());
+        assert_eq!(uart.read_rx(), 0x01);
+        send_line_frame(&mut uart, 0x01, false);
+        assert!(!uart.rx_ready());
+    }
+
+    fn send_line_frame(uart: &mut Uart, value: u8, parity: bool) {
+        uart.set_rx_line(false);
+        uart.tick(NORMAL_MODE_FACTOR);
+        for bit in 0..8 {
+            uart.set_rx_line((value >> bit) & 1 != 0);
+            uart.tick(NORMAL_MODE_FACTOR);
+        }
+        uart.set_rx_line(parity);
+        uart.tick(NORMAL_MODE_FACTOR);
+        uart.set_rx_line(true);
+        uart.tick(NORMAL_MODE_FACTOR);
+    }
+
     #[test]
     fn line_receiver_decodes_8n1_frame() {
         let mut uart = enabled_uart();

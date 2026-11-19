@@ -79,8 +79,9 @@ UART.
 
 `UartRxLink` mengambil satu node analog dengan threshold dan
 mengumpankannya ke receiver 8N1 bertiming. Sampling memakai 16x clock
-normal atau 8x saat double speed. Buffer byte `UartLink` tetap tersedia
-untuk jalur RX byte-level.
+normal atau 8x saat double speed. Delapan data bit dan parity even/odd
+mengikuti UCSR0C. Buffer byte `UartLink` tetap tersedia untuk jalur RX
+byte-level.
 
 `Timer0Event` memilih `Overflow` atau `Compare`. Timer0 menyimpan
 counter event monotonik sejak konstruksi. `AvrSession` mengambil selisih
@@ -222,6 +223,17 @@ Test `uart_tx_line_loops_back_to_rx`:
 - Receiver menyelesaikan frame dalam batas langkah.
 - Event `UartRx(0x5A)` tercatat di queue.
 
+Test `parity_bit_is_transmitted_in_even_mode`:
+
+- UCSR0C memakai even parity.
+- Byte dengan satu bit tinggi mengirim parity 1.
+- Byte dengan dua bit tinggi mengirim parity 0.
+
+Test `line_receiver_checks_even_parity`:
+
+- Frame dengan parity benar diterima.
+- Frame dengan parity salah tidak menyalakan RXC.
+
 Test `timer0_compare_event_stops_session`:
 
 - Timer0 CTC compare 4 dengan clock clk/1.
@@ -278,8 +290,8 @@ Test `avr_pin_map_links_all_io`:
 - AVR masih hybrid, bukan full-chip structural.
 - Hanya sumber tegangan yang dapat diubah.
 - PWM baru mencakup Timer0 channel A.
-- UART level garis memakai frame 8N1; parity, 9-bit, dan flow control
-  belum.
+- UART level garis mendukung 8 data bit dan parity even/odd.
+- Frame 9 data bit, parity 9-bit, dan flow control belum.
 - Buffer RX byte-level menahan byte berikutnya selama RXC masih set.
 
 ## 6. Hubungan dengan S7
@@ -301,5 +313,5 @@ S7-09:
 
 S7-04 tetap hybrid, bukan full-chip structural. S7-05 sudah mencakup
 semua pin IO yang dimodelkan, tetapi belum pin daya, reset, atau paket
-32 pin penuh. S7-08 belum mencakup UART level garis; S7-09 belum
-mencakup interpolasi dan timestamp sub-langkah.
+32 pin penuh. S7-08 belum mencakup UART 9-bit dan flow control; S7-09
+belum mencakup interpolasi dan timestamp sub-langkah.
