@@ -185,6 +185,35 @@ struct Timer0EventState {
     compare_count: u32,
 }
 
+/// One deterministic co-simulation event.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct CoSimEvent {
+    /// CPU cycles completed when the event was observed.
+    pub cycles: u64,
+    /// Analog time when the event was observed.
+    pub time: Time,
+    /// Event payload.
+    pub kind: CoSimEventKind,
+}
+
+/// Kind of event recorded by an AVR session.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CoSimEventKind {
+    /// One AVR pin changed level.
+    PinChanged {
+        /// Index in the session pin list.
+        index: usize,
+        /// New digital level.
+        level: bool,
+    },
+    /// Timer0 wrapped from 0xFF to 0x00.
+    Timer0Overflow,
+    /// Timer0 matched its compare value.
+    Timer0Compare,
+    /// A UART frame completed with one byte.
+    UartTx(u8),
+}
+
 impl UartLink {
     /// Builds an empty UART link.
     #[must_use]
@@ -235,6 +264,7 @@ pub struct AvrSession {
     adc_voltage: f64,
     pwm_voltage: f64,
     timer0_events: Timer0EventState,
+    events: VecDeque<CoSimEvent>,
 }
 
 impl AvrSession {
@@ -290,6 +320,7 @@ impl AvrSession {
             adc_voltage: 0.0,
             pwm_voltage: 0.0,
             timer0_events: Timer0EventState::default(),
+            events: VecDeque::new(),
         }
     }
 
@@ -306,8 +337,9 @@ impl AvrSession {
         self.apply_uart_rx();
         self.apply_inputs()?;
         let trace = self.cpu.step()?;
-        self.drain_uart_tx();
         self.update_timer0_events();
+        self.record_timer0_events();
+        self.drain_uart_tx();
         let driven = self.drive_sources()?;
         self.drive_pwm()?;
         let sample = self.analog.step()?;
@@ -342,7 +374,25 @@ impl AvrSession {
             if let Some(link) = self.uart.as_mut() {
                 link.tx.push_back(value);
             }
+            self.push_event(CoSimEventKind::UartTx(value));
         }
+    }
+
+    fn record_timer0_events(&mut self) {
+        if self.timer0_events.overflow {
+            self.push_event(CoSimEventKind::Timer0Overflow);
+        }
+        if self.timer0_events.compare {
+            self.push_event(CoSimEventKind::Timer0Compare);
+        }
+    }
+
+    fn push_event(&mut self, kind: CoSimEventKind) {
+        self.events.push_back(CoSimEvent {
+            cycles: self.cpu.cycles(),
+            time: self.analog.time(),
+            kind,
+        });
     }
 
     fn update_timer0_events(&mut self) {
@@ -367,6 +417,17 @@ impl AvrSession {
     #[must_use]
     pub fn timer0_compare(&self) -> bool {
         self.timer0_events.compare
+    }
+
+    /// Takes the oldest queued co-simulation event.
+    pub fn take_event(&mut self) -> Option<CoSimEvent> {
+        self.events.pop_front()
+    }
+
+    /// Returns the number of queued co-simulation events.
+    #[must_use]
+    pub fn event_count(&self) -> usize {
+        self.events.len()
     }
 
     /// Runs until the requested Timer0 event or the step limit is reached.
@@ -476,9 +537,13 @@ impl AvrSession {
             let voltage = sample.solution.voltage(link.node).unwrap_or(0.0);
             let level = *value >= link.config.input_threshold;
             let state = &mut self.pins[index];
-            state.changed = level != state.level;
+            let changed = level != state.level;
+            state.changed = changed;
             state.level = level;
             state.voltage = voltage;
+            if changed {
+                self.push_event(CoSimEventKind::PinChanged { index, level });
+            }
         }
     }
 
@@ -576,8 +641,8 @@ fn pin_states(pins: Vec<AvrPin>) -> Vec<AvrPinState> {
 #[cfg(test)]
 mod tests {
     use super::{
-        AdcLink, AvrPin, AvrSession, MixedSession, PinInput, PinLink, PwmLink, Timer0Event,
-        UartLink,
+        AdcLink, AvrPin, AvrSession, CoSimEventKind, MixedSession, PinInput, PinLink, PwmLink,
+        Timer0Event, UartLink,
     };
     use analysis::TransientConfig;
     use avr::PinElectricalConfig;
@@ -931,6 +996,9 @@ mod tests {
         assert_eq!(link.take_tx(), Some(0x41));
         assert_eq!(link.tx_len(), 0);
         assert_eq!(link.take_tx(), None);
+        let event = session.take_event().expect("uart event");
+        assert_eq!(event.kind, CoSimEventKind::UartTx(0x41));
+        assert_eq!(event.cycles, 160);
     }
 
     #[test]
@@ -986,6 +1054,36 @@ mod tests {
         assert!(trace.expect("run").is_some());
         assert_eq!(session.cpu().cycles(), 256);
         assert!(session.timer0_overflow());
+    }
+
+    #[test]
+    fn timer0_event_queue_records_time_and_cycles() {
+        let mut session = pin_session(vec![0xCFFF]);
+        configure_timer0(&mut session, 4);
+        session.cpu_mut().timer0().set_ctc(true);
+        let trace = session.run_until_timer0_event(Timer0Event::Compare, 10);
+        assert!(trace.expect("run").is_some());
+        assert_eq!(session.event_count(), 1);
+        let event = session.take_event().expect("event");
+        assert_eq!(event.kind, CoSimEventKind::Timer0Compare);
+        assert_eq!(event.cycles, 4);
+        assert_eq!(event.time.as_ps(), 10_000_000);
+        assert_eq!(session.event_count(), 0);
+    }
+
+    #[test]
+    fn pin_event_queue_records_level() {
+        let mut session = pin_session(blink_program());
+        assert!(session.run_until_pin_change(5000).expect("run").is_some());
+        let event = session.take_event().expect("event");
+        assert_eq!(
+            event.kind,
+            CoSimEventKind::PinChanged {
+                index: 0,
+                level: true
+            }
+        );
+        assert!(event.time > kernel::Time::ZERO);
     }
 
     #[test]

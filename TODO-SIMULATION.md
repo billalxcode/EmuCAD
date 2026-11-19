@@ -472,7 +472,8 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
 - [~] S7-09 Jaga determinisme urutan event.
   - Urutan digital ke analog dan analog ke digital diuji di `mixed`.
   - Breakpoint event Timer0 tersedia per langkah.
-  - Event queue gabungan dan interpolasi belum.
+  - Queue menggabungkan event pin, Timer0, dan UART TX.
+  - Interpolasi dan timestamp sub-langkah belum.
 - [x] S7-10 Test AVR + LED + resistor + voltage source.
   - Board test dan GUI simulation sudah mencakup LED, resistor, dan PB5.
 - [x] S7-11 Jalankan GPIO blink gate-level sebagai vertical slice.

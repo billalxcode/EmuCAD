@@ -35,6 +35,7 @@ Prototipe ini membuktikan urutan deterministik:
 - `adc_voltage()`, `pwm_voltage()`, `uart_link()`, dan `uart_link_mut()`.
 - `timer0_overflow()`, `timer0_compare()`, dan
   `run_until_timer0_event(event, max_steps)`.
+- `take_event()` dan `event_count()` untuk queue event.
 - `run_until_pin_change(max_steps)`.
 
 `PinLink` menghubungkan output digital ke sumber tegangan dan node
@@ -60,6 +61,11 @@ counter event monotonik sejak konstruksi. `AvrSession` mengambil selisih
 counter setelah setiap instruksi, sehingga event dapat dibaca tanpa
 mengambil flag yang dipakai firmware atau interupsi.
 
+`CoSimEvent` mencatat `kind`, `cycles`, dan `time`. Queue menggabungkan
+event pin, Timer0, dan UART TX. Event CPU memakai waktu analog awal
+langkah, sedangkan event pin memakai waktu akhir langkah. Pemanggil
+harus mengambil event secara berkala agar queue tidak tumbuh terus.
+
 `AvrSession` membungkus `avr::Cpu`, satu atau beberapa pin AVR, dan
 opsional satu link ADC, satu link PWM, serta satu link UART. Setiap
 langkah menjalankan satu instruksi AVR dan satu langkah transient
@@ -73,6 +79,7 @@ analog:
 - Byte RX dikirim ke USART sebelum instruksi CPU.
 - Byte TX yang selesai dikirim dikumpulkan setelah instruksi CPU.
 - Event Timer0 pada langkah tersebut dicatat tanpa menghapus flag model.
+- Event pin, Timer0, dan UART TX masuk queue dengan timestamp.
 
 Wrapper ini memakai core AVR hybrid, bukan full-chip structural.
 
@@ -137,6 +144,7 @@ Test `uart_transmit_reaches_external_link`:
 - USART diaktifkan dan satu byte dimuat ke transmitter.
 - Setelah frame selesai, `take_tx` mengembalikan byte tersebut.
 - Buffer TX kosong setelah byte diambil.
+- Event `UartTx(0x41)` tercatat pada 160 siklus CPU.
 
 Test `uart_receive_reaches_avr_register`:
 
@@ -156,6 +164,18 @@ Test `timer0_overflow_event_stops_session`:
 - Overflow terdeteksi pada 256 siklus CPU.
 - `timer0_overflow` true pada langkah berhenti.
 
+Test `timer0_event_queue_records_time_and_cycles`:
+
+- Timer0 CTC compare 4 pada clock clk/1.
+- Event `Timer0Compare` tercatat pada 4 siklus CPU.
+- Timestamp event sama dengan awal langkah kedua.
+
+Test `pin_event_queue_records_level`:
+
+- Program blink mengubah level PB5.
+- Event `PinChanged` untuk index 0 dan level tinggi masuk queue.
+- Timestamp event lebih besar dari nol.
+
 ## 5. Batas
 
 - Umpan balik analog hanya satu input dan satu threshold.
@@ -164,8 +184,8 @@ Test `timer0_overflow_event_stops_session`:
   PWM, dan satu link UART.
 - Belum ada pemetaan penuh 32 pin.
 - Breakpoint pin berlaku untuk semua link yang terdaftar.
-- Event timer tersedia per langkah; queue gabungan dan interpolasi
-  belum.
+- Queue event gabungan tersedia dengan resolusi satu langkah.
+- Interpolasi dan timestamp sub-langkah belum ada.
 - AVR masih hybrid, bukan full-chip structural.
 - Hanya sumber tegangan yang dapat diubah.
 - PWM baru mencakup Timer0 channel A.
@@ -185,8 +205,9 @@ S7-09:
 - Thevenin pin input dan breakpoint perubahan pin.
 - ADC satu channel, PWM Timer0 channel A, dan UART byte-level.
 - Breakpoint event Timer0 untuk overflow dan compare.
+- Queue event gabungan untuk pin, Timer0, dan UART TX.
 - Test regresi untuk satu arah, loop feedback, dan bridge ADC/PWM/UART.
 
 S7-04 tetap hybrid, bukan full-chip structural. S7-05 baru mencakup
 link pin manual, bukan pemetaan 32 pin. S7-08 belum mencakup UART level
-garis; S7-09 belum mencakup queue gabungan dan interpolasi.
+garis; S7-09 belum mencakup interpolasi dan timestamp sub-langkah.
