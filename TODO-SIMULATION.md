@@ -468,7 +468,8 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Satu pin GPIO AVR sudah terhubung ke RC analog lewat `mixed`.
   - `AdcLink` membaca node analog ke channel ADC; beberapa channel
     dapat aktif dalam satu session.
-  - `PwmLink` menggerakkan node analog dari Timer0 PWM channel A.
+  - `PwmLink` menggerakkan node analog dari Timer0 PWM channel A;
+    beberapa node dapat memakai output yang sama.
   - `UartLink` mengirim byte TX ke buffer eksternal dan menerima byte RX.
   - `run_until_timer0_event` menyediakan breakpoint overflow dan compare.
   - UART level garis dan queue event gabungan belum.

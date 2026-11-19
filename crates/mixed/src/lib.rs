@@ -345,10 +345,10 @@ pub struct AvrSession {
     analog: TransientSession,
     pins: Vec<AvrPinState>,
     adcs: Vec<AdcLink>,
-    pwm: Option<PwmLink>,
+    pwms: Vec<PwmLink>,
     uart: Option<UartLink>,
     adc_voltages: Vec<f64>,
-    pwm_voltage: f64,
+    pwm_voltages: Vec<f64>,
     timer0_events: Timer0EventState,
     events: VecDeque<CoSimEvent>,
 }
@@ -412,10 +412,29 @@ impl AvrSession {
         adcs: Vec<AdcLink>,
         pwm: Option<PwmLink>,
     ) -> Result<Self, SimError> {
-        validate_links(&pins, &adcs, pwm)?;
+        Self::with_pwm_links(
+            program,
+            circuit,
+            config,
+            pins,
+            adcs,
+            pwm.into_iter().collect(),
+        )
+    }
+
+    /// Builds a session with multiple ADC and PWM links.
+    pub fn with_pwm_links(
+        program: Vec<u16>,
+        circuit: &Circuit,
+        config: &TransientConfig,
+        pins: Vec<AvrPin>,
+        adcs: Vec<AdcLink>,
+        pwms: Vec<PwmLink>,
+    ) -> Result<Self, SimError> {
+        validate_links(&pins, &adcs, &pwms)?;
         let cpu = Cpu::new(program)?;
         let analog = TransientSession::new(circuit, config)?;
-        Ok(Self::assemble(cpu, analog, pins, adcs, pwm))
+        Ok(Self::assemble(cpu, analog, pins, adcs, pwms))
     }
 
     fn assemble(
@@ -423,7 +442,7 @@ impl AvrSession {
         analog: TransientSession,
         pins: Vec<AvrPin>,
         adcs: Vec<AdcLink>,
-        pwm: Option<PwmLink>,
+        pwms: Vec<PwmLink>,
     ) -> Self {
         Self {
             cpu,
@@ -431,9 +450,9 @@ impl AvrSession {
             pins: pin_states(pins),
             adc_voltages: vec![0.0; adcs.len()],
             adcs,
-            pwm,
+            pwm_voltages: vec![0.0; pwms.len()],
+            pwms,
             uart: None,
-            pwm_voltage: 0.0,
             timer0_events: Timer0EventState::default(),
             events: VecDeque::new(),
         }
@@ -456,11 +475,11 @@ impl AvrSession {
         self.record_timer0_events();
         self.drain_uart_tx();
         let driven = self.drive_sources()?;
-        self.drive_pwm()?;
+        self.drive_pwms()?;
         let sample = self.analog.step()?;
         self.update_pins(&driven, &sample);
         self.update_adcs(&sample);
-        self.update_pwm(&sample);
+        self.update_pwms(&sample);
         Ok(trace)
     }
 
@@ -574,12 +593,13 @@ impl AvrSession {
         }
     }
 
-    fn drive_pwm(&mut self) -> Result<(), SimError> {
-        let Some(pwm) = self.pwm else {
-            return Ok(());
-        };
-        let value = if self.cpu.pwm_a() { pwm.high } else { pwm.low };
-        self.analog.set_source_voltage(pwm.source, value)
+    fn drive_pwms(&mut self) -> Result<(), SimError> {
+        let high = self.cpu.pwm_a();
+        for link in &self.pwms {
+            let value = if high { link.high } else { link.low };
+            self.analog.set_source_voltage(link.source, value)?;
+        }
+        Ok(())
     }
 
     fn update_adcs(&mut self, sample: &analysis::TransientSample) {
@@ -588,11 +608,10 @@ impl AvrSession {
         }
     }
 
-    fn update_pwm(&mut self, sample: &analysis::TransientSample) {
-        let Some(pwm) = self.pwm else {
-            return;
-        };
-        self.pwm_voltage = sample.solution.voltage(pwm.node).unwrap_or(0.0);
+    fn update_pwms(&mut self, sample: &analysis::TransientSample) {
+        for (index, link) in self.pwms.iter().enumerate() {
+            self.pwm_voltages[index] = sample.solution.voltage(link.node).unwrap_or(0.0);
+        }
     }
 
     /// Returns the first ADC node voltage.
@@ -607,10 +626,16 @@ impl AvrSession {
         self.adc_voltages.get(index).copied()
     }
 
-    /// Returns the last PWM node voltage.
+    /// Returns the first PWM node voltage.
     #[must_use]
     pub fn pwm_voltage(&self) -> Option<f64> {
-        self.pwm.map(|_| self.pwm_voltage)
+        self.pwm_voltage_at(0)
+    }
+
+    /// Returns one PWM node voltage by link index.
+    #[must_use]
+    pub fn pwm_voltage_at(&self, index: usize) -> Option<f64> {
+        self.pwm_voltages.get(index).copied()
     }
 
     /// Returns the attached UART link.
@@ -739,8 +764,8 @@ fn adc_code(voltage: f64, reference: f64) -> u16 {
     (ratio * 1023.0).round() as u16
 }
 
-fn validate_links(pins: &[AvrPin], adcs: &[AdcLink], pwm: Option<PwmLink>) -> Result<(), SimError> {
-    if pins.is_empty() && adcs.is_empty() && pwm.is_none() {
+fn validate_links(pins: &[AvrPin], adcs: &[AdcLink], pwms: &[PwmLink]) -> Result<(), SimError> {
+    if pins.is_empty() && adcs.is_empty() && pwms.is_empty() {
         return Err(SimError::InvalidNetlist(
             "AVR session requires at least one link".to_string(),
         ));
@@ -1322,6 +1347,50 @@ mod tests {
         let (low, high) = run_pwm(&mut session, 800);
         assert!(low < 2.7, "low={low}");
         assert!(high > 2.3, "high={high}");
+    }
+
+    #[test]
+    fn timer_pwm_drives_multiple_analog_nodes() {
+        let (circuit, links) = dual_rc_circuit();
+        let mut session = AvrSession::with_pwm_links(
+            vec![0xCFFF],
+            &circuit,
+            &config(1e-5, 1000),
+            Vec::new(),
+            Vec::new(),
+            pwm_links(&links),
+        )
+        .expect("session");
+        configure_pwm(&mut session);
+        let (low, high) = run_pwm_links(&mut session, 800);
+        assert!(low < 2.7, "low={low}");
+        assert!(high > 2.3, "high={high}");
+    }
+
+    fn pwm_links(links: &[(DeviceId, NodeId)]) -> Vec<PwmLink> {
+        links
+            .iter()
+            .map(|(source, node)| PwmLink {
+                source: *source,
+                node: *node,
+                high: 5.0,
+                low: 0.0,
+            })
+            .collect()
+    }
+
+    fn run_pwm_links(session: &mut AvrSession, steps: usize) -> (f64, f64) {
+        let mut low = f64::INFINITY;
+        let mut high = f64::NEG_INFINITY;
+        for _ in 0..steps {
+            session.step().expect("step");
+            for index in 0..2 {
+                let voltage = session.pwm_voltage_at(index).unwrap_or(0.0);
+                low = low.min(voltage);
+                high = high.max(voltage);
+            }
+        }
+        (low, high)
     }
 
     fn pwm_session(resistance: f64, capacitance: f64) -> AvrSession {
