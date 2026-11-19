@@ -60,8 +60,8 @@ lalu menyimpannya sebagai input channel sebelum instruksi CPU berjalan.
 
 `PwmLink` memetakan output Timer0 PWM channel A ke sumber tegangan
 analog dan node pengamatan. Satu session dapat memakai beberapa link
-PWM. Nilai `high` dan `low` menentukan tegangan sumber saat PWM aktif
-atau tidak.
+PWM. Sumber harus unik, sedangkan nilai `high` dan `low` harus finite
+serta menentukan tegangan sumber saat PWM aktif atau tidak.
 
 `UartLink` adalah buffer byte eksternal untuk USART. `push_rx`
 mengantrekan byte untuk AVR, sedangkan `take_tx` mengambil byte yang
@@ -168,6 +168,11 @@ Test `timer_pwm_drives_multiple_analog_nodes`:
 - Satu output Timer0 menggerakkan dua jaringan RC.
 - Kedua node mengikuti level PWM yang sama.
 - Kedua node mencapai level rendah dan tinggi.
+
+Test `pwm_links_reject_duplicate_sources_and_invalid_voltage`:
+
+- Dua link dengan sumber yang sama ditolak.
+- Tegangan PWM tak hingga ditolak.
 
 Test `uart_transmit_reaches_external_link`:
 

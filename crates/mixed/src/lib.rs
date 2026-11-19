@@ -795,8 +795,33 @@ fn validate_adc_link(link: &AdcLink) -> Result<(), SimError> {
     Ok(())
 }
 
+fn validate_pwms(pwms: &[PwmLink]) -> Result<(), SimError> {
+    for (index, link) in pwms.iter().enumerate() {
+        validate_pwm_link(link)?;
+        if pwms[..index]
+            .iter()
+            .any(|other| other.source == link.source)
+        {
+            return Err(SimError::InvalidNetlist(
+                "PWM source already mapped".to_string(),
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn validate_pwm_link(link: &PwmLink) -> Result<(), SimError> {
+    if !link.high.is_finite() || !link.low.is_finite() {
+        return Err(SimError::InvalidNetlist(
+            "PWM voltage must be finite".to_string(),
+        ));
+    }
+    Ok(())
+}
+
 fn validate_links(pins: &[AvrPin], adcs: &[AdcLink], pwms: &[PwmLink]) -> Result<(), SimError> {
     validate_adcs(adcs)?;
+    validate_pwms(pwms)?;
     if pins.is_empty() && adcs.is_empty() && pwms.is_empty() {
         return Err(SimError::InvalidNetlist(
             "AVR session requires at least one link".to_string(),
@@ -1261,6 +1286,28 @@ mod tests {
             Vec::new(),
             adcs,
             Vec::new(),
+        )
+    }
+
+    #[test]
+    fn pwm_links_reject_duplicate_sources_and_invalid_voltage() {
+        let (circuit, links) = dual_rc_circuit();
+        let mut duplicate = pwm_links(&links);
+        duplicate[1].source = duplicate[0].source;
+        assert!(try_pwm_session(&circuit, duplicate).is_err());
+        let mut invalid = pwm_links(&links);
+        invalid[0].high = f64::INFINITY;
+        assert!(try_pwm_session(&circuit, invalid).is_err());
+    }
+
+    fn try_pwm_session(circuit: &Circuit, pwms: Vec<PwmLink>) -> Result<AvrSession, SimError> {
+        AvrSession::with_pwm_links(
+            vec![0xCFFF],
+            circuit,
+            &config(1e-5, 10),
+            Vec::new(),
+            Vec::new(),
+            pwms,
         )
     }
 

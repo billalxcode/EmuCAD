@@ -471,6 +471,7 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Channel ganda, channel di luar rentang, dan reference nol ditolak.
   - `PwmLink` menggerakkan node analog dari Timer0 PWM channel A;
     beberapa node dapat memakai output yang sama.
+  - Sumber PWM ganda dan tegangan tidak finite ditolak.
   - `UartLink` mengirim byte TX ke buffer eksternal dan menerima byte RX.
   - `run_until_timer0_event` menyediakan breakpoint overflow dan compare.
   - UART level garis dan queue event gabungan belum.
