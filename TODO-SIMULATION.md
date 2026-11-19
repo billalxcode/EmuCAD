@@ -4,6 +4,9 @@ Status: S1-S4 selesai; S0, S5, S6, S7, dan S8 sebagian. S6 sudah
 mencakup 12 dari 15 memory; MCU gate-level, protocol memory, dan
 co-sim S7 belum selesai.
 
+Snapshot 2026-11-20: 1154 test lulus, 10 crate, branch `dev` sudah
+di-push. `main` belum di-merge.
+
 Tujuan: membuat komponen di skematik GUI dapat disimulasikan dengan model
 fisika atau compact model yang terdokumentasi, bukan hanya AVR board.
 
@@ -445,12 +448,13 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Prototipe `mixed` menjalankan input threshold, satu tick digital,
     update sumber tegangan, lalu satu langkah transient analog.
   - Loop feedback digital-analog sudah diuji dengan inverter dan RC.
-  - AVR dan queue event penuh belum.
+  - Queue event dasar sudah ada; interpolasi dan event queue penuh
+    belum.
 - [~] S7-04 Buat wrapper AVR structural sebagai device digital.
   - Prototipe `AvrSession` menghubungkan pin AVR hybrid ke sumber
     tegangan dan node analog.
-  - Beberapa link pin, beberapa link ADC, satu link PWM, dan satu link
-    UART sudah diuji.
+  - Beberapa link pin, beberapa link ADC, beberapa link PWM, UART
+    TX/RX line-level, dan event queue sudah diuji.
   - Wrapper full-chip structural belum.
 - [~] S7-05 Petakan pin AVR ke node netlist.
   - Board simulation memetakan PB5 dan pin LED.
@@ -460,13 +464,15 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Pin daya, reset, dan paket 32 pin penuh belum.
 - [~] S7-06 Hubungkan pin electrical sebagai Thevenin.
   - Satu pin AVR output diuji dengan resistor seri 45 ohm menuju RC.
-  - Pemetaan Thevenin untuk semua pin belum.
+  - `AvrPinMap` membawa config dan external resistance per pin.
+  - Verifikasi elektrik untuk semua pin belum.
 - [~] S7-07 Tambahkan breakpoint saat pin berubah.
   - `run_until_pin_change` berhenti pada perubahan salah satu pin AVR.
   - `run_until_pin_voltage` berhenti saat node pin mencapai threshold.
   - `run_until_voltage` mendukung probe pin, ADC, dan PWM.
-  - Breakpoint untuk semua pin dan event queue belum.
-- [~] S7-08 Hubungkan ADC, PWM, timer, dan UART.
+  - Breakpoint pin, tegangan, dan event Timer0 tersedia; interpolasi
+    sub-langkah belum.
+- [x] S7-08 Hubungkan ADC, PWM, timer, dan UART.
   - Peripheral AVR sudah ada di `avr`.
   - Satu pin GPIO AVR sudah terhubung ke RC analog lewat `mixed`.
   - `AdcLink` membaca node analog ke channel ADC; beberapa channel
@@ -477,14 +483,14 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Sumber PWM ganda dan tegangan tidak finite ditolak.
   - `UartLink` mengirim byte TX ke buffer eksternal dan menerima byte RX.
   - `UartTxLink` menggerakkan sumber analog dari garis TX UART.
-  - `UartRxLink` menerima frame 8N1 dari node analog.
+  - `UartRxLink` menerima frame 5 sampai 9 data bit dari node analog.
   - Parity even/odd dan frame 5 sampai 9 data bit didukung.
   - Event `UartRx9` menandai byte dengan bit kesembilan.
   - Event `UartRx` mencatat byte yang diterima.
   - Edge PWM dan edge garis TX UART masuk ke queue event.
   - `run_until_timer0_event` menyediakan breakpoint overflow dan compare.
   - `AdcConversion` mencatat channel dan kode hasil konversi.
-  - UART level garis dan queue event gabungan belum.
+  - Flow control hardware tidak dimodelkan; integrasi board/GUI belum.
 - [~] S7-09 Jaga determinisme urutan event.
   - Urutan digital ke analog dan analog ke digital diuji di `mixed`.
   - Breakpoint event Timer0 tersedia per langkah.
@@ -590,3 +596,63 @@ dokumentasi menyebut batas fidelity.
 - [ ] Golden ngspice berjalan di CI container.
 - [ ] Hasil transient disimpan di JSON + file biner.
 - [ ] Dokumentasi fidelity diperbarui.
+
+## 16. Snapshot Progress - 2026-11-20
+
+Status ringkas:
+
+- 1154 test lulus, 0 gagal melalui
+  `bash .opencode/skills/clean-code/scripts/check.sh`.
+- 10 crate; crate simulasi zero external dependency.
+- `fmt`, clippy `-D warnings`, dan pengecekan ASCII lulus.
+- Branch `dev` sudah di-push; commit fitur terakhir `a35930d`.
+- `main` belum di-merge karena merge memicu workflow rilis.
+
+S7 yang sudah berjalan:
+
+- `AvrSession` mendukung link pin, peta 24 pin IO, beberapa ADC, beberapa
+  PWM, UART byte-level, UART TX/RX line-level, dan queue event.
+- ADC: konversi multi-channel, validasi channel/reference, dan event
+  `AdcConversion`.
+- PWM: satu output Timer0 channel A dapat menggerakkan beberapa node,
+  validasi source/tegangan, dan event `PwmEdge`.
+- UART: TX/RX line-level, 5 sampai 9 data bit, parity even/odd, TXB8,
+  `rx_ninth`, event `UartTx`, `UartTxEdge`, `UartRx`, dan `UartRx9`.
+- Breakpoint: `run_until_pin_change`, `run_until_pin_voltage`,
+  `run_until_voltage` untuk pin/ADC/PWM, dan
+  `run_until_timer0_event`.
+- Event: `CoSimEvent` membawa `cycles` dan `time`; tersedia
+  `take_event`, `event_count`, dan `drain_events`.
+
+Commit fitur terakhir:
+
+- `a35930d feat(avr): support 9-bit UART frames`
+- `72ab006 feat(mixed): probe pin ADC and PWM voltages`
+- `182feff feat(mixed): add pin voltage breakpoint`
+- `6095134 feat(avr): support UART parity frames`
+- `49287ab feat(mixed): record PWM and UART line edges`
+- `44e8180 feat(mixed): record UART receive events`
+- `aa284e5 feat(mixed): receive UART frames from analog line`
+- `1a85ffc feat(mixed): drive analog from UART TX line`
+- `55e8ff7 feat(mixed): record ADC conversion events`
+- `11cddb4 feat(mixed): validate AVR pin locations`
+- `d277dcf feat(mixed): validate PWM link configuration`
+- `8131727 feat(mixed): validate ADC link configuration`
+- `1901517 feat(mixed): support multiple PWM links`
+- `68dd90d feat(mixed): support multiple ADC links`
+- `e42c671 feat(mixed): map all AVR IO pins`
+
+Gap S7 yang masih terbuka:
+
+- S7-02 dan S7-04: kontrol dan peripheral belum full structural.
+- S7-05: pin daya, reset, dan paket 32 pin penuh belum dipetakan.
+- S7-06: verifikasi elektrik Thevenin untuk semua pin belum.
+- S7-09: timestamp event masih per langkah; interpolasi sub-langkah
+  belum.
+- Flow control hardware dan integrasi peta pin ke board/GUI belum.
+
+Prioritas berikutnya:
+
+1. Tentukan dan implementasikan resolusi waktu event sub-langkah.
+2. Integrasikan peta pin ke alur board dan GUI.
+3. Tambahkan verifikasi Thevenin untuk semua pin yang dipetakan.

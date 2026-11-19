@@ -158,7 +158,7 @@ Dokumen yang sering dipakai:
 | [`docs/58-gui-user-guide.md`](docs/58-gui-user-guide.md) | Panduan pengguna GUI |
 | [`docs/59-gui-golden.md`](docs/59-gui-golden.md) | Status dan prosedur golden RGBA GUI |
 | [`docs/60-component-catalog.md`](docs/60-component-catalog.md) | Katalog 500 komponen, akurasi, dan schema |
-| [`docs/90-mixed-signal.md`](docs/90-mixed-signal.md) | Scheduler co-sim satu arah digital ke analog |
+| [`docs/90-mixed-signal.md`](docs/90-mixed-signal.md) | Scheduler co-sim digital-analog dengan AVR, ADC, PWM, dan UART |
 | [`docs/61-design-system.md`](docs/61-design-system.md) | Design system GUI, font, warna, dan spacing |
 | [`TODO-COMPONENTS.md`](TODO-COMPONENTS.md) | Backlog katalog komponen dan Python builder |
 | [`TODO.md`](TODO.md) | Pekerjaan yang tersisa |
@@ -178,6 +178,8 @@ Sudah:
   `Serial.println("Hello World")` berjalan.
 - GUI egui untuk editing skematik, simulasi PB5, monitor UART TX,
   graph digital, minimap, dan export PNG.
+- Co-sim AVR hybrid dengan peta 24 pin IO, ADC multi-channel, PWM
+  multi-load, UART TX/RX line-level, dan queue event.
 - Library GUI memuat 6 komponen kurasi dan 500 entri katalog dengan 16 kategori, definisi pin, dan simbol SVG unik per entri.
 - Design system GUI berbasis Adobe Spectrum dengan font Source Sans 3 dan Source Code Pro, token warna dark/light, serta spacing yang konsisten.
 
