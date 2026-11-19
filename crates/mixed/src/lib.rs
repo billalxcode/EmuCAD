@@ -819,7 +819,15 @@ fn validate_pwm_link(link: &PwmLink) -> Result<(), SimError> {
     Ok(())
 }
 
+fn validate_pins(pins: &[AvrPin]) -> Result<(), SimError> {
+    for pin in pins {
+        pin_index(pin.port, pin.bit)?;
+    }
+    Ok(())
+}
+
 fn validate_links(pins: &[AvrPin], adcs: &[AdcLink], pwms: &[PwmLink]) -> Result<(), SimError> {
+    validate_pins(pins)?;
     validate_adcs(adcs)?;
     validate_pwms(pwms)?;
     if pins.is_empty() && adcs.is_empty() && pwms.is_empty() {
@@ -1298,6 +1306,21 @@ mod tests {
         let mut invalid = pwm_links(&links);
         invalid[0].high = f64::INFINITY;
         assert!(try_pwm_session(&circuit, invalid).is_err());
+    }
+
+    #[test]
+    fn pins_reject_invalid_locations() {
+        let (circuit, links) = multi_pin_circuit(1);
+        let mut invalid = test_pin(0, 5, links[0]);
+        invalid.port = 3;
+        assert!(try_pin_session(&circuit, vec![invalid]).is_err());
+        invalid.port = 0;
+        invalid.bit = 8;
+        assert!(try_pin_session(&circuit, vec![invalid]).is_err());
+    }
+
+    fn try_pin_session(circuit: &Circuit, pins: Vec<AvrPin>) -> Result<AvrSession, SimError> {
+        AvrSession::with_pins(vec![0xCFFF], circuit, &config(1e-5, 10), pins)
     }
 
     fn try_pwm_session(circuit: &Circuit, pwms: Vec<PwmLink>) -> Result<AvrSession, SimError> {

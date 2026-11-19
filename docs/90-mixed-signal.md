@@ -46,7 +46,8 @@ Prototipe ini membuktikan urutan deterministik:
 `AvrPinMap` memetakan pin berdasarkan pasangan port dan bit untuk 3
 port x 8 bit. `add` menolak lokasi ganda atau di luar rentang, sedangkan
 `links` mengembalikan pin dalam urutan port dan bit. `with_pin_map`
-membangun session dari peta yang sudah tervalidasi.
+membangun session dari peta yang sudah tervalidasi. Link pin langsung
+juga divalidasi untuk port 0..2 dan bit 0..7.
 
 `PinLink` menghubungkan output digital ke sumber tegangan dan node
 analog. `PinInput` opsional membandingkan node analog dengan threshold
@@ -216,6 +217,11 @@ Test `pin_map_tracks_one_pin_per_location`:
 - Satu lokasi port dan bit menyimpan satu pin.
 - Duplikat, port 3, dan bit 8 ditolak.
 - `get`, `remove`, `len`, dan `is_empty` konsisten.
+
+Test `pins_reject_invalid_locations`:
+
+- Link pin dengan port 3 ditolak.
+- Link pin dengan bit 8 ditolak.
 
 Test `avr_pin_map_links_all_io`:
 

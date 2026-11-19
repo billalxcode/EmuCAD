@@ -456,6 +456,7 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Board simulation memetakan PB5 dan pin LED.
   - `AvrPinMap` memetakan 3 port x 8 bit dan menolak duplikat.
   - `AvrSession::with_pin_map` membangun session dari peta.
+  - Link pin langsung divalidasi untuk rentang port dan bit.
   - Pin daya, reset, dan paket 32 pin penuh belum.
 - [~] S7-06 Hubungkan pin electrical sebagai Thevenin.
   - Satu pin AVR output diuji dengan resistor seri 45 ohm menuju RC.
