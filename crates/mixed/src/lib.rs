@@ -344,10 +344,10 @@ pub struct AvrSession {
     cpu: Cpu,
     analog: TransientSession,
     pins: Vec<AvrPinState>,
-    adc: Option<AdcLink>,
+    adcs: Vec<AdcLink>,
     pwm: Option<PwmLink>,
     uart: Option<UartLink>,
-    adc_voltage: f64,
+    adc_voltages: Vec<f64>,
     pwm_voltage: f64,
     timer0_events: Timer0EventState,
     events: VecDeque<CoSimEvent>,
@@ -393,27 +393,46 @@ impl AvrSession {
         adc: Option<AdcLink>,
         pwm: Option<PwmLink>,
     ) -> Result<Self, SimError> {
-        validate_links(&pins, adc, pwm)?;
+        Self::with_bridges(
+            program,
+            circuit,
+            config,
+            pins,
+            adc.into_iter().collect(),
+            pwm,
+        )
+    }
+
+    /// Builds a session with multiple ADC links and an optional PWM link.
+    pub fn with_bridges(
+        program: Vec<u16>,
+        circuit: &Circuit,
+        config: &TransientConfig,
+        pins: Vec<AvrPin>,
+        adcs: Vec<AdcLink>,
+        pwm: Option<PwmLink>,
+    ) -> Result<Self, SimError> {
+        validate_links(&pins, &adcs, pwm)?;
         let cpu = Cpu::new(program)?;
         let analog = TransientSession::new(circuit, config)?;
-        Ok(Self::assemble(cpu, analog, pins, adc, pwm))
+        Ok(Self::assemble(cpu, analog, pins, adcs, pwm))
     }
 
     fn assemble(
         cpu: Cpu,
         analog: TransientSession,
         pins: Vec<AvrPin>,
-        adc: Option<AdcLink>,
+        adcs: Vec<AdcLink>,
         pwm: Option<PwmLink>,
     ) -> Self {
         Self {
             cpu,
             analog,
             pins: pin_states(pins),
-            adc,
+            adc_voltages: vec![0.0; adcs.len()],
+            adcs,
             pwm,
             uart: None,
-            adc_voltage: 0.0,
             pwm_voltage: 0.0,
             timer0_events: Timer0EventState::default(),
             events: VecDeque::new(),
@@ -429,7 +448,7 @@ impl AvrSession {
 
     /// Steps one AVR instruction and one analog step.
     pub fn step(&mut self) -> Result<Option<AvrTrace>, SimError> {
-        self.apply_adc();
+        self.apply_adcs();
         self.apply_uart_rx();
         self.apply_inputs()?;
         let trace = self.cpu.step()?;
@@ -440,7 +459,7 @@ impl AvrSession {
         self.drive_pwm()?;
         let sample = self.analog.step()?;
         self.update_pins(&driven, &sample);
-        self.update_adc(&sample);
+        self.update_adcs(&sample);
         self.update_pwm(&sample);
         Ok(trace)
     }
@@ -548,12 +567,11 @@ impl AvrSession {
         }
     }
 
-    fn apply_adc(&mut self) {
-        let Some(adc) = self.adc else {
-            return;
-        };
-        let code = adc_code(self.adc_voltage, adc.reference);
-        self.cpu.adc().set_input(adc.channel, code);
+    fn apply_adcs(&mut self) {
+        for (link, voltage) in self.adcs.iter().zip(&self.adc_voltages) {
+            let code = adc_code(*voltage, link.reference);
+            self.cpu.adc().set_input(link.channel, code);
+        }
     }
 
     fn drive_pwm(&mut self) -> Result<(), SimError> {
@@ -564,11 +582,10 @@ impl AvrSession {
         self.analog.set_source_voltage(pwm.source, value)
     }
 
-    fn update_adc(&mut self, sample: &analysis::TransientSample) {
-        let Some(adc) = self.adc else {
-            return;
-        };
-        self.adc_voltage = sample.solution.voltage(adc.node).unwrap_or(0.0);
+    fn update_adcs(&mut self, sample: &analysis::TransientSample) {
+        for (index, link) in self.adcs.iter().enumerate() {
+            self.adc_voltages[index] = sample.solution.voltage(link.node).unwrap_or(0.0);
+        }
     }
 
     fn update_pwm(&mut self, sample: &analysis::TransientSample) {
@@ -578,10 +595,16 @@ impl AvrSession {
         self.pwm_voltage = sample.solution.voltage(pwm.node).unwrap_or(0.0);
     }
 
-    /// Returns the last ADC node voltage.
+    /// Returns the first ADC node voltage.
     #[must_use]
     pub fn adc_voltage(&self) -> Option<f64> {
-        self.adc.map(|_| self.adc_voltage)
+        self.adc_voltage_at(0)
+    }
+
+    /// Returns one ADC node voltage by link index.
+    #[must_use]
+    pub fn adc_voltage_at(&self, index: usize) -> Option<f64> {
+        self.adc_voltages.get(index).copied()
     }
 
     /// Returns the last PWM node voltage.
@@ -716,12 +739,8 @@ fn adc_code(voltage: f64, reference: f64) -> u16 {
     (ratio * 1023.0).round() as u16
 }
 
-fn validate_links(
-    pins: &[AvrPin],
-    adc: Option<AdcLink>,
-    pwm: Option<PwmLink>,
-) -> Result<(), SimError> {
-    if pins.is_empty() && adc.is_none() && pwm.is_none() {
+fn validate_links(pins: &[AvrPin], adcs: &[AdcLink], pwm: Option<PwmLink>) -> Result<(), SimError> {
+    if pins.is_empty() && adcs.is_empty() && pwm.is_none() {
         return Err(SimError::InvalidNetlist(
             "AVR session requires at least one link".to_string(),
         ));
@@ -868,6 +887,16 @@ mod tests {
         let ground = builder.ground();
         add_source(&mut builder, "V1", output, ground, voltage);
         (builder.build().expect("circuit"), output)
+    }
+
+    fn dual_fixed_circuit(first: f64, second: f64) -> (Circuit, NodeId, NodeId) {
+        let mut builder = CircuitBuilder::new();
+        let node_a = builder.node("a").expect("node");
+        let node_b = builder.node("b").expect("node");
+        let ground = builder.ground();
+        add_source(&mut builder, "V1", node_a, ground, first);
+        add_source(&mut builder, "V2", node_b, ground, second);
+        (builder.build().expect("circuit"), node_a, node_b)
     }
 
     fn multi_pin_circuit(count: usize) -> (Circuit, Vec<(DeviceId, NodeId)>) {
@@ -1082,11 +1111,7 @@ mod tests {
     #[test]
     fn analog_node_feeds_avr_adc() {
         let (circuit, node) = fixed_circuit(2.5);
-        let adc = AdcLink {
-            channel: 0,
-            node,
-            reference: 5.0,
-        };
+        let adc = adc_link(0, node);
         let mut session = adc_session(circuit, adc);
         session.step().expect("settle");
         assert!((session.adc_voltage().unwrap_or(0.0) - 2.5).abs() < 0.01);
@@ -1116,6 +1141,40 @@ mod tests {
         assert!(adc.flag());
         assert!(!adc.busy());
         u16::from(adc.read_data_low()) | (u16::from(adc.read_data_high()) << 8)
+    }
+
+    #[test]
+    fn multiple_adc_channels_sample_independent_nodes() {
+        let (circuit, node_a, node_b) = dual_fixed_circuit(1.25, 3.75);
+        let adcs = vec![adc_link(0, node_a), adc_link(1, node_b)];
+        let mut session = adc_bridge_session(circuit, adcs);
+        session.step().expect("settle");
+        assert!((session.adc_voltage_at(0).unwrap_or(0.0) - 1.25).abs() < 0.01);
+        assert!((session.adc_voltage_at(1).unwrap_or(0.0) - 3.75).abs() < 0.01);
+        let low = i32::from(convert_adc(&mut session, 0));
+        let high = i32::from(convert_adc(&mut session, 1));
+        assert!((low - 256).abs() <= 5, "low={low}");
+        assert!((high - 767).abs() <= 5, "high={high}");
+    }
+
+    fn adc_link(channel: u8, node: NodeId) -> AdcLink {
+        AdcLink {
+            channel,
+            node,
+            reference: 5.0,
+        }
+    }
+
+    fn adc_bridge_session(circuit: Circuit, adcs: Vec<AdcLink>) -> AvrSession {
+        AvrSession::with_bridges(
+            vec![0xCFFF],
+            &circuit,
+            &config(1e-5, 200),
+            Vec::new(),
+            adcs,
+            None,
+        )
+        .expect("session")
     }
 
     #[test]

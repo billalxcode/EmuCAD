@@ -28,13 +28,15 @@ Prototipe ini membuktikan urutan deterministik:
 - `new(...)` untuk satu pin.
 - `with_pins(...)` untuk beberapa link pin.
 - `with_pin_map(...)` untuk peta 3 port x 8 bit.
-- `with_links(...)` untuk pin, ADC, dan PWM.
+- `with_links(...)` untuk pin, satu ADC, dan PWM.
+- `with_bridges(...)` untuk beberapa link ADC dan PWM opsional.
 - `with_uart(link)` untuk endpoint UART eksternal.
 - `step()`, `time()`, `cpu()`, dan `cpu_mut()`.
 - `pin_level(index)`, `pin_changed(index)`, `any_pin_changed()`, dan
   `pin_count()`.
 - `node_voltage(index)` dan `voltage()` untuk link pertama.
-- `adc_voltage()`, `pwm_voltage()`, `uart_link()`, dan `uart_link_mut()`.
+- `adc_voltage()`, `adc_voltage_at(index)`, `pwm_voltage()`,
+  `uart_link()`, dan `uart_link_mut()`.
 - `timer0_overflow()`, `timer0_compare()`, dan
   `run_until_timer0_event(event, max_steps)`.
 - `take_event()` dan `event_count()` untuk queue event.
@@ -50,9 +52,9 @@ analog. `PinInput` opsional membandingkan node analog dengan threshold
 untuk menggerakkan input digital. Sumber harus berupa `VoltageSource`.
 
 `AdcLink` memetakan satu channel ADC ke node analog dan reference
-voltage. Setiap langkah menghitung kode 10-bit dari rasio tegangan node
-terhadap reference, lalu menyimpannya sebagai input channel sebelum
-instruksi CPU berjalan.
+voltage. Satu session dapat memakai beberapa link ADC. Setiap langkah
+menghitung kode 10-bit dari rasio tegangan node terhadap reference,
+lalu menyimpannya sebagai input channel sebelum instruksi CPU berjalan.
 
 `PwmLink` memetakan output Timer0 PWM channel A ke sumber tegangan
 analog dan node pengamatan. Nilai `high` dan `low` menentukan tegangan
@@ -74,7 +76,7 @@ langkah, sedangkan event pin memakai waktu akhir langkah. Pemanggil
 harus mengambil event secara berkala agar queue tidak tumbuh terus.
 
 `AvrSession` membungkus `avr::Cpu`, satu atau beberapa pin AVR, dan
-opsional satu link ADC, satu link PWM, serta satu link UART. Setiap
+opsional beberapa link ADC, satu link PWM, serta satu link UART. Setiap
 langkah menjalankan satu instruksi AVR dan satu langkah transient
 analog:
 
@@ -140,6 +142,12 @@ Test `analog_node_feeds_avr_adc`:
 - Konversi menghasilkan kode sekitar 512.
 - Flag konversi set dan status busy clear.
 
+Test `multiple_adc_channels_sample_independent_nodes`:
+
+- Dua node analog berada pada 1.25 V dan 3.75 V.
+- Setiap channel membaca node yang berbeda.
+- Konversi menghasilkan kode sekitar 256 dan 767.
+
 Test `timer_pwm_drives_analog_node`:
 
 - Timer0 memakai fast PWM, compare 128, dan clock clk/1.
@@ -199,8 +207,8 @@ Test `avr_pin_map_links_all_io`:
 
 - Umpan balik analog hanya satu input dan satu threshold.
 - Satu tick digital sama dengan satu `dt` analog.
-- AvrSession dapat memakai beberapa link pin, satu link ADC, satu link
-  PWM, dan satu link UART.
+- AvrSession dapat memakai beberapa link pin, beberapa link ADC, satu
+  link PWM, dan satu link UART.
 - Pemetaan 24 pin IO model (3 port x 8 bit) tersedia.
 - Pin daya, reset, dan paket 32 pin penuh belum dipetakan.
 - Index pin pada session mengikuti urutan `links`, bukan nomor package.
@@ -224,7 +232,7 @@ S7-09:
 - Umpan balik analog ke digital lewat threshold.
 - Wrapper AVR hybrid dengan beberapa link pin dan peta 24 pin IO.
 - Thevenin pin input dan breakpoint perubahan pin.
-- ADC satu channel, PWM Timer0 channel A, dan UART byte-level.
+- ADC multi-channel, PWM Timer0 channel A, dan UART byte-level.
 - Breakpoint event Timer0 untuk overflow dan compare.
 - Queue event gabungan untuk pin, Timer0, dan UART TX.
 - Test regresi untuk satu arah, loop feedback, dan bridge ADC/PWM/UART.

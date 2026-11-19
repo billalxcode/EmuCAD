@@ -449,7 +449,8 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
 - [~] S7-04 Buat wrapper AVR structural sebagai device digital.
   - Prototipe `AvrSession` menghubungkan pin AVR hybrid ke sumber
     tegangan dan node analog.
-  - Beberapa link pin, satu link ADC, dan satu link PWM sudah diuji.
+  - Beberapa link pin, beberapa link ADC, satu link PWM, dan satu link
+    UART sudah diuji.
   - Wrapper full-chip structural belum.
 - [~] S7-05 Petakan pin AVR ke node netlist.
   - Board simulation memetakan PB5 dan pin LED.
@@ -465,7 +466,8 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
 - [~] S7-08 Hubungkan ADC, PWM, timer, dan UART.
   - Peripheral AVR sudah ada di `avr`.
   - Satu pin GPIO AVR sudah terhubung ke RC analog lewat `mixed`.
-  - `AdcLink` membaca node analog ke channel ADC.
+  - `AdcLink` membaca node analog ke channel ADC; beberapa channel
+    dapat aktif dalam satu session.
   - `PwmLink` menggerakkan node analog dari Timer0 PWM channel A.
   - `UartLink` mengirim byte TX ke buffer eksternal dan menerima byte RX.
   - `run_until_timer0_event` menyediakan breakpoint overflow dan compare.
