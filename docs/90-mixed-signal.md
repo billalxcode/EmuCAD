@@ -87,7 +87,7 @@ counter setelah setiap instruksi, sehingga event dapat dibaca tanpa
 mengambil flag yang dipakai firmware atau interupsi.
 
 `CoSimEvent` mencatat `kind`, `cycles`, dan `time`. Queue menggabungkan
-event pin, Timer0, UART TX, dan konversi ADC. Event CPU memakai waktu
+event pin, Timer0, UART TX, UART RX, dan konversi ADC. Event CPU memakai waktu
 analog awal langkah, sedangkan event pin memakai waktu akhir langkah.
 Pemanggil harus mengambil event secara berkala agar queue tidak tumbuh
 terus.
@@ -107,7 +107,8 @@ analog:
 - Garis TX UART menggerakkan sumber analog mengikuti level frame.
 - Garis RX UART diset dari sampel analog sebelumnya sebelum instruksi.
 - Event Timer0 pada langkah tersebut dicatat tanpa menghapus flag model.
-- Event pin, Timer0, UART TX, dan ADC masuk queue dengan timestamp.
+- Event pin, Timer0, UART TX, UART RX, dan ADC masuk queue dengan
+  timestamp.
 
 Wrapper ini memakai core AVR hybrid, bukan full-chip structural.
 
@@ -215,6 +216,7 @@ Test `uart_tx_line_loops_back_to_rx`:
 - Node TX dihubungkan kembali ke RX.
 - Frame 8N1 dikirim dan diterima sebagai byte yang sama.
 - Receiver menyelesaikan frame dalam batas langkah.
+- Event `UartRx(0x5A)` tercatat di queue.
 
 Test `timer0_compare_event_stops_session`:
 
@@ -289,7 +291,7 @@ S7-09:
 - ADC multi-channel, PWM Timer0 multi-load, serta UART TX dan RX
   line-level.
 - Breakpoint event Timer0 untuk overflow dan compare.
-- Queue event gabungan untuk pin, Timer0, UART TX, dan ADC.
+- Queue event gabungan untuk pin, Timer0, UART TX/RX, dan ADC.
 - Test regresi untuk satu arah, loop feedback, dan bridge ADC/PWM/UART.
 
 S7-04 tetap hybrid, bukan full-chip structural. S7-05 sudah mencakup

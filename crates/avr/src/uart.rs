@@ -34,6 +34,7 @@ struct RxState {
     line_timer: u32,
     line_shift: u8,
     line_bits: u8,
+    count: u32,
 }
 
 impl Default for RxState {
@@ -51,6 +52,7 @@ impl Default for RxState {
             line_timer: 0,
             line_shift: 0,
             line_bits: 0,
+            count: 0,
         }
     }
 }
@@ -140,8 +142,19 @@ impl Uart {
 
     /// Records an externally received byte and sets RXC.
     pub fn receive(&mut self, value: u8) {
+        self.complete_rx(value);
+    }
+
+    /// Returns the number of received bytes since construction.
+    #[must_use]
+    pub const fn rx_count(&self) -> u32 {
+        self.rx.count
+    }
+
+    fn complete_rx(&mut self, value: u8) {
         self.rx.data = value;
         self.rx.rxc = true;
+        self.rx.count = self.rx.count.wrapping_add(1);
     }
 
     /// Shifts one received serial bit into the receiver.
@@ -183,8 +196,7 @@ impl Uart {
         }
         self.rx.bits += 1;
         if self.rx.bits == 8 {
-            self.rx.data = self.rx.shift;
-            self.rx.rxc = true;
+            self.complete_rx(self.rx.shift);
             self.rx.active = false;
         }
     }
@@ -342,8 +354,7 @@ impl Uart {
             return;
         }
         if self.rx.line {
-            self.rx.data = self.rx.line_shift;
-            self.rx.rxc = true;
+            self.complete_rx(self.rx.line_shift);
         }
         self.rx.line_state = RxLineState::Idle;
     }

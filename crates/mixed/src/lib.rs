@@ -305,6 +305,8 @@ pub enum CoSimEventKind {
     Timer0Compare,
     /// A UART frame completed with one byte.
     UartTx(u8),
+    /// A UART byte was received.
+    UartRx(u8),
     /// An ADC conversion completed.
     AdcConversion {
         /// Selected ADC channel.
@@ -343,6 +345,7 @@ struct UartState {
     rx: Option<UartRxLink>,
     rx_level: bool,
     rx_voltage: f64,
+    rx_count: u32,
 }
 
 impl Default for UartState {
@@ -354,6 +357,7 @@ impl Default for UartState {
             rx: None,
             rx_level: true,
             rx_voltage: 0.0,
+            rx_count: 0,
         }
     }
 }
@@ -567,6 +571,7 @@ impl AvrSession {
         self.record_timer0_events();
         self.drain_uart_tx();
         self.record_adc_conversions();
+        self.record_uart_rx();
         Ok(trace)
     }
 
@@ -631,6 +636,15 @@ impl AvrSession {
             self.push_event(CoSimEventKind::AdcConversion { channel, code });
         }
         self.event_state.adc_conversion_count = count;
+    }
+
+    fn record_uart_rx(&mut self) {
+        let count = self.cpu.uart().rx_count();
+        if count.wrapping_sub(self.uart_state.rx_count) != 0 {
+            let value = self.cpu.uart().rx_byte();
+            self.push_event(CoSimEventKind::UartRx(value));
+        }
+        self.uart_state.rx_count = count;
     }
 
     fn push_event(&mut self, kind: CoSimEventKind) {
@@ -1570,6 +1584,16 @@ mod tests {
         session.cpu_mut().uart().write_control(1, 0x18);
         session.cpu_mut().uart().write_tx(0x5A);
         assert_eq!(receive_uart(&mut session, 400), Some(0x5A));
+        assert_eq!(take_uart_rx(&mut session), Some(0x5A));
+    }
+
+    fn take_uart_rx(session: &mut AvrSession) -> Option<u8> {
+        while let Some(event) = session.take_event() {
+            if let CoSimEventKind::UartRx(value) = event.kind {
+                return Some(value);
+            }
+        }
+        None
     }
 
     fn uart_loop_session() -> AvrSession {
