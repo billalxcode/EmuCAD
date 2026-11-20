@@ -1,6 +1,6 @@
 //! Combinational restoring and non-restoring dividers.
 
-use super::blocks::{add_vectors, select_vector, validate_operands};
+use super::blocks::{add_vectors, invert_vector, select_vector, validate_operands};
 use super::circuit::{DigitalBuilder, NetId};
 use kernel::SimError;
 
@@ -100,10 +100,6 @@ fn shift_in(remainder: &[NetId], bit: NetId) -> Vec<NetId> {
     next.push(bit);
     next.extend_from_slice(&remainder[..remainder.len() - 1]);
     next
-}
-
-fn invert_vector(builder: &mut DigitalBuilder, data: &[NetId]) -> Vec<NetId> {
-    data.iter().map(|&bit| builder.not(bit)).collect()
 }
 
 fn xor_vector(builder: &mut DigitalBuilder, data: &[NetId], control: NetId) -> Vec<NetId> {

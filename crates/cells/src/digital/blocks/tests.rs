@@ -1,6 +1,7 @@
 use super::{
-    ProgramCounter, StackPointer, add_vectors, and_all, counter, decoder, full_adder, mux_tree,
-    or_all, read_bits, register, select_vector, shift_register, validate_operands,
+    ProgramCounter, StackPointer, add_vectors, and_all, counter, decoder, full_adder,
+    invert_vector, mux_tree, or_all, read_bits, register, select_vector, shift_register,
+    validate_operands,
 };
 use crate::digital::{DigitalBuilder, DigitalCircuit, NetId};
 
@@ -307,4 +308,17 @@ fn vector_select_rejects_width_mismatch() {
     let second = named_inputs(&mut builder, "b", 3);
     let select = builder.input("sel");
     assert!(select_vector(&mut builder, &first, &second, select).is_err());
+}
+
+#[test]
+fn vector_invert_flips_every_bit() {
+    let mut builder = DigitalBuilder::new();
+    let data = named_inputs(&mut builder, "a", 4);
+    let inverted = invert_vector(&mut builder, &data);
+    let mut circuit = builder.build();
+    for value in 0..16 {
+        set_bits(&mut circuit, "a", value, 4);
+        circuit.settle().expect("settle");
+        assert_eq!(read_bits(&circuit, &inverted), !value & 0xF);
+    }
 }

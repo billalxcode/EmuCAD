@@ -10,8 +10,8 @@ mod registers;
 mod tests;
 
 pub use combinational::{
-    add_vectors, and_all, decoder, mux_tree, or_all, read_bits, select_vector, validate_operands,
-    validate_pair, validate_power_of_two,
+    add_vectors, and_all, decoder, invert_vector, mux_tree, or_all, read_bits, select_vector,
+    validate_operands, validate_pair, validate_power_of_two,
 };
 pub use pointers::{ProgramCounter, StackPointer};
 pub use registers::{

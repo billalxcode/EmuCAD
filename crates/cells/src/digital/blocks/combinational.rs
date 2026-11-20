@@ -111,6 +111,11 @@ pub fn select_vector(
         .collect())
 }
 
+/// Inverts every bit of a vector.
+pub fn invert_vector(builder: &mut DigitalBuilder, data: &[NetId]) -> Vec<NetId> {
+    data.iter().map(|&bit| builder.not(bit)).collect()
+}
+
 /// Builds a multiplexer tree. The number of inputs must be two to the
 /// power of the number of select nets.
 pub fn mux_tree(
