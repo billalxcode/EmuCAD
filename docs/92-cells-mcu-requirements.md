@@ -1,8 +1,8 @@
 # 92 - Kebutuhan Cells untuk Multi-MCU
 
 Tanggal: 2026-11-20
-Status: P0 dimulai; `DigitalVector`, `DigitalModule`, dan `BusResolver`
-sudah diimplementasikan.
+Status: P0 dimulai; `DigitalVector`, `DigitalModule`, `BusResolver`,
+dan wired-AND sudah diimplementasikan.
 
 ## 1. Tujuan
 

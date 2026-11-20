@@ -1,6 +1,6 @@
 //! Tri-state bus resolution for digital circuits.
 
-use super::blocks::or_all;
+use super::blocks::{and_all, or_all};
 use super::circuit::{DigitalBuilder, NetId};
 use super::vector::DigitalVector;
 use kernel::SimError;
@@ -42,6 +42,29 @@ pub fn resolve_bus(
         value: DigitalVector::new(bits)?,
         contention,
     })
+}
+
+/// Resolves open-drain drivers into a pulled-up wired-AND bus.
+pub fn resolve_open_drain(
+    builder: &mut DigitalBuilder,
+    drivers: &[BusDriver],
+) -> Result<DigitalVector, SimError> {
+    let width = validate_drivers(drivers)?;
+    let bits = (0..width)
+        .map(|index| open_drain_bit(builder, drivers, index))
+        .collect();
+    DigitalVector::new(bits)
+}
+
+fn open_drain_bit(builder: &mut DigitalBuilder, drivers: &[BusDriver], index: usize) -> NetId {
+    let terms: Vec<NetId> = drivers
+        .iter()
+        .map(|driver| {
+            let released = builder.not(driver.enable);
+            builder.or(released, driver.data.bits()[index])
+        })
+        .collect();
+    and_all(builder, &terms)
 }
 
 fn validate_drivers(drivers: &[BusDriver]) -> Result<usize, SimError> {
@@ -110,7 +133,7 @@ fn conflict_bit(builder: &mut DigitalBuilder, drivers: &[BusDriver], index: usiz
 
 #[cfg(test)]
 mod tests {
-    use super::{BusDriver, BusPull, resolve_bus};
+    use super::{BusDriver, BusPull, resolve_bus, resolve_open_drain};
     use crate::{DigitalBuilder, DigitalCircuit, DigitalVector};
 
     fn inputs(builder: &mut DigitalBuilder, prefix: &str, width: usize) -> DigitalVector {
@@ -140,6 +163,32 @@ mod tests {
             data: inputs(builder, prefix, 1),
             enable: builder.input(&format!("e{prefix}")),
         }
+    }
+
+    fn open_drain_two() -> DigitalCircuit {
+        let mut builder = DigitalBuilder::new();
+        let drivers = [driver(&mut builder, "a"), driver(&mut builder, "b")];
+        let bus = resolve_open_drain(&mut builder, &drivers).expect("bus");
+        expose(&mut builder, "y", &bus);
+        builder.build()
+    }
+
+    #[test]
+    fn open_drain_is_wired_and_with_pull_up() {
+        let mut circuit = open_drain_two();
+        circuit.set_input("ea", true).expect("ea");
+        circuit.set_input("eb", true).expect("eb");
+        circuit.set_input("a0", false).expect("a0");
+        circuit.set_input("b0", true).expect("b0");
+        circuit.settle().expect("settle");
+        assert_eq!(circuit.output("y0"), Some(false));
+        circuit.set_input("a0", true).expect("a0");
+        circuit.settle().expect("settle");
+        assert_eq!(circuit.output("y0"), Some(true));
+        circuit.set_input("ea", false).expect("ea");
+        circuit.set_input("eb", false).expect("eb");
+        circuit.settle().expect("settle");
+        assert_eq!(circuit.output("y0"), Some(true));
     }
 
     #[test]
