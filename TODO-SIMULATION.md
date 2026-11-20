@@ -693,6 +693,7 @@ S7 yang sudah berjalan:
 
 Commit fitur terakhir:
 
+- `db9468f feat(mixed): interpolate PWM and UART edge events`
 - `9e8d432 test(mixed): verify all mapped AVR pins`
 - `5ab2e4e feat(mixed): interpolate timer events within steps`
 - `9734772 feat(soc): validate memory and IRQ maps`
