@@ -57,4 +57,5 @@ pub(super) struct Dff {
     pub(super) data: NetId,
     pub(super) output: NetId,
     pub(super) domain: ClockDomain,
+    pub(super) reset: ResetDomain,
 }

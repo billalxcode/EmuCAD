@@ -112,27 +112,44 @@ impl DigitalBuilder {
 
     /// Adds a D flip-flop that captures data on every clock tick.
     pub fn dff(&mut self, data: NetId) -> NetId {
-        self.dff_in(ClockDomain::DEFAULT, data)
+        self.dff_with(ClockDomain::DEFAULT, ResetDomain::DEFAULT, data)
     }
 
     /// Adds a D flip-flop in one clock domain.
     pub fn dff_in(&mut self, domain: ClockDomain, data: NetId) -> NetId {
+        self.dff_with(domain, ResetDomain::DEFAULT, data)
+    }
+
+    /// Adds a D flip-flop in one clock and reset domain.
+    pub fn dff_with(&mut self, clock: ClockDomain, reset: ResetDomain, data: NetId) -> NetId {
         let output = self.new_net();
-        self.dff_into_in(domain, data, output);
+        self.dff_into_with(clock, reset, data, output);
         output
     }
 
     /// Adds a D flip-flop that drives an existing net.
     pub fn dff_into(&mut self, data: NetId, output: NetId) {
-        self.dff_into_in(ClockDomain::DEFAULT, data, output);
+        self.dff_into_with(ClockDomain::DEFAULT, ResetDomain::DEFAULT, data, output);
     }
 
     /// Adds a D flip-flop in one clock domain that drives an existing net.
     pub fn dff_into_in(&mut self, domain: ClockDomain, data: NetId, output: NetId) {
+        self.dff_into_with(domain, ResetDomain::DEFAULT, data, output);
+    }
+
+    /// Adds a D flip-flop with clock and reset domains.
+    pub fn dff_into_with(
+        &mut self,
+        clock: ClockDomain,
+        reset: ResetDomain,
+        data: NetId,
+        output: NetId,
+    ) {
         self.dffs.push(Dff {
             data,
             output,
-            domain,
+            domain: clock,
+            reset,
         });
     }
 
@@ -245,6 +262,7 @@ fn map_dff(dff: &Dff, mapping: &[NetId]) -> Dff {
         data: mapping[dff.data.raw()],
         output: mapping[dff.output.raw()],
         domain: dff.domain,
+        reset: dff.reset,
     }
 }
 

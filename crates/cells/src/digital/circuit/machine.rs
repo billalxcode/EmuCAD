@@ -205,6 +205,17 @@ impl DigitalCircuit {
         self.settle()
     }
 
+    /// Clears one reset domain and settles.
+    pub fn reset_domain(&mut self, reset: ResetDomain) -> Result<(), SimError> {
+        for dff in &self.dffs {
+            if dff.reset == reset {
+                self.values[dff.output.raw()] = false;
+            }
+        }
+        self.mark_all_dirty();
+        self.settle()
+    }
+
     fn dff_inputs(&self) -> Vec<bool> {
         self.dffs
             .iter()

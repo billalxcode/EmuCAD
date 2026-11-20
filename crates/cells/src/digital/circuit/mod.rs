@@ -39,6 +39,27 @@ impl ClockDomain {
     }
 }
 
+/// Identifies one reset domain.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct ResetDomain(usize);
+
+impl ResetDomain {
+    /// Default reset domain.
+    pub const DEFAULT: Self = Self(0);
+
+    /// Creates a reset domain identifier.
+    #[must_use]
+    pub const fn new(index: usize) -> Self {
+        Self(index)
+    }
+
+    /// Returns the domain index.
+    #[must_use]
+    pub const fn index(self) -> usize {
+        self.0
+    }
+}
+
 mod builder;
 mod components;
 mod evaluate;

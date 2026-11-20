@@ -1,4 +1,4 @@
-use super::{ClockDomain, DigitalBuilder, DigitalCircuit};
+use super::{ClockDomain, DigitalBuilder, DigitalCircuit, ResetDomain};
 use kernel::SimError;
 
 fn combinational_circuit() -> DigitalCircuit {
@@ -193,5 +193,23 @@ fn tick_domain_updates_only_matching_flip_flops() {
     assert_eq!(circuit.output("q0"), Some(true));
     assert_eq!(circuit.output("q1"), Some(false));
     circuit.tick_domain(ClockDomain::new(1)).expect("tick1");
+    assert_eq!(circuit.output("q1"), Some(true));
+}
+
+#[test]
+fn reset_domain_clears_only_matching_flip_flops() {
+    let mut builder = DigitalBuilder::new();
+    let data = builder.input("d");
+    let first = builder.dff_with(ClockDomain::DEFAULT, ResetDomain::new(0), data);
+    let second = builder.dff_with(ClockDomain::DEFAULT, ResetDomain::new(1), data);
+    builder.output("q0", first);
+    builder.output("q1", second);
+    let mut circuit = builder.build();
+    circuit.set_input("d", true).expect("d");
+    circuit.tick().expect("tick");
+    assert_eq!(circuit.output("q0"), Some(true));
+    assert_eq!(circuit.output("q1"), Some(true));
+    circuit.reset_domain(ResetDomain::new(0)).expect("reset0");
+    assert_eq!(circuit.output("q0"), Some(false));
     assert_eq!(circuit.output("q1"), Some(true));
 }
