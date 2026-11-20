@@ -66,6 +66,9 @@ impl DigitalBuilder {
 - `mux_tree` memilih satu dari `2^n` input.
 - `decoder` menghasilkan one-hot output.
 - `counter` adalah ripple counter dengan enable.
+- `counter_loadable` menambahkan load, up/down, dan hold.
+- `counter_match` dan `prescaler` menyediakan compare dan tick
+  periodik.
 - `shift_register` menggeser saat enable tinggi.
 - `read_bits` membaca vektor bit little-endian.
 - `register_file` menyediakan `count x width` dengan decoder tulis dan
@@ -135,6 +138,17 @@ Test lapisan digital mencakup:
 - `register_extended` mendukung load, clear, preset, dan byte mask
   opsional untuk register tunggal.
 - Prioritas kontrol: clear, preset, load, lalu hold.
+
+## 7.1 Counter dan Prescaler
+
+- `counter_loadable` mendukung width 1..=64, load, enable, dan up/down.
+- Load memiliki prioritas di atas enable; enable rendah menahan nilai.
+- `counter_match` membandingkan bit counter dengan nilai target.
+- `prescaler(width, divisor, enable)` menghasilkan `count` dan `tick`.
+- `tick` tinggi selama satu cycle ketika counter mencapai
+  `divisor - 1`.
+- Divisor valid 1..=2^width untuk width 1..=32.
+- Test memeriksa load, hitung naik/turun, wrap, hold, match, dan tick.
 
 ## 8. Program Counter, IR, dan Stack Pointer
 

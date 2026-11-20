@@ -1,8 +1,9 @@
 # 92 - Kebutuhan Cells untuk Multi-MCU
 
 Tanggal: 2026-11-20
-Status: P0 selesai; P1 berjalan dengan ALU, register, shifter,
-multiplier, divider, comparator, encoder, dan bit manipulation.
+Status: P0 selesai; P1 berjalan dengan ALU, register, counter,
+shifter, multiplier, divider, comparator, encoder, dan bit
+manipulation.
 `DigitalVector`, `DigitalModule`, `BusResolver`, wired-AND,
 `ClockDomain`, `ResetDomain`, dan `reset_synchronizer` ada di `cells`.
 `McuSpec` dan `BusSpec` ada di crate `soc`.
@@ -123,6 +124,7 @@ Sudah:
   (`register_extended`).
 - Shift register width 1..64.
 - Counter width 1..16.
+- Counter loadable dengan up/down, match, dan prescaler generic.
 - Register file parameterized `count x width` dengan 2 read dan 1 write.
 - Register file dengan byte write mask untuk width 1..=64, termasuk
   32 x 32.
@@ -133,8 +135,6 @@ Sebagian:
 
 - Register file belum memiliki clear, preset, parity, atau
   multi-write port.
-- Counter belum memiliki load, up/down, compare, capture, atau
-  prescaler generic.
 - Memory array masih fixed 128 x 8 dan berada di katalog, bukan
   generator.
 - ROM, flash, EEPROM, FRAM, MRAM, dan NVRAM masih entry katalog.

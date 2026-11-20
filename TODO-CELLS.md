@@ -160,8 +160,14 @@ Exit P0:
   - `register_extended` memakai kontrol load, clear, dan preset.
   - Byte mask opsional; slice kosong berarti semua byte aktif.
   - Prioritas clear, lalu preset, lalu load, lalu hold.
-- [~] CELL-02-02 Tambahkan counter dengan load, up/down, compare,
-  capture, dan prescaler generic. Counter 1..16 sudah ada.
+- [x] CELL-02-02 Tambahkan counter dengan load, up/down, compare,
+  capture, dan prescaler generic.
+  - `counter_loadable` mendukung load, enable, up/down, dan width
+    1..=64.
+  - `counter_match` menghasilkan sinyal equality.
+  - `prescaler` menghasilkan tick satu cycle setiap divisor.
+  - Capture dapat dibangun dari `register_extended` dengan sinyal
+    tick atau match sebagai load.
 - [ ] CELL-02-03 Tambahkan FIFO sinkron dan async FIFO.
 - [~] CELL-02-04 Buat memory compiler parameterized: depth, width,
   byte enable, initialization, latency, dan read-during-write.

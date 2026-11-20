@@ -6,6 +6,7 @@ pub mod blocks;
 pub mod bus;
 pub mod circuit;
 pub mod compare;
+pub mod counters;
 pub mod cpu;
 pub mod divider;
 pub mod encoder;
@@ -28,6 +29,7 @@ pub use blocks::{
 pub use bus::{BusDriver, BusPull, BusResolver, resolve_bus, resolve_open_drain};
 pub use circuit::{CircuitStats, ClockDomain, DigitalBuilder, DigitalCircuit, NetId, ResetDomain};
 pub use compare::{Comparison, comparator_unsigned};
+pub use counters::{Prescaler, counter_loadable, counter_match, prescaler};
 pub use cpu::{
     Cpu, CpuTrace, OP_ADD, OP_AND, OP_HLT, OP_JMP, OP_JNZ, OP_JZ, OP_LDI, OP_MOV, OP_NOP, OP_OR,
     OP_SUB, OP_XOR, encode_alu, encode_branch, encode_hlt, encode_ldi,
