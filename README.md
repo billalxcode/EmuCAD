@@ -159,6 +159,7 @@ Dokumen yang sering dipakai:
 | [`docs/59-gui-golden.md`](docs/59-gui-golden.md) | Status dan prosedur golden RGBA GUI |
 | [`docs/60-component-catalog.md`](docs/60-component-catalog.md) | Katalog 500 komponen, akurasi, dan schema |
 | [`docs/90-mixed-signal.md`](docs/90-mixed-signal.md) | Scheduler co-sim digital-analog dengan AVR, ADC, PWM, dan UART |
+| [`docs/91-avr-audit.md`](docs/91-avr-audit.md) | Audit struktur AVR, integrasi cells, dan rencana cleanup |
 | [`docs/61-design-system.md`](docs/61-design-system.md) | Design system GUI, font, warna, dan spacing |
 | [`TODO-COMPONENTS.md`](TODO-COMPONENTS.md) | Backlog katalog komponen dan Python builder |
 | [`TODO.md`](TODO.md) | Pekerjaan yang tersisa |

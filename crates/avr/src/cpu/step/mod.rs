@@ -53,7 +53,7 @@ impl Cpu {
         self.program.words()
     }
 
-    /// Returns static digital circuit size information.
+    /// Returns static size information for the wired structural blocks.
     #[must_use]
     pub fn circuit_stats(&self) -> cells::CircuitStats {
         self.circuit.stats()

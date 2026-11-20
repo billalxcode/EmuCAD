@@ -97,6 +97,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 88 | [Domain digital](88-digital-domain.md) | 13 entry digital dengan port bernama dan CLI |
 | 89 | [Rilis biner](89-release.md) | Versi workspace, target, arsip, dan SHA512 GitHub Release |
 | 90 | [Mixed-signal](90-mixed-signal.md) | Scheduler co-sim digital-analog dengan AVR, ADC, PWM, dan UART |
+| 91 | [Audit struktur AVR](91-avr-audit.md) | Kategori modul, integrasi cells, temuan, dan rencana cleanup |
 
 ### 3.2 Fondasi
 

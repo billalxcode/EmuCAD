@@ -1,4 +1,4 @@
-//! Structural AVR CPU and peripherals, targeting the ATmega328P.
+//! Hybrid AVR CPU and peripheral models, targeting the ATmega328P.
 
 pub mod adc;
 pub mod alu;

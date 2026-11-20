@@ -1,4 +1,4 @@
-//! AVR execution core with a structural datapath.
+//! AVR execution core with a structural GPIO datapath.
 
 use super::adc::Adc;
 use super::fetch::ProgramMemory;

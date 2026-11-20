@@ -27,8 +27,10 @@ utama S6.
   transistor sebagai referensi.
 - `cells::catalog_memory` menyediakan sel SRAM digital 1-bit dan
   array 128x8 (1024 bit) untuk domain digital.
-- `avr` memakai `cells` untuk datapath, register bank, instruksi,
-  ALU, shift, multiply, dan beberapa GPIO.
+- `avr` memakai `cells` untuk GPIO. Register bank, instruction register,
+  ALU, shift, dan multiply tersedia sebagai blok structural, tetapi
+  belum terhubung ke jalur eksekusi CPU. Audit ada di
+  `docs/91-avr-audit.md`.
 - `board` menyediakan board AVR + LED + resistor + button + UART.
 
 ## 3. Batas AVR Saat Ini
