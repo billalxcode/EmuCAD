@@ -85,7 +85,11 @@ Catatan:
   - `BusResolver` menangani beberapa driver, pull low/high, dan
     contention.
   - `resolve_open_drain` menangani wired-AND dengan pull-up.
-- [ ] CELL-00-04 Tambahkan API clock domain dan tick per domain.
+- [x] CELL-00-04 Tambahkan API clock domain dan tick per domain.
+  - `ClockDomain` dengan default domain dan index.
+  - `DigitalBuilder::dff_in` dan `dff_into_in`.
+  - `DigitalCircuit::tick_domain`.
+  - Penjadwalan periode per domain tetap di luar engine.
 - [ ] CELL-00-05 Tambahkan reset domain, async assert, dan sync deassert.
 - [ ] CELL-00-06 Definisikan `McuSpec`, `CpuSpec`, `BusSpec`,
   `MemorySpec`, `PeripheralSpec`, `PinSpec`, dan `ClockSpec`.

@@ -1,4 +1,4 @@
-use super::{DigitalBuilder, DigitalCircuit};
+use super::{ClockDomain, DigitalBuilder, DigitalCircuit};
 use kernel::SimError;
 
 fn combinational_circuit() -> DigitalCircuit {
@@ -177,4 +177,21 @@ fn stats_report_gate_and_component_counts() {
     assert_eq!(stats.dffs, 0);
     assert_eq!(stats.largest_component, 1);
     assert_eq!(stats.cyclic_components, 0);
+}
+
+#[test]
+fn tick_domain_updates_only_matching_flip_flops() {
+    let mut builder = DigitalBuilder::new();
+    let data = builder.input("d");
+    let first = builder.dff_in(ClockDomain::new(0), data);
+    let second = builder.dff_in(ClockDomain::new(1), data);
+    builder.output("q0", first);
+    builder.output("q1", second);
+    let mut circuit = builder.build();
+    circuit.set_input("d", true).expect("d");
+    circuit.tick_domain(ClockDomain::new(0)).expect("tick0");
+    assert_eq!(circuit.output("q0"), Some(true));
+    assert_eq!(circuit.output("q1"), Some(false));
+    circuit.tick_domain(ClockDomain::new(1)).expect("tick1");
+    assert_eq!(circuit.output("q1"), Some(true));
 }

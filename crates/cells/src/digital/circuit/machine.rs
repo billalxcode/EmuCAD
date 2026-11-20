@@ -179,6 +179,23 @@ impl DigitalCircuit {
         self.settle()
     }
 
+    /// Applies one ideal clock tick to one domain and settles.
+    pub fn tick_domain(&mut self, domain: ClockDomain) -> Result<(), SimError> {
+        self.settle()?;
+        let next: Vec<(usize, bool)> = self
+            .dffs
+            .iter()
+            .enumerate()
+            .filter(|(_, dff)| dff.domain == domain)
+            .map(|(index, dff)| (index, self.values[dff.data.raw()]))
+            .collect();
+        for (index, value) in next {
+            let output = self.dffs[index].output;
+            self.set_net(output, value);
+        }
+        self.settle()
+    }
+
     /// Clears all flip-flops and settles.
     pub fn reset(&mut self) -> Result<(), SimError> {
         for dff in &self.dffs {

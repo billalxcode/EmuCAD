@@ -15,7 +15,7 @@ pub use blocks::{
     mux_tree, or_all, read_bits, register, shift_register,
 };
 pub use bus::{BusDriver, BusPull, BusResolver, resolve_bus, resolve_open_drain};
-pub use circuit::{CircuitStats, DigitalBuilder, DigitalCircuit, NetId};
+pub use circuit::{CircuitStats, ClockDomain, DigitalBuilder, DigitalCircuit, NetId};
 pub use cpu::{
     Cpu, CpuTrace, OP_ADD, OP_AND, OP_HLT, OP_JMP, OP_JNZ, OP_JZ, OP_LDI, OP_MOV, OP_NOP, OP_OR,
     OP_SUB, OP_XOR, encode_alu, encode_branch, encode_hlt, encode_ldi,

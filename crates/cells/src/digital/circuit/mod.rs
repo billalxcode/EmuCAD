@@ -18,6 +18,27 @@ impl NetId {
     }
 }
 
+/// Identifies one ideal clock domain.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct ClockDomain(usize);
+
+impl ClockDomain {
+    /// Default clock domain.
+    pub const DEFAULT: Self = Self(0);
+
+    /// Creates a clock domain identifier.
+    #[must_use]
+    pub const fn new(index: usize) -> Self {
+        Self(index)
+    }
+
+    /// Returns the domain index.
+    #[must_use]
+    pub const fn index(self) -> usize {
+        self.0
+    }
+}
+
 mod builder;
 mod components;
 mod evaluate;

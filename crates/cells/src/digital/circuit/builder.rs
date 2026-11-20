@@ -112,14 +112,28 @@ impl DigitalBuilder {
 
     /// Adds a D flip-flop that captures data on every clock tick.
     pub fn dff(&mut self, data: NetId) -> NetId {
+        self.dff_in(ClockDomain::DEFAULT, data)
+    }
+
+    /// Adds a D flip-flop in one clock domain.
+    pub fn dff_in(&mut self, domain: ClockDomain, data: NetId) -> NetId {
         let output = self.new_net();
-        self.dff_into(data, output);
+        self.dff_into_in(domain, data, output);
         output
     }
 
     /// Adds a D flip-flop that drives an existing net.
     pub fn dff_into(&mut self, data: NetId, output: NetId) {
-        self.dffs.push(Dff { data, output });
+        self.dff_into_in(ClockDomain::DEFAULT, data, output);
+    }
+
+    /// Adds a D flip-flop in one clock domain that drives an existing net.
+    pub fn dff_into_in(&mut self, domain: ClockDomain, data: NetId, output: NetId) {
+        self.dffs.push(Dff {
+            data,
+            output,
+            domain,
+        });
     }
 
     /// Builds the digital circuit.
@@ -230,6 +244,7 @@ fn map_dff(dff: &Dff, mapping: &[NetId]) -> Dff {
     Dff {
         data: mapping[dff.data.raw()],
         output: mapping[dff.output.raw()],
+        domain: dff.domain,
     }
 }
 
