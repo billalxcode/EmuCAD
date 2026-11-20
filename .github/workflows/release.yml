@@ -1,30 +1,75 @@
 name: release
 
+# SAFETY MODEL
+# - workflow_run publishes only after a successful ci push run from main. The
+#   trigger and the prepare guard enforce the event, branch, and conclusion.
+#   Pull request ci runs are excluded even if a fork branch is named main.
+# - workflow_dispatch is dry run by default. A manual run can publish only
+#   when dry_run=false and the selected ref is refs/heads/main.
+# - No non-main publish override exists. Dispatching from dev, a topic branch,
+#   or a tag forces dry_run=true. Such runs stage artifacts but never create or
+#   update a tag or release.
 on:
   workflow_run:
     workflows: ["ci"]
     types: [completed]
     branches: [main]
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Stage release artifacts without publishing a release"
+        type: boolean
+        default: true
+        required: false
 
 permissions:
-  contents: write
-
-concurrency:
-  group: release-${{ github.event.workflow_run.head_sha || github.sha }}
-  cancel-in-progress: false
+  contents: read
 
 jobs:
   prepare:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.meta.outputs.version }}
       sha: ${{ steps.meta.outputs.sha }}
+      dry_run: ${{ steps.policy.outputs.dry_run }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - name: Resolve release policy
+        id: policy
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_REF: ${{ github.ref }}
+          SOURCE_EVENT: ${{ github.event.workflow_run.event }}
+          SOURCE_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          SOURCE_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          INPUT_DRY_RUN: ${{ github.event.inputs.dry_run }}
+        run: |
+          # Start dry. A missing input can never publish; only the explicit
+          # trusted paths below may flip this to false.
+          dry_run=true
+          reason="default dry run"
+          if [ "$EVENT_NAME" = "workflow_run" ] && [ "$SOURCE_EVENT" = "push" ] && [ "$SOURCE_BRANCH" = "main" ] && [ "$SOURCE_CONCLUSION" = "success" ]; then
+            dry_run=false
+            reason="successful ci push run on main"
+          fi
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$DISPATCH_REF" = "refs/heads/main" ] && [ "$INPUT_DRY_RUN" = "false" ]; then
+            dry_run=false
+            reason="main dispatch with dry_run=false"
+          fi
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$DISPATCH_REF" != "refs/heads/main" ]; then
+            echo "::warning::Publishing is restricted to main; $DISPATCH_REF will only stage artifacts."
+          fi
+          echo "dry_run=$dry_run" >> "$GITHUB_OUTPUT"
+          echo "Release policy: dry_run=$dry_run ($reason)"
       - name: Read version
         id: meta
         shell: bash
@@ -74,7 +119,7 @@ jobs:
           path: dist/emucad-v${{ needs.prepare.outputs.version }}-${{ matrix.target }}.*
           if-no-files-found: error
 
-  publish:
+  stage:
     needs: [prepare, build]
     runs-on: ubuntu-latest
     steps:
@@ -93,6 +138,7 @@ jobs:
           VERSION: ${{ needs.prepare.outputs.version }}
           SHA: ${{ needs.prepare.outputs.sha }}
           SOURCE_RUN: ${{ github.event.workflow_run.html_url }}
+          DRY_RUN: ${{ needs.prepare.outputs.dry_run }}
         run: |
           source_run="${SOURCE_RUN:-$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID}"
           {
@@ -104,7 +150,53 @@ jobs:
             echo "- Commit: ${SHA}"
             echo "- Source run: ${source_run}"
             echo "- Targets: linux-x86_64, macos-arm64, windows-x86_64"
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "- Dry run: yes (artifacts staged, no release published)"
+            fi
           } > release-notes.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-stage-v${{ needs.prepare.outputs.version }}
+          path: |
+            dist/
+            release-notes.md
+          if-no-files-found: error
+          retention-days: 7
+      - name: Report dry run
+        if: needs.prepare.outputs.dry_run == 'true'
+        run: |
+          echo "::notice::Dry run complete. Download artifact release-stage-v${{ needs.prepare.outputs.version }}; no release was published."
+
+  publish:
+    needs: [prepare, stage]
+    if: |
+      needs.prepare.outputs.dry_run != 'true' &&
+      (
+        (github.event_name == 'workflow_run' &&
+         github.event.workflow_run.event == 'push' &&
+         github.event.workflow_run.head_branch == 'main' &&
+         github.event.workflow_run.conclusion == 'success') ||
+        (github.event_name == 'workflow_dispatch' &&
+         github.ref == 'refs/heads/main')
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    # Stable per-release group. Runs that would publish tag v<version> share
+    # one queue, so assets and notes cannot clobber each other out of order.
+    # The old head_sha group allowed same-tag runs to race. Keep the in-flight
+    # publisher running because a cancelled upload can leave partial assets.
+    concurrency:
+      group: release-v${{ needs.prepare.outputs.version }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-stage-v${{ needs.prepare.outputs.version }}
+          path: .
       - name: Publish release
         shell: bash
         env:
