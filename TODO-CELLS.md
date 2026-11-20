@@ -150,8 +150,12 @@ Exit P0:
   - `popcount` menghitung bit satu untuk width power-of-two 1..=64.
   - `saturating_add_unsigned` dan `saturating_sub_unsigned` membatasi
     hasil pada nilai maksimum atau nol.
-- [ ] CELL-01-07 Generalisasi LUT dan FSM dengan width dan jumlah state
-  yang dapat dikonfigurasi.
+- [x] CELL-01-07 Generalisasi LUT dan FSM dengan width dan jumlah
+  state yang dapat dikonfigurasi.
+  - `lookup_table` mendukung 1..=10 input dengan truth table `bool`.
+  - `finite_state_machine` mendukung state 1..=8 bit, input 0..=8 bit,
+    dan total address maksimal 12 bit.
+  - Next-state table memakai `u16`; output berupa Moore output.
 - [x] CELL-01-08 Tambahkan crossbar dan bus mux parameterized.
   - `bus_mux` memilih satu dari 1..=64 bus dengan lebar sama.
   - `crossbar` merutekan satu bus per output secara independen.

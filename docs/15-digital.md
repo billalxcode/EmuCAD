@@ -247,6 +247,19 @@ Test lapisan digital mencakup:
 - Lebar seluruh bus harus sama dan berada di 1..=64.
 - Test memilih setiap bus dan menukar rute dua output.
 
+## 9.7 LUT dan FSM
+
+- `lookup_table` menerima 1..=10 input dan truth table `bool` dengan
+  panjang `2^n`.
+- `finite_state_machine` menerima `FsmSpec` berisi `state_bits`,
+  `input_bits`, `next_state`, dan `output`.
+- State 1..=8 bit; input 0..=8 bit; total address maksimal 12 bit.
+- Next-state table diindeks `{state, input}` dengan input least
+  significant.
+- Output adalah Moore output yang hanya bergantung pada state.
+- Test memeriksa LUT, FSM bebas, FSM dengan input hold/toggle, dan
+  validasi tabel.
+
 ---
 
 ## 10. CPU Uji

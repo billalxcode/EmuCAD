@@ -4,7 +4,7 @@
 yang memodelkan transistor, gerbang CMOS, CPU AVR, peripheral, dan board,
 serta mampu menjalankan firmware AVR.
 
-> **Status v0.1:** 1236 test lulus, 11 crate, crate simulasi zero external
+> **Status v0.1:** 1241 test lulus, 11 crate, crate simulasi zero external
 > dependency; dependensi GUI dan binding Python dibatasi pada daftar yang
 > disetujui di `AGENTS.md`.
 > Rilis biner GitHub mengikuti versi workspace; aset dan SHA512
@@ -175,7 +175,7 @@ Dokumen yang sering dipakai:
 
 Sudah:
 
-- 1236 test workspace.
+- 1241 test workspace.
 - fmt, clippy, test, dan build release lulus.
 - Paket Linux dapat dibuat.
 - Determinisme Linux diuji.

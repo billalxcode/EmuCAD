@@ -3,7 +3,7 @@
 Tanggal: 2026-11-20
 Status: P0 selesai; P1 berjalan dengan ALU, register, counter,
 shifter, multiplier, divider, comparator, encoder, bit manipulation,
-bus mux/crossbar, dan FIFO sinkron.
+bus mux/crossbar, FIFO sinkron, dan LUT/FSM generic.
 `DigitalVector`, `DigitalModule`, `BusResolver`, wired-AND,
 `ClockDomain`, `ResetDomain`, dan `reset_synchronizer` ada di `cells`.
 `McuSpec` dan `BusSpec` ada di crate `soc`.
@@ -102,6 +102,7 @@ Sudah:
   power-of-two 1..=64.
 - Bit reverse, byte swap, popcount, dan saturating add/sub unsigned.
 - Bus mux dan crossbar parameterized.
+- LUT dan FSM generic dengan width dan state configurable.
 - LUT dan finite state machine kecil di katalog digital.
 
 Sebagian:
