@@ -1,0 +1,8 @@
+* Synthetic ngspice-format log for scripts/test-ngspice-check.py.
+* This is not a recorded ngspice run and not golden data.
+Circuit: RC step response
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Measurements for Transient Analysis
+
+vout = 4.758129e-01

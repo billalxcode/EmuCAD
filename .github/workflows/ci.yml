@@ -58,7 +58,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Comparator self-test
+        run: python3 scripts/test-ngspice-check.py
+      - name: Build EmuCAD RC reference
+        run: cargo build -p analysis --example rc_analysis
       - name: Build ngspice image
         run: docker build -f ci/ngspice.Dockerfile -t emucad-ngspice .
       - name: Golden RC
-        run: docker run --rm -v "$PWD:/work" emucad-ngspice bash scripts/ngspice_golden.sh
+        run: |
+          bash scripts/ngspice_golden.sh --require \
+            --docker-image emucad-ngspice \
+            --emucad target/debug/examples/rc_analysis
