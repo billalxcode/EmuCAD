@@ -547,16 +547,18 @@ simulasi dengan sumber gate-level yang dapat diaudit.
 - [~] S8-06 Perbarui docs, README, dan TODO.
   - Fidelity, benchmark, reference circuit, dan persistensi sudah
     diperbarui.
-  - Dokumentasi per keluarga behavioral belum lengkap.
-  - Fidelity, benchmark, dan batas real-time sudah diperbarui.
+  - Coverage katalog ada di `docs/93-catalog-coverage.md`.
   - Dokumentasi per keluarga behavioral belum lengkap.
 - [x] S8-07 Simpan hasil transient di JSON + file biner.
   - Metadata JSON dan sampel biner ditulis sebagai sidecar proyek.
   - Trace dipulihkan saat proyek dibuka; sidecar lama dihapus saat
     hasil baru tidak ada.
 - [~] S8-08 Jalankan fmt, clippy, test, ASCII, package, dan CI ngspice.
-  - fmt, clippy, test, dan ASCII lulus.
-  - Package dan CI ngspice belum dijalankan pada mesin ini.
+  - fmt, clippy, test, dan ASCII lulus di lokal.
+  - Job ASCII ditambahkan ke CI.
+  - Packaging lokal melalui `scripts/package.sh` sudah diverifikasi.
+  - CI ngspice belum dieksekusi karena Docker socket dan runner belum
+    tersedia.
 
 **Acceptance S8:** semua test lulus, hasil dapat direproduksi, dan
 dokumentasi menyebut batas fidelity.
