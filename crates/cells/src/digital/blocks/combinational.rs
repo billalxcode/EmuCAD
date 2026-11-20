@@ -44,6 +44,43 @@ pub fn add_vectors(
     Ok((sum, carry))
 }
 
+/// Validates a vector width in 1..=limit.
+pub fn validate_width(data: &[NetId], label: &str, limit: usize) -> Result<(), SimError> {
+    if data.is_empty() || data.len() > limit {
+        return Err(SimError::InvalidNetlist(format!(
+            "{label} width must be 1..={limit}"
+        )));
+    }
+    Ok(())
+}
+
+/// Validates two equally sized vectors with width in 1..=limit.
+pub fn validate_pair(
+    first: &[NetId],
+    second: &[NetId],
+    label: &str,
+    limit: usize,
+) -> Result<(), SimError> {
+    validate_width(first, label, limit)?;
+    if second.len() != first.len() {
+        return Err(SimError::InvalidNetlist(format!(
+            "{label} operand width mismatch"
+        )));
+    }
+    Ok(())
+}
+
+/// Validates a power-of-two vector width in 1..=limit.
+pub fn validate_power_of_two(data: &[NetId], label: &str, limit: usize) -> Result<(), SimError> {
+    validate_width(data, label, limit)?;
+    if !data.len().is_power_of_two() {
+        return Err(SimError::InvalidNetlist(format!(
+            "{label} width must be a power of two in 1..={limit}"
+        )));
+    }
+    Ok(())
+}
+
 /// Validates two equally sized power-of-two operand vectors.
 pub fn validate_operands(
     first: &[NetId],
@@ -51,18 +88,8 @@ pub fn validate_operands(
     label: &str,
     limit: usize,
 ) -> Result<(), SimError> {
-    let width = first.len();
-    if !width.is_power_of_two() || width > limit {
-        return Err(SimError::InvalidNetlist(format!(
-            "{label} width must be a power of two in 1..={limit}"
-        )));
-    }
-    if second.len() != width {
-        return Err(SimError::InvalidNetlist(format!(
-            "{label} operand width mismatch"
-        )));
-    }
-    Ok(())
+    validate_power_of_two(first, label, limit)?;
+    validate_pair(first, second, label, limit)
 }
 
 /// Selects between two equally sized vectors.

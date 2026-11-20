@@ -1,6 +1,6 @@
 //! Priority and one-hot encoders plus leading-zero count.
 
-use super::blocks::{increment, or_all, select_vector};
+use super::blocks::{increment, or_all, select_vector, validate_power_of_two};
 use super::circuit::{DigitalBuilder, NetId};
 use kernel::SimError;
 
@@ -19,7 +19,7 @@ pub fn priority_encoder(
     builder: &mut DigitalBuilder,
     inputs: &[NetId],
 ) -> Result<PriorityEncoding, SimError> {
-    validate_encoder(inputs)?;
+    validate_power_of_two(inputs, "encoder", 64)?;
     let lines = priority_lines(builder, inputs);
     let index = encode_lines(builder, &lines);
     Ok(PriorityEncoding {
@@ -35,7 +35,7 @@ pub fn one_hot_encoder(
     builder: &mut DigitalBuilder,
     inputs: &[NetId],
 ) -> Result<Vec<NetId>, SimError> {
-    validate_encoder(inputs)?;
+    validate_power_of_two(inputs, "encoder", 64)?;
     Ok(encode_lines(builder, inputs))
 }
 
@@ -46,7 +46,7 @@ pub fn leading_zero_count(
     builder: &mut DigitalBuilder,
     data: &[NetId],
 ) -> Result<Vec<NetId>, SimError> {
-    validate_encoder(data)?;
+    validate_power_of_two(data, "encoder", 64)?;
     let width = data.len();
     let count_bits = width.trailing_zeros() as usize + 1;
     let zero = builder.constant(false);
@@ -87,18 +87,6 @@ fn encode_lines(builder: &mut DigitalBuilder, lines: &[NetId]) -> Vec<NetId> {
             or_all(builder, &terms)
         })
         .collect()
-}
-
-fn validate_encoder(inputs: &[NetId]) -> Result<(), SimError> {
-    let width = inputs.len();
-    if !width.is_power_of_two() || width > 64 {
-        return Err(invalid("encoder width must be a power of two in 1..=64"));
-    }
-    Ok(())
-}
-
-fn invalid(message: &str) -> SimError {
-    SimError::InvalidNetlist(message.to_string())
 }
 
 #[cfg(test)]

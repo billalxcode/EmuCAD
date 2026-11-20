@@ -1,5 +1,6 @@
 //! Combinational unsigned magnitude comparator.
 
+use super::blocks::validate_pair;
 use super::circuit::{DigitalBuilder, NetId};
 use kernel::SimError;
 
@@ -19,7 +20,7 @@ pub fn comparator_unsigned(
     first: &[NetId],
     second: &[NetId],
 ) -> Result<Comparison, SimError> {
-    validate_comparator(first, second)?;
+    validate_pair(first, second, "comparator", 64)?;
     let mut state = CompareState {
         less: builder.constant(false),
         equal: builder.constant(true),
@@ -60,20 +61,6 @@ fn compare_bit(
         equal: builder.and(state.equal, bit_equal),
         greater: builder.or(state.greater, higher),
     }
-}
-
-fn validate_comparator(first: &[NetId], second: &[NetId]) -> Result<(), SimError> {
-    if first.len() != second.len() {
-        return Err(invalid("comparator operand width mismatch"));
-    }
-    if first.is_empty() || first.len() > 64 {
-        return Err(invalid("comparator width must be 1..=64"));
-    }
-    Ok(())
-}
-
-fn invalid(message: &str) -> SimError {
-    SimError::InvalidNetlist(message.to_string())
 }
 
 #[cfg(test)]
