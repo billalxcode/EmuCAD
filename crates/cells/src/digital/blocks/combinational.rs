@@ -65,6 +65,25 @@ pub fn validate_operands(
     Ok(())
 }
 
+/// Selects between two equally sized vectors.
+pub fn select_vector(
+    builder: &mut DigitalBuilder,
+    first: &[NetId],
+    second: &[NetId],
+    select: NetId,
+) -> Result<Vec<NetId>, SimError> {
+    if first.len() != second.len() {
+        return Err(SimError::InvalidNetlist(
+            "select operand width mismatch".to_string(),
+        ));
+    }
+    Ok(first
+        .iter()
+        .zip(second)
+        .map(|(&left, &right)| builder.mux(left, right, select))
+        .collect())
+}
+
 /// Builds a multiplexer tree. The number of inputs must be two to the
 /// power of the number of select nets.
 pub fn mux_tree(

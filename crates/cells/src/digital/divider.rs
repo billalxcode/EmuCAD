@@ -1,6 +1,6 @@
 //! Combinational restoring and non-restoring dividers.
 
-use super::blocks::{add_vectors, validate_operands};
+use super::blocks::{add_vectors, select_vector, validate_operands};
 use super::circuit::{DigitalBuilder, NetId};
 use kernel::SimError;
 
@@ -68,7 +68,7 @@ fn restore_quotient(
     for bit in (0..width).rev() {
         let shifted = shift_in(&remainder, dividend[bit]);
         let (difference, carry) = add_vectors(builder, &shifted, inverted, one)?;
-        remainder = select_vector(builder, &shifted, &difference, carry);
+        remainder = select_vector(builder, &shifted, &difference, carry)?;
         quotient[bit] = carry;
     }
     Ok((quotient, remainder))
@@ -100,19 +100,6 @@ fn shift_in(remainder: &[NetId], bit: NetId) -> Vec<NetId> {
     next.push(bit);
     next.extend_from_slice(&remainder[..remainder.len() - 1]);
     next
-}
-
-fn select_vector(
-    builder: &mut DigitalBuilder,
-    first: &[NetId],
-    second: &[NetId],
-    select: NetId,
-) -> Vec<NetId> {
-    first
-        .iter()
-        .zip(second)
-        .map(|(&left, &right)| builder.mux(left, right, select))
-        .collect()
 }
 
 fn invert_vector(builder: &mut DigitalBuilder, data: &[NetId]) -> Vec<NetId> {

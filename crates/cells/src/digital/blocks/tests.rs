@@ -1,6 +1,6 @@
 use super::{
     ProgramCounter, StackPointer, add_vectors, and_all, counter, decoder, full_adder, mux_tree,
-    or_all, read_bits, register, shift_register, validate_operands,
+    or_all, read_bits, register, select_vector, shift_register, validate_operands,
 };
 use crate::digital::{DigitalBuilder, DigitalCircuit, NetId};
 
@@ -278,4 +278,33 @@ fn operand_validation_checks_width_and_pair() {
     let first = named_inputs(&mut builder, "e", 8);
     let second = named_inputs(&mut builder, "f", 8);
     assert!(validate_operands(&first, &second, "test", 32).is_ok());
+}
+
+#[test]
+fn vector_select_switches_inputs() {
+    let mut builder = DigitalBuilder::new();
+    let first = named_inputs(&mut builder, "a", 4);
+    let second = named_inputs(&mut builder, "b", 4);
+    let select = builder.input("sel");
+    let output = select_vector(&mut builder, &first, &second, select).expect("select");
+    let mut circuit = builder.build();
+    for value in 0..16 {
+        set_bits(&mut circuit, "a", value, 4);
+        set_bits(&mut circuit, "b", 15 - value, 4);
+        circuit.set_input("sel", false).expect("sel");
+        circuit.settle().expect("settle");
+        assert_eq!(read_bits(&circuit, &output), value);
+        circuit.set_input("sel", true).expect("sel");
+        circuit.settle().expect("settle");
+        assert_eq!(read_bits(&circuit, &output), 15 - value);
+    }
+}
+
+#[test]
+fn vector_select_rejects_width_mismatch() {
+    let mut builder = DigitalBuilder::new();
+    let first = named_inputs(&mut builder, "a", 4);
+    let second = named_inputs(&mut builder, "b", 3);
+    let select = builder.input("sel");
+    assert!(select_vector(&mut builder, &first, &second, select).is_err());
 }
