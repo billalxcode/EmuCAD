@@ -609,6 +609,8 @@ Status ringkas:
 - `main` belum di-merge karena merge memicu workflow rilis.
 - Audit struktur AVR ada di `docs/91-avr-audit.md`; status masih hybrid
   dan beberapa blok structural belum terhubung ke CPU.
+- Kebutuhan `cells` untuk multi-MCU ada di
+  `docs/92-cells-mcu-requirements.md`.
 
 S7 yang sudah berjalan:
 

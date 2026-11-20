@@ -98,6 +98,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 89 | [Rilis biner](89-release.md) | Versi workspace, target, arsip, dan SHA512 GitHub Release |
 | 90 | [Mixed-signal](90-mixed-signal.md) | Scheduler co-sim digital-analog dengan AVR, ADC, PWM, dan UART |
 | 91 | [Audit struktur AVR](91-avr-audit.md) | Kategori modul, integrasi cells, temuan, dan rencana cleanup |
+| 92 | [Kebutuhan cells multi-MCU](92-cells-mcu-requirements.md) | Kesiapan cells untuk AVR, STM32, ESP32, dan CPU lain |
 
 ### 3.2 Fondasi
 
