@@ -1,6 +1,6 @@
 use super::{
-    ProgramCounter, StackPointer, and_all, counter, decoder, full_adder, mux_tree, or_all,
-    read_bits, register, shift_register,
+    ProgramCounter, StackPointer, add_vectors, and_all, counter, decoder, full_adder, mux_tree,
+    or_all, read_bits, register, shift_register,
 };
 use crate::digital::{DigitalBuilder, DigitalCircuit, NetId};
 
@@ -234,4 +234,34 @@ fn digital_full_adder_truth_table() {
         assert_eq!(circuit.output("sum").expect("sum"), total & 1 != 0);
         assert_eq!(circuit.output("carry").expect("carry"), total >= 2);
     }
+}
+
+#[test]
+fn vector_adder_propagates_carry() {
+    let mut builder = DigitalBuilder::new();
+    let first = named_inputs(&mut builder, "a", 4);
+    let second = named_inputs(&mut builder, "b", 4);
+    let carry_in = builder.input("cin");
+    let (sum, carry_out) = add_vectors(&mut builder, &first, &second, carry_in).expect("adder");
+    let mut circuit = builder.build();
+    for first_value in 0..16 {
+        for second_value in 0..16 {
+            set_bits(&mut circuit, "a", first_value, 4);
+            set_bits(&mut circuit, "b", second_value, 4);
+            circuit.set_input("cin", true).expect("cin");
+            circuit.settle().expect("settle");
+            let total = first_value + second_value + 1;
+            assert_eq!(read_bits(&circuit, &sum), total & 0xF);
+            assert_eq!(circuit.value(carry_out), total > 0xF);
+        }
+    }
+}
+
+#[test]
+fn vector_adder_rejects_width_mismatch() {
+    let mut builder = DigitalBuilder::new();
+    let first = named_inputs(&mut builder, "a", 4);
+    let second = named_inputs(&mut builder, "b", 3);
+    let carry_in = builder.input("cin");
+    assert!(add_vectors(&mut builder, &first, &second, carry_in).is_err());
 }

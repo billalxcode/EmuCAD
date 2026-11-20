@@ -22,6 +22,28 @@ pub fn or_all(builder: &mut DigitalBuilder, inputs: &[NetId]) -> NetId {
         .fold(inputs[0], |left, right| builder.or(left, *right))
 }
 
+/// Adds two vectors with a carry input.
+pub fn add_vectors(
+    builder: &mut DigitalBuilder,
+    first: &[NetId],
+    second: &[NetId],
+    carry_in: NetId,
+) -> Result<(Vec<NetId>, NetId), SimError> {
+    if first.len() != second.len() {
+        return Err(SimError::InvalidNetlist(
+            "adder operand width mismatch".to_string(),
+        ));
+    }
+    let mut carry = carry_in;
+    let mut sum = Vec::with_capacity(first.len());
+    for index in 0..first.len() {
+        let (bit, next) = full_adder(builder, first[index], second[index], carry);
+        sum.push(bit);
+        carry = next;
+    }
+    Ok((sum, carry))
+}
+
 /// Builds a multiplexer tree. The number of inputs must be two to the
 /// power of the number of select nets.
 pub fn mux_tree(
