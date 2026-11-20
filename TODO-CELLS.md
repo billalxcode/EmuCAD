@@ -152,7 +152,10 @@ Exit P0:
     hasil pada nilai maksimum atau nol.
 - [ ] CELL-01-07 Generalisasi LUT dan FSM dengan width dan jumlah state
   yang dapat dikonfigurasi.
-- [ ] CELL-01-08 Tambahkan crossbar dan bus mux parameterized.
+- [x] CELL-01-08 Tambahkan crossbar dan bus mux parameterized.
+  - `bus_mux` memilih satu dari 1..=64 bus dengan lebar sama.
+  - `crossbar` merutekan satu bus per output secara independen.
+  - Jumlah bus dan lebar select divalidasi.
 - [ ] CELL-01-09 Tambahkan equivalence test antara model fungsional dan
   structural untuk ALU, shifter, multiplier, dan divider.
 - [x] CELL-02-01 Tambahkan register dengan enable, clear, preset, dan

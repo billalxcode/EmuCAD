@@ -226,6 +226,16 @@ Test lapisan digital mencakup:
 - Test memeriksa model Rust untuk reverse, swap, popcount, dan
   saturasi.
 
+## 9.6 Bus Mux dan Crossbar
+
+- `bus_mux` memilih satu dari sekumpulan bus dengan lebar sama.
+- Jumlah bus harus power-of-two 1..=64 dan lebar select
+  `log2(jumlah bus)`.
+- `crossbar` memakai satu select per output sehingga setiap output
+  dapat memilih input sendiri.
+- Lebar seluruh bus harus sama dan berada di 1..=64.
+- Test memilih setiap bus dan menukar rute dua output.
+
 ---
 
 ## 10. CPU Uji

@@ -8,6 +8,7 @@ pub mod circuit;
 pub mod compare;
 pub mod counters;
 pub mod cpu;
+pub mod crossbar;
 pub mod divider;
 pub mod encoder;
 pub mod module;
@@ -34,6 +35,7 @@ pub use cpu::{
     Cpu, CpuTrace, OP_ADD, OP_AND, OP_HLT, OP_JMP, OP_JNZ, OP_JZ, OP_LDI, OP_MOV, OP_NOP, OP_OR,
     OP_SUB, OP_XOR, encode_alu, encode_branch, encode_hlt, encode_ldi,
 };
+pub use crossbar::{bus_mux, crossbar};
 pub use divider::{Division, divider_non_restoring, divider_restoring};
 pub use encoder::{PriorityEncoding, leading_zero_count, one_hot_encoder, priority_encoder};
 pub use module::DigitalModule;

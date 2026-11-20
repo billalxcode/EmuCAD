@@ -2,8 +2,8 @@
 
 Tanggal: 2026-11-20
 Status: P0 selesai; P1 berjalan dengan ALU, register, counter,
-shifter, multiplier, divider, comparator, encoder, dan bit
-manipulation.
+shifter, multiplier, divider, comparator, encoder, bit manipulation,
+dan bus mux/crossbar.
 `DigitalVector`, `DigitalModule`, `BusResolver`, wired-AND,
 `ClockDomain`, `ResetDomain`, dan `reset_synchronizer` ada di `cells`.
 `McuSpec` dan `BusSpec` ada di crate `soc`.
@@ -101,6 +101,7 @@ Sudah:
 - Priority encoder dan one-hot encoder untuk jumlah input
   power-of-two 1..=64.
 - Bit reverse, byte swap, popcount, dan saturating add/sub unsigned.
+- Bus mux dan crossbar parameterized.
 - LUT dan finite state machine kecil di katalog digital.
 
 Sebagian:
@@ -112,7 +113,6 @@ Sebagian:
 Belum:
 
 - Carry-lookahead adder dan prefix adder untuk jalur kritis.
-- Crossbar mux dan bus mux parameterized.
 - Formal equivalence block untuk ALU dan shifter.
 
 ### 3.3 Sequential dan Memory
@@ -324,7 +324,7 @@ Belum:
 | Kebutuhan | Sudah | Sebagian | Belum |
 |---|---|---|---|
 | Gate dasar | Ya | - | Varian drive strength |
-| Arithmetic | Adder, ALU 1..64, shifter, multiplier, divider, comparator, encoder, bit-manip | Parity, LUT | Carry-lookahead, crossbar |
+| Arithmetic | Adder, ALU 1..64, shifter, multiplier, divider, comparator, encoder, bit-manip, crossbar | Parity, LUT | Carry-lookahead |
 | Sequential | DFF, register, counter | Counter 1..16, PC/SP 16-bit | FIFO, CDC, pipeline |
 | Memory | SRAM6T, array 128x8 | Register file 2R1W | Memory compiler, cache, ECC |
 | CPU | CPU mainan 16-bit | ISA decoder kecil | Pipeline, CSR, exception, 32-bit |
