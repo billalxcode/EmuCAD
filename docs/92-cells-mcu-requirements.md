@@ -2,8 +2,8 @@
 
 Tanggal: 2026-11-20
 Status: P0 selesai; P1 berjalan dengan `digital_alu_width` 1..=64 bit,
-`register_file_masked`, barrel/funnel shifter, multiplier, divider,
-comparator, dan encoder.
+`register_file_masked`, shifter, multiplier, divider, comparator,
+encoder, dan bit manipulation.
 `DigitalVector`, `DigitalModule`, `BusResolver`, wired-AND,
 `ClockDomain`, `ResetDomain`, dan `reset_synchronizer` ada di `cells`.
 `McuSpec` dan `BusSpec` ada di crate `soc`.
@@ -38,6 +38,7 @@ Yang sudah ada:
 - Multiplier array unsigned dan Booth multiplier signed.
 - Divider restoring dan non-restoring unsigned.
 - Comparator unsigned dan priority/one-hot encoder.
+- Bit reverse, byte swap, popcount, dan saturating arithmetic.
 - Register file 32 x 8 dengan dua read port dan satu write port.
 - Program counter dan stack pointer 16-bit.
 - CPU mainan 16-bit dengan 32 register 8-bit dan ISA kecil.
@@ -99,6 +100,7 @@ Sudah:
 - Comparator unsigned dan leading-zero count untuk width 1..=64.
 - Priority encoder dan one-hot encoder untuk jumlah input
   power-of-two 1..=64.
+- Bit reverse, byte swap, popcount, dan saturating add/sub unsigned.
 - LUT dan finite state machine kecil di katalog digital.
 
 Sebagian:
@@ -109,7 +111,6 @@ Sebagian:
 
 Belum:
 
-- Bit reverse, byte swap, saturating arithmetic.
 - Carry-lookahead adder dan prefix adder untuk jalur kritis.
 - Crossbar mux dan bus mux parameterized.
 - Formal equivalence block untuk ALU dan shifter.
@@ -322,7 +323,7 @@ Belum:
 | Kebutuhan | Sudah | Sebagian | Belum |
 |---|---|---|---|
 | Gate dasar | Ya | - | Varian drive strength |
-| Arithmetic | Adder, ALU 1..64, shifter, multiplier, divider, comparator, encoder | Parity, LUT | Bit-manip |
+| Arithmetic | Adder, ALU 1..64, shifter, multiplier, divider, comparator, encoder, bit-manip | Parity, LUT | Carry-lookahead, crossbar |
 | Sequential | DFF, register, counter | Counter 1..16, PC/SP 16-bit | FIFO, CDC, pipeline |
 | Memory | SRAM6T, array 128x8 | Register file 2R1W | Memory compiler, cache, ECC |
 | CPU | CPU mainan 16-bit | ISA decoder kecil | Pipeline, CSR, exception, 32-bit |

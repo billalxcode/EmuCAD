@@ -1,6 +1,7 @@
 //! Two-state digital logic and digital blocks.
 
 pub mod alu;
+pub mod bitops;
 pub mod blocks;
 pub mod bus;
 pub mod circuit;
@@ -16,6 +17,9 @@ pub mod shifter;
 pub mod vector;
 
 pub use alu::{DigitalAlu, digital_alu, digital_alu_width};
+pub use bitops::{
+    bit_reverse, byte_swap, popcount, saturating_add_unsigned, saturating_sub_unsigned,
+};
 pub use blocks::{
     ProgramCounter, StackPointer, and_all, counter, decoder, decrement, full_adder, increment,
     mux_tree, or_all, read_bits, register, shift_register,

@@ -11,7 +11,7 @@ mod tests;
 
 pub use combinational::{
     add_vectors, and_all, decoder, invert_vector, mux_tree, or_all, read_bits, select_vector,
-    validate_operands, validate_pair, validate_power_of_two,
+    validate_operands, validate_pair, validate_power_of_two, validate_width,
 };
 pub use pointers::{ProgramCounter, StackPointer};
 pub use registers::{

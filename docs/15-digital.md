@@ -117,6 +117,7 @@ Test lapisan digital mencakup:
 - Divider restoring dan non-restoring.
 - Comparator, priority encoder, one-hot encoder, dan leading-zero
   count.
+- Bit reverse, byte swap, popcount, dan saturating arithmetic.
 
 ## 7. Register File
 
@@ -195,6 +196,17 @@ Test lapisan digital mencakup:
 - Jumlah input encoder harus power-of-two 1..=64.
 - Test menyapu seluruh pola 8-bit untuk priority encoder dan
   leading-zero count.
+
+## 9.5 Bit Manipulation
+
+- `bit_reverse` membalik urutan bit untuk width 1..=64.
+- `byte_swap` membalik urutan byte untuk width kelipatan 8.
+- `popcount` menghitung bit satu untuk width power-of-two 1..=64.
+- `saturating_add_unsigned` berhenti di nilai maksimum saat carry.
+- `saturating_sub_unsigned` berhenti di nol saat borrow.
+- Semua fungsi mengembalikan vektor LSB-first.
+- Test memeriksa model Rust untuk reverse, swap, popcount, dan
+  saturasi.
 
 ---
 

@@ -143,8 +143,13 @@ Exit P0:
   - `one_hot_encoder` mengubah vektor one-hot menjadi index biner.
   - `leading_zero_count` menghitung nol di depan untuk width
     power-of-two 1..=64.
-- [ ] CELL-01-06 Tambahkan bit reverse, byte swap, popcount, dan
+- [x] CELL-01-06 Tambahkan bit reverse, byte swap, popcount, dan
   saturating arithmetic.
+  - `bit_reverse` dan `byte_swap` mengubah urutan bit atau byte tanpa
+    gate tambahan.
+  - `popcount` menghitung bit satu untuk width power-of-two 1..=64.
+  - `saturating_add_unsigned` dan `saturating_sub_unsigned` membatasi
+    hasil pada nilai maksimum atau nol.
 - [ ] CELL-01-07 Generalisasi LUT dan FSM dengan width dan jumlah state
   yang dapat dikonfigurasi.
 - [ ] CELL-01-08 Tambahkan crossbar dan bus mux parameterized.

@@ -41,13 +41,14 @@ pub use digital::{
     DigitalAlu, DigitalBuilder, DigitalCircuit, DigitalModule, DigitalVector, Division, NetId,
     OP_ADD, OP_AND, OP_HLT, OP_JMP, OP_JNZ, OP_JZ, OP_LDI, OP_MOV, OP_NOP, OP_OR, OP_SUB, OP_XOR,
     PriorityEncoding, ProgramCounter, RegisterFile, RegisterPorts, ResetDomain, StackPointer,
-    and_all, arithmetic_shift_right, barrel_shift_left, barrel_shift_right, comparator_unsigned,
-    counter, decoder, decrement, digital_alu, digital_alu_width, divider_non_restoring,
-    divider_restoring, encode_alu, encode_branch, encode_hlt, encode_ldi,
+    and_all, arithmetic_shift_right, barrel_shift_left, barrel_shift_right, bit_reverse, byte_swap,
+    comparator_unsigned, counter, decoder, decrement, digital_alu, digital_alu_width,
+    divider_non_restoring, divider_restoring, encode_alu, encode_branch, encode_hlt, encode_ldi,
     full_adder as digital_full_adder, funnel_shift_left, funnel_shift_right, increment,
     leading_zero_count, multiplier_array, multiplier_booth, mux_tree, one_hot_encoder, or_all,
-    priority_encoder, read_bits, register, register_file, register_file_masked, reset_synchronizer,
-    resolve_bus, resolve_open_drain, rotate_left, rotate_right, shift_register,
+    popcount, priority_encoder, read_bits, register, register_file, register_file_masked,
+    reset_synchronizer, resolve_bus, resolve_open_drain, rotate_left, rotate_right,
+    saturating_add_unsigned, saturating_sub_unsigned, shift_register,
 };
 pub use registry::CellKind;
 pub use sequential::{d_flip_flop, d_latch, ring_oscillator, sram6t};
