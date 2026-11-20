@@ -697,13 +697,13 @@ S7 yang sudah berjalan:
 
 Commit fitur terakhir:
 
+- `a689dcb feat(avr): add ATmega328P package pin map`
 - `db9468f feat(mixed): interpolate PWM and UART edge events`
 - `9e8d432 test(mixed): verify all mapped AVR pins`
 - `5ab2e4e feat(mixed): interpolate timer events within steps`
 - `9734772 feat(soc): validate memory and IRQ maps`
 - `d2e1486 feat(cells): add valid-ready handshake buffer`
 - `1e2d423 feat(cells): add synchronous memory`
-- `32b06a7 feat(cells): add generic LUT and FSM`
 - `34dacd1 feat(cells): add synchronous FIFO`
 
 Gap S7 yang masih terbuka:
