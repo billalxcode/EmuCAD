@@ -23,3 +23,6 @@ board = { path = "../board" }
 analysis = { path = "../analysis" }
 kernel = { path = "../kernel" }
 device = { path = "../device" }
+
+[dev-dependencies]
+mixed = { path = "../mixed" }

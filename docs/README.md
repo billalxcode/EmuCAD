@@ -2,7 +2,7 @@
 
 Pintu masuk dokumentasi EmuCAD versi 0.1.0.
 
-**Status saat ini:** 1269 test lulus, 11 crate, crate simulasi zero external
+**Status saat ini:** 1270 test lulus, 11 crate, crate simulasi zero external
 dependency Rust. Dependensi GUI dan binding Python dibatasi pada daftar
 yang disetujui di `AGENTS.md`. Tag `v0.1` tersedia.
 
@@ -198,7 +198,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 |---|---|
 | Versi workspace | `0.1.0` |
 | Tag | `v0.1` |
-| Test | 1269 lulus |
+| Test | 1270 lulus |
 | Crate | 10 |
 | Dependensi eksternal | 0 untuk crate simulasi; `pyo3` hanya di `python` |
 | `unsafe` | Dilarang manual; glue `pyo3` diisolasi di `python` |
@@ -222,9 +222,9 @@ Setiap dokumen muncul satu kali pada peta ini.
 | `mixed` | 28 |
 | `soc` | 11 |
 | `cli` | 40 |
-| `gui` | 305 |
+| `gui` | 306 |
 | `python` | 8 |
-| **Total** | **1269** |
+| **Total** | **1270** |
 
 ---
 

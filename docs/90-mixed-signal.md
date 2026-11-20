@@ -332,6 +332,12 @@ Test `extracts_mcu_package_nets` di GUI:
 - Netlist menyimpan pemetaan nomor pin paket ke node listrik.
 - Pin 3 terhubung ke ground dan pin lain tetap menjadi node terpisah.
 
+Test `builds_mixed_session_from_netlist` di GUI:
+
+- Netlist MCU, resistor, dan ground diubah menjadi `AvrSession`.
+- Sumber tersembunyi ditambahkan untuk pin output PB5.
+- Firmware mengatur DDRB dan PORTB, lalu node analog mencapai 5 V.
+
 ## 5. Batas
 
 - Umpan balik analog hanya satu input dan satu threshold.
@@ -344,7 +350,9 @@ Test `extracts_mcu_package_nets` di GUI:
 - `io_locations` mengembalikan 23 IO yang ter-bonding; PC7 tidak ada
   di paket 32 pin.
 - Netlist GUI menyimpan pemetaan 32 pin paket ke node listrik.
-- Session mixed dari netlist GUI belum dibangun.
+- Prototipe `build_mixed_session` membangun `AvrSession` dari netlist,
+  sumber tersembunyi, ADC, PWM, dan UART.
+- Builder mixed masih test-only dan belum dipanggil worker GUI.
 - Pin daya, reset, dan paket 32 pin belum disimulasikan secara elektrik.
 - Index pin pada session mengikuti urutan `links`, bukan nomor package.
 - Breakpoint pin berlaku untuk semua link yang terdaftar.

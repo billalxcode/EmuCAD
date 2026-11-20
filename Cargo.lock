@@ -1433,6 +1433,7 @@ dependencies = [
  "device",
  "eframe",
  "kernel",
+ "mixed",
  "png",
  "rfd",
  "serde",

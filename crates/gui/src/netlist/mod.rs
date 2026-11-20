@@ -466,6 +466,7 @@ fn part_nets(
 ) -> Vec<usize> {
     part.pins
         .iter()
+        .filter(|pin| index.contains(pin.point))
         .map(|pin| {
             let root = set.find(index.get(pin.point));
             *table.by_root.get(&root).expect("pin root has node")
@@ -684,6 +685,10 @@ impl PointIndex {
         *self.lookup.get(&point).expect("netlist point indexed")
     }
 
+    fn contains(&self, point: GridPos) -> bool {
+        self.lookup.contains_key(&point)
+    }
+
     fn len(&self) -> usize {
         self.points.len()
     }
@@ -734,8 +739,15 @@ fn collect_points(document: &Document, parts: &[PlacedPart]) -> BTreeSet<GridPos
     for wire in document.wires() {
         points.extend(wire.points.iter().copied());
     }
-    for pin in parts.iter().flat_map(|part| part.pins.iter()) {
-        points.insert(pin.point);
+    let junctions: BTreeSet<GridPos> = document.junctions().into_iter().collect();
+    for part in parts {
+        for pin in &part.pins {
+            let connected = points.contains(&pin.point) || junctions.contains(&pin.point);
+            if part.kind == PartKind::Mcu && !connected {
+                continue;
+            }
+            points.insert(pin.point);
+        }
     }
     points
 }
@@ -977,7 +989,11 @@ fn pin_counts(
     set: &mut DisjointSet,
 ) -> BTreeMap<usize, usize> {
     let mut counts = BTreeMap::new();
-    for pin in parts.iter().flat_map(|part| part.pins.iter()) {
+    for pin in parts
+        .iter()
+        .flat_map(|part| part.pins.iter())
+        .filter(|pin| index.contains(pin.point))
+    {
         let root = set.find(index.get(pin.point));
         *counts.entry(root).or_default() += 1;
     }
@@ -1011,6 +1027,7 @@ fn component_pins(
 ) -> Vec<usize> {
     part.pins
         .iter()
+        .filter(|pin| index.contains(pin.point))
         .map(|pin| {
             let root = set.find(index.get(pin.point));
             *table.by_root.get(&root).expect("pin root has node")
@@ -1042,6 +1059,9 @@ fn mcu_pin_node(
     set: &mut DisjointSet,
     table: &NodeTable,
 ) -> Option<(u8, usize)> {
+    if !index.contains(pin.point) {
+        return None;
+    }
     let number = pin.number.parse().ok()?;
     let root = set.find(index.get(pin.point));
     let node = *table.by_root.get(&root)?;
@@ -1050,6 +1070,12 @@ fn mcu_pin_node(
 
 mod circuit;
 #[cfg(test)]
+mod mixed_session;
+#[cfg(test)]
 mod tests;
 
+#[cfg(test)]
+pub(crate) use circuit::build_circuit_with_sources;
 pub(crate) use circuit::{build_circuit, device_currents, node_voltages, solve_dc};
+#[cfg(test)]
+pub(crate) use mixed_session::{MixedPinPlan, build_mixed_session};

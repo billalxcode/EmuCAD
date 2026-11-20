@@ -1,6 +1,10 @@
-use super::{Netlist, NetlistComponent, NetlistError, device_currents, extract, solve_dc};
+use super::{
+    MixedPinPlan, Netlist, NetlistComponent, NetlistError, build_mixed_session, device_currents,
+    extract, solve_dc,
+};
 use crate::library;
 use crate::model::{ComponentId, Document, GridPos, Mirror, NetClass, Rotation, WireId};
+use analysis::TransientConfig;
 use kernel::NodeId;
 
 fn add(document: &mut Document, id: &str, x: i32, y: i32) -> ComponentId {
@@ -100,10 +104,52 @@ fn extracts_mcu_package_nets() {
     wire(&mut document, &[(4, 6), (2, 6), (2, 36), (21, 36)]);
     let netlist = extract(&document).expect("netlist");
     let mcu = netlist.mcu.expect("mcu");
-    assert_eq!(mcu.pins.len(), 32);
+    assert_eq!(mcu.pins.len(), 1);
     assert_eq!(mcu.pins.get(&3), Some(&netlist.ground));
-    assert_ne!(mcu.pins.get(&1), Some(&netlist.ground));
+    assert_eq!(mcu.pins.get(&1), None);
     assert!(netlist.components.is_empty());
+}
+
+fn mixed_mcu_document() -> Document {
+    let mut document = Document::default();
+    add(&mut document, "atmega328p", 4, 0);
+    add(&mut document, "resistor", 20, 31);
+    add(&mut document, "gnd", 30, 36);
+    wire(&mut document, &[(14, 32), (20, 32)]);
+    wire(&mut document, &[(24, 32), (24, 36), (31, 36)]);
+    document
+}
+
+fn mixed_plan() -> MixedPinPlan {
+    MixedPinPlan {
+        outputs: vec![17],
+        adcs: Vec::new(),
+        pwms: Vec::new(),
+        uart_tx: None,
+        uart_rx: None,
+        high: 5.0,
+        low: 0.0,
+        external_resistance: 1000.0,
+        adc_reference: 5.0,
+        uart_threshold: 2.5,
+    }
+}
+
+#[test]
+fn builds_mixed_session_from_netlist() {
+    let netlist = extract(&mixed_mcu_document()).expect("netlist");
+    let program = vec![0xE200, 0xB904, 0xB905, 0xCFFF];
+    let config = TransientConfig {
+        dt: 1e-6,
+        steps: 10,
+        ..Default::default()
+    };
+    let mut session =
+        build_mixed_session(&netlist, program, &mixed_plan(), &config).expect("session");
+    for _ in 0..3 {
+        session.step().expect("step");
+    }
+    assert!(session.node_voltage(0).unwrap_or(0.0) > 4.0);
 }
 
 #[test]

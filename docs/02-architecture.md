@@ -78,6 +78,7 @@ gui
   |-- board
   |-- avr
   |-- analysis
+  |-- mixed
   |-- device
   `-- kernel
 

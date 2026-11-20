@@ -1,19 +1,88 @@
 //! Netlist-to-circuit conversion and DC solving.
 
-use super::Netlist;
+use super::{McuNetlist, Netlist};
 use analysis::{DcConfig, DcResult, dc_operating_point, dc_terminal_currents};
 use device::{ComponentRegistry, ComponentRequest};
-use kernel::{Circuit, CircuitBuilder, DeviceId, NodeId};
+use kernel::{Circuit, CircuitBuilder, DeviceId, DeviceKind, NodeId};
+use std::collections::BTreeMap;
 
 /// Builds a solver circuit from an extracted netlist.
 pub(crate) fn build_circuit(netlist: &Netlist) -> Result<Circuit, String> {
+    build_circuit_with_sources(netlist, &[]).map(|(circuit, _)| circuit)
+}
+
+/// Builds a circuit with hidden sources for selected MCU package pins.
+pub(crate) fn build_circuit_with_sources(
+    netlist: &Netlist,
+    source_pins: &[u8],
+) -> Result<(Circuit, BTreeMap<u8, DeviceId>), String> {
     let registry = ComponentRegistry::new();
     let mut builder = CircuitBuilder::new();
     let nodes = add_nodes(&mut builder, netlist)?;
     for component in &netlist.components {
         add_component(&mut builder, &registry, component, &nodes)?;
     }
-    builder.build().map_err(|error| error.to_string())
+    let sources = add_mcu_sources(&mut builder, netlist, source_pins, &nodes)?;
+    let circuit = builder.build().map_err(|error| error.to_string())?;
+    Ok((circuit, sources))
+}
+
+fn add_mcu_sources(
+    builder: &mut CircuitBuilder,
+    netlist: &Netlist,
+    source_pins: &[u8],
+    nodes: &[NodeId],
+) -> Result<BTreeMap<u8, DeviceId>, String> {
+    let Some(mcu) = netlist_mcu(netlist, source_pins)? else {
+        return Ok(BTreeMap::new());
+    };
+    let ground = builder.ground();
+    let mut sources = BTreeMap::new();
+    for &pin in source_pins {
+        let node = mcu_source_node(mcu, netlist.ground, pin)?;
+        let id = add_voltage_source(builder, pin, nodes[node], ground)?;
+        sources.insert(pin, id);
+    }
+    Ok(sources)
+}
+
+fn netlist_mcu<'a>(
+    netlist: &'a Netlist,
+    source_pins: &[u8],
+) -> Result<Option<&'a McuNetlist>, String> {
+    match netlist.mcu.as_ref() {
+        Some(mcu) => Ok(Some(mcu)),
+        None if source_pins.is_empty() => Ok(None),
+        None => Err("netlist has no MCU".to_string()),
+    }
+}
+
+fn mcu_source_node(mcu: &McuNetlist, ground: usize, pin: u8) -> Result<usize, String> {
+    let node = *mcu
+        .pins
+        .get(&pin)
+        .ok_or_else(|| format!("MCU pin {pin} is not mapped"))?;
+    if node == ground {
+        return Err(format!("MCU pin {pin} is connected to ground"));
+    }
+    Ok(node)
+}
+
+fn add_voltage_source(
+    builder: &mut CircuitBuilder,
+    pin: u8,
+    node: NodeId,
+    ground: NodeId,
+) -> Result<DeviceId, String> {
+    let parameters = BTreeMap::from([("voltage".to_string(), 0.0)]);
+    builder
+        .device(
+            format!("VAVR{pin}"),
+            DeviceKind::VoltageSource,
+            vec![node, ground],
+            parameters,
+        )
+        .map_err(|error| error.to_string())
 }
 
 /// Solves the DC operating point of an extracted netlist.

@@ -5,7 +5,7 @@ memory sudah punya model digital tetapi belum terverifikasi reference
 vector; MCU gate-level, integrasi mixed di GUI, dan co-sim S7 penuh
 belum selesai.
 
-Snapshot 2026-11-20: 1269 test lulus, 11 crate, branch `dev` sudah
+Snapshot 2026-11-20: 1270 test lulus, 11 crate, branch `dev` sudah
 di-push. `main` belum di-merge.
 
 Tujuan: membuat komponen di skematik GUI dapat disimulasikan dengan model
@@ -476,7 +476,9 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Pin 29 adalah PC6/RESET dan tetap terdaftar sebagai IO.
   - 23 IO ter-bonding; PC7 tidak tersedia di paket 32 pin.
   - Netlist GUI menyimpan pemetaan 32 pin paket ke node listrik.
-  - Session mixed dari netlist GUI belum dibangun.
+  - Prototipe `build_mixed_session` membangun `AvrSession` dari
+    netlist GUI, sumber tersembunyi, ADC, PWM, dan UART.
+  - Builder mixed masih test-only dan belum dipanggil worker GUI.
 - [x] S7-06 Hubungkan pin electrical sebagai Thevenin.
   - Satu pin AVR output diuji dengan resistor seri 45 ohm menuju RC.
   - `AvrPinMap` membawa config dan external resistance per pin.
@@ -627,7 +629,7 @@ dokumentasi menyebut batas fidelity.
 
 Status ringkas:
 
-- 1269 test lulus, 0 gagal melalui
+- 1270 test lulus, 0 gagal melalui
   `bash .opencode/skills/clean-code/scripts/check.sh`.
 - 11 crate; crate simulasi zero external dependency.
 - `fmt`, clippy `-D warnings`, dan pengecekan ASCII lulus.
@@ -713,15 +715,15 @@ Commit fitur terakhir:
 Gap S7 yang masih terbuka:
 
 - S7-02 dan S7-04: kontrol dan peripheral belum full structural.
-- S7-05: simbol GUI 32 pin dan pemetaan paket ke node netlist sudah
-  ada; session mixed dari netlist dan integrasi board belum.
+- S7-05: simbol GUI 32 pin, pemetaan paket ke node netlist, dan
+  builder `AvrSession` sudah ada; integrasi worker/panel GUI belum.
 - Flow control hardware dan integrasi simulasi mixed ke GUI belum.
 - S7-06 dan S7-09 sudah selesai untuk 24 pin IO dan event siklus;
   event pin memakai batas langkah karena dibaca setelah sampel analog.
 
 Prioritas berikutnya:
 
-1. Bangun session mixed dari netlist GUI dan pemetaan paket.
-2. Integrasikan kontrol mixed ke board dan panel GUI.
+1. Panggil builder mixed dari worker/panel simulasi GUI.
+2. Integrasikan kontrol mixed ke board dan probe GUI.
 3. Lanjutkan S6: model digital MCU lain dan verifikasi memory dengan
    reference vector.
