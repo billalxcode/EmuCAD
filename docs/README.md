@@ -181,6 +181,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | [AGENTS.md](../AGENTS.md) | Aturan wajib agent dan kontributor |
 | [TODO.md](../TODO.md) | Daftar tugas dan status milestone |
 | [TODO-SIMULATION.md](../TODO-SIMULATION.md) | Backlog simulasi semua komponen dan pertanyaan keputusan |
+| [TODO-CELLS.md](../TODO-CELLS.md) | Backlog library cells untuk multi-MCU |
 | [README.md](../README.md) | Ringkasan proyek dan quick start |
 | [Examples](../examples/README.md) | Contoh runnable per crate |
 | [Firmware](../firmware/README.md) | Firmware contoh dan batas toolchain |

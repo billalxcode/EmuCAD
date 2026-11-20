@@ -163,6 +163,7 @@ Dokumen yang sering dipakai:
 | [`docs/92-cells-mcu-requirements.md`](docs/92-cells-mcu-requirements.md) | Kesiapan cells untuk multi-MCU dan prioritas library |
 | [`docs/61-design-system.md`](docs/61-design-system.md) | Design system GUI, font, warna, dan spacing |
 | [`TODO-COMPONENTS.md`](TODO-COMPONENTS.md) | Backlog katalog komponen dan Python builder |
+| [`TODO-CELLS.md`](TODO-CELLS.md) | Backlog library cells untuk multi-MCU |
 | [`TODO.md`](TODO.md) | Pekerjaan yang tersisa |
 | [`TODO-GUI.md`](TODO-GUI.md) | Backlog GUI egui |
 
