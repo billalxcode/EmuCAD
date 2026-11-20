@@ -50,6 +50,7 @@ Dengan pemisahan ini, `cells` tetap menjadi library primitive, sedangkan
 
 - `name`.
 - `kind`: RAM, ROM, Flash, EEPROM, FRAM, atau Other.
+- `base_address`.
 - `address_bits`: 1 sampai 64.
 - `data_bits`: 1 sampai 64.
 
@@ -75,6 +76,10 @@ Dengan pemisahan ini, `cells` tetap menjadi library primitive, sedangkan
 - Frequency clock positif.
 - Width bus dan memory valid.
 - Base address peripheral unik.
+- IRQ peripheral unik.
+- Region memory tidak saling tumpang tindih.
+- Fungsi pin tidak kosong.
+- Address map peripheral terhadap memory belum divalidasi.
 
 Validasi mengembalikan `SimError::InvalidNetlist` dengan pesan yang
 menyebut field yang salah.
@@ -105,6 +110,7 @@ let spec = McuSpec {
     memories: vec![MemorySpec {
         name: "sram".to_string(),
         kind: MemoryKind::Ram,
+        base_address: 0x2000_0000,
         address_bits: 12,
         data_bits: 32,
     }],
@@ -116,8 +122,8 @@ assert!(spec.validate().is_ok());
 
 ## 6. Belum Termasuk
 
-- Address map hierarchy dan region overlap antar memory.
-- IRQ map lengkap dan prioritas.
+- Address map hierarchy dan decode logic.
+- IRQ priority dan vector table.
 - Pin mux matrix.
 - Fidelity per blok.
 - Elaboration ke `cells`.

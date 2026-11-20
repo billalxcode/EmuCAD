@@ -99,8 +99,12 @@ Catatan:
   - Semua tipe ada di crate `soc`.
   - `BusSpec` mencakup protocol, data width, dan address width.
   - Elaboration ke `cells` belum; lihat `docs/94-soc-spec.md`.
-- [ ] CELL-00-07 Buat validator address map, IRQ map, pin map, dan
+- [x] CELL-00-07 Buat validator address map, IRQ map, pin map, dan
   memory map.
+  - `McuSpec::validate` menolak region memory yang tumpang tindih.
+  - IRQ peripheral harus unik.
+  - Nama pin unik dan fungsi pin tidak kosong.
+  - Validasi address map peripheral terhadap memory belum ada.
 - [ ] CELL-00-08 Tambahkan enum fidelity per blok: behavioral,
   cycle-accurate, gate-level.
 - [ ] CELL-00-09 Buat elaboration pipeline dari spec ke top-level

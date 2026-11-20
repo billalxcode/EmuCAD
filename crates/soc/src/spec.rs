@@ -138,6 +138,8 @@ pub struct MemorySpec {
     pub name: String,
     /// Memory kind.
     pub kind: MemoryKind,
+    /// Base address.
+    pub base_address: u64,
     /// Address bits.
     pub address_bits: u8,
     /// Data bits.
@@ -223,14 +225,40 @@ fn validate_memories(memories: &[MemorySpec]) -> Result<(), SimError> {
             return Err(invalid("memory data width must be 1..=64"));
         }
     }
-    ensure_unique(memories.iter().map(|memory| memory.name.as_str()), "memory")
+    ensure_unique(memories.iter().map(|memory| memory.name.as_str()), "memory")?;
+    validate_memory_map(memories)
+}
+
+fn validate_memory_map(memories: &[MemorySpec]) -> Result<(), SimError> {
+    let mut ranges: Vec<(u128, u128)> = memories
+        .iter()
+        .map(|memory| {
+            (
+                memory.base_address as u128,
+                memory.base_address as u128 + (1u128 << memory.address_bits),
+            )
+        })
+        .collect();
+    ranges.sort_by_key(|range| range.0);
+    for pair in ranges.windows(2) {
+        if pair[0].1 > pair[1].0 {
+            return Err(invalid("memory regions must not overlap"));
+        }
+    }
+    Ok(())
 }
 
 fn validate_peripherals(peripherals: &[PeripheralSpec]) -> Result<(), SimError> {
     let mut addresses = BTreeSet::new();
+    let mut irqs = BTreeSet::new();
     for peripheral in peripherals {
-        if !addresses.insert(peripheral.base_address) {
-            return Err(invalid("peripheral base addresses must be unique"));
+        insert_unique(
+            &mut addresses,
+            peripheral.base_address,
+            "peripheral base addresses must be unique",
+        )?;
+        if let Some(irq) = peripheral.irq {
+            insert_unique(&mut irqs, irq, "peripheral IRQs must be unique")?;
         }
     }
     ensure_unique(
@@ -241,7 +269,19 @@ fn validate_peripherals(peripherals: &[PeripheralSpec]) -> Result<(), SimError> 
     )
 }
 
+fn insert_unique<T: Ord>(seen: &mut BTreeSet<T>, value: T, message: &str) -> Result<(), SimError> {
+    if !seen.insert(value) {
+        return Err(invalid(message));
+    }
+    Ok(())
+}
+
 fn validate_pins(pins: &[PinSpec]) -> Result<(), SimError> {
+    for pin in pins {
+        if pin.function.trim().is_empty() {
+            return Err(invalid("pin function must not be empty"));
+        }
+    }
     ensure_unique(pins.iter().map(|pin| pin.name.as_str()), "pin")
 }
 
@@ -311,6 +351,7 @@ mod tests {
         MemorySpec {
             name: "sram".to_string(),
             kind: MemoryKind::Ram,
+            base_address: 0x2000_0000,
             address_bits: 12,
             data_bits: 32,
         }
@@ -378,6 +419,43 @@ mod tests {
     fn rejects_duplicate_pin_name() {
         let mut spec = minimal();
         spec.pins.push(spec.pins[0].clone());
+        assert!(spec.validate().is_err());
+    }
+
+    #[test]
+    fn rejects_overlapping_memory_regions() {
+        let mut spec = minimal();
+        let mut overlap = memory();
+        overlap.name = "sram2".to_string();
+        overlap.base_address = 0x2000_0100;
+        spec.memories.push(overlap);
+        assert!(spec.validate().is_err());
+    }
+
+    #[test]
+    fn accepts_adjacent_memory_regions() {
+        let mut spec = minimal();
+        let mut next = memory();
+        next.name = "sram2".to_string();
+        next.base_address = 0x2000_1000;
+        spec.memories.push(next);
+        assert!(spec.validate().is_ok());
+    }
+
+    #[test]
+    fn rejects_duplicate_irq() {
+        let mut spec = minimal();
+        let mut duplicate = peripheral();
+        duplicate.name = "timer1".to_string();
+        duplicate.base_address = 0x2000;
+        spec.peripherals.push(duplicate);
+        assert!(spec.validate().is_err());
+    }
+
+    #[test]
+    fn rejects_empty_pin_function() {
+        let mut spec = minimal();
+        spec.pins[0].function = " ".to_string();
         assert!(spec.validate().is_err());
     }
 }
