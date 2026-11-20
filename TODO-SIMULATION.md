@@ -395,8 +395,9 @@ model, input, output, dan referensi yang jelas.
     interface, dan timing.
   - Bukan transistor-level atau HDL pihak ketiga.
 - [~] S6-02 Tulis gate-level dari nol sebagai komponen Rust.
-  - AVR memakai `cells` untuk datapath dan register, tetapi kontrol
-    dan peripheral masih hybrid.
+  - AVR memakai `cells` untuk GPIO; register bank, ALU, instruction
+    register, dan unit structural lain belum terhubung ke eksekusi.
+  - Kontrol dan peripheral masih hybrid.
   - PIC, 8051, ARM Cortex-M, RISC-V, ESP32, STM32, dan RP2040 belum.
   - Tidak memakai HDL pihak ketiga.
 - [~] S6-03 Implementasikan memory gate-level.
@@ -412,12 +413,14 @@ model, input, output, dan referensi yang jelas.
   - I2C EEPROM dengan random read sudah ada.
   - SD card dengan satu blok 512 byte sudah ada.
   - Seluruh 15 entry memory sudah memiliki model digital.
+  - 0 dari 15 entry terverifikasi penuh dengan reference vector atau
+    data kalibrasi.
 - [~] S6-04 Gunakan `cells` untuk sel memory dan logic.
-  - AVR datapath, register bank, ALU, dan register file memakai
-    `cells`.
   - Seluruh entry memory katalog (SRAM, non-volatile, ROM, PROM,
     module, controller, SPI flash, I2C EEPROM, dan SD card) memakai
     `cells`.
+  - AVR register bank, ALU, instruction register, dan unit structural
+    lain belum dipakai oleh jalur eksekusi.
   - Sel memory digital lain belum.
 - [~] S6-05 Tambahkan model interface dan timing.
   - Timing digital AVR dan peripheral sudah diuji sebagian.
@@ -426,6 +429,7 @@ model, input, output, dan referensi yang jelas.
   test per keluarga.
   - Suite AVR sudah ada.
   - Suite MCU lain belum.
+  - S8-04 merujuk ke item ini; jangan membuat suite terpisah.
 - [x] S6-07 Dokumentasikan batas structural dan performa.
   - Lihat `docs/64-gate-level.md` dan `docs/63-fidelity.md`.
 - [~] S6-08 Ukur waktu build dan waktu simulasi per MCU dan memory.
@@ -526,14 +530,18 @@ simulasi dengan sumber gate-level yang dapat diaudit.
 - [~] S8-03 Sediakan CI container dengan ngspice dan golden test wajib.
   - `ci/ngspice.Dockerfile`, `scripts/ngspice_golden.sh`, dan job CI
     sudah ada.
-  - Job belum dieksekusi lokal karena akses Docker socket ditolak;
-    hasil CI belum diverifikasi.
+  - Harness membandingkan keluaran EmuCAD dengan ngspice, bukan nilai
+    analitik.
+  - Run nyata belum dieksekusi karena Docker socket dan ngspice lokal
+    tidak tersedia; hasil CI belum diverifikasi.
 - [~] S8-04 Tambahkan instruction suite, peripheral suite, dan timing test.
+  - Sumber tugas: S6-06. Jangan membuat suite duplikat.
   - Suite AVR sudah ada di `avr`.
   - Timing suite lintas MCU belum.
 - [~] S8-05 Ukur performa real-time semua MCU di desktop dan akurasi 500 komponen.
   - AVR dan memory macro sudah diukur.
-  - 11 MCU dan 500 komponen belum diukur seluruhnya.
+  - Coverage entry-level ada di `docs/93-catalog-coverage.md`.
+  - 11 MCU dan akurasi 500 komponen belum diukur seluruhnya.
 - [~] S8-06 Perbarui docs, README, dan TODO.
   - Fidelity, benchmark, reference circuit, dan persistensi sudah
     diperbarui.

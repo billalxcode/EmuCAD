@@ -32,17 +32,17 @@ Setiap klaim harus punya:
 | Dioda | Device model | Analitik, clamp, dan transient | Model sederhana |
 | BJT | Device model | DC bias dan AC gain | Ebers-Moll |
 | JFET | Device model | DC bias dan AC gain | Model sederhana |
-| Register file | Struktural | Test logika | DFF ideal |
-| ALU/control | Struktural | ISA test vector | Delay dari sel |
+| Register file | Structural block, belum wired | Test logika | DFF ideal; CPU memakai array fungsional |
+| ALU/control | Structural block dan functional fast path | ISA test vector | Blok structural belum wired |
 | SRAM (data space AVR) | Behavioral | Firmware test | `Cpu.data: Vec<u8>`; bukan macro gate-level |
 | Flash (program AVR) | Behavioral | Firmware test | `ProgramMemory: Vec<u16>`; bukan macro gate-level |
 | Macro memory katalog | Gate-level digital (model) | Unit test fungsional | 15/15 entry punya `DigitalEntry`; 11/15 punya test langsung; 0/15 terverifikasi penuh |
 | GPIO | Struktural | Pin test | Model listrik terbatas |
-| Timer | Struktural | Periode/PWM test | Detail silikon tidak |
-| UART | Struktural | Loopback/hello | Tanpa noise |
-| SPI | Struktural | Loopback | Tanpa noise |
-| I2C | Struktural | Master/slave test | Arbitration terbatas |
-| ADC | Struktural | Kode vs tegangan | Model analog L1 |
+| Timer | Behavioral | Periode/PWM test | Bukan structural |
+| UART | Behavioral | Loopback/hello | Bukan structural |
+| SPI | Behavioral | Loopback | Bukan structural |
+| I2C | Behavioral | Master/slave test | Arbitration terbatas |
+| ADC | Behavioral | Kode vs tegangan | Model analog L1 |
 | Comparator | Struktural | Threshold test | Hysteresis terbatas |
 | EEPROM | Struktural | Read/write | Timing ideal |
 | Watchdog | Struktural | Reset test | Timing ideal |
@@ -63,6 +63,10 @@ katalog, bukan verifikasi penuh: 0/15 punya reference vector atau data
 kalibrasi. SRAM dan Flash pada tabel di atas adalah memory jalur eksekusi
 AVR yang masih behavioral (`Cpu.data` dan `ProgramMemory`), bukan macro
 katalog. Rincian ada di `docs/63-fidelity.md` bagian 5.
+
+Catatan integrasi AVR: register file dan ALU structural belum
+terhubung ke jalur eksekusi CPU; timer, UART, SPI, I2C, dan ADC masih
+behavioral. Audit lengkap ada di `docs/91-avr-audit.md`.
 
 ## 3. Test Pyramid
 
