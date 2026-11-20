@@ -17,6 +17,29 @@ pub(crate) struct Netlist {
     pub nodes: Vec<NetNode>,
     pub ground: usize,
     pub components: Vec<NetlistComponent>,
+    pub mcu: Option<McuNetlist>,
+}
+
+/// Package pin to node mapping for one MCU.
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct McuNetlist {
+    pub label: String,
+    pub pins: BTreeMap<u8, usize>,
+}
+
+impl Netlist {
+    fn new(
+        nodes: Vec<NetNode>,
+        components: Vec<NetlistComponent>,
+        mcu: Option<McuNetlist>,
+    ) -> Self {
+        Self {
+            nodes,
+            ground: 0,
+            components,
+            mcu,
+        }
+    }
 }
 
 /// One electrical node and its schematic points.
@@ -267,10 +290,12 @@ enum PartKind {
     Device,
     Vcc,
     Gnd,
+    Mcu,
 }
 
 struct PlacedPin {
     name: &'static str,
+    number: &'static str,
     point: GridPos,
 }
 
@@ -332,11 +357,8 @@ pub(crate) fn extract(document: &Document) -> Result<Netlist, NetlistError> {
     validate_connections(&parts, &index, &mut set)?;
     validate_driver_islands(&parts, &index, &mut set, &table)?;
     let components = build_components(&parts, &index, &mut set, &table);
-    Ok(Netlist {
-        nodes: table.nodes,
-        ground: 0,
-        components,
-    })
+    let mcu = build_mcu(&parts, &index, &mut set, &table);
+    Ok(Netlist::new(table.nodes, components, mcu))
 }
 
 fn point_text(point: GridPos) -> String {
@@ -401,19 +423,32 @@ fn validate_driver_islands(
     for part in parts {
         let nets = part_nets(part, index, set, table);
         union_nets(&mut islands, &nets);
-        if part.kind == PartKind::Gnd || is_source(part.part) {
-            for &net in &nets {
-                driven[net] = true;
-            }
-        }
+        mark_driven(part, &nets, &mut driven);
     }
-    let mut roots = vec![false; table.nodes.len()];
+    floating_island(&mut islands, &driven, &table.nodes)
+}
+
+fn mark_driven(part: &PlacedPart, nets: &[usize], driven: &mut [bool]) {
+    if part.kind != PartKind::Gnd && part.kind != PartKind::Mcu && !is_source(part.part) {
+        return;
+    }
+    for &net in nets {
+        driven[net] = true;
+    }
+}
+
+fn floating_island(
+    islands: &mut DisjointSet,
+    driven: &[bool],
+    nodes: &[NetNode],
+) -> Result<(), NetlistError> {
+    let mut roots = vec![false; nodes.len()];
     for (net, is_driven) in driven.iter().enumerate() {
         if *is_driven {
             roots[islands.find(net)] = true;
         }
     }
-    for (index, node) in table.nodes.iter().enumerate() {
+    for (index, node) in nodes.iter().enumerate() {
         if !roots[islands.find(index)] {
             return Err(NetlistError::FloatingIsland {
                 net: node.name.clone(),
@@ -470,14 +505,12 @@ fn part_kind(definition: &ComponentDefinition) -> PartKind {
     match definition.id {
         "vcc" => PartKind::Vcc,
         "gnd" => PartKind::Gnd,
+        "atmega328p" => PartKind::Mcu,
         _ => PartKind::Device,
     }
 }
 
 fn device_spec(definition: &ComponentDefinition) -> Result<&'static ComponentSpec, NetlistError> {
-    if definition.id == "atmega328p" {
-        return Err(NetlistError::Unsupported(definition.name.to_string()));
-    }
     let part = builtin_part(definition.id).unwrap_or(definition.id);
     let spec = part_spec(part)
         .ok_or_else(|| NetlistError::UnknownDefinition(definition.id.to_string()))?;
@@ -625,6 +658,7 @@ fn placed_pins(instance: &ComponentInstance, definition: &ComponentDefinition) -
         .iter()
         .map(|pin| PlacedPin {
             name: pin.name,
+            number: pin.number,
             point: world_pin(instance, definition, pin),
         })
         .collect()
@@ -923,7 +957,7 @@ fn validate_connections(
     set: &mut DisjointSet,
 ) -> Result<(), NetlistError> {
     let counts = pin_counts(parts, index, set);
-    for part in parts {
+    for part in parts.iter().filter(|part| part.kind == PartKind::Device) {
         for pin in &part.pins {
             let root = set.find(index.get(pin.point));
             if counts.get(&root).copied().unwrap_or(0) < 2 {
@@ -982,6 +1016,36 @@ fn component_pins(
             *table.by_root.get(&root).expect("pin root has node")
         })
         .collect()
+}
+
+fn build_mcu(
+    parts: &[PlacedPart],
+    index: &PointIndex,
+    set: &mut DisjointSet,
+    table: &NodeTable,
+) -> Option<McuNetlist> {
+    let part = parts.iter().find(|part| part.kind == PartKind::Mcu)?;
+    let pins = part
+        .pins
+        .iter()
+        .filter_map(|pin| mcu_pin_node(pin, index, set, table))
+        .collect();
+    Some(McuNetlist {
+        label: part.label.clone(),
+        pins,
+    })
+}
+
+fn mcu_pin_node(
+    pin: &PlacedPin,
+    index: &PointIndex,
+    set: &mut DisjointSet,
+    table: &NodeTable,
+) -> Option<(u8, usize)> {
+    let number = pin.number.parse().ok()?;
+    let root = set.find(index.get(pin.point));
+    let node = *table.by_root.get(&root)?;
+    Some((number, node))
 }
 
 mod circuit;

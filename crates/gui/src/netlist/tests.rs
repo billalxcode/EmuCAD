@@ -93,9 +93,28 @@ fn multiple_grounds_are_rejected() {
 }
 
 #[test]
+fn extracts_mcu_package_nets() {
+    let mut document = Document::default();
+    add(&mut document, "atmega328p", 4, 0);
+    add(&mut document, "gnd", 20, 36);
+    wire(&mut document, &[(4, 6), (2, 6), (2, 36), (21, 36)]);
+    let netlist = extract(&document).expect("netlist");
+    let mcu = netlist.mcu.expect("mcu");
+    assert_eq!(mcu.pins.len(), 32);
+    assert_eq!(mcu.pins.get(&3), Some(&netlist.ground));
+    assert_ne!(mcu.pins.get(&1), Some(&netlist.ground));
+    assert!(netlist.components.is_empty());
+}
+
+#[test]
 fn unsupported_component_is_rejected() {
     let mut document = Document::default();
-    add(&mut document, "atmega328p", 0, 0);
+    add(
+        &mut document,
+        "source.behavioral.behavioral_voltage_source",
+        0,
+        0,
+    );
     assert!(matches!(
         extract(&document),
         Err(NetlistError::Unsupported(_))

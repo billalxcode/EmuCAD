@@ -57,76 +57,38 @@ const GND_PINS: &[PinDefinition] = &[PinDefinition {
 }];
 
 const MCU_PINS: &[PinDefinition] = &[
-    PinDefinition {
-        name: "RESET",
-        number: "1",
-        offset: GridPos::new(0, 2),
-    },
-    PinDefinition {
-        name: "D2",
-        number: "2",
-        offset: GridPos::new(0, 4),
-    },
-    PinDefinition {
-        name: "D3",
-        number: "3",
-        offset: GridPos::new(0, 6),
-    },
-    PinDefinition {
-        name: "D4",
-        number: "4",
-        offset: GridPos::new(0, 8),
-    },
-    PinDefinition {
-        name: "D5",
-        number: "5",
-        offset: GridPos::new(0, 10),
-    },
-    PinDefinition {
-        name: "D6",
-        number: "6",
-        offset: GridPos::new(0, 12),
-    },
-    PinDefinition {
-        name: "D7",
-        number: "7",
-        offset: GridPos::new(0, 14),
-    },
-    PinDefinition {
-        name: "VCC",
-        number: "8",
-        offset: GridPos::new(10, 2),
-    },
-    PinDefinition {
-        name: "GND",
-        number: "9",
-        offset: GridPos::new(10, 4),
-    },
-    PinDefinition {
-        name: "A0",
-        number: "10",
-        offset: GridPos::new(10, 6),
-    },
-    PinDefinition {
-        name: "A1",
-        number: "11",
-        offset: GridPos::new(10, 8),
-    },
-    PinDefinition {
-        name: "A2",
-        number: "12",
-        offset: GridPos::new(10, 10),
-    },
-    PinDefinition {
-        name: "A3",
-        number: "13",
-        offset: GridPos::new(10, 12),
-    },
-    PinDefinition {
-        name: "A4",
-        number: "14",
-        offset: GridPos::new(10, 14),
-    },
+    mcu_pin("1", "PD3", 0, 2),
+    mcu_pin("2", "PD4", 0, 4),
+    mcu_pin("3", "GND1", 0, 6),
+    mcu_pin("4", "VCC1", 0, 8),
+    mcu_pin("5", "GND2", 0, 10),
+    mcu_pin("6", "VCC2", 0, 12),
+    mcu_pin("7", "PB6", 0, 14),
+    mcu_pin("8", "PB7", 0, 16),
+    mcu_pin("9", "PD5", 0, 18),
+    mcu_pin("10", "PD6", 0, 20),
+    mcu_pin("11", "PD7", 0, 22),
+    mcu_pin("12", "PB0", 0, 24),
+    mcu_pin("13", "PB1", 0, 26),
+    mcu_pin("14", "PB2", 0, 28),
+    mcu_pin("15", "PB3", 0, 30),
+    mcu_pin("16", "PB4", 0, 32),
+    mcu_pin("17", "PB5", 10, 32),
+    mcu_pin("18", "AVCC", 10, 30),
+    mcu_pin("19", "ADC6", 10, 28),
+    mcu_pin("20", "AREF", 10, 26),
+    mcu_pin("21", "GND3", 10, 24),
+    mcu_pin("22", "ADC7", 10, 22),
+    mcu_pin("23", "PC0", 10, 20),
+    mcu_pin("24", "PC1", 10, 18),
+    mcu_pin("25", "PC2", 10, 16),
+    mcu_pin("26", "PC3", 10, 14),
+    mcu_pin("27", "PC4", 10, 12),
+    mcu_pin("28", "PC5", 10, 10),
+    mcu_pin("29", "PC6/RESET", 10, 8),
+    mcu_pin("30", "PD0", 10, 6),
+    mcu_pin("31", "PD1", 10, 4),
+    mcu_pin("32", "PD2", 10, 2),
 ];
 
 const DEFINITIONS: &[ComponentDefinition] = &[
@@ -186,7 +148,7 @@ const DEFINITIONS: &[ComponentDefinition] = &[
         category: Category::Board,
         reference_prefix: "U",
         default_value: "ATmega328P",
-        size: GridSize::new(10, 16),
+        size: GridSize::new(10, 34),
         pins: MCU_PINS,
         symbol: SymbolKind::Mcu,
     },
@@ -277,6 +239,14 @@ fn pin(index: u8, x: i32, y: i32) -> PinDefinition {
     PinDefinition {
         name: label,
         number: label,
+        offset: GridPos::new(x, y),
+    }
+}
+
+const fn mcu_pin(number: &'static str, name: &'static str, x: i32, y: i32) -> PinDefinition {
+    PinDefinition {
+        name,
+        number,
         offset: GridPos::new(x, y),
     }
 }
@@ -404,6 +374,18 @@ mod tests {
     fn find_returns_known_definition() {
         assert_eq!(find("resistor").expect("resistor").name, "Resistor");
         assert!(find("missing").is_none());
+    }
+
+    #[test]
+    fn atmega328p_symbol_exposes_tqfp32_pins() {
+        let definition = find("atmega328p").expect("mcu");
+        assert_eq!(definition.pins.len(), 32);
+        assert_eq!(definition.size.width, 10);
+        assert_eq!(definition.size.height, 34);
+        assert_eq!(definition.pins[0].name, "PD3");
+        assert_eq!(definition.pins[0].number, "1");
+        assert_eq!(definition.pins[16].name, "PB5");
+        assert_eq!(definition.pins[28].name, "PC6/RESET");
     }
 
     #[test]

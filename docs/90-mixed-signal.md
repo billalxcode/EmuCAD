@@ -326,6 +326,12 @@ Test `all_mapped_pins_drive_thevenin_nodes`:
 - Semua 24 pin diuji high dan low dengan external resistance 1 kohm.
 - Node analog high di atas 4 V dan low di bawah 1 V untuk setiap pin.
 
+Test `extracts_mcu_package_nets` di GUI:
+
+- Simbol ATmega328P memakai 32 pin TQFP.
+- Netlist menyimpan pemetaan nomor pin paket ke node listrik.
+- Pin 3 terhubung ke ground dan pin lain tetap menjadi node terpisah.
+
 ## 5. Batas
 
 - Umpan balik analog hanya satu input dan satu threshold.
@@ -337,7 +343,8 @@ Test `all_mapped_pins_drive_thevenin_nodes`:
   termasuk VCC, GND, AVCC, AREF, ADC6, ADC7, dan PC6/RESET.
 - `io_locations` mengembalikan 23 IO yang ter-bonding; PC7 tidak ada
   di paket 32 pin.
-- Pemetaan sinyal paket ke node netlist skematik belum ada.
+- Netlist GUI menyimpan pemetaan 32 pin paket ke node listrik.
+- Session mixed dari netlist GUI belum dibangun.
 - Pin daya, reset, dan paket 32 pin belum disimulasikan secara elektrik.
 - Index pin pada session mengikuti urutan `links`, bukan nomor package.
 - Breakpoint pin berlaku untuk semua link yang terdaftar.
@@ -374,8 +381,8 @@ S7-09:
 - Test regresi untuk satu arah, loop feedback, dan bridge ADC/PWM/UART.
 
 S7-04 tetap hybrid, bukan full-chip structural. S7-05 sudah mencakup
-semua pin IO dan peta paket 32 pin TQFP, tetapi belum memetakan sinyal
-paket ke node netlist atau mensimulasikan pin daya/reset. S7-08 belum
-mencakup flow control hardware; S7-09 sudah menginterpolasi event
-Timer0, PWM, dan UART TX di dalam langkah. Event pin tetap memakai batas
-langkah karena dibaca setelah sampel analog.
+semua pin IO, simbol GUI 32 pin TQFP, dan pemetaan paket ke node
+netlist, tetapi session mixed dari GUI serta simulasi pin daya/reset
+belum ada. S7-08 belum mencakup flow control hardware; S7-09 sudah
+menginterpolasi event Timer0, PWM, dan UART TX di dalam langkah. Event
+pin tetap memakai batas langkah karena dibaca setelah sampel analog.
