@@ -5,7 +5,7 @@ memory sudah punya model digital tetapi belum terverifikasi reference
 vector; MCU gate-level, integrasi mixed di GUI, dan co-sim S7 penuh
 belum selesai.
 
-Snapshot 2026-11-20: 1265 test lulus, 11 crate, branch `dev` sudah
+Snapshot 2026-11-20: 1267 test lulus, 11 crate, branch `dev` sudah
 di-push. `main` belum di-merge.
 
 Tujuan: membuat komponen di skematik GUI dapat disimulasikan dengan model
@@ -474,6 +474,7 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - `AvrPackageMap::atmega328p_tqfp32` memetakan 32 pin TQFP: 23 IO,
     2 VCC, 3 GND, AVCC, AREF, ADC6, dan ADC7.
   - Pin 29 adalah PC6/RESET dan tetap terdaftar sebagai IO.
+  - 23 IO ter-bonding; PC7 tidak tersedia di paket 32 pin.
   - Pemetaan sinyal paket ke node netlist skematik belum ada.
 - [x] S7-06 Hubungkan pin electrical sebagai Thevenin.
   - Satu pin AVR output diuji dengan resistor seri 45 ohm menuju RC.
@@ -625,7 +626,7 @@ dokumentasi menyebut batas fidelity.
 
 Status ringkas:
 
-- 1265 test lulus, 0 gagal melalui
+- 1267 test lulus, 0 gagal melalui
   `bash .opencode/skills/clean-code/scripts/check.sh`.
 - 11 crate; crate simulasi zero external dependency.
 - `fmt`, clippy `-D warnings`, dan pengecekan ASCII lulus.

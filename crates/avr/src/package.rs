@@ -67,6 +67,19 @@ impl AvrPackageMap {
         self.signals.iter().flatten().count()
     }
 
+    /// Returns the IO locations present in this package.
+    #[must_use]
+    pub fn io_locations(&self) -> Vec<(u8, u8)> {
+        self.signals
+            .iter()
+            .flatten()
+            .filter_map(|signal| match signal {
+                AvrSignal::Io { port, bit } => Some((*port, *bit)),
+                _ => None,
+            })
+            .collect()
+    }
+
     /// Returns true when no package pin is mapped.
     #[must_use]
     pub fn is_empty(&self) -> bool {
@@ -154,6 +167,16 @@ mod tests {
         assert_eq!(io, 23);
         assert_eq!(vcc, 2);
         assert_eq!(gnd, 3);
+    }
+
+    #[test]
+    fn tqfp32_exposes_bonded_io_locations() {
+        let map = AvrPackageMap::atmega328p_tqfp32();
+        let locations = map.io_locations();
+        assert_eq!(locations.len(), 23);
+        assert!(locations.contains(&(0, 0)));
+        assert!(locations.contains(&(1, 6)));
+        assert!(!locations.contains(&(1, 7)));
     }
 
     fn count(map: &AvrPackageMap, predicate: impl Fn(AvrSignal) -> bool) -> usize {

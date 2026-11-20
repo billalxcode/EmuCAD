@@ -335,6 +335,8 @@ Test `all_mapped_pins_drive_thevenin_nodes`:
 - Pemetaan 24 pin IO model (3 port x 8 bit) tersedia.
 - `AvrPackageMap` menyediakan peta 32 pin TQFP untuk ATmega328P,
   termasuk VCC, GND, AVCC, AREF, ADC6, ADC7, dan PC6/RESET.
+- `io_locations` mengembalikan 23 IO yang ter-bonding; PC7 tidak ada
+  di paket 32 pin.
 - Pemetaan sinyal paket ke node netlist skematik belum ada.
 - Pin daya, reset, dan paket 32 pin belum disimulasikan secara elektrik.
 - Index pin pada session mengikuti urutan `links`, bukan nomor package.

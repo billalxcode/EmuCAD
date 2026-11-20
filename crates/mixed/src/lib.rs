@@ -1179,7 +1179,7 @@ mod tests {
         MixedSession, PinInput, PinLink, PwmLink, Timer0Event, UartLink, UartRxLink, UartTxLink,
     };
     use analysis::TransientConfig;
-    use avr::PinElectricalConfig;
+    use avr::{AvrPackageMap, PinElectricalConfig};
     use cells::DigitalBuilder;
     use cells::catalog_digital::{DigitalEntry, digital_entry};
     use kernel::{Circuit, CircuitBuilder, DeviceId, DeviceKind, NodeId, SimError};
@@ -2003,6 +2003,17 @@ mod tests {
             low.step().expect("step");
         }
         assert_all_pin_voltages(&high, &low);
+    }
+
+    #[test]
+    fn package_io_matches_mapped_pins() {
+        let (_, links) = multi_pin_circuit(AVR_IO_PIN_COUNT);
+        let map = full_pin_map(&links);
+        let locations = AvrPackageMap::atmega328p_tqfp32().io_locations();
+        for pin in map.links() {
+            let location = (pin.port, pin.bit);
+            assert_eq!(locations.contains(&location), location != (1, 7));
+        }
     }
 
     #[test]
