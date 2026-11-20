@@ -8,6 +8,7 @@ pub mod cpu;
 pub mod module;
 pub mod registers;
 pub mod reset;
+pub mod shifter;
 pub mod vector;
 
 pub use alu::{DigitalAlu, digital_alu, digital_alu_width};
@@ -24,4 +25,8 @@ pub use cpu::{
 pub use module::DigitalModule;
 pub use registers::{RegisterFile, RegisterPorts, register_file, register_file_masked};
 pub use reset::reset_synchronizer;
+pub use shifter::{
+    arithmetic_shift_right, barrel_shift_left, barrel_shift_right, funnel_shift_left,
+    funnel_shift_right, rotate_left, rotate_right,
+};
 pub use vector::DigitalVector;

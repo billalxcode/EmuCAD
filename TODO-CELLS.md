@@ -120,7 +120,11 @@ Exit P0:
   - `digital_alu_width` mendukung width 1..=64.
   - `digital_alu` tetap wrapper 8-bit.
   - Test 32-bit arithmetic dan logic ditambahkan.
-- [ ] CELL-01-02 Tambahkan barrel shifter, rotate, dan funnel shift.
+- [x] CELL-01-02 Tambahkan barrel shifter, rotate, dan funnel shift.
+  - `barrel_shift_left`, `barrel_shift_right`, dan
+    `arithmetic_shift_right` untuk width power-of-two 1..=64.
+  - `rotate_left` dan `rotate_right` memakai funnel shift.
+  - `funnel_shift_left` dan `funnel_shift_right` untuk dua operand.
 - [ ] CELL-01-03 Tambahkan multiplier array dan Booth multiplier.
 - [ ] CELL-01-04 Tambahkan divider restored dan non-restored.
 - [ ] CELL-01-05 Tambahkan comparator, priority encoder, one-hot

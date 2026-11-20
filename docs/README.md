@@ -2,7 +2,7 @@
 
 Pintu masuk dokumentasi EmuCAD versi 0.1.0.
 
-**Status saat ini:** 1184 test lulus, 11 crate, crate simulasi zero external
+**Status saat ini:** 1192 test lulus, 11 crate, crate simulasi zero external
 dependency Rust. Dependensi GUI dan binding Python dibatasi pada daftar
 yang disetujui di `AGENTS.md`. Tag `v0.1` tersedia.
 
@@ -153,7 +153,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 05 | [Peripheral](05-peripherals.md) | GPIO, timer, UART, SPI, I2C, ADC |
 | 06 | [Board dan firmware](06-board-firmware.md) | Komponen board, loader, toolchain |
 | 14 | [CMOS cells](14-cells.md) | Inverter, NAND, NOR, adder, ALU |
-| 15 | [Digital](15-digital.md) | Logika dua-state, clock, counter |
+| 15 | [Digital](15-digital.md) | Logika dua-state, clock, ALU, register file, shifter |
 | 16 | [AVR decode](16-avr-decode.md) | Decoder, fetch, register bank, ALU |
 | 17 | [GPIO](17-gpio.md) | Port B/C/D, DDR, PORT, PIN |
 | 18 | [Timer0](18-timer0.md) | Counter, prescaler, CTC, compare |
@@ -198,7 +198,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 |---|---|
 | Versi workspace | `0.1.0` |
 | Tag | `v0.1` |
-| Test | 1184 lulus |
+| Test | 1192 lulus |
 | Crate | 10 |
 | Dependensi eksternal | 0 untuk crate simulasi; `pyo3` hanya di `python` |
 | `unsafe` | Dilarang manual; glue `pyo3` diisolasi di `python` |
@@ -216,7 +216,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | `kernel` | 62 |
 | `device` | 202 |
 | `analysis` | 125 |
-| `cells` | 146 |
+| `cells` | 154 |
 | `avr` | 242 |
 | `board` | 24 |
 | `mixed` | 25 |
@@ -224,7 +224,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | `cli` | 40 |
 | `gui` | 303 |
 | `python` | 8 |
-| **Total** | **1184** |
+| **Total** | **1192** |
 
 ---
 

@@ -68,7 +68,12 @@ impl DigitalBuilder {
 - `counter` adalah ripple counter dengan enable.
 - `shift_register` menggeser saat enable tinggi.
 - `read_bits` membaca vektor bit little-endian.
-- `register_file` menyediakan 32 x 8 bit, decoder tulis, dan dua read port.
+- `register_file` menyediakan `count x width` dengan decoder tulis dan
+  dua read port.
+- `register_file_masked` menambahkan byte write mask.
+- `barrel_shift_left`, `barrel_shift_right`, `arithmetic_shift_right`,
+  `rotate_left`, `rotate_right`, `funnel_shift_left`, dan
+  `funnel_shift_right` membangun shifter kombinasional.
 - `ProgramCounter` adalah register 16-bit dengan load dan increment.
 - `StackPointer` adalah register 16-bit dengan load, increment, dan decrement.
 - `register` adalah register loadable yang dipakai IR dan register file.
@@ -104,6 +109,7 @@ Test lapisan digital mencakup:
 - MUX tree.
 - Counter dan hold.
 - Shift register dan hold.
+- Barrel shift, arithmetic shift, rotate, dan funnel shift.
 
 ## 7. Register File
 
@@ -113,6 +119,10 @@ Test lapisan digital mencakup:
 - Dua read port 32:1 berbasis mux tree.
 - Reset mengosongkan seluruh register.
 - Test menulis dan membaca 32 register, hold, port independen, dan reset.
+- `register_file_masked` mendukung width 1..=64, jumlah register 2..=32,
+  byte write mask, dan 2 read port.
+- Test 32 x 32 memeriksa word utuh, retensi byte yang tidak dimask,
+  kedua read port, dan validasi lebar mask.
 
 ## 8. Program Counter, IR, dan Stack Pointer
 
@@ -126,11 +136,24 @@ Test lapisan digital mencakup:
 
 ## 9. Digital ALU
 
-- Operand 8 bit, opcode 3 bit.
+- `digital_alu_width` mendukung operand 1..=64 bit dengan opcode 3 bit.
+- `digital_alu` adalah wrapper 8 bit untuk kompatibilitas.
 - Operasi: ADD, SUB, AND, OR, XOR, dan pass B.
 - SUB memakai two's complement.
 - Output: result, zero, carry/borrow, negative, half carry/borrow.
 - Carry dan half carry dibalik saat SUB agar berarti borrow.
+
+## 9.1 Barrel Shifter
+
+- `amount` memakai `log2(width)` bit untuk width power-of-two 1..=64.
+- `barrel_shift_left` dan `barrel_shift_right` mengisi bit kosong
+  dengan nol.
+- `arithmetic_shift_right` mengisi dengan sign bit.
+- `rotate_left` dan `rotate_right` membungkus bit yang keluar.
+- `funnel_shift_left` dan `funnel_shift_right` menggeser dua operand
+  sebagai satu nilai 2 x width.
+- Implementasi struktural memakai tahap mux logaritmik.
+- Test menyapu semua nilai amount 0..width-1 terhadap model Rust.
 
 ---
 

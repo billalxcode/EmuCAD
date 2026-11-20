@@ -1,8 +1,8 @@
 # 92 - Kebutuhan Cells untuk Multi-MCU
 
 Tanggal: 2026-11-20
-Status: P0 selesai; P1 dimulai dengan `digital_alu_width` 1..=64 bit
-dan `register_file_masked` untuk register file ber-byte-mask.
+Status: P0 selesai; P1 berjalan dengan `digital_alu_width` 1..=64 bit,
+`register_file_masked`, dan barrel/funnel shifter.
 `DigitalVector`, `DigitalModule`, `BusResolver`, wired-AND,
 `ClockDomain`, `ResetDomain`, dan `reset_synchronizer` ada di `cells`.
 `McuSpec` dan `BusSpec` ada di crate `soc`.
@@ -33,6 +33,7 @@ Yang sudah ada:
 - Gate dasar, mux, buffer, transmission gate, tri-state inverter.
 - D flip-flop, D latch, SRAM 6T, ring oscillator.
 - Adder ripple-carry, ALU 8-bit, register, counter, shift register.
+- ALU parameterized 1..=64 bit dan barrel/funnel shifter.
 - Register file 32 x 8 dengan dua read port dan satu write port.
 - Program counter dan stack pointer 16-bit.
 - CPU mainan 16-bit dengan 32 register 8-bit dan ISA kecil.
@@ -42,7 +43,7 @@ Yang sudah ada:
 
 Yang belum memadai untuk STM32/ESP32:
 
-- ALU 32-bit, barrel shifter, multiplier, divider, dan unit bit-manip.
+- Multiplier, divider, dan unit bit-manip.
 - Bus fabric, address decoder, arbiter, bridge, wait state, DMA.
 - Interrupt controller, CSR, exception, privilege, MMU/MPU.
 - Multi-clock, PLL, clock divider, clock gating, reset synchronizer,
@@ -86,7 +87,9 @@ Sudah:
 
 - `and_all`, `or_all`, `mux_tree`, `decoder`, `read_bits`.
 - Half adder, full adder, ripple-carry adder.
-- Increment, decrement, ALU 8-bit.
+- Increment, decrement, dan ALU 8-bit (`digital_alu`).
+- Barrel shift, arithmetic shift, rotate, dan funnel shift untuk width
+  power-of-two 1..=64.
 - LUT dan finite state machine kecil di katalog digital.
 
 Sebagian:
@@ -94,12 +97,9 @@ Sebagian:
 - Encoder, priority encoder, comparator, parity, dan beberapa blok
   lain hanya ada sebagai entry katalog, bukan builder library.
 - Lebar operand masih banyak yang hardcoded 8-bit.
-- Shift dan rotate baru berupa operasi byte, belum barrel shifter
-  parameterized.
 
 Belum:
 
-- Barrel shifter 8/16/32/64-bit.
 - Multiplier array, Booth multiplier, divider restored/non-restored.
 - Leading-zero count, bit reverse, byte swap, saturating arithmetic.
 - Comparator parameterized dengan flag less/equal/greater.
@@ -163,7 +163,7 @@ Sebagian:
 Belum:
 
 - ALU 32/64-bit dengan flag overflow dan flag lengkap lainnya.
-- Barrel shifter dan multiplier/divider 32-bit.
+- Multiplier dan divider 32-bit.
 - Decoder ISA table-driven yang dapat dikonfigurasi per spec.
 - Pipeline register dan hazard control.
 - Instruction cache dan data cache interface.
@@ -316,7 +316,7 @@ Belum:
 | Kebutuhan | Sudah | Sebagian | Belum |
 |---|---|---|---|
 | Gate dasar | Ya | - | Varian drive strength |
-| Arithmetic | Adder, ALU 8-bit | Comparator, encoder, LUT | 32/64-bit, divider, barrel shifter |
+| Arithmetic | Adder, ALU 1..64, barrel/funnel shifter | Comparator, encoder, LUT | Multiplier, divider, bit-manip |
 | Sequential | DFF, register, counter | Counter 1..16, PC/SP 16-bit | FIFO, CDC, pipeline |
 | Memory | SRAM6T, array 128x8 | Register file 2R1W | Memory compiler, cache, ECC |
 | CPU | CPU mainan 16-bit | ISA decoder kecil | Pipeline, CSR, exception, 32-bit |
@@ -344,7 +344,7 @@ Belum:
 ### P1 - CPU dan Memory
 
 1. ALU 32-bit dan 64-bit.
-2. Barrel shifter, multiplier, divider.
+2. Multiplier dan divider.
 3. Register file dengan byte enable dan multi-port.
 4. Memory compiler parameterized.
 5. Pipeline register, hazard unit, branch unit.
