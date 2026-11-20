@@ -4,7 +4,8 @@ use super::{
 };
 use crate::canvas::GridCamera;
 use crate::model::{
-    ComponentDefinition, ComponentId, Document, GridPos, Mirror, NetClass, Rotation, WireId,
+    ComponentDefinition, ComponentId, Document, GridPos, McuPinMode, Mirror, NetClass, Rotation,
+    WireId,
 };
 use crate::persist;
 use std::path::{Path, PathBuf};

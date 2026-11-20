@@ -21,8 +21,6 @@ serde_json = "1.0.154"
 avr = { path = "../avr" }
 board = { path = "../board" }
 analysis = { path = "../analysis" }
+mixed = { path = "../mixed" }
 kernel = { path = "../kernel" }
 device = { path = "../device" }
-
-[dev-dependencies]
-mixed = { path = "../mixed" }

@@ -72,18 +72,170 @@ impl GuiApp {
     }
 
     pub(super) fn run_analysis(&mut self) {
+        if self.simulation_domain == SimulationDomain::Mixed {
+            self.run_mixed();
+            return;
+        }
         if self.simulation_domain != SimulationDomain::Analog {
-            self.message = match self.simulation_domain {
-                SimulationDomain::Avr => "AVR runs from the board controls".to_string(),
-                SimulationDomain::Mixed => "Mixed simulation is not implemented".to_string(),
-                SimulationDomain::Analog => String::new(),
-            };
+            self.message = "AVR runs from the board controls".to_string();
             return;
         }
         match self.analysis_kind {
             AnalysisKind::Dc => self.solve_dc(),
             AnalysisKind::Transient => self.run_transient(),
         }
+    }
+
+    pub(super) fn run_mixed(&mut self) {
+        match self.mixed_message() {
+            Ok(message) => self.message = message,
+            Err(error) => self.message = error,
+        }
+    }
+
+    fn mixed_message(&self) -> Result<String, String> {
+        if self.firmware_words.is_empty() {
+            return Err("Load firmware before mixed simulation".to_string());
+        }
+        let netlist = self.mixed_netlist()?;
+        let component = self.mixed_component()?;
+        let plan = Self::mixed_plan(component)?;
+        let config = Self::mixed_config(&self.transient_settings);
+        let mut session = self.mixed_session(&netlist, &plan, &config)?;
+        Self::run_mixed_steps(&mut session, config.steps)?;
+        Ok(Self::format_mixed(&plan, &session))
+    }
+
+    fn mixed_netlist(&self) -> Result<crate::netlist::Netlist, String> {
+        crate::netlist::extract(&self.document).map_err(|error| error.to_string())
+    }
+
+    fn mixed_component(&self) -> Result<&ComponentInstance, String> {
+        self.document
+            .components()
+            .iter()
+            .find(|component| component.definition == "atmega328p")
+            .ok_or_else(|| "Schematic has no ATmega328P".to_string())
+    }
+
+    fn mixed_session(
+        &self,
+        netlist: &crate::netlist::Netlist,
+        plan: &crate::netlist::MixedPinPlan,
+        config: &analysis::TransientConfig,
+    ) -> Result<mixed::AvrSession, String> {
+        crate::netlist::build_mixed_session(netlist, self.firmware_words.clone(), plan, config)
+    }
+
+    fn run_mixed_steps(session: &mut mixed::AvrSession, steps: usize) -> Result<(), String> {
+        for _ in 0..steps {
+            if session.step().map_err(|error| error.to_string())?.is_none() {
+                break;
+            }
+        }
+        Ok(())
+    }
+
+    fn mixed_config(settings: &crate::transient::TransientSettings) -> analysis::TransientConfig {
+        analysis::TransientConfig {
+            dt: settings.dt,
+            steps: settings.steps,
+            gmin: settings.gmin,
+            use_dc_op: settings.use_dc_op,
+            ..Default::default()
+        }
+    }
+
+    fn mixed_plan(component: &ComponentInstance) -> Result<crate::netlist::MixedPinPlan, String> {
+        let mut plan = Self::empty_plan();
+        for (&pin, &mode) in &component.pin_modes {
+            Self::apply_pin_mode(&mut plan, pin, mode)?;
+        }
+        if Self::plan_is_empty(&plan) {
+            return Err("Set at least one MCU pin mode".to_string());
+        }
+        Ok(plan)
+    }
+
+    fn empty_plan() -> crate::netlist::MixedPinPlan {
+        crate::netlist::MixedPinPlan {
+            outputs: Vec::new(),
+            adcs: Vec::new(),
+            pwms: Vec::new(),
+            uart_tx: None,
+            uart_rx: None,
+            high: 5.0,
+            low: 0.0,
+            external_resistance: 1000.0,
+            adc_reference: 5.0,
+            uart_threshold: 2.5,
+        }
+    }
+
+    fn plan_is_empty(plan: &crate::netlist::MixedPinPlan) -> bool {
+        plan.outputs.is_empty()
+            && plan.adcs.is_empty()
+            && plan.pwms.is_empty()
+            && plan.uart_tx.is_none()
+            && plan.uart_rx.is_none()
+    }
+
+    fn apply_pin_mode(
+        plan: &mut crate::netlist::MixedPinPlan,
+        pin: u8,
+        mode: McuPinMode,
+    ) -> Result<(), String> {
+        match mode {
+            McuPinMode::Input => Ok(()),
+            McuPinMode::Output => Self::push_output(plan, pin),
+            McuPinMode::Adc => Self::push_adc(plan, pin),
+            McuPinMode::Pwm => Self::push_pwm(plan, pin),
+            McuPinMode::UartTx => Self::set_once(&mut plan.uart_tx, pin, "UART TX"),
+            McuPinMode::UartRx => Self::set_once(&mut plan.uart_rx, pin, "UART RX"),
+        }
+    }
+
+    fn push_output(plan: &mut crate::netlist::MixedPinPlan, pin: u8) -> Result<(), String> {
+        plan.outputs.push(pin);
+        Ok(())
+    }
+
+    fn push_adc(plan: &mut crate::netlist::MixedPinPlan, pin: u8) -> Result<(), String> {
+        plan.adcs.push((Self::adc_channel(pin)?, pin));
+        Ok(())
+    }
+
+    fn push_pwm(plan: &mut crate::netlist::MixedPinPlan, pin: u8) -> Result<(), String> {
+        plan.pwms.push(pin);
+        Ok(())
+    }
+
+    fn adc_channel(pin: u8) -> Result<u8, String> {
+        match avr::AvrPackageMap::atmega328p_tqfp32().get(pin) {
+            Some(avr::AvrSignal::Io { port: 1, bit }) => Ok(bit),
+            _ => Err(format!("MCU pin {pin} is not an ADC pin")),
+        }
+    }
+
+    fn set_once(slot: &mut Option<u8>, pin: u8, label: &str) -> Result<(), String> {
+        if slot.is_some() {
+            return Err(format!("Only one {label} pin is supported"));
+        }
+        *slot = Some(pin);
+        Ok(())
+    }
+
+    fn format_mixed(plan: &crate::netlist::MixedPinPlan, session: &mixed::AvrSession) -> String {
+        let values: Vec<String> = plan
+            .outputs
+            .iter()
+            .enumerate()
+            .map(|(index, pin)| {
+                let voltage = session.node_voltage(index).unwrap_or(f64::NAN);
+                format!("{pin}={voltage:.2}V")
+            })
+            .collect();
+        format!("Mixed: {}", values.join(", "))
     }
 
     pub(super) fn analysis_state(&self) -> AnalysisState {

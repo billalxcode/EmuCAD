@@ -17,6 +17,7 @@ pub(super) fn new_instance(
         label,
         value: definition.default_value.to_string(),
         parameters: BTreeMap::new(),
+        pin_modes: BTreeMap::new(),
     }
 }
 

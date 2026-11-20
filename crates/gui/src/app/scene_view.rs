@@ -49,12 +49,23 @@ pub(crate) fn show_component_info(
     ui: &mut egui::Ui,
     component: &ComponentInstance,
     definition: &ComponentDefinition,
+    action: &mut Option<InspectorAction>,
 ) {
     ui.label(format!("{} {}", component.label, component.value));
     ui.label(format!("Type: {}", definition.name));
     if let Some(fidelity) = crate::netlist::fidelity_label(definition) {
         ui.label(format!("Fidelity: {fidelity}"));
     }
+    show_component_geometry(ui, component);
+    ui.separator();
+    show_component_pins(ui, definition);
+    if definition.id == "atmega328p" {
+        show_mcu_pin_modes(ui, component, definition, action);
+    }
+    show_component_simulation(ui);
+}
+
+fn show_component_geometry(ui: &mut egui::Ui, component: &ComponentInstance) {
     ui.label(format!(
         "Pos: {}, {}",
         component.position.x, component.position.y
@@ -64,9 +75,71 @@ pub(crate) fn show_component_info(
         component.rotation.label(),
         component.mirror.label()
     ));
+}
+
+fn show_mcu_pin_modes(
+    ui: &mut egui::Ui,
+    component: &ComponentInstance,
+    definition: &ComponentDefinition,
+    action: &mut Option<InspectorAction>,
+) {
     ui.separator();
-    show_component_pins(ui, definition);
-    show_component_simulation(ui);
+    ui.label("MCU pin modes");
+    let package = avr::AvrPackageMap::atmega328p_tqfp32();
+    for pin in definition.pins {
+        let Some((number, current)) = mcu_pin_state(pin, component, &package) else {
+            continue;
+        };
+        show_mcu_pin_row(ui, pin, number, current, action);
+    }
+}
+
+fn show_mcu_pin_row(
+    ui: &mut egui::Ui,
+    pin: &crate::model::PinDefinition,
+    number: u8,
+    current: McuPinMode,
+    action: &mut Option<InspectorAction>,
+) {
+    ui.horizontal(|ui| {
+        ui.label(format!("{} {}", pin.number, pin.name));
+        let selected = mcu_pin_mode_combo(ui, number, current);
+        if selected != current {
+            *action = Some(InspectorAction::SetPinMode {
+                pin: number,
+                mode: selected,
+            });
+        }
+    });
+}
+
+fn mcu_pin_state(
+    pin: &crate::model::PinDefinition,
+    component: &ComponentInstance,
+    package: &avr::AvrPackageMap,
+) -> Option<(u8, McuPinMode)> {
+    let number = pin.number.parse().ok()?;
+    if !matches!(package.get(number), Some(avr::AvrSignal::Io { .. })) {
+        return None;
+    }
+    let current = component
+        .pin_modes
+        .get(&number)
+        .copied()
+        .unwrap_or_default();
+    Some((number, current))
+}
+
+fn mcu_pin_mode_combo(ui: &mut egui::Ui, number: u8, current: McuPinMode) -> McuPinMode {
+    let mut selected = current;
+    egui::ComboBox::from_id_salt(("mcu_pin_mode", number))
+        .selected_text(selected.label())
+        .show_ui(ui, |ui| {
+            for mode in McuPinMode::ALL {
+                ui.selectable_value(&mut selected, mode, mode.label());
+            }
+        });
+    selected
 }
 
 pub(crate) fn show_component_value(

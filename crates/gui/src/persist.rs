@@ -3,8 +3,8 @@
 use crate::analysis::AnalysisState;
 use crate::canvas::GridCamera;
 use crate::model::{
-    ComponentDefinition, ComponentId, ComponentInstance, Document, GridPos, Mirror, NetClass,
-    Rotation, Wire,
+    ComponentDefinition, ComponentId, ComponentInstance, Document, GridPos, McuPinMode, Mirror,
+    NetClass, Rotation, Wire,
 };
 use eframe::egui;
 use serde::{Deserialize, Serialize};
@@ -54,6 +54,8 @@ struct ComponentFile {
     value: String,
     #[serde(default)]
     parameters: BTreeMap<String, f64>,
+    #[serde(default)]
+    pin_modes: BTreeMap<u8, String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -266,7 +268,19 @@ impl ComponentFile {
             label: instance.label.clone(),
             value: instance.value.clone(),
             parameters: instance.parameters.clone(),
+            pin_modes: pin_mode_files(&instance.pin_modes),
         }
+    }
+
+    fn pin_modes(&self) -> Result<BTreeMap<u8, McuPinMode>, String> {
+        self.pin_modes
+            .iter()
+            .map(|(&pin, text)| {
+                let mode = McuPinMode::parse(text)
+                    .ok_or_else(|| format!("unknown MCU pin mode: {text}"))?;
+                Ok((pin, mode))
+            })
+            .collect()
     }
 
     fn to_instance(&self, library: &[ComponentDefinition]) -> Result<ComponentInstance, String> {
@@ -285,8 +299,16 @@ impl ComponentFile {
             label: self.label.clone(),
             value: self.value.clone(),
             parameters: self.parameters.clone(),
+            pin_modes: self.pin_modes()?,
         })
     }
+}
+
+fn pin_mode_files(modes: &BTreeMap<u8, McuPinMode>) -> BTreeMap<u8, String> {
+    modes
+        .iter()
+        .map(|(&pin, mode)| (pin, mode.key().to_string()))
+        .collect()
 }
 
 impl WireFile {

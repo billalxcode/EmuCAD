@@ -18,6 +18,21 @@ fn open_flushes_dirty_document_and_updates_recent() {
 }
 
 #[test]
+fn pin_modes_round_trip_through_project_json() {
+    let mut document = Document::new();
+    let mcu = crate::library::find("atmega328p").expect("mcu");
+    let id = document.add(mcu, GridPos::new(0, 0), Rotation::Deg0, Mirror::None);
+    let component = document.component_mut(id).expect("mcu");
+    component.pin_modes.insert(17, McuPinMode::Output);
+    component.pin_modes.insert(23, McuPinMode::Adc);
+    let text = persist::to_json(&document, &GridCamera::default(), true).expect("json");
+    let project = persist::from_json(&text, crate::library::builtin()).expect("load");
+    let loaded = project.document.component(id).expect("mcu");
+    assert_eq!(loaded.pin_modes.get(&17), Some(&McuPinMode::Output));
+    assert_eq!(loaded.pin_modes.get(&23), Some(&McuPinMode::Adc));
+}
+
+#[test]
 fn open_is_blocked_for_unsaved_project() {
     let mut app = GuiApp {
         dirty: true,

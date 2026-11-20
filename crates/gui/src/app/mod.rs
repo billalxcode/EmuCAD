@@ -40,7 +40,7 @@ use crate::library;
 use crate::log::Log;
 use crate::model::{
     Category, ComponentDefinition, ComponentId, ComponentInstance, Document, GridPos, GridRect,
-    Mirror, NetClass, Rotation, WireId,
+    McuPinMode, Mirror, NetClass, Rotation, WireId,
 };
 use crate::palette::{self, Command};
 use crate::persist;
@@ -110,6 +110,7 @@ pub(crate) enum InspectorAction {
     SetColor(Option<[u8; 3]>),
     SetLabel(Option<String>),
     SetParameter { name: &'static str, value: f64 },
+    SetPinMode { pin: u8, mode: McuPinMode },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -245,6 +246,7 @@ pub struct GuiApp {
     history: History,
     drag_history_pending: bool,
     sim: Option<SimHandle>,
+    firmware_words: Vec<u16>,
     sim_status: Status,
     waveform: Waveform,
     waveform_open: bool,

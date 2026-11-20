@@ -73,11 +73,66 @@ fn non_analog_domain_does_not_run_analog() {
 }
 
 #[test]
-fn mixed_domain_is_reported_as_unimplemented() {
+fn mixed_domain_requires_firmware() {
     let mut app = worker_app();
     app.simulation_domain = crate::analysis::SimulationDomain::Mixed;
     app.run_analysis();
-    assert_eq!(app.message, "Mixed simulation is not implemented");
+    assert_eq!(app.message, "Load firmware before mixed simulation");
+}
+
+fn mixed_document() -> Document {
+    let mut document = Document::new();
+    let id = mixed_parts(&mut document);
+    mixed_wires(&mut document);
+    document
+        .component_mut(id)
+        .expect("mcu")
+        .pin_modes
+        .insert(17, McuPinMode::Output);
+    document
+}
+
+fn mixed_parts(document: &mut Document) -> ComponentId {
+    let mcu = crate::library::find("atmega328p").expect("mcu");
+    let resistor = crate::library::find("resistor").expect("resistor");
+    let ground = crate::library::find("gnd").expect("gnd");
+    let id = document.add(mcu, GridPos::new(4, 0), Rotation::Deg0, Mirror::None);
+    document.add(resistor, GridPos::new(20, 31), Rotation::Deg0, Mirror::None);
+    document.add(ground, GridPos::new(30, 36), Rotation::Deg0, Mirror::None);
+    id
+}
+
+fn mixed_wires(document: &mut Document) {
+    document
+        .add_wire(
+            crate::library::builtin(),
+            vec![GridPos::new(14, 32), GridPos::new(20, 32)],
+            NetClass::Digital,
+        )
+        .expect("pb5 wire");
+    document
+        .add_wire(
+            crate::library::builtin(),
+            vec![
+                GridPos::new(24, 32),
+                GridPos::new(24, 36),
+                GridPos::new(31, 36),
+            ],
+            NetClass::Digital,
+        )
+        .expect("ground wire");
+}
+
+#[test]
+fn mixed_domain_runs_pb5_firmware() {
+    let mut app = worker_app();
+    app.document = mixed_document();
+    app.firmware_words = vec![0xE200, 0xB904, 0xB905, 0xCFFF];
+    app.transient_settings.steps = 10;
+    app.simulation_domain = crate::analysis::SimulationDomain::Mixed;
+    app.run_analysis();
+    assert!(app.message.starts_with("Mixed:"), "{}", app.message);
+    assert!(app.message.contains("17="), "{}", app.message);
 }
 
 #[test]

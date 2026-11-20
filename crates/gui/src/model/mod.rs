@@ -424,6 +424,68 @@ impl GridEdge {
     }
 }
 
+/// Analog role of one MCU package pin.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum McuPinMode {
+    /// Digital input.
+    #[default]
+    Input,
+    /// Digital output.
+    Output,
+    /// ADC input.
+    Adc,
+    /// Timer PWM output.
+    Pwm,
+    /// UART transmit.
+    UartTx,
+    /// UART receive.
+    UartRx,
+}
+
+impl McuPinMode {
+    /// All selectable pin modes.
+    pub const ALL: [Self; 6] = [
+        Self::Input,
+        Self::Output,
+        Self::Adc,
+        Self::Pwm,
+        Self::UartTx,
+        Self::UartRx,
+    ];
+
+    /// Returns the display label.
+    #[must_use]
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::Input => "Input",
+            Self::Output => "Output",
+            Self::Adc => "ADC",
+            Self::Pwm => "PWM",
+            Self::UartTx => "UART TX",
+            Self::UartRx => "UART RX",
+        }
+    }
+
+    /// Returns the persisted key.
+    #[must_use]
+    pub const fn key(self) -> &'static str {
+        match self {
+            Self::Input => "input",
+            Self::Output => "output",
+            Self::Adc => "adc",
+            Self::Pwm => "pwm",
+            Self::UartTx => "uart_tx",
+            Self::UartRx => "uart_rx",
+        }
+    }
+
+    /// Parses a persisted key.
+    #[must_use]
+    pub fn parse(text: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|mode| mode.key() == text)
+    }
+}
+
 /// One placed component.
 #[derive(Clone, Debug)]
 pub struct ComponentInstance {
@@ -435,6 +497,7 @@ pub struct ComponentInstance {
     pub label: String,
     pub value: String,
     pub parameters: BTreeMap<String, f64>,
+    pub pin_modes: BTreeMap<u8, McuPinMode>,
 }
 
 impl ComponentInstance {

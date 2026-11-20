@@ -12,9 +12,7 @@ impl GuiApp {
             return;
         }
         if let Some((component, definition)) = self.selected_pair() {
-            show_component_info(ui, component, definition);
-            show_component_value(ui, component, definition, action);
-            show_component_actions(ui, action);
+            self.selected_inspector(ui, component, definition, action);
             return;
         }
         if self.selection.is_empty() {
@@ -22,6 +20,18 @@ impl GuiApp {
             return;
         }
         self.multi_inspector(ui, action);
+    }
+
+    fn selected_inspector(
+        &self,
+        ui: &mut egui::Ui,
+        component: &ComponentInstance,
+        definition: &ComponentDefinition,
+        action: &mut Option<InspectorAction>,
+    ) {
+        show_component_info(ui, component, definition, action);
+        show_component_value(ui, component, definition, action);
+        show_component_actions(ui, action);
     }
 
     pub(super) fn multi_inspector(&self, ui: &mut egui::Ui, action: &mut Option<InspectorAction>) {
@@ -293,7 +303,28 @@ impl GuiApp {
             InspectorAction::SetParameter { name, value } => {
                 self.set_component_parameter(name, value)
             }
+            InspectorAction::SetPinMode { pin, mode } => self.set_pin_mode(pin, mode),
         }
+    }
+
+    pub(super) fn set_pin_mode(&mut self, pin: u8, mode: McuPinMode) {
+        let Some(id) = self.selection.single_component() else {
+            return;
+        };
+        let current = self
+            .document
+            .component(id)
+            .and_then(|component| component.pin_modes.get(&pin).copied());
+        if current == Some(mode) {
+            return;
+        }
+        self.push_undo();
+        let Some(component) = self.document.component_mut(id) else {
+            return;
+        };
+        component.pin_modes.insert(pin, mode);
+        self.mark_dirty();
+        self.message = format!("Pin {pin} mode {}", mode.label());
     }
 
     pub(super) fn set_component_parameter(&mut self, name: &'static str, value: f64) {

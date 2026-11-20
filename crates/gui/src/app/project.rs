@@ -312,6 +312,7 @@ impl GuiApp {
     }
 
     pub(super) fn start_firmware(&mut self, words: Vec<u16>, name: String) {
+        self.firmware_words = words.clone();
         match self.load_sim(words) {
             Ok(()) => {
                 self.waveform.clear();
