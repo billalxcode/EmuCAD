@@ -2,7 +2,8 @@
 
 Tanggal: 2026-11-20
 Status: P0 dimulai; `DigitalVector`, `DigitalModule`, `BusResolver`,
-wired-AND, dan `ClockDomain` sudah diimplementasikan.
+wired-AND, `ClockDomain`, dan `reset_synchronizer` sudah
+diimplementasikan.
 
 ## 1. Tujuan
 

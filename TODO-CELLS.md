@@ -90,7 +90,9 @@ Catatan:
   - `DigitalBuilder::dff_in` dan `dff_into_in`.
   - `DigitalCircuit::tick_domain`.
   - Penjadwalan periode per domain tetap di luar engine.
-- [ ] CELL-00-05 Tambahkan reset domain, async assert, dan sync deassert.
+- [~] CELL-00-05 Tambahkan reset domain, async assert, dan sync deassert.
+  - `reset_synchronizer` menyediakan async assert dan sync deassert.
+  - Reset domain per kelompok DFF belum.
 - [ ] CELL-00-06 Definisikan `McuSpec`, `CpuSpec`, `BusSpec`,
   `MemorySpec`, `PeripheralSpec`, `PinSpec`, dan `ClockSpec`.
 - [ ] CELL-00-07 Buat validator address map, IRQ map, pin map, dan

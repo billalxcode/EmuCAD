@@ -7,6 +7,7 @@ pub mod circuit;
 pub mod cpu;
 pub mod module;
 pub mod registers;
+pub mod reset;
 pub mod vector;
 
 pub use alu::{DigitalAlu, digital_alu};
@@ -22,4 +23,5 @@ pub use cpu::{
 };
 pub use module::DigitalModule;
 pub use registers::{RegisterFile, RegisterPorts, register_file};
+pub use reset::reset_synchronizer;
 pub use vector::DigitalVector;
