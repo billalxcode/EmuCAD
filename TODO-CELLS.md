@@ -69,8 +69,11 @@ Catatan:
 
 ## P0 - Fondasi Library
 
-- [ ] CELL-00-01 Buat tipe `DigitalVector` atau `Bus` dengan width,
+- [x] CELL-00-01 Buat tipe `DigitalVector` atau `Bus` dengan width,
   slice, concat, zero extension, dan sign extension.
+  - `cells::DigitalVector` tersedia dengan allocate, new, slice,
+    concat, zero_extend, sign_extend, dan read.
+  - Width dibatasi 1..=64; slice dan extension divalidasi.
 - [ ] CELL-00-02 Tambahkan module hierarchy dengan port bernama dan
   parameter width.
 - [~] CELL-00-03 Tambahkan high-Z, pull-up, pull-down, wired-AND, dan

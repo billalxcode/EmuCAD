@@ -5,6 +5,7 @@ pub mod blocks;
 pub mod circuit;
 pub mod cpu;
 pub mod registers;
+pub mod vector;
 
 pub use alu::{DigitalAlu, digital_alu};
 pub use blocks::{
@@ -17,3 +18,4 @@ pub use cpu::{
     OP_SUB, OP_XOR, encode_alu, encode_branch, encode_hlt, encode_ldi,
 };
 pub use registers::{RegisterFile, RegisterPorts, register_file};
+pub use vector::DigitalVector;

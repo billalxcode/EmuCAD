@@ -1,7 +1,7 @@
 # 92 - Kebutuhan Cells untuk Multi-MCU
 
 Tanggal: 2026-11-20
-Status: analisis kebutuhan, belum implementasi.
+Status: P0 dimulai; `DigitalVector` sudah diimplementasikan.
 
 ## 1. Tujuan
 
