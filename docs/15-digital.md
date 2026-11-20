@@ -161,6 +161,18 @@ Test lapisan digital mencakup:
 - Test mengisi, mengosongkan, menolak write saat full, dan menolak read
   saat empty.
 
+## 7.3 Memory Sinkron
+
+- `memory_sync` mendukung depth 2..=32, width 1..=64, dan byte mask
+  opsional.
+- Latency 0 menghasilkan read kombinasional; latency 1 mendaftarkan
+  read data saat `read_enable` tinggi.
+- `ReadDuringWrite::ReadFirst` mengembalikan nilai lama; `WriteFirst`
+  mem-bypass write data pada alamat yang sama.
+- Storage di-reset ke nol; initial contents arbitrary belum didukung.
+- Test memeriksa word, byte mask, read-first, write-first, latency 1,
+  reset, dan validasi shape.
+
 ## 8. Program Counter, IR, dan Stack Pointer
 
 - PC 16-bit: increment setiap tick atau load alamat target.

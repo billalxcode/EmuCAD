@@ -3,7 +3,7 @@
 Tanggal: 2026-11-20
 Status: P0 selesai; P1 berjalan dengan ALU, register, counter,
 shifter, multiplier, divider, comparator, encoder, bit manipulation,
-bus mux/crossbar, FIFO sinkron, dan LUT/FSM generic.
+bus mux/crossbar, FIFO sinkron, LUT/FSM generic, dan memory sinkron.
 `DigitalVector`, `DigitalModule`, `BusResolver`, wired-AND,
 `ClockDomain`, `ResetDomain`, dan `reset_synchronizer` ada di `cells`.
 `McuSpec` dan `BusSpec` ada di crate `soc`.
@@ -54,7 +54,7 @@ Yang belum memadai untuk STM32/ESP32:
 - Multi-clock, PLL, clock divider, clock gating, reset synchronizer,
   CDC.
 - Async FIFO, pipeline register, scoreboard, hazard unit.
-- Memory compiler parameterized, byte enable, cache, parity/ECC.
+- Cache, parity/ECC, dan memory macro lengkap.
 - Pin mux, pad model, open-drain resolution, high-Z bus, pull-up/down.
 - Spec MCU, validator address map, IRQ map, dan pin map.
 - Model timing, propagation delay, setup/hold, dan multi-clock.
@@ -131,22 +131,23 @@ Sudah:
   32 x 32.
 - Program counter dan stack pointer 16-bit.
 - FIFO sinkron dengan full, empty, dan count.
+- Memory sinkron `memory_sync` dengan byte mask, latency 0/1, dan
+  read-during-write policy.
 - SRAM 6T dan array 128 x 8 di katalog.
 
 Sebagian:
 
 - Register file belum memiliki clear, preset, parity, atau
   multi-write port.
-- Memory array masih fixed 128 x 8 dan berada di katalog, bukan
-  generator.
+- Memory array transistor-level masih fixed 128 x 8 di katalog;
+  `memory_sync` adalah generator digital.
 - ROM, flash, EEPROM, FRAM, MRAM, dan NVRAM masih entry katalog.
 
 Belum:
 
 - Async FIFO dan CDC FIFO.
 - Dual-clock RAM dan dual-port RAM.
-- Memory compiler: word count, data width, byte enable, latency,
-  initialization, read-during-write behavior.
+- Initial contents arbitrary untuk `memory_sync`.
 - Cache tag/data array, valid/dirty bit, replacement metadata.
 - Parity, ECC, scrubber, dan error injection.
 - ROM/flash programming model dan erase/write timing.
@@ -328,7 +329,7 @@ Belum:
 | Gate dasar | Ya | - | Varian drive strength |
 | Arithmetic | Adder, ALU 1..64, shifter, multiplier, divider, comparator, encoder, bit-manip, crossbar | Parity, LUT | Carry-lookahead |
 | Sequential | DFF, register, counter, FIFO sinkron | Counter 1..16, PC/SP 16-bit | Async FIFO, CDC, pipeline |
-| Memory | SRAM6T, array 128x8 | Register file 2R1W | Memory compiler, cache, ECC |
+| Memory | SRAM6T, array 128x8, memory_sync | Register file 2R1W, init nol | Cache, ECC, init arbitrary |
 | CPU | CPU mainan 16-bit | ISA decoder kecil | Pipeline, CSR, exception, 32-bit |
 | Bus | Decoder, mux | Entry katalog ber-address | APB/AHB/AXI, arbiter, DMA |
 | Clock/reset | Ring oscillator | Clock source katalog | PLL, clock domain, reset sync |

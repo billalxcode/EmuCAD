@@ -182,6 +182,10 @@ Exit P0:
   - Async FIFO dan CDC belum ada.
 - [~] CELL-02-04 Buat memory compiler parameterized: depth, width,
   byte enable, initialization, latency, dan read-during-write.
+  - `memory_sync` mendukung depth 2..=32, width 1..=64, byte mask,
+    latency 0/1, serta ReadFirst/WriteFirst.
+  - Storage di-reset ke nol; initial contents arbitrary belum ada.
+  - Memory compiler transistor-level masih terpisah di katalog.
 - [ ] CELL-02-05 Tambahkan dual-port dan dual-clock RAM.
 - [ ] CELL-02-06 Tambahkan cache tag/data array dan metadata valid,
   dirty, dan replacement.
