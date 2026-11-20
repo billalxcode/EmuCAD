@@ -131,10 +131,105 @@ impl DigitalBuilder {
         circuit
     }
 
+    pub(crate) fn append_template(
+        &mut self,
+        template: &DigitalBuilder,
+        template_inputs: &[NetId],
+        parent_inputs: &[NetId],
+        template_outputs: &[NetId],
+    ) -> Result<Vec<NetId>, SimError> {
+        if template_inputs.len() != parent_inputs.len() {
+            return Err(SimError::InvalidNetlist(
+                "module input count mismatch".to_string(),
+            ));
+        }
+        let mapping = self.map_nets(template, template_inputs, parent_inputs);
+        self.copy_template(template, &mapping);
+        Ok(template_outputs
+            .iter()
+            .map(|net| mapping[net.raw()])
+            .collect())
+    }
+
+    fn copy_template(&mut self, template: &DigitalBuilder, mapping: &[NetId]) {
+        for gate in &template.gates {
+            self.gates.push(map_gate(gate, mapping));
+        }
+        for dff in &template.dffs {
+            self.dffs.push(map_dff(dff, mapping));
+        }
+    }
+
+    fn map_nets(
+        &mut self,
+        template: &DigitalBuilder,
+        template_inputs: &[NetId],
+        parent_inputs: &[NetId],
+    ) -> Vec<NetId> {
+        let mut mapping = Vec::with_capacity(template.values.len());
+        for raw in 0..template.values.len() {
+            let parent = template_inputs
+                .iter()
+                .position(|net| net.raw() == raw)
+                .map_or_else(|| self.net(), |index| parent_inputs[index]);
+            mapping.push(parent);
+        }
+        mapping
+    }
+
     fn new_net(&mut self) -> NetId {
         let net = NetId(self.values.len());
         self.values.push(false);
         net
+    }
+}
+
+fn map_gate(gate: &Gate, mapping: &[NetId]) -> Gate {
+    match *gate {
+        Gate::Const(value, output) => Gate::Const(value, mapping[output.raw()]),
+        Gate::Buf(input, output) => Gate::Buf(mapping[input.raw()], mapping[output.raw()]),
+        Gate::Not(input, output) => Gate::Not(mapping[input.raw()], mapping[output.raw()]),
+        Gate::And(first, second, output) => binary(first, second, output, mapping, Gate::And),
+        Gate::Or(first, second, output) => binary(first, second, output, mapping, Gate::Or),
+        Gate::Xor(first, second, output) => binary(first, second, output, mapping, Gate::Xor),
+        Gate::Nand(first, second, output) => binary(first, second, output, mapping, Gate::Nand),
+        Gate::Nor(first, second, output) => binary(first, second, output, mapping, Gate::Nor),
+        Gate::Mux {
+            first,
+            second,
+            select,
+            output,
+        } => map_mux(first, second, select, output, mapping),
+    }
+}
+
+fn map_mux(first: NetId, second: NetId, select: NetId, output: NetId, mapping: &[NetId]) -> Gate {
+    Gate::Mux {
+        first: mapping[first.raw()],
+        second: mapping[second.raw()],
+        select: mapping[select.raw()],
+        output: mapping[output.raw()],
+    }
+}
+
+fn binary(
+    first: NetId,
+    second: NetId,
+    output: NetId,
+    mapping: &[NetId],
+    gate: fn(NetId, NetId, NetId) -> Gate,
+) -> Gate {
+    gate(
+        mapping[first.raw()],
+        mapping[second.raw()],
+        mapping[output.raw()],
+    )
+}
+
+fn map_dff(dff: &Dff, mapping: &[NetId]) -> Dff {
+    Dff {
+        data: mapping[dff.data.raw()],
+        output: mapping[dff.output.raw()],
     }
 }
 

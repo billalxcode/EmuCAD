@@ -74,8 +74,11 @@ Catatan:
   - `cells::DigitalVector` tersedia dengan allocate, new, slice,
     concat, zero_extend, sign_extend, dan read.
   - Width dibatasi 1..=64; slice dan extension divalidasi.
-- [ ] CELL-00-02 Tambahkan module hierarchy dengan port bernama dan
+- [x] CELL-00-02 Tambahkan module hierarchy dengan port bernama dan
   parameter width.
+  - `cells::DigitalModule` membangun template dengan port input/output.
+  - `instantiate` menyalin gate dan DFF dengan remap net.
+  - Instansiasi berulang menghasilkan net yang independen.
 - [~] CELL-00-03 Tambahkan high-Z, pull-up, pull-down, wired-AND, dan
   resolusi bus contention. Tri-state inverter sudah ada, resolver belum.
 - [ ] CELL-00-04 Tambahkan API clock domain dan tick per domain.

@@ -4,6 +4,7 @@ pub mod alu;
 pub mod blocks;
 pub mod circuit;
 pub mod cpu;
+pub mod module;
 pub mod registers;
 pub mod vector;
 
@@ -17,5 +18,6 @@ pub use cpu::{
     Cpu, CpuTrace, OP_ADD, OP_AND, OP_HLT, OP_JMP, OP_JNZ, OP_JZ, OP_LDI, OP_MOV, OP_NOP, OP_OR,
     OP_SUB, OP_XOR, encode_alu, encode_branch, encode_hlt, encode_ldi,
 };
+pub use module::DigitalModule;
 pub use registers::{RegisterFile, RegisterPorts, register_file};
 pub use vector::DigitalVector;
