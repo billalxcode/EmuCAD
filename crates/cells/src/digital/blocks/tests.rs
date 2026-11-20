@@ -1,7 +1,7 @@
 use super::{
-    ProgramCounter, StackPointer, add_vectors, and_all, counter, decoder, full_adder,
-    invert_vector, mux_tree, or_all, read_bits, register, select_vector, shift_register,
-    validate_operands,
+    ProgramCounter, RegisterControl, StackPointer, add_vectors, and_all, counter, decoder,
+    full_adder, invert_vector, mux_tree, or_all, read_bits, register, register_extended,
+    select_vector, shift_register, validate_operands,
 };
 use crate::digital::{DigitalBuilder, DigitalCircuit, NetId};
 
@@ -321,4 +321,87 @@ fn vector_invert_flips_every_bit() {
         circuit.settle().expect("settle");
         assert_eq!(read_bits(&circuit, &inverted), !value & 0xF);
     }
+}
+
+fn extended_register_fixture() -> (DigitalCircuit, Vec<NetId>) {
+    let mut builder = DigitalBuilder::new();
+    let data = named_inputs(&mut builder, "d", 16);
+    let mask = named_inputs(&mut builder, "m", 2);
+    let control = RegisterControl {
+        load: builder.input("load"),
+        clear: builder.input("clear"),
+        preset: builder.input("preset"),
+        mask: &mask,
+    };
+    let bits = register_extended(&mut builder, 16, &data, &control).expect("register");
+    (builder.build(), bits)
+}
+
+fn set_register_control(circuit: &mut DigitalCircuit, load: bool, clear: bool, preset: bool) {
+    circuit.set_input("load", load).expect("load");
+    circuit.set_input("clear", clear).expect("clear");
+    circuit.set_input("preset", preset).expect("preset");
+}
+
+#[test]
+fn extended_register_loads_and_holds() {
+    let (mut circuit, bits) = extended_register_fixture();
+    set_bits(&mut circuit, "m", 0b11, 2);
+    set_bits(&mut circuit, "d", 0xABCD, 16);
+    set_register_control(&mut circuit, true, false, false);
+    circuit.tick().expect("tick");
+    assert_eq!(read_bits(&circuit, &bits), 0xABCD);
+    set_bits(&mut circuit, "d", 0x1234, 16);
+    set_register_control(&mut circuit, false, false, false);
+    circuit.tick().expect("tick");
+    assert_eq!(read_bits(&circuit, &bits), 0xABCD);
+}
+
+#[test]
+fn extended_register_clear_and_preset_priority() {
+    let (mut circuit, bits) = extended_register_fixture();
+    set_bits(&mut circuit, "m", 0b11, 2);
+    set_bits(&mut circuit, "d", 0xFFFF, 16);
+    set_register_control(&mut circuit, true, false, false);
+    circuit.tick().expect("tick");
+    set_register_control(&mut circuit, false, true, false);
+    circuit.tick().expect("tick");
+    assert_eq!(read_bits(&circuit, &bits), 0);
+    set_register_control(&mut circuit, false, false, true);
+    circuit.tick().expect("tick");
+    assert_eq!(read_bits(&circuit, &bits), 0xFFFF);
+    set_register_control(&mut circuit, true, true, true);
+    circuit.tick().expect("tick");
+    assert_eq!(read_bits(&circuit, &bits), 0);
+}
+
+#[test]
+fn extended_register_applies_byte_mask() {
+    let (mut circuit, bits) = extended_register_fixture();
+    set_bits(&mut circuit, "d", 0xFFFF, 16);
+    set_bits(&mut circuit, "m", 0b01, 2);
+    set_register_control(&mut circuit, true, false, false);
+    circuit.tick().expect("tick");
+    assert_eq!(read_bits(&circuit, &bits), 0x00FF);
+    set_bits(&mut circuit, "d", 0x0000, 16);
+    set_bits(&mut circuit, "m", 0b10, 2);
+    circuit.tick().expect("tick");
+    assert_eq!(read_bits(&circuit, &bits), 0x00FF);
+    set_bits(&mut circuit, "d", 0xFFFF, 16);
+    circuit.tick().expect("tick");
+    assert_eq!(read_bits(&circuit, &bits), 0xFFFF);
+}
+
+#[test]
+fn extended_register_rejects_bad_mask() {
+    let mut builder = DigitalBuilder::new();
+    let data = named_inputs(&mut builder, "d", 16);
+    let mask = named_inputs(&mut builder, "m", 3);
+    let control = RegisterControl {
+        load: builder.input("load"),
+        clear: builder.input("clear"),
+        preset: builder.input("preset"),
+        mask: &mask,
+    };
+    assert!(register_extended(&mut builder, 16, &data, &control).is_err());
 }

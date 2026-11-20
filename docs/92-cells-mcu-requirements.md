@@ -1,9 +1,8 @@
 # 92 - Kebutuhan Cells untuk Multi-MCU
 
 Tanggal: 2026-11-20
-Status: P0 selesai; P1 berjalan dengan `digital_alu_width` 1..=64 bit,
-`register_file_masked`, shifter, multiplier, divider, comparator,
-encoder, dan bit manipulation.
+Status: P0 selesai; P1 berjalan dengan ALU, register, shifter,
+multiplier, divider, comparator, encoder, dan bit manipulation.
 `DigitalVector`, `DigitalModule`, `BusResolver`, wired-AND,
 `ClockDomain`, `ResetDomain`, dan `reset_synchronizer` ada di `cells`.
 `McuSpec` dan `BusSpec` ada di crate `soc`.
@@ -120,6 +119,8 @@ Belum:
 Sudah:
 
 - Register width 1..64.
+- Register dengan load, clear, preset, dan byte mask opsional
+  (`register_extended`).
 - Shift register width 1..64.
 - Counter width 1..16.
 - Register file parameterized `count x width` dengan 2 read dan 1 write.

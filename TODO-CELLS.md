@@ -155,8 +155,11 @@ Exit P0:
 - [ ] CELL-01-08 Tambahkan crossbar dan bus mux parameterized.
 - [ ] CELL-01-09 Tambahkan equivalence test antara model fungsional dan
   structural untuk ALU, shifter, multiplier, dan divider.
-- [~] CELL-02-01 Tambahkan register dengan enable, clear, preset, dan
-  byte enable. Register dasar sudah ada.
+- [x] CELL-02-01 Tambahkan register dengan enable, clear, preset, dan
+  byte enable.
+  - `register_extended` memakai kontrol load, clear, dan preset.
+  - Byte mask opsional; slice kosong berarti semua byte aktif.
+  - Prioritas clear, lalu preset, lalu load, lalu hold.
 - [~] CELL-02-02 Tambahkan counter dengan load, up/down, compare,
   capture, dan prescaler generic. Counter 1..16 sudah ada.
 - [ ] CELL-02-03 Tambahkan FIFO sinkron dan async FIFO.

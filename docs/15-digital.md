@@ -80,6 +80,7 @@ impl DigitalBuilder {
 - `ProgramCounter` adalah register 16-bit dengan load dan increment.
 - `StackPointer` adalah register 16-bit dengan load, increment, dan decrement.
 - `register` adalah register loadable yang dipakai IR dan register file.
+- `register_extended` menambahkan clear, preset, dan byte mask.
 
 Semua blok diuji secara fungsional dengan clock ideal.
 
@@ -131,6 +132,9 @@ Test lapisan digital mencakup:
   byte write mask, dan 2 read port.
 - Test 32 x 32 memeriksa word utuh, retensi byte yang tidak dimask,
   kedua read port, dan validasi lebar mask.
+- `register_extended` mendukung load, clear, preset, dan byte mask
+  opsional untuk register tunggal.
+- Prioritas kontrol: clear, preset, load, lalu hold.
 
 ## 8. Program Counter, IR, dan Stack Pointer
 

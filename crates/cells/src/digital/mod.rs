@@ -21,8 +21,9 @@ pub use bitops::{
     bit_reverse, byte_swap, popcount, saturating_add_unsigned, saturating_sub_unsigned,
 };
 pub use blocks::{
-    ProgramCounter, StackPointer, and_all, counter, decoder, decrement, full_adder, increment,
-    mux_tree, or_all, read_bits, register, shift_register,
+    ProgramCounter, RegisterControl, StackPointer, and_all, counter, decoder, decrement,
+    full_adder, increment, mux_tree, or_all, read_bits, register, register_extended,
+    shift_register,
 };
 pub use bus::{BusDriver, BusPull, BusResolver, resolve_bus, resolve_open_drain};
 pub use circuit::{CircuitStats, ClockDomain, DigitalBuilder, DigitalCircuit, NetId, ResetDomain};
