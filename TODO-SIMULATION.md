@@ -704,11 +704,11 @@ S7 yang sudah berjalan:
 
 Commit fitur terakhir:
 
+- `2eadcde feat(gui): add MCU pin modes and mixed run`
 - `f91e6a4 feat(gui): build mixed session from netlist`
 - `99a2371 feat(gui): expand MCU symbol to TQFP-32`
 - `008ceb5 test(avr): cross-check package IO with pin map`
 - `a689dcb feat(avr): add ATmega328P package pin map`
-- `db9468f feat(mixed): interpolate PWM and UART edge events`
 - `9e8d432 test(mixed): verify all mapped AVR pins`
 - `5ab2e4e feat(mixed): interpolate timer events within steps`
 - `9734772 feat(soc): validate memory and IRQ maps`
