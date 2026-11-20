@@ -135,8 +135,14 @@ Exit P0:
   - Lebar power-of-two 1..=32; quotient dan remainder masing-masing
     width bit.
   - Pembagian oleh nol tidak didefinisikan.
-- [ ] CELL-01-05 Tambahkan comparator, priority encoder, one-hot
+- [x] CELL-01-05 Tambahkan comparator, priority encoder, one-hot
   encoder, dan leading-zero count.
+  - `comparator_unsigned` mengembalikan less, equal, dan greater untuk
+    width 1..=64.
+  - `priority_encoder` memilih index terendah yang aktif.
+  - `one_hot_encoder` mengubah vektor one-hot menjadi index biner.
+  - `leading_zero_count` menghitung nol di depan untuk width
+    power-of-two 1..=64.
 - [ ] CELL-01-06 Tambahkan bit reverse, byte swap, popcount, dan
   saturating arithmetic.
 - [ ] CELL-01-07 Generalisasi LUT dan FSM dengan width dan jumlah state

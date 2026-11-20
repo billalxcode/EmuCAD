@@ -74,6 +74,9 @@ impl DigitalBuilder {
 - `barrel_shift_left`, `barrel_shift_right`, `arithmetic_shift_right`,
   `rotate_left`, `rotate_right`, `funnel_shift_left`, dan
   `funnel_shift_right` membangun shifter kombinasional.
+- `comparator_unsigned` menghasilkan less, equal, dan greater.
+- `priority_encoder`, `one_hot_encoder`, dan `leading_zero_count`
+  membangun encoder dan hitungan nol di depan.
 - `ProgramCounter` adalah register 16-bit dengan load dan increment.
 - `StackPointer` adalah register 16-bit dengan load, increment, dan decrement.
 - `register` adalah register loadable yang dipakai IR dan register file.
@@ -112,6 +115,8 @@ Test lapisan digital mencakup:
 - Barrel shift, arithmetic shift, rotate, dan funnel shift.
 - Multiplier array dan Booth multiplier.
 - Divider restoring dan non-restoring.
+- Comparator, priority encoder, one-hot encoder, dan leading-zero
+  count.
 
 ## 7. Register File
 
@@ -177,6 +182,19 @@ Test lapisan digital mencakup:
 - Hasil berisi `quotient` dan `remainder`, masing-masing width bit.
 - Pembagian oleh nol tidak didefinisikan dan tidak dideteksi.
 - Test menyapu semua dividend 8-bit untuk divisor batas 1 sampai 255.
+
+## 9.4 Comparator dan Encoder
+
+- `comparator_unsigned` membandingkan dua vektor unsigned dengan lebar
+  1..=64 dan menghasilkan `less`, `equal`, dan `greater`.
+- `priority_encoder` memilih index terendah yang aktif dan
+  mengembalikan `index` serta `valid`.
+- `one_hot_encoder` mengubah vektor one-hot menjadi index biner.
+- `leading_zero_count` menghitung jumlah nol dari bit paling
+  signifikan sampai bit satu pertama.
+- Jumlah input encoder harus power-of-two 1..=64.
+- Test menyapu seluruh pola 8-bit untuk priority encoder dan
+  leading-zero count.
 
 ---
 

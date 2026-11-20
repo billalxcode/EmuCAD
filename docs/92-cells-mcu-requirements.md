@@ -2,7 +2,8 @@
 
 Tanggal: 2026-11-20
 Status: P0 selesai; P1 berjalan dengan `digital_alu_width` 1..=64 bit,
-`register_file_masked`, barrel/funnel shifter, multiplier, dan divider.
+`register_file_masked`, barrel/funnel shifter, multiplier, divider,
+comparator, dan encoder.
 `DigitalVector`, `DigitalModule`, `BusResolver`, wired-AND,
 `ClockDomain`, `ResetDomain`, dan `reset_synchronizer` ada di `cells`.
 `McuSpec` dan `BusSpec` ada di crate `soc`.
@@ -36,6 +37,7 @@ Yang sudah ada:
 - ALU parameterized 1..=64 bit dan barrel/funnel shifter.
 - Multiplier array unsigned dan Booth multiplier signed.
 - Divider restoring dan non-restoring unsigned.
+- Comparator unsigned dan priority/one-hot encoder.
 - Register file 32 x 8 dengan dua read port dan satu write port.
 - Program counter dan stack pointer 16-bit.
 - CPU mainan 16-bit dengan 32 register 8-bit dan ISA kecil.
@@ -94,20 +96,21 @@ Sudah:
   power-of-two 1..=64.
 - Multiplier unsigned dan Booth signed untuk width 1..=32.
 - Divider restoring dan non-restoring untuk width 1..=32.
+- Comparator unsigned dan leading-zero count untuk width 1..=64.
+- Priority encoder dan one-hot encoder untuk jumlah input
+  power-of-two 1..=64.
 - LUT dan finite state machine kecil di katalog digital.
 
 Sebagian:
 
-- Encoder, priority encoder, comparator, parity, dan beberapa blok
-  lain hanya ada sebagai entry katalog, bukan builder library.
+- Parity dan beberapa blok lain hanya ada sebagai entry katalog,
+  bukan builder library.
 - Lebar operand masih banyak yang hardcoded 8-bit.
 
 Belum:
 
-- Leading-zero count, bit reverse, byte swap, saturating arithmetic.
-- Comparator parameterized dengan flag less/equal/greater.
+- Bit reverse, byte swap, saturating arithmetic.
 - Carry-lookahead adder dan prefix adder untuk jalur kritis.
-- One-hot/priority encoder generic.
 - Crossbar mux dan bus mux parameterized.
 - Formal equivalence block untuk ALU dan shifter.
 
@@ -319,7 +322,7 @@ Belum:
 | Kebutuhan | Sudah | Sebagian | Belum |
 |---|---|---|---|
 | Gate dasar | Ya | - | Varian drive strength |
-| Arithmetic | Adder, ALU 1..64, barrel/funnel shifter, multiplier, divider | Comparator, encoder, LUT | Bit-manip |
+| Arithmetic | Adder, ALU 1..64, shifter, multiplier, divider, comparator, encoder | Parity, LUT | Bit-manip |
 | Sequential | DFF, register, counter | Counter 1..16, PC/SP 16-bit | FIFO, CDC, pipeline |
 | Memory | SRAM6T, array 128x8 | Register file 2R1W | Memory compiler, cache, ECC |
 | CPU | CPU mainan 16-bit | ISA decoder kecil | Pipeline, CSR, exception, 32-bit |
