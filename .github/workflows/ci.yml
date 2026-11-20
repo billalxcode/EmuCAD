@@ -5,6 +5,13 @@ on:
   pull_request:
 
 jobs:
+  ascii:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check ASCII
+        run: python3 scripts/check_ascii.py
+
   test:
     strategy:
       fail-fast: false

@@ -1,4 +1,4 @@
-# 09 — Risiko dan Realisme
+# 09 - Risiko dan Realisme
 
 Dokumen ini adalah pemeriksaan jujur terhadap visi, bukan daftar alasan untuk berhenti.
 
@@ -51,7 +51,7 @@ Ini setara **program riset multi-person-decade**. Proyek tetap bisa dimulai, tet
 Pada 16 MHz:
 
 - Satu siklus = 62.5 ns.
-- Time step 0.1 ns → 625 step per siklus.
+- Time step 0.1 ns -> 625 step per siklus.
 - Satu instruksi bisa melibatkan ribuan node.
 - Setiap step bisa membutuhkan beberapa iterasi Newton.
 - Setiap iterasi menyelesaikan sistem linear.
@@ -59,23 +59,23 @@ Pada 16 MHz:
 Konsekuensi:
 
 - Satu detik firmware bisa memakan menit, jam, atau lebih.
-- “Blink 1 detik” secara struktural bukan demo cepat.
+- "Blink 1 detik" secara struktural bukan demo cepat.
 - Target offline sudah tepat.
 
 ### 3.2 Jumlah Node
 
-- Register file 32×8 DFF → 256 flip-flop, ribuan transistor.
-- ALU 8-bit ripple-carry → ratusan transistor.
-- Control PLA → ribuan gerbang.
-- Peripheral structural → ribuan hingga puluhan ribu transistor.
-- SRAM/flash behavioral → menghindari ledakan node.
+- Register file 32x8 DFF -> 256 flip-flop, ribuan transistor.
+- ALU 8-bit ripple-carry -> ratusan transistor.
+- Control PLA -> ribuan gerbang.
+- Peripheral structural -> ribuan hingga puluhan ribu transistor.
+- SRAM/flash behavioral -> menghindari ledakan node.
 
 ### 3.3 Akurasi
 
 - Shichman-Hodges Level 1 tidak akurat untuk short-channel.
 - Meyer tidak konservasi muatan.
 - Tanpa lab, kalibrasi internal tidak mungkin.
-- “100% elektrik” tidak dapat diverifikasi; hanya “dalam toleransi pada pin”.
+- "100% elektrik" tidak dapat diverifikasi; hanya "dalam toleransi pada pin".
 
 ---
 
@@ -142,15 +142,15 @@ Kapan harus mengubah rencana:
 
 ## 8. Definisi Berhasil yang Realistis
 
-Keberhasilan tidak harus berarti “seluruh visi selesai”. Beberapa definisi yang valid:
+Keberhasilan tidak harus berarti "seluruh visi selesai". Beberapa definisi yang valid:
 
-1. **M1 selesai** — solver dan inverter VTC terbukti.
-2. **M2 selesai** — pustaka CMOS dan ring oscillator berjalan.
-3. **M3 selesai** — CPU uji kecil berjalan.
-4. **M4 selesai** — blink AVR berjalan di CPU struktural.
-5. **M5 selesai** — blink + UART hello.
-6. **M7 selesai** — board demo end-to-end.
-7. **M8 selesai** — full SPICE.
+1. **M1 selesai** - solver dan inverter VTC terbukti.
+2. **M2 selesai** - pustaka CMOS dan ring oscillator berjalan.
+3. **M3 selesai** - CPU uji kecil berjalan.
+4. **M4 selesai** - blink AVR berjalan di CPU struktural.
+5. **M5 selesai** - blink + UART hello.
+6. **M7 selesai** - board demo end-to-end.
+7. **M8 selesai** - full SPICE.
 
 Setiap level adalah hasil yang bernilai, bahkan jika level berikutnya belum tercapai.
 

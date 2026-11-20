@@ -1,4 +1,4 @@
-# 05 — Peripheral
+# 05 - Peripheral
 
 Dokumen ini menjelaskan peripheral ATmega328P yang harus dibangun secara struktural.
 
@@ -33,8 +33,8 @@ Data address = I/O address + 0x20.
 
 ### 2.2 Perilaku
 
-- `DDRx = 1` → pin output.
-- `DDRx = 0` → pin input.
+- `DDRx = 1` -> pin output.
+- `DDRx = 0` -> pin input.
 - Output value dari `PORTx`.
 - Input value dari pin eksternal.
 - Pull-up aktif jika `DDRx = 0` dan `PORTx = 1`.
@@ -107,7 +107,7 @@ Vout = Vol - I * Rout   (low)
 ### 3.3 Perilaku
 
 - Counter increment pada setiap clock prescaler.
-- Overflow saat 0xFF → 0x00.
+- Overflow saat 0xFF -> 0x00.
 - `TOV0` set saat overflow.
 - `OCF0A/OCF0B` set saat compare match.
 - Interrupt jika bit enable di `TIMSK0`.
@@ -195,7 +195,7 @@ Test:
 
 ### 6.4 Test
 
-- Kirim “hello”.
+- Kirim "hello".
 - Baud rate 9600/115200.
 - Interrupt TX/RX.
 - Framing error.
@@ -208,7 +208,7 @@ Test:
 Fitur:
 
 - Master/slave.
-- Clock polarity/phase (mode 0–3).
+- Clock polarity/phase (mode 0-3).
 - Bit order.
 - Prescaler.
 - `SPCR`, `SPSR`, `SPDR`.
@@ -219,7 +219,7 @@ Test:
 
 - Loopback master-slave.
 - Transfer byte.
-- Mode 0–3.
+- Mode 0-3.
 - Interrupt.
 
 ---

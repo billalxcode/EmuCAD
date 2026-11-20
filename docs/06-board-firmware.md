@@ -1,4 +1,4 @@
-# 06 — Board dan Firmware
+# 06 - Board dan Firmware
 
 Dokumen ini menjelaskan model board, komponen, toolchain firmware, loader, dan demo end-to-end.
 
@@ -130,7 +130,7 @@ board.connect_uart(mcu.uart0(), UartHost::stdout());
 Tujuan:
 
 - Board description eksplisit.
-- Tidak ada “magic” yang menghubungkan pin.
+- Tidak ada "magic" yang menghubungkan pin.
 - Mudah diganti dengan board lain.
 
 ---
@@ -291,11 +291,11 @@ Target lanjut:
 ## 7. CLI (Rencana)
 
 ```bash
-# DC sweep inverter → CSV
+# DC sweep inverter -> CSV
 emucad run --circuit inverter --analysis dc-sweep \
   --start 0 --stop 5 --step 0.01 --output vtc.csv
 
-# Transient inverter → VCD
+# Transient inverter -> VCD
 emucad run --circuit inverter --analysis transient \
   --stop 100n --step 0.1n --output inverter.vcd
 
@@ -342,7 +342,7 @@ emucad monitor --board uno --firmware blink.hex
 
 ### 9.2 UART
 
-- Output “hello”.
+- Output "hello".
 - Baud rate benar.
 - Tidak ada framing error.
 - Flag UART benar.

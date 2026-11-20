@@ -1,4 +1,4 @@
-# 00 — Visi dan Ruang Lingkup
+# 00 - Visi dan Ruang Lingkup
 
 ## 1. Visi
 
@@ -16,14 +16,14 @@ Proyek ini bukan sekadar emulator instruksi. Ini adalah **simulator struktural**
 
 ## 2. Tujuan
 
-1. **Transistor-level foundation** — device model fisik, bukan switch ideal.
-2. **Firmware-capable** — menjalankan firmware AVR hasil `avr-gcc`.
-3. **Structural MCU** — ATmega328P clean-room yang dibangun bertahap.
-4. **Full SPICE engine** — MNA, DC, transient, AC, noise, dan analisis lainnya.
-5. **Native and self-contained** — Rust std-only, tanpa runtime eksternal.
-6. **Deterministic** — hasil dapat direproduksi dan dibandingkan.
-7. **Observable** — CSV, VCD, CLI monitor, dan fidelity matrix.
-8. **Open source** — MIT.
+1. **Transistor-level foundation** - device model fisik, bukan switch ideal.
+2. **Firmware-capable** - menjalankan firmware AVR hasil `avr-gcc`.
+3. **Structural MCU** - ATmega328P clean-room yang dibangun bertahap.
+4. **Full SPICE engine** - MNA, DC, transient, AC, noise, dan analisis lainnya.
+5. **Native and self-contained** - Rust std-only, tanpa runtime eksternal.
+6. **Deterministic** - hasil dapat direproduksi dan dibandingkan.
+7. **Observable** - CSV, VCD, CLI monitor, dan fidelity matrix.
+8. **Open source** - MIT.
 
 ## 3. Non-goal (untuk saat ini)
 
@@ -55,11 +55,11 @@ Hal-hal berikut **bukan** target awal, meskipun bisa muncul kemudian:
 | GPIO | Port B, C, D |
 | Timer | Timer0, Timer1, Timer2 |
 | UART | USART0 |
-| Firmware demo | Blink + UART “hello” |
+| Firmware demo | Blink + UART "hello" |
 | LED | PB5 (D13) melalui resistor |
 | Host UART | Endpoint behavioral |
 
-## 5. Definisi “100% Native”
+## 5. Definisi "100% Native"
 
 - Emulator adalah binary hasil kompilasi Rust untuk host.
 - Tidak ada VM, interpreter bytecode untuk emulator, browser, atau WASM.
@@ -69,7 +69,7 @@ Hal-hal berikut **bukan** target awal, meskipun bisa muncul kemudian:
 - Firmware boleh dikompilasi dengan `avr-gcc` di luar runtime; itu toolchain, bukan bagian emulator.
 - Viewer VCD (GTKWave) boleh eksternal; itu alat analisis, bukan bagian runtime.
 
-## 6. Definisi “100% Berfungsi”
+## 6. Definisi "100% Berfungsi"
 
 Kebenaran diukur sebagai **firmware-observable equivalence** pada board profile:
 
