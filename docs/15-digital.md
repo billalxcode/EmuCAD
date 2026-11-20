@@ -111,6 +111,7 @@ Test lapisan digital mencakup:
 - Shift register dan hold.
 - Barrel shift, arithmetic shift, rotate, dan funnel shift.
 - Multiplier array dan Booth multiplier.
+- Divider restoring dan non-restoring.
 
 ## 7. Register File
 
@@ -166,6 +167,16 @@ Test lapisan digital mencakup:
   pengurangan operand tergantung pasangan bit multiplier.
 - Test array memeriksa model unsigned dan batas 255 x 255.
 - Test Booth memeriksa model signed termasuk nilai negatif dan -128.
+
+## 9.3 Divider
+
+- `divider_restoring` memakai trial subtraction dan restore remainder.
+- `divider_non_restoring` menambah atau mengurangi divisor berdasarkan
+  tanda remainder, lalu mengoreksi di akhir.
+- Dividend dan divisor unsigned dengan width power-of-two 1..=32.
+- Hasil berisi `quotient` dan `remainder`, masing-masing width bit.
+- Pembagian oleh nol tidak didefinisikan dan tidak dideteksi.
+- Test menyapu semua dividend 8-bit untuk divisor batas 1 sampai 255.
 
 ---
 

@@ -4,7 +4,7 @@ Status: S1-S4 selesai; S0, S5, S6, S7, dan S8 sebagian. S6 sudah
 mencakup 12 dari 15 memory; MCU gate-level, protocol memory, dan
 co-sim S7 belum selesai.
 
-Snapshot 2026-11-20: 1199 test lulus, 11 crate, branch `dev` sudah
+Snapshot 2026-11-20: 1203 test lulus, 11 crate, branch `dev` sudah
 di-push. `main` belum di-merge.
 
 Tujuan: membuat komponen di skematik GUI dapat disimulasikan dengan model
@@ -616,7 +616,7 @@ dokumentasi menyebut batas fidelity.
 
 Status ringkas:
 
-- 1199 test lulus, 0 gagal melalui
+- 1203 test lulus, 0 gagal melalui
   `bash .opencode/skills/clean-code/scripts/check.sh`.
 - 11 crate; crate simulasi zero external dependency.
 - `fmt`, clippy `-D warnings`, dan pengecekan ASCII lulus.
@@ -645,6 +645,8 @@ Status ringkas:
   untuk width power-of-two 1..=64.
 - `multiplier_array` dan `multiplier_booth` tersedia untuk width
   1..=32 dengan hasil 2 x width bit.
+- `divider_restoring` dan `divider_non_restoring` tersedia untuk
+  operand unsigned 1..=32 bit.
 - Audit struktur AVR ada di `docs/91-avr-audit.md`; status masih hybrid
   dan beberapa blok structural belum terhubung ke CPU.
 - Kebutuhan `cells` untuk multi-MCU ada di

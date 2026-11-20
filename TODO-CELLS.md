@@ -129,7 +129,12 @@ Exit P0:
   - `multiplier_array` untuk operand unsigned.
   - `multiplier_booth` untuk operand signed two's complement.
   - Width power-of-two 1..=32; produk 2 x width bit.
-- [ ] CELL-01-04 Tambahkan divider restored dan non-restored.
+- [x] CELL-01-04 Tambahkan divider restored dan non-restored.
+  - `divider_restoring` dan `divider_non_restoring` untuk operand
+    unsigned.
+  - Lebar power-of-two 1..=32; quotient dan remainder masing-masing
+    width bit.
+  - Pembagian oleh nol tidak didefinisikan.
 - [ ] CELL-01-05 Tambahkan comparator, priority encoder, one-hot
   encoder, dan leading-zero count.
 - [ ] CELL-01-06 Tambahkan bit reverse, byte swap, popcount, dan

@@ -5,6 +5,7 @@ pub mod blocks;
 pub mod bus;
 pub mod circuit;
 pub mod cpu;
+pub mod divider;
 pub mod module;
 pub mod multiplier;
 pub mod registers;
@@ -23,6 +24,7 @@ pub use cpu::{
     Cpu, CpuTrace, OP_ADD, OP_AND, OP_HLT, OP_JMP, OP_JNZ, OP_JZ, OP_LDI, OP_MOV, OP_NOP, OP_OR,
     OP_SUB, OP_XOR, encode_alu, encode_branch, encode_hlt, encode_ldi,
 };
+pub use divider::{Division, divider_non_restoring, divider_restoring};
 pub use module::DigitalModule;
 pub use multiplier::{multiplier_array, multiplier_booth};
 pub use registers::{RegisterFile, RegisterPorts, register_file, register_file_masked};
