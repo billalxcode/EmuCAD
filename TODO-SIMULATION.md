@@ -618,6 +618,8 @@ Status ringkas:
 - `fmt`, clippy `-D warnings`, dan pengecekan ASCII lulus.
 - Branch `dev` sudah di-push; commit fitur terakhir `a35930d`.
 - `main` belum di-merge karena merge memicu workflow rilis.
+- Phase 0 selesai: S2-06 branch current, coverage report
+  `docs/93`, harness ngspice, dan rekonsiliasi dokumentasi fidelity.
 - Audit struktur AVR ada di `docs/91-avr-audit.md`; status masih hybrid
   dan beberapa blok structural belum terhubung ke CPU.
 - Kebutuhan `cells` untuk multi-MCU ada di
