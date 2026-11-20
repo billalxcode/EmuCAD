@@ -175,10 +175,11 @@ Gerbang kelayakan sebelum implementasi besar:
 - [x] S0-10 Benchmark memory macro gate-level.
   - `memory_bench` mengukur register file 32x8, 32x16, dan 32x64.
   - Hasil ada di `docs/63-fidelity.md`.
-- [~] S0-11 Jalankan GPIO blink gate-level dan putuskan fallback Q55.
+- [x] S0-11 Jalankan GPIO blink gate-level dan putuskan fallback Q55.
   - Program GPIO pada `avr_bench` berjalan 3.58x realtime.
   - Memory macro gate-level jauh di atas budget siklus; fallback Q55
     dipakai sampai model memory lebih cepat.
+  - Eksekusi memakai core hybrid; full-chip gate-level tetap target S6.
   - Semua definisi solver-backed punya binding.
   - Tidak ada duplicate role pada satu definition.
   - Semua parameter default valid.
@@ -305,10 +306,11 @@ simulasi sesuai fungsi; parameter tanpa efek tidak ditampilkan.
   - Data per entry ada di `docs/data/behavioral-classification.csv`.
   - Kategori: compact, behavioral, digital, mixed-signal,
     structural, multidomain, RF, dan unsupported.
-- [~] S5-02 Gunakan `cells` untuk logic, flip-flop, counter, dan
+- [x] S5-02 Gunakan `cells` untuk logic, flip-flop, counter, dan
   multiplexer bila cocok.
   - 63 entry logic dan peripheral sudah dapat dijalankan lewat
     `emucad digital`.
+  - 78 entry digital total termasuk 15 entry memory.
   - Cakupan: 8 mux/decoder/encoder, 8 adder/comparator/parity/buffer,
     10 flip-flop, 10 counter/shift, 6 level/high-Z, 3 timer, 3 digital
     source, 5 programmable logic/LUT, serta UART, SPI, I2C, dan CAN.
