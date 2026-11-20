@@ -110,6 +110,7 @@ Test lapisan digital mencakup:
 - Counter dan hold.
 - Shift register dan hold.
 - Barrel shift, arithmetic shift, rotate, dan funnel shift.
+- Multiplier array dan Booth multiplier.
 
 ## 7. Register File
 
@@ -154,6 +155,17 @@ Test lapisan digital mencakup:
   sebagai satu nilai 2 x width.
 - Implementasi struktural memakai tahap mux logaritmik.
 - Test menyapu semua nilai amount 0..width-1 terhadap model Rust.
+
+## 9.2 Multiplier
+
+- `multiplier_array` mengalikan dua operand unsigned.
+- `multiplier_booth` mengalikan dua operand signed two's complement.
+- Lebar operand power-of-two 1..=32; hasil 2 x width bit.
+- Array multiplier menjumlahkan partial product yang digeser.
+- Booth multiplier memakai recoding radix-2 dan penjumlahan atau
+  pengurangan operand tergantung pasangan bit multiplier.
+- Test array memeriksa model unsigned dan batas 255 x 255.
+- Test Booth memeriksa model signed termasuk nilai negatif dan -128.
 
 ---
 

@@ -44,6 +44,27 @@ pub fn add_vectors(
     Ok((sum, carry))
 }
 
+/// Validates two equally sized power-of-two operand vectors.
+pub fn validate_operands(
+    first: &[NetId],
+    second: &[NetId],
+    label: &str,
+    limit: usize,
+) -> Result<(), SimError> {
+    let width = first.len();
+    if !width.is_power_of_two() || width > limit {
+        return Err(SimError::InvalidNetlist(format!(
+            "{label} width must be a power of two in 1..={limit}"
+        )));
+    }
+    if second.len() != width {
+        return Err(SimError::InvalidNetlist(format!(
+            "{label} operand width mismatch"
+        )));
+    }
+    Ok(())
+}
+
 /// Builds a multiplexer tree. The number of inputs must be two to the
 /// power of the number of select nets.
 pub fn mux_tree(

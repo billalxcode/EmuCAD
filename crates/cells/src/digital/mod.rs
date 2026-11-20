@@ -6,6 +6,7 @@ pub mod bus;
 pub mod circuit;
 pub mod cpu;
 pub mod module;
+pub mod multiplier;
 pub mod registers;
 pub mod reset;
 pub mod shifter;
@@ -23,6 +24,7 @@ pub use cpu::{
     OP_SUB, OP_XOR, encode_alu, encode_branch, encode_hlt, encode_ldi,
 };
 pub use module::DigitalModule;
+pub use multiplier::{multiplier_array, multiplier_booth};
 pub use registers::{RegisterFile, RegisterPorts, register_file, register_file_masked};
 pub use reset::reset_synchronizer;
 pub use shifter::{

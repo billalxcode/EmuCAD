@@ -1,6 +1,6 @@
 use super::{
     ProgramCounter, StackPointer, add_vectors, and_all, counter, decoder, full_adder, mux_tree,
-    or_all, read_bits, register, shift_register,
+    or_all, read_bits, register, shift_register, validate_operands,
 };
 use crate::digital::{DigitalBuilder, DigitalCircuit, NetId};
 
@@ -264,4 +264,18 @@ fn vector_adder_rejects_width_mismatch() {
     let second = named_inputs(&mut builder, "b", 3);
     let carry_in = builder.input("cin");
     assert!(add_vectors(&mut builder, &first, &second, carry_in).is_err());
+}
+
+#[test]
+fn operand_validation_checks_width_and_pair() {
+    let mut builder = DigitalBuilder::new();
+    let first = named_inputs(&mut builder, "a", 6);
+    let second = named_inputs(&mut builder, "b", 6);
+    assert!(validate_operands(&first, &second, "test", 32).is_err());
+    let first = named_inputs(&mut builder, "c", 8);
+    let second = named_inputs(&mut builder, "d", 4);
+    assert!(validate_operands(&first, &second, "test", 32).is_err());
+    let first = named_inputs(&mut builder, "e", 8);
+    let second = named_inputs(&mut builder, "f", 8);
+    assert!(validate_operands(&first, &second, "test", 32).is_ok());
 }

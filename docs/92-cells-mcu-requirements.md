@@ -2,7 +2,7 @@
 
 Tanggal: 2026-11-20
 Status: P0 selesai; P1 berjalan dengan `digital_alu_width` 1..=64 bit,
-`register_file_masked`, dan barrel/funnel shifter.
+`register_file_masked`, barrel/funnel shifter, dan multiplier.
 `DigitalVector`, `DigitalModule`, `BusResolver`, wired-AND,
 `ClockDomain`, `ResetDomain`, dan `reset_synchronizer` ada di `cells`.
 `McuSpec` dan `BusSpec` ada di crate `soc`.
@@ -34,6 +34,7 @@ Yang sudah ada:
 - D flip-flop, D latch, SRAM 6T, ring oscillator.
 - Adder ripple-carry, ALU 8-bit, register, counter, shift register.
 - ALU parameterized 1..=64 bit dan barrel/funnel shifter.
+- Multiplier array unsigned dan Booth multiplier signed.
 - Register file 32 x 8 dengan dua read port dan satu write port.
 - Program counter dan stack pointer 16-bit.
 - CPU mainan 16-bit dengan 32 register 8-bit dan ISA kecil.
@@ -43,7 +44,7 @@ Yang sudah ada:
 
 Yang belum memadai untuk STM32/ESP32:
 
-- Multiplier, divider, dan unit bit-manip.
+- Divider dan unit bit-manip.
 - Bus fabric, address decoder, arbiter, bridge, wait state, DMA.
 - Interrupt controller, CSR, exception, privilege, MMU/MPU.
 - Multi-clock, PLL, clock divider, clock gating, reset synchronizer,
@@ -90,6 +91,7 @@ Sudah:
 - Increment, decrement, dan ALU 8-bit (`digital_alu`).
 - Barrel shift, arithmetic shift, rotate, dan funnel shift untuk width
   power-of-two 1..=64.
+- Multiplier unsigned dan Booth signed untuk width 1..=32.
 - LUT dan finite state machine kecil di katalog digital.
 
 Sebagian:
@@ -100,7 +102,7 @@ Sebagian:
 
 Belum:
 
-- Multiplier array, Booth multiplier, divider restored/non-restored.
+- Divider restored/non-restored.
 - Leading-zero count, bit reverse, byte swap, saturating arithmetic.
 - Comparator parameterized dengan flag less/equal/greater.
 - Carry-lookahead adder dan prefix adder untuk jalur kritis.
@@ -163,7 +165,7 @@ Sebagian:
 Belum:
 
 - ALU 32/64-bit dengan flag overflow dan flag lengkap lainnya.
-- Multiplier dan divider 32-bit.
+- Divider 32-bit.
 - Decoder ISA table-driven yang dapat dikonfigurasi per spec.
 - Pipeline register dan hazard control.
 - Instruction cache dan data cache interface.
@@ -316,7 +318,7 @@ Belum:
 | Kebutuhan | Sudah | Sebagian | Belum |
 |---|---|---|---|
 | Gate dasar | Ya | - | Varian drive strength |
-| Arithmetic | Adder, ALU 1..64, barrel/funnel shifter | Comparator, encoder, LUT | Multiplier, divider, bit-manip |
+| Arithmetic | Adder, ALU 1..64, barrel/funnel shifter, multiplier | Comparator, encoder, LUT | Divider, bit-manip |
 | Sequential | DFF, register, counter | Counter 1..16, PC/SP 16-bit | FIFO, CDC, pipeline |
 | Memory | SRAM6T, array 128x8 | Register file 2R1W | Memory compiler, cache, ECC |
 | CPU | CPU mainan 16-bit | ISA decoder kecil | Pipeline, CSR, exception, 32-bit |
@@ -344,7 +346,7 @@ Belum:
 ### P1 - CPU dan Memory
 
 1. ALU 32-bit dan 64-bit.
-2. Multiplier dan divider.
+2. Divider.
 3. Register file dengan byte enable dan multi-port.
 4. Memory compiler parameterized.
 5. Pipeline register, hazard unit, branch unit.

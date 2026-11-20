@@ -125,7 +125,10 @@ Exit P0:
     `arithmetic_shift_right` untuk width power-of-two 1..=64.
   - `rotate_left` dan `rotate_right` memakai funnel shift.
   - `funnel_shift_left` dan `funnel_shift_right` untuk dua operand.
-- [ ] CELL-01-03 Tambahkan multiplier array dan Booth multiplier.
+- [x] CELL-01-03 Tambahkan multiplier array dan Booth multiplier.
+  - `multiplier_array` untuk operand unsigned.
+  - `multiplier_booth` untuk operand signed two's complement.
+  - Width power-of-two 1..=32; produk 2 x width bit.
 - [ ] CELL-01-04 Tambahkan divider restored dan non-restored.
 - [ ] CELL-01-05 Tambahkan comparator, priority encoder, one-hot
   encoder, dan leading-zero count.
