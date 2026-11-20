@@ -10,7 +10,7 @@ pub mod registers;
 pub mod reset;
 pub mod vector;
 
-pub use alu::{DigitalAlu, digital_alu};
+pub use alu::{DigitalAlu, digital_alu, digital_alu_width};
 pub use blocks::{
     ProgramCounter, StackPointer, and_all, counter, decoder, decrement, full_adder, increment,
     mux_tree, or_all, read_bits, register, shift_register,

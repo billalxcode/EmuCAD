@@ -4,7 +4,7 @@ Status: S1-S4 selesai; S0, S5, S6, S7, dan S8 sebagian. S6 sudah
 mencakup 12 dari 15 memory; MCU gate-level, protocol memory, dan
 co-sim S7 belum selesai.
 
-Snapshot 2026-11-20: 1172 test lulus, 10 crate, branch `dev` sudah
+Snapshot 2026-11-20: 1181 test lulus, 11 crate, branch `dev` sudah
 di-push. `main` belum di-merge.
 
 Tujuan: membuat komponen di skematik GUI dapat disimulasikan dengan model
@@ -616,9 +616,9 @@ dokumentasi menyebut batas fidelity.
 
 Status ringkas:
 
-- 1172 test lulus, 0 gagal melalui
+- 1181 test lulus, 0 gagal melalui
   `bash .opencode/skills/clean-code/scripts/check.sh`.
-- 10 crate; crate simulasi zero external dependency.
+- 11 crate; crate simulasi zero external dependency.
 - `fmt`, clippy `-D warnings`, dan pengecekan ASCII lulus.
 - Branch `dev` sudah di-push; commit fitur terakhir `a35930d`.
 - `main` belum di-merge karena merge memicu workflow rilis.
@@ -637,6 +637,8 @@ Status ringkas:
 - `ResetDomain` dan `reset_domain` untuk reset per kelompok DFF.
 - Crate `soc` menyediakan `McuSpec`, `CpuSpec`, `BusSpec`,
   `MemorySpec`, `PeripheralSpec`, `PinSpec`, dan `ClockSpec`.
+- `digital_alu_width` mendukung ALU 1 sampai 64 bit; `digital_alu`
+  tetap kompatibel sebagai ALU 8-bit.
 - Audit struktur AVR ada di `docs/91-avr-audit.md`; status masih hybrid
   dan beberapa blok structural belum terhubung ke CPU.
 - Kebutuhan `cells` untuk multi-MCU ada di

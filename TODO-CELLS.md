@@ -116,8 +116,10 @@ Exit P0:
 
 ## P1 - Arithmetic, CPU, dan Memory
 
-- [~] CELL-01-01 Generalisasi adder dan ALU ke width 8/16/32/64.
-  Saat ini ALU digital fixed 8-bit.
+- [x] CELL-01-01 Generalisasi adder dan ALU ke width 8/16/32/64.
+  - `digital_alu_width` mendukung width 1..=64.
+  - `digital_alu` tetap wrapper 8-bit.
+  - Test 32-bit arithmetic dan logic ditambahkan.
 - [ ] CELL-01-02 Tambahkan barrel shifter, rotate, dan funnel shift.
 - [ ] CELL-01-03 Tambahkan multiplier array dan Booth multiplier.
 - [ ] CELL-01-04 Tambahkan divider restored dan non-restored.
