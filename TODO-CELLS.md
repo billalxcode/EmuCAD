@@ -171,7 +171,11 @@ Exit P0:
   - `prescaler` menghasilkan tick satu cycle setiap divisor.
   - Capture dapat dibangun dari `register_extended` dengan sinyal
     tick atau match sebagai load.
-- [ ] CELL-02-03 Tambahkan FIFO sinkron dan async FIFO.
+- [~] CELL-02-03 Tambahkan FIFO sinkron dan async FIFO.
+  - `fifo_sync` mendukung width 1..=64, depth power-of-two 2..=32,
+    write enable, read enable, full, empty, dan count.
+  - Read dan write bersamaan menahan count.
+  - Async FIFO dan CDC belum ada.
 - [~] CELL-02-04 Buat memory compiler parameterized: depth, width,
   byte enable, initialization, latency, dan read-during-write.
 - [ ] CELL-02-05 Tambahkan dual-port dan dual-clock RAM.

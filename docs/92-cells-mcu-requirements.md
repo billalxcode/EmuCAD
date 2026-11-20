@@ -3,7 +3,7 @@
 Tanggal: 2026-11-20
 Status: P0 selesai; P1 berjalan dengan ALU, register, counter,
 shifter, multiplier, divider, comparator, encoder, bit manipulation,
-dan bus mux/crossbar.
+bus mux/crossbar, dan FIFO sinkron.
 `DigitalVector`, `DigitalModule`, `BusResolver`, wired-AND,
 `ClockDomain`, `ResetDomain`, dan `reset_synchronizer` ada di `cells`.
 `McuSpec` dan `BusSpec` ada di crate `soc`.
@@ -53,7 +53,7 @@ Yang belum memadai untuk STM32/ESP32:
 - Interrupt controller, CSR, exception, privilege, MMU/MPU.
 - Multi-clock, PLL, clock divider, clock gating, reset synchronizer,
   CDC.
-- FIFO, async FIFO, pipeline register, scoreboard, hazard unit.
+- Async FIFO, pipeline register, scoreboard, hazard unit.
 - Memory compiler parameterized, byte enable, cache, parity/ECC.
 - Pin mux, pad model, open-drain resolution, high-Z bus, pull-up/down.
 - Spec MCU, validator address map, IRQ map, dan pin map.
@@ -129,6 +129,7 @@ Sudah:
 - Register file dengan byte write mask untuk width 1..=64, termasuk
   32 x 32.
 - Program counter dan stack pointer 16-bit.
+- FIFO sinkron dengan full, empty, dan count.
 - SRAM 6T dan array 128 x 8 di katalog.
 
 Sebagian:
@@ -141,7 +142,7 @@ Sebagian:
 
 Belum:
 
-- FIFO sinkron dan async FIFO.
+- Async FIFO dan CDC FIFO.
 - Dual-clock RAM dan dual-port RAM.
 - Memory compiler: word count, data width, byte enable, latency,
   initialization, read-during-write behavior.
@@ -325,7 +326,7 @@ Belum:
 |---|---|---|---|
 | Gate dasar | Ya | - | Varian drive strength |
 | Arithmetic | Adder, ALU 1..64, shifter, multiplier, divider, comparator, encoder, bit-manip, crossbar | Parity, LUT | Carry-lookahead |
-| Sequential | DFF, register, counter | Counter 1..16, PC/SP 16-bit | FIFO, CDC, pipeline |
+| Sequential | DFF, register, counter, FIFO sinkron | Counter 1..16, PC/SP 16-bit | Async FIFO, CDC, pipeline |
 | Memory | SRAM6T, array 128x8 | Register file 2R1W | Memory compiler, cache, ECC |
 | CPU | CPU mainan 16-bit | ISA decoder kecil | Pipeline, CSR, exception, 32-bit |
 | Bus | Decoder, mux | Entry katalog ber-address | APB/AHB/AXI, arbiter, DMA |

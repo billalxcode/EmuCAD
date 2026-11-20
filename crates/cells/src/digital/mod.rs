@@ -11,6 +11,7 @@ pub mod cpu;
 pub mod crossbar;
 pub mod divider;
 pub mod encoder;
+pub mod fifo;
 pub mod module;
 pub mod multiplier;
 pub mod registers;
@@ -38,6 +39,7 @@ pub use cpu::{
 pub use crossbar::{bus_mux, crossbar};
 pub use divider::{Division, divider_non_restoring, divider_restoring};
 pub use encoder::{PriorityEncoding, leading_zero_count, one_hot_encoder, priority_encoder};
+pub use fifo::{Fifo, fifo_sync};
 pub use module::DigitalModule;
 pub use multiplier::{multiplier_array, multiplier_booth};
 pub use registers::{RegisterFile, RegisterPorts, register_file, register_file_masked};

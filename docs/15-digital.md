@@ -150,6 +150,17 @@ Test lapisan digital mencakup:
 - Divisor valid 1..=2^width untuk width 1..=32.
 - Test memeriksa load, hitung naik/turun, wrap, hold, match, dan tick.
 
+## 7.2 FIFO Sinkron
+
+- `fifo_sync` mendukung width 1..=64 dan depth power-of-two 2..=32.
+- Penyimpanan memakai `register_file`; pointer tulis dan baca memakai
+  `counter_loadable`.
+- Status `full` dan `empty` dihitung dari counter jumlah entri.
+- Write saat full dan read saat empty diabaikan.
+- Read dan write bersamaan menahan count.
+- Test mengisi, mengosongkan, menolak write saat full, dan menolak read
+  saat empty.
+
 ## 8. Program Counter, IR, dan Stack Pointer
 
 - PC 16-bit: increment setiap tick atau load alamat target.
