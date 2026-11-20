@@ -1,6 +1,6 @@
 //! Digital register file with two read ports.
 
-use super::blocks::{decoder, mux_tree, register};
+use super::blocks::{decoder, mux_tree, register, register_bit};
 use super::circuit::{DigitalBuilder, NetId};
 use kernel::SimError;
 
@@ -61,6 +61,66 @@ pub fn register_file(
         read_a,
         read_b,
     })
+}
+
+/// Builds a register file with byte write masks.
+pub fn register_file_masked(
+    builder: &mut DigitalBuilder,
+    count: usize,
+    width: usize,
+    ports: &RegisterPorts,
+    mask: &[NetId],
+) -> Result<RegisterFile, SimError> {
+    validate_shape(count, width, ports)?;
+    validate_mask(width, mask)?;
+    let bits = build_masked_storage(builder, count, width, ports, mask)?;
+    let read_a = optional_read_port(builder, &bits, width, &ports.read_address_a)?;
+    let read_b = optional_read_port(builder, &bits, width, &ports.read_address_b)?;
+    Ok(RegisterFile {
+        bits,
+        read_a,
+        read_b,
+    })
+}
+
+fn validate_mask(width: usize, mask: &[NetId]) -> Result<(), SimError> {
+    if mask.len() != width.div_ceil(8) {
+        return Err(SimError::InvalidNetlist(
+            "register mask must have one bit per byte".to_string(),
+        ));
+    }
+    Ok(())
+}
+
+fn build_masked_storage(
+    builder: &mut DigitalBuilder,
+    count: usize,
+    width: usize,
+    ports: &RegisterPorts,
+    mask: &[NetId],
+) -> Result<Vec<Vec<NetId>>, SimError> {
+    let lines = decoder(builder, &ports.write_address)?;
+    let mut bits = Vec::with_capacity(count);
+    for line in lines {
+        let enable = builder.and(line, ports.write_enable);
+        bits.push(masked_row(builder, enable, &ports.write_data, mask, width));
+    }
+    Ok(bits)
+}
+
+fn masked_row(
+    builder: &mut DigitalBuilder,
+    enable: NetId,
+    data: &[NetId],
+    mask: &[NetId],
+    width: usize,
+) -> Vec<NetId> {
+    (0..width)
+        .map(|bit| {
+            let load = builder.and(enable, mask[bit / 8]);
+            register_bit(builder, data[bit], load)
+        })
+        .collect()
 }
 
 fn optional_read_port(
@@ -155,8 +215,14 @@ fn build_read_port(
 
 #[cfg(test)]
 mod tests {
-    use super::{RegisterPorts, register_file};
+    use super::{RegisterPorts, register_file, register_file_masked};
     use crate::digital::{DigitalBuilder, DigitalCircuit, NetId};
+
+    const FILE_COUNT: usize = 32;
+    const ADDRESS_WIDTH: usize = 5;
+    const BYTE_WIDTH: usize = 8;
+    const WORD_WIDTH: usize = 32;
+    const MASK_WIDTH: usize = 4;
 
     fn named_inputs(builder: &mut DigitalBuilder, prefix: &str, width: usize) -> Vec<NetId> {
         (0..width)
@@ -172,20 +238,31 @@ mod tests {
 
     fn fixture() -> DigitalCircuit {
         let mut builder = DigitalBuilder::new();
-        let ports = fixture_ports(&mut builder);
-        let file = register_file(&mut builder, 32, 8, &ports).expect("file");
+        let ports = fixture_ports(&mut builder, BYTE_WIDTH);
+        let file = register_file(&mut builder, FILE_COUNT, BYTE_WIDTH, &ports).expect("file");
         expose(&mut builder, "a", file.read_a());
         expose(&mut builder, "b", file.read_b());
         builder.build()
     }
 
-    fn fixture_ports(builder: &mut DigitalBuilder) -> RegisterPorts {
+    fn masked_fixture() -> DigitalCircuit {
+        let mut builder = DigitalBuilder::new();
+        let ports = fixture_ports(&mut builder, WORD_WIDTH);
+        let mask = named_inputs(&mut builder, "msk", MASK_WIDTH);
+        let file = register_file_masked(&mut builder, FILE_COUNT, WORD_WIDTH, &ports, &mask)
+            .expect("file");
+        expose(&mut builder, "a", file.read_a());
+        expose(&mut builder, "b", file.read_b());
+        builder.build()
+    }
+
+    fn fixture_ports(builder: &mut DigitalBuilder, width: usize) -> RegisterPorts {
         RegisterPorts {
-            write_address: named_inputs(builder, "wa", 5),
-            write_data: named_inputs(builder, "wd", 8),
+            write_address: named_inputs(builder, "wa", ADDRESS_WIDTH),
+            write_data: named_inputs(builder, "wd", width),
             write_enable: builder.input("we"),
-            read_address_a: named_inputs(builder, "ra", 5),
-            read_address_b: named_inputs(builder, "rb", 5),
+            read_address_a: named_inputs(builder, "ra", ADDRESS_WIDTH),
+            read_address_b: named_inputs(builder, "rb", ADDRESS_WIDTH),
         }
     }
 
@@ -198,11 +275,16 @@ mod tests {
         }
     }
 
-    fn write_register(circuit: &mut DigitalCircuit, address: usize, value: u64) {
-        set_bits(circuit, "wa", address as u64, 5);
-        set_bits(circuit, "wd", value, 8);
+    fn write_register(circuit: &mut DigitalCircuit, address: usize, value: u64, width: usize) {
+        set_bits(circuit, "wa", address as u64, ADDRESS_WIDTH);
+        set_bits(circuit, "wd", value, width);
         circuit.set_input("we", true).expect("we");
         circuit.tick().expect("tick");
+    }
+
+    fn write_masked(circuit: &mut DigitalCircuit, address: usize, value: u64, mask: u64) {
+        set_bits(circuit, "msk", mask, MASK_WIDTH);
+        write_register(circuit, address, value, WORD_WIDTH);
     }
 
     fn read_port(
@@ -210,10 +292,11 @@ mod tests {
         input_prefix: &str,
         output_prefix: &str,
         address: usize,
+        width: usize,
     ) -> u64 {
-        set_bits(circuit, input_prefix, address as u64, 5);
+        set_bits(circuit, input_prefix, address as u64, ADDRESS_WIDTH);
         circuit.settle().expect("settle");
-        read_named(circuit, output_prefix, 8)
+        read_named(circuit, output_prefix, width)
     }
 
     fn read_named(circuit: &DigitalCircuit, prefix: &str, width: usize) -> u64 {
@@ -233,40 +316,88 @@ mod tests {
     #[test]
     fn register_file_writes_and_reads_all_registers() {
         let mut circuit = fixture();
-        for address in 0..32 {
-            write_register(&mut circuit, address, sample_value(address));
+        for address in 0..FILE_COUNT {
+            write_register(&mut circuit, address, sample_value(address), BYTE_WIDTH);
         }
-        for address in 0..32 {
+        for address in 0..FILE_COUNT {
             let expected = sample_value(address);
-            assert_eq!(read_port(&mut circuit, "ra", "a", address), expected);
+            assert_eq!(
+                read_port(&mut circuit, "ra", "a", address, BYTE_WIDTH),
+                expected
+            );
         }
     }
 
     #[test]
     fn register_file_holds_without_write() {
         let mut circuit = fixture();
-        write_register(&mut circuit, 1, 0x55);
-        set_bits(&mut circuit, "wa", 1, 5);
-        set_bits(&mut circuit, "wd", 0x30, 8);
+        write_register(&mut circuit, 1, 0x55, BYTE_WIDTH);
+        set_bits(&mut circuit, "wa", 1, ADDRESS_WIDTH);
+        set_bits(&mut circuit, "wd", 0x30, BYTE_WIDTH);
         circuit.set_input("we", false).expect("we");
         circuit.tick().expect("tick");
-        assert_eq!(read_port(&mut circuit, "ra", "a", 1), 0x55);
+        assert_eq!(read_port(&mut circuit, "ra", "a", 1, BYTE_WIDTH), 0x55);
     }
 
     #[test]
     fn register_file_ports_are_independent() {
         let mut circuit = fixture();
-        write_register(&mut circuit, 0, 0x3);
-        write_register(&mut circuit, 31, 0xC);
-        assert_eq!(read_port(&mut circuit, "ra", "a", 0), 0x3);
-        assert_eq!(read_port(&mut circuit, "rb", "b", 31), 0xC);
+        write_register(&mut circuit, 0, 0x3, BYTE_WIDTH);
+        write_register(&mut circuit, 31, 0xC, BYTE_WIDTH);
+        assert_eq!(read_port(&mut circuit, "ra", "a", 0, BYTE_WIDTH), 0x3);
+        assert_eq!(read_port(&mut circuit, "rb", "b", 31, BYTE_WIDTH), 0xC);
     }
 
     #[test]
     fn register_file_reset_clears_storage() {
         let mut circuit = fixture();
-        write_register(&mut circuit, 2, 0xF);
+        write_register(&mut circuit, 2, 0xF, BYTE_WIDTH);
         circuit.reset().expect("reset");
-        assert_eq!(read_port(&mut circuit, "ra", "a", 2), 0);
+        assert_eq!(read_port(&mut circuit, "ra", "a", 2, BYTE_WIDTH), 0);
+    }
+
+    #[test]
+    fn masked_register_file_writes_32_bit_words() {
+        let mut circuit = masked_fixture();
+        write_masked(&mut circuit, 5, 0xDEAD_BEEF, 0xF);
+        write_masked(&mut circuit, 31, 0x1234_5678, 0xF);
+        assert_eq!(
+            read_port(&mut circuit, "ra", "a", 5, WORD_WIDTH),
+            0xDEAD_BEEF
+        );
+        assert_eq!(
+            read_port(&mut circuit, "rb", "b", 31, WORD_WIDTH),
+            0x1234_5678
+        );
+    }
+
+    #[test]
+    fn masked_register_file_retains_unmasked_bytes() {
+        let mut circuit = masked_fixture();
+        write_masked(&mut circuit, 7, 0x1122_3344, 0xF);
+        write_masked(&mut circuit, 7, 0x0000_AA00, 0b0010);
+        assert_eq!(
+            read_port(&mut circuit, "ra", "a", 7, WORD_WIDTH),
+            0x1122_AA44
+        );
+        write_masked(&mut circuit, 7, 0xFF00_0000, 0b1000);
+        assert_eq!(
+            read_port(&mut circuit, "rb", "b", 7, WORD_WIDTH),
+            0xFF22_AA44
+        );
+        write_masked(&mut circuit, 7, 0xFFFF_FFFF, 0b0000);
+        assert_eq!(
+            read_port(&mut circuit, "ra", "a", 7, WORD_WIDTH),
+            0xFF22_AA44
+        );
+    }
+
+    #[test]
+    fn masked_register_file_rejects_wrong_mask_width() {
+        let mut builder = DigitalBuilder::new();
+        let ports = fixture_ports(&mut builder, WORD_WIDTH);
+        let mask = named_inputs(&mut builder, "msk", MASK_WIDTH - 1);
+        let result = register_file_masked(&mut builder, FILE_COUNT, WORD_WIDTH, &ports, &mask);
+        assert!(result.is_err());
     }
 }

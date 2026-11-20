@@ -11,4 +11,6 @@ mod tests;
 
 pub use combinational::{and_all, decoder, mux_tree, or_all, read_bits};
 pub use pointers::{ProgramCounter, StackPointer};
-pub use registers::{counter, decrement, full_adder, increment, register, shift_register};
+pub use registers::{
+    counter, decrement, full_adder, increment, register, register_bit, shift_register,
+};

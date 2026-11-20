@@ -16,7 +16,8 @@ pub fn register(
         .collect())
 }
 
-fn register_bit(builder: &mut DigitalBuilder, data: NetId, load: NetId) -> NetId {
+/// Builds one enabled storage bit.
+pub fn register_bit(builder: &mut DigitalBuilder, data: NetId, load: NetId) -> NetId {
     let output = builder.net();
     let next = builder.mux(output, data, load);
     builder.dff_into(next, output);

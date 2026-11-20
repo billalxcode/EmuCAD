@@ -22,6 +22,6 @@ pub use cpu::{
     OP_SUB, OP_XOR, encode_alu, encode_branch, encode_hlt, encode_ldi,
 };
 pub use module::DigitalModule;
-pub use registers::{RegisterFile, RegisterPorts, register_file};
+pub use registers::{RegisterFile, RegisterPorts, register_file, register_file_masked};
 pub use reset::reset_synchronizer;
 pub use vector::DigitalVector;

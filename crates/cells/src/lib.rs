@@ -43,7 +43,8 @@ pub use digital::{
     RegisterFile, RegisterPorts, ResetDomain, StackPointer, and_all, counter, decoder, decrement,
     digital_alu, digital_alu_width, encode_alu, encode_branch, encode_hlt, encode_ldi,
     full_adder as digital_full_adder, increment, mux_tree, or_all, read_bits, register,
-    register_file, reset_synchronizer, resolve_bus, resolve_open_drain, shift_register,
+    register_file, register_file_masked, reset_synchronizer, resolve_bus, resolve_open_drain,
+    shift_register,
 };
 pub use registry::CellKind;
 pub use sequential::{d_flip_flop, d_latch, ring_oscillator, sram6t};

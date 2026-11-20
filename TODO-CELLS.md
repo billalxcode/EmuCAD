@@ -147,8 +147,12 @@ Exit P0:
   dan skid buffer.
 - [ ] CELL-02-09 Tambahkan model flash/EEPROM dengan erase/write timing
   behavioral.
-- [~] CELL-03-01 Buat register file 32 x 32 dengan byte enable dan
-  multi-port. Register file 32 x 8 sudah ada.
+- [x] CELL-03-01 Buat register file 32 x 32 dengan byte enable dan
+  multi-port.
+  - `register_file_masked` mendukung 2 read port, 1 write port, dan
+    byte write mask.
+  - Lebar data 1..=64 dan jumlah register 2..=32.
+  - Multi-write port belum ada.
 - [ ] CELL-03-02 Tambahkan pipeline, hazard unit, forwarding, dan
   branch unit.
 - [ ] CELL-03-03 Tambahkan CSR file, trap controller, dan interrupt

@@ -1,7 +1,8 @@
 # 92 - Kebutuhan Cells untuk Multi-MCU
 
 Tanggal: 2026-11-20
-Status: P0 selesai; P1 dimulai dengan `digital_alu_width` 1..=64 bit.
+Status: P0 selesai; P1 dimulai dengan `digital_alu_width` 1..=64 bit
+dan `register_file_masked` untuk register file ber-byte-mask.
 `DigitalVector`, `DigitalModule`, `BusResolver`, wired-AND,
 `ClockDomain`, `ResetDomain`, dan `reset_synchronizer` ada di `cells`.
 `McuSpec` dan `BusSpec` ada di crate `soc`.
@@ -115,12 +116,14 @@ Sudah:
 - Shift register width 1..64.
 - Counter width 1..16.
 - Register file parameterized `count x width` dengan 2 read dan 1 write.
+- Register file dengan byte write mask untuk width 1..=64, termasuk
+  32 x 32.
 - Program counter dan stack pointer 16-bit.
 - SRAM 6T dan array 128 x 8 di katalog.
 
 Sebagian:
 
-- Register file belum memiliki byte enable, clear, preset, parity, atau
+- Register file belum memiliki clear, preset, parity, atau
   multi-write port.
 - Counter belum memiliki load, up/down, compare, capture, atau
   prescaler generic.
@@ -154,11 +157,12 @@ Sebagian:
 - CPU ini adalah model demonstrasi, bukan implementasi ISA nyata.
 - Belum ada pipeline, hazard unit, forwarding, atau branch prediction.
 - Belum ada CSR, interrupt entry, exception, privilege, atau sleep.
-- Belum ada 32-bit datapath atau register file 32 x 32.
+- CPU demo belum memakai datapath 32-bit; blok `cells` 32-bit sudah
+  tersedia.
 
 Belum:
 
-- ALU 32/64-bit dengan flag lengkap.
+- ALU 32/64-bit dengan flag overflow dan flag lengkap lainnya.
 - Barrel shifter dan multiplier/divider 32-bit.
 - Decoder ISA table-driven yang dapat dikonfigurasi per spec.
 - Pipeline register dan hazard control.
