@@ -291,6 +291,12 @@ Test `timer0_event_interpolates_within_step`:
 - Compare terjadi pada siklus pertama dari instruction dua siklus.
 - Timestamp event berada di tengah langkah, bukan di awal langkah.
 
+Test `tx_edge_offsets_track_start_and_bit_boundary` di `avr`:
+
+- Start bit dicatat pada offset 0.
+- Perubahan bit berikutnya dicatat pada offset satu periode bit.
+- Offset dipakai untuk timestamp edge UART di `mixed`.
+
 Test `pin_event_queue_records_level`:
 
 - Program blink mengubah level PB5.
@@ -331,9 +337,10 @@ Test `all_mapped_pins_drive_thevenin_nodes`:
 - Index pin pada session mengikuti urutan `links`, bukan nomor package.
 - Breakpoint pin berlaku untuk semua link yang terdaftar.
 - Breakpoint tegangan berlaku untuk node pin, ADC, dan PWM.
-- Queue event gabungan tersedia; event Timer0 memakai interpolasi
-  offset siklus, event lain memakai batas langkah.
-- Interpolasi sub-langkah untuk event UART, PWM, dan pin belum ada.
+- Queue event gabungan tersedia; event Timer0, edge PWM, dan edge UART
+  TX memakai interpolasi offset siklus, event pin memakai batas langkah.
+- Event pin dibaca setelah sampel analog sehingga batas langkah adalah
+  waktu observasi yang benar.
 - AVR masih hybrid, bukan full-chip structural.
 - Hanya sumber tegangan yang dapat diubah.
 - PWM baru mencakup Timer0 channel A.
@@ -364,5 +371,5 @@ S7-09:
 S7-04 tetap hybrid, bukan full-chip structural. S7-05 sudah mencakup
 semua pin IO yang dimodelkan, tetapi belum pin daya, reset, atau paket
 32 pin penuh. S7-08 belum mencakup flow control hardware; S7-09 sudah
-menginterpolasi event Timer0 di dalam langkah, tetapi event UART, PWM,
-dan pin masih memakai batas langkah.
+menginterpolasi event Timer0, PWM, dan UART TX di dalam langkah. Event
+pin tetap memakai batas langkah karena dibaca setelah sampel analog.

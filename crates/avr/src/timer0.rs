@@ -18,6 +18,7 @@ pub struct Timer0 {
     compare_count: u32,
     overflow_cycle: Option<u32>,
     compare_cycle: Option<u32>,
+    pwm_cycle: Option<u32>,
 }
 
 impl Timer0 {
@@ -38,6 +39,7 @@ impl Timer0 {
             compare_count: 0,
             overflow_cycle: None,
             compare_cycle: None,
+            pwm_cycle: None,
         })
     }
 
@@ -90,6 +92,7 @@ impl Timer0 {
     pub fn tick(&mut self, cycles: u32) -> Result<(), SimError> {
         self.overflow_cycle = None;
         self.compare_cycle = None;
+        self.pwm_cycle = None;
         let initial = self.prescaler;
         self.prescaler = self.prescaler.saturating_add(cycles);
         let ticks = self.prescaler / self.divider;
@@ -157,6 +160,12 @@ impl Timer0 {
         self.compare_cycle
     }
 
+    /// Returns the cycle offset of the first PWM change in the last tick.
+    #[must_use]
+    pub const fn pwm_cycle(&self) -> Option<u32> {
+        self.pwm_cycle
+    }
+
     /// Resets the counter, prescaler, and flags.
     ///
     /// Event counters are preserved so observers keep their history.
@@ -170,8 +179,16 @@ impl Timer0 {
 
     fn step(&mut self, offset: u32) {
         let previous = self.counter;
+        let previous_pwm = self.pwm_output;
         self.counter = self.counter.wrapping_add(1);
         self.update_pwm();
+        self.record_step_events(previous, previous_pwm, offset);
+    }
+
+    fn record_step_events(&mut self, previous: u8, previous_pwm: bool, offset: u32) {
+        if self.pwm_output != previous_pwm {
+            self.pwm_cycle.get_or_insert(offset);
+        }
         if previous == 0xFF {
             self.overflow = true;
             self.overflow_count = self.overflow_count.wrapping_add(1);
@@ -303,8 +320,10 @@ mod tests {
         timer.set_pwm(false);
         timer.tick(1).expect("tick");
         assert!(timer.pwm_output());
+        assert_eq!(timer.pwm_cycle(), Some(1));
         timer.tick(1).expect("tick");
         assert!(!timer.pwm_output());
+        assert_eq!(timer.pwm_cycle(), Some(1));
         timer.tick(254).expect("tick");
         assert_eq!(timer.counter(), 0);
         assert!(timer.pwm_output());

@@ -606,11 +606,11 @@ impl AvrSession {
         let cycles = trace.as_ref().map_or(1, |trace| trace.cycles).max(1);
         self.update_timer0_events();
         self.record_timer0_events(cycles);
-        self.record_pwm_event();
+        self.record_pwm_event(cycles);
         self.drain_uart_tx();
         self.record_adc_conversions();
         self.record_uart_rx();
-        self.record_uart_tx_edge();
+        self.record_uart_tx_edge(cycles);
         Ok(trace)
     }
 
@@ -659,17 +659,17 @@ impl AvrSession {
     fn record_timer0_events(&mut self, cycles: u8) {
         if self.event_state.timer0.overflow {
             let offset = self.cpu.timer0().overflow_cycle().unwrap_or(cycles.into());
-            let time = self.timer_event_time(offset, cycles);
+            let time = self.event_time_at(offset, cycles);
             self.push_event_at(CoSimEventKind::Timer0Overflow, time);
         }
         if self.event_state.timer0.compare {
             let offset = self.cpu.timer0().compare_cycle().unwrap_or(cycles.into());
-            let time = self.timer_event_time(offset, cycles);
+            let time = self.event_time_at(offset, cycles);
             self.push_event_at(CoSimEventKind::Timer0Compare, time);
         }
     }
 
-    fn timer_event_time(&self, offset: u32, cycles: u8) -> Time {
+    fn event_time_at(&self, offset: u32, cycles: u8) -> Time {
         let cycles = u32::from(cycles.max(1));
         let fraction = f64::from(offset.min(cycles)) / f64::from(cycles);
         let step = self.analog.step_time();
@@ -702,16 +702,19 @@ impl AvrSession {
         self.uart_state.rx_count = count;
     }
 
-    fn record_pwm_event(&mut self) {
+    fn record_pwm_event(&mut self, cycles: u8) {
         let high = self.cpu.pwm_a();
         if high == self.event_state.pwm_level {
             return;
         }
-        self.push_event(CoSimEventKind::PwmEdge { high });
+        let offset = self.cpu.timer0().pwm_cycle().unwrap_or(cycles.into());
+        let time = self.event_time_at(offset, cycles);
+        self.push_event_at(CoSimEventKind::PwmEdge { high }, time);
         self.event_state.pwm_level = high;
     }
 
-    fn record_uart_tx_edge(&mut self) {
+    fn record_uart_tx_edge(&mut self, cycles: u8) {
+        let edge = self.cpu.uart().take_tx_edge_cycle();
         if self.uart_state.tx.is_none() {
             return;
         }
@@ -719,7 +722,9 @@ impl AvrSession {
         if high == self.event_state.uart_tx_level {
             return;
         }
-        self.push_event(CoSimEventKind::UartTxEdge { high });
+        let offset = edge.unwrap_or(cycles.into());
+        let time = self.event_time_at(offset, cycles);
+        self.push_event_at(CoSimEventKind::UartTxEdge { high }, time);
         self.event_state.uart_tx_level = high;
     }
 

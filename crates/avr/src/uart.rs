@@ -51,6 +51,7 @@ pub struct Uart {
     tx_data: u8,
     tx_bit_cycles: u32,
     tx_frame_cycles: u32,
+    tx_edge_cycle: Option<u32>,
     tx_elapsed: u32,
     tx_active: bool,
     tx_queue: VecDeque<u8>,
@@ -71,15 +72,13 @@ impl Uart {
             tx_data: 0,
             tx_bit_cycles: 0,
             tx_frame_cycles: 0,
+            tx_edge_cycle: None,
             tx_elapsed: 0,
             tx_active: false,
             tx_queue: VecDeque::new(),
             udre: true,
             txc: false,
-            rx: RxState {
-                line: true,
-                ..RxState::default()
-            },
+            rx: rx_reset(),
         }
     }
 
@@ -113,6 +112,7 @@ impl Uart {
         self.tx_bit_cycles = self.cycles_per_bit();
         self.tx_frame_cycles = self.tx_bit_cycles.saturating_mul(self.frame_bits());
         self.tx_active = true;
+        self.tx_edge_cycle = Some(0);
     }
 
     /// Returns the last received byte without clearing RXC.
@@ -207,8 +207,20 @@ impl Uart {
         if cycles == 0 {
             return;
         }
+        let bit_cycles = self.tx_bit_cycles.max(1);
+        let previous_line = self.tx_line();
+        let elapsed = self.tx_elapsed;
         self.advance_tx(cycles);
+        if self.tx_line() != previous_line {
+            let offset = tx_edge_offset(elapsed, cycles, bit_cycles);
+            self.tx_edge_cycle.get_or_insert(offset);
+        }
         self.advance_rx_line(cycles);
+    }
+
+    /// Takes the cycle offset of the first TX edge since the last call.
+    pub fn take_tx_edge_cycle(&mut self) -> Option<u32> {
+        self.tx_edge_cycle.take()
     }
 
     /// Returns true when the TX data register is empty (UDRE).
@@ -475,6 +487,18 @@ impl Default for Uart {
     }
 }
 
+fn tx_edge_offset(elapsed: u32, cycles: u32, bit_cycles: u32) -> u32 {
+    let next = ((elapsed / bit_cycles) + 1) * bit_cycles;
+    next.saturating_sub(elapsed).min(cycles)
+}
+
+fn rx_reset() -> RxState {
+    RxState {
+        line: true,
+        ..RxState::default()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{FRAME_BITS, NORMAL_MODE_FACTOR, Uart};
@@ -586,6 +610,17 @@ mod tests {
         uart.tick(NORMAL_MODE_FACTOR);
         assert!(!uart.tx_activity());
         assert!(uart.tx_line());
+    }
+
+    #[test]
+    fn tx_edge_offsets_track_start_and_bit_boundary() {
+        let mut uart = enabled_uart();
+        uart.write_tx(0x01);
+        assert_eq!(uart.take_tx_edge_cycle(), Some(0));
+        uart.tick(NORMAL_MODE_FACTOR);
+        assert_eq!(uart.take_tx_edge_cycle(), Some(NORMAL_MODE_FACTOR));
+        uart.tick(NORMAL_MODE_FACTOR);
+        assert_eq!(uart.take_tx_edge_cycle(), Some(NORMAL_MODE_FACTOR));
     }
 
     #[test]

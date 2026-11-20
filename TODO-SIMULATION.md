@@ -1,10 +1,11 @@
 # TODO - Simulasi Semua Komponen
 
-Status: S1-S4 selesai; S0, S5, S6, S7, dan S8 sebagian. S6 sudah
-mencakup 12 dari 15 memory; MCU gate-level, protocol memory, dan
-co-sim S7 belum selesai.
+Status: S1-S4 selesai; S0, S5, S6, S7, dan S8 sebagian. Seluruh 15
+memory sudah punya model digital tetapi belum terverifikasi reference
+vector; MCU gate-level, integrasi mixed di GUI, dan co-sim S7 penuh
+belum selesai.
 
-Snapshot 2026-11-20: 1261 test lulus, 11 crate, branch `dev` sudah
+Snapshot 2026-11-20: 1262 test lulus, 11 crate, branch `dev` sudah
 di-push. `main` belum di-merge.
 
 Tujuan: membuat komponen di skematik GUI dapat disimulasikan dengan model
@@ -502,12 +503,13 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - `run_until_timer0_event` menyediakan breakpoint overflow dan compare.
   - `AdcConversion` mencatat channel dan kode hasil konversi.
   - Flow control hardware tidak dimodelkan; integrasi board/GUI belum.
-- [~] S7-09 Jaga determinisme urutan event.
+- [x] S7-09 Jaga determinisme urutan event.
   - Urutan digital ke analog dan analog ke digital diuji di `mixed`.
   - Breakpoint event Timer0 tersedia per langkah.
   - Queue menggabungkan event pin, Timer0, UART, edge PWM, dan ADC.
-  - Event Timer0 memakai interpolasi offset siklus di dalam langkah.
-  - Event UART, PWM, dan pin masih memakai batas langkah.
+  - Event Timer0, edge PWM, dan edge UART TX memakai interpolasi offset
+    siklus di dalam langkah.
+  - Event pin memakai batas langkah karena dibaca setelah sampel analog.
 - [x] S7-10 Test AVR + LED + resistor + voltage source.
   - Board test dan GUI simulation sudah mencakup LED, resistor, dan PB5.
 - [x] S7-11 Jalankan GPIO blink gate-level sebagai vertical slice.
@@ -619,7 +621,7 @@ dokumentasi menyebut batas fidelity.
 
 Status ringkas:
 
-- 1261 test lulus, 0 gagal melalui
+- 1262 test lulus, 0 gagal melalui
   `bash .opencode/skills/clean-code/scripts/check.sh`.
 - 11 crate; crate simulasi zero external dependency.
 - `fmt`, clippy `-D warnings`, dan pengecekan ASCII lulus.
@@ -691,33 +693,25 @@ S7 yang sudah berjalan:
 
 Commit fitur terakhir:
 
-- `a35930d feat(avr): support 9-bit UART frames`
-- `72ab006 feat(mixed): probe pin ADC and PWM voltages`
-- `182feff feat(mixed): add pin voltage breakpoint`
-- `6095134 feat(avr): support UART parity frames`
-- `49287ab feat(mixed): record PWM and UART line edges`
-- `44e8180 feat(mixed): record UART receive events`
-- `aa284e5 feat(mixed): receive UART frames from analog line`
-- `1a85ffc feat(mixed): drive analog from UART TX line`
-- `55e8ff7 feat(mixed): record ADC conversion events`
-- `11cddb4 feat(mixed): validate AVR pin locations`
-- `d277dcf feat(mixed): validate PWM link configuration`
-- `8131727 feat(mixed): validate ADC link configuration`
-- `1901517 feat(mixed): support multiple PWM links`
-- `68dd90d feat(mixed): support multiple ADC links`
-- `e42c671 feat(mixed): map all AVR IO pins`
+- `9e8d432 test(mixed): verify all mapped AVR pins`
+- `5ab2e4e feat(mixed): interpolate timer events within steps`
+- `9734772 feat(soc): validate memory and IRQ maps`
+- `d2e1486 feat(cells): add valid-ready handshake buffer`
+- `1e2d423 feat(cells): add synchronous memory`
+- `32b06a7 feat(cells): add generic LUT and FSM`
+- `34dacd1 feat(cells): add synchronous FIFO`
 
 Gap S7 yang masih terbuka:
 
 - S7-02 dan S7-04: kontrol dan peripheral belum full structural.
 - S7-05: pin daya, reset, dan paket 32 pin penuh belum dipetakan.
-- S7-06: verifikasi elektrik Thevenin untuk semua pin belum.
-- S7-09: timestamp event masih per langkah; interpolasi sub-langkah
-  belum.
 - Flow control hardware dan integrasi peta pin ke board/GUI belum.
+- S7-06 dan S7-09 sudah selesai untuk 24 pin IO dan event siklus;
+  event pin memakai batas langkah karena dibaca setelah sampel analog.
 
 Prioritas berikutnya:
 
-1. Interpolasi event UART, PWM, dan pin di dalam langkah.
-2. Integrasikan peta pin ke alur board dan GUI.
-3. Tambahkan pin daya, reset, dan paket 32 pin penuh.
+1. Integrasikan peta pin ke alur board dan GUI.
+2. Tambahkan pin daya, reset, dan paket 32 pin penuh.
+3. Lanjutkan S6: model digital MCU lain dan verifikasi memory dengan
+   reference vector.
