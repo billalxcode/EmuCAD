@@ -10,5 +10,4 @@ workspace = true
 
 [dependencies]
 kernel = { path = "../kernel" }
-device = { path = "../device" }
 cells = { path = "../cells" }
