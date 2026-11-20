@@ -698,6 +698,7 @@ S7 yang sudah berjalan:
 
 Commit fitur terakhir:
 
+- `008ceb5 test(avr): cross-check package IO with pin map`
 - `a689dcb feat(avr): add ATmega328P package pin map`
 - `db9468f feat(mixed): interpolate PWM and UART edge events`
 - `9e8d432 test(mixed): verify all mapped AVR pins`
