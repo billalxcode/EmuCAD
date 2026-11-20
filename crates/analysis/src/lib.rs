@@ -26,7 +26,7 @@ pub use characterization::{
     measure_switching,
 };
 pub use corners::{ProcessCorner, with_process_corner, with_temperature};
-pub use dc::{DcConfig, DcPoint, DcResult, dc_operating_point, dc_sweep};
+pub use dc::{DcConfig, DcPoint, DcResult, dc_operating_point, dc_sweep, dc_terminal_currents};
 pub use device::IntegrationMethod;
 pub use distortion::{DistortionConfig, DistortionResult, distortion_analysis};
 pub use newton::NewtonConfig;

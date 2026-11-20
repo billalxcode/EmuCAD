@@ -988,4 +988,4 @@ mod circuit;
 #[cfg(test)]
 mod tests;
 
-pub(crate) use circuit::{build_circuit, node_voltages, solve_dc};
+pub(crate) use circuit::{build_circuit, device_currents, node_voltages, solve_dc};

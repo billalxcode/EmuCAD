@@ -1,4 +1,4 @@
-use super::{Netlist, NetlistComponent, NetlistError, extract, solve_dc};
+use super::{Netlist, NetlistComponent, NetlistError, device_currents, extract, solve_dc};
 use crate::library;
 use crate::model::{ComponentId, Document, GridPos, Mirror, NetClass, Rotation, WireId};
 use kernel::NodeId;
@@ -124,6 +124,20 @@ fn solves_resistor_divider() {
         .voltage(node_id(output))
         .expect("output voltage");
     assert!((voltage - 2.5).abs() < 1e-6, "voltage={voltage}");
+}
+
+#[test]
+fn dc_device_currents_include_resistors() {
+    let netlist = extract(&divider()).expect("netlist");
+    let result = solve_dc(&netlist).expect("dc");
+    let currents = device_currents(&netlist, &result).expect("currents");
+    let r1 = currents
+        .iter()
+        .find(|(name, _)| name == "R1")
+        .expect("R1 current")
+        .1
+        .expect("R1 value");
+    assert!((r1 - 0.0025).abs() < 1e-9, "current={r1}");
 }
 
 fn node_id(index: usize) -> NodeId {

@@ -13,6 +13,7 @@ const CHUNK: usize = 256;
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct DcResultView {
     pub voltages: Vec<(String, f64)>,
+    pub currents: Vec<(String, Option<f64>)>,
     pub iterations: usize,
     pub residual: f64,
 }
@@ -373,8 +374,10 @@ fn reset_session(state: Option<&mut SessionState>, events: &Sender<Event>) {
 fn dc_result(document: &Document) -> Result<DcResultView, String> {
     let netlist = netlist::extract(document).map_err(|error| error.to_string())?;
     let result = netlist::solve_dc(&netlist)?;
+    let currents = netlist::device_currents(&netlist, &result)?;
     Ok(DcResultView {
         voltages: netlist::node_voltages(&netlist, &result),
+        currents,
         iterations: result.iterations,
         residual: result.residual,
     })

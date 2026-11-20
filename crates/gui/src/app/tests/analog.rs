@@ -39,6 +39,7 @@ fn simulation_window_renders_dc_results() {
         simulation_open: true,
         analog_dc: Some(crate::analog::DcResultView {
             voltages: vec![("0".to_string(), 0.0)],
+            currents: vec![("V1".to_string(), Some(0.0))],
             iterations: 3,
             residual: 1e-12,
         }),

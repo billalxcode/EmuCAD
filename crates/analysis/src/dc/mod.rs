@@ -64,6 +64,16 @@ pub fn dc_operating_point(circuit: &Circuit, config: &DcConfig) -> Result<DcResu
     }
 }
 
+/// Returns one terminal current per device at a DC solution.
+pub fn dc_terminal_currents(
+    circuit: &Circuit,
+    result: &DcResult,
+) -> Result<Vec<Option<f64>>, SimError> {
+    let mut system = SimulationSystem::new(circuit)?;
+    system.update(&result.solution)?;
+    Ok(system.currents(&result.solution))
+}
+
 mod operating;
 mod sweep;
 #[cfg(test)]

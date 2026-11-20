@@ -1,7 +1,7 @@
 //! Netlist-to-circuit conversion and DC solving.
 
 use super::Netlist;
-use analysis::{DcConfig, DcResult, dc_operating_point};
+use analysis::{DcConfig, DcResult, dc_operating_point, dc_terminal_currents};
 use device::{ComponentRegistry, ComponentRequest};
 use kernel::{Circuit, CircuitBuilder, DeviceId, NodeId};
 
@@ -20,6 +20,24 @@ pub(crate) fn build_circuit(netlist: &Netlist) -> Result<Circuit, String> {
 pub(crate) fn solve_dc(netlist: &Netlist) -> Result<DcResult, String> {
     let circuit = build_circuit(netlist)?;
     dc_operating_point(&circuit, &DcConfig::default()).map_err(|error| error.to_string())
+}
+
+/// Returns a terminal current for each netlist component at a DC solution.
+pub(crate) fn device_currents(
+    netlist: &Netlist,
+    result: &DcResult,
+) -> Result<Vec<(String, Option<f64>)>, String> {
+    let circuit = build_circuit(netlist)?;
+    let currents = dc_terminal_currents(&circuit, result).map_err(|error| error.to_string())?;
+    if currents.len() != netlist.components.len() {
+        return Err("device current count mismatch".to_string());
+    }
+    Ok(netlist
+        .components
+        .iter()
+        .zip(currents)
+        .map(|(component, current)| (component.label.clone(), current))
+        .collect())
 }
 
 /// Returns node voltages in netlist order.

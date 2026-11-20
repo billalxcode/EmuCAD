@@ -1,4 +1,4 @@
-use super::{DcConfig, dc_operating_point, dc_sweep};
+use super::{DcConfig, dc_operating_point, dc_sweep, dc_terminal_currents};
 use crate::test_support::{
     cccs_circuit, ccvs_circuit, common_emitter, common_emitter_pnp, common_source_body,
     common_source_n, common_source_n_biased, common_source_p, diode_clamp, floating_node, inverter,
@@ -12,6 +12,16 @@ fn voltage_divider_is_half_supply() {
     let voltage = result.solution.voltage(output).expect("output");
     assert!((voltage - 5.0).abs() < 1e-6);
     assert!(result.residual.is_finite() && result.residual < 1e-3);
+}
+
+#[test]
+fn voltage_divider_terminal_currents_are_consistent() {
+    let (circuit, _) = voltage_divider();
+    let result = dc_operating_point(&circuit, &DcConfig::default()).expect("dc");
+    let currents = dc_terminal_currents(&circuit, &result).expect("currents");
+    assert_eq!(currents.len(), 3);
+    assert!((currents[1].expect("r1") - 0.005).abs() < 1e-9);
+    assert!((currents[2].expect("r2") - 0.005).abs() < 1e-9);
 }
 
 #[test]

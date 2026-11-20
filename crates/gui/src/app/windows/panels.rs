@@ -261,7 +261,34 @@ fn show_dc_results(ui: &mut egui::Ui, dc: Option<&crate::analog::DcResultView>) 
         "DC converged: {} iterations, residual {:.3e}",
         dc.iterations, dc.residual
     ));
+    ui.label("Node voltages");
     show_dc_grid(ui, &dc.voltages);
+    show_dc_currents(ui, &dc.currents);
+}
+
+fn show_dc_currents(ui: &mut egui::Ui, currents: &[(String, Option<f64>)]) {
+    if currents.is_empty() {
+        return;
+    }
+    ui.label("Branch currents");
+    egui::ScrollArea::vertical()
+        .max_height(120.0)
+        .show(ui, |ui| {
+            egui::Grid::new("dc_currents").striped(true).show(ui, |ui| {
+                for (name, current) in currents {
+                    show_dc_current(ui, name, *current);
+                }
+            });
+        });
+}
+
+fn show_dc_current(ui: &mut egui::Ui, name: &str, current: Option<f64>) {
+    ui.label(name);
+    match current {
+        Some(value) => ui.label(format!("{value:.6} A")),
+        None => ui.label("n/a"),
+    };
+    ui.end_row();
 }
 
 fn show_dc_grid(ui: &mut egui::Ui, voltages: &[(String, f64)]) {
