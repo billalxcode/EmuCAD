@@ -161,6 +161,7 @@ Dokumen yang sering dipakai:
 | [`docs/90-mixed-signal.md`](docs/90-mixed-signal.md) | Scheduler co-sim digital-analog dengan AVR, ADC, PWM, dan UART |
 | [`docs/91-avr-audit.md`](docs/91-avr-audit.md) | Audit struktur AVR, integrasi cells, dan rencana cleanup |
 | [`docs/92-cells-mcu-requirements.md`](docs/92-cells-mcu-requirements.md) | Kesiapan cells untuk multi-MCU dan prioritas library |
+| [`docs/93-catalog-coverage.md`](docs/93-catalog-coverage.md) | Cakupan deterministik 500 entri katalog |
 | [`docs/61-design-system.md`](docs/61-design-system.md) | Design system GUI, font, warna, dan spacing |
 | [`TODO-COMPONENTS.md`](TODO-COMPONENTS.md) | Backlog katalog komponen dan Python builder |
 | [`TODO-CELLS.md`](TODO-CELLS.md) | Backlog library cells untuk multi-MCU |

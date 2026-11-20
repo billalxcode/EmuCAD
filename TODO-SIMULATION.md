@@ -614,6 +614,7 @@ Status ringkas:
   dan beberapa blok structural belum terhubung ke CPU.
 - Kebutuhan `cells` untuk multi-MCU ada di
   `docs/92-cells-mcu-requirements.md`; backlog-nya di `TODO-CELLS.md`.
+- Coverage 500 entri katalog ada di `docs/93-catalog-coverage.md`.
 
 S7 yang sudah berjalan:
 
