@@ -4,7 +4,7 @@ Status: S1-S4 selesai; S0, S5, S6, S7, dan S8 sebagian. S6 sudah
 mencakup 12 dari 15 memory; MCU gate-level, protocol memory, dan
 co-sim S7 belum selesai.
 
-Snapshot 2026-11-20: 1260 test lulus, 11 crate, branch `dev` sudah
+Snapshot 2026-11-20: 1261 test lulus, 11 crate, branch `dev` sudah
 di-push. `main` belum di-merge.
 
 Tujuan: membuat komponen di skematik GUI dapat disimulasikan dengan model
@@ -471,10 +471,12 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - `AvrSession::with_pin_map` membangun session dari peta.
   - Link pin langsung divalidasi untuk rentang port dan bit.
   - Pin daya, reset, dan paket 32 pin penuh belum.
-- [~] S7-06 Hubungkan pin electrical sebagai Thevenin.
+- [x] S7-06 Hubungkan pin electrical sebagai Thevenin.
   - Satu pin AVR output diuji dengan resistor seri 45 ohm menuju RC.
   - `AvrPinMap` membawa config dan external resistance per pin.
-  - Verifikasi elektrik untuk semua pin belum.
+  - Semua 24 pin IO diuji high dan low melalui `AvrSession`; node
+    analog mencapai level yang diharapkan.
+  - Pin daya dan reset belum dipetakan; lihat S7-05.
 - [~] S7-07 Tambahkan breakpoint saat pin berubah.
   - `run_until_pin_change` berhenti pada perubahan salah satu pin AVR.
   - `run_until_pin_voltage` berhenti saat node pin mencapai threshold.
@@ -617,7 +619,7 @@ dokumentasi menyebut batas fidelity.
 
 Status ringkas:
 
-- 1260 test lulus, 0 gagal melalui
+- 1261 test lulus, 0 gagal melalui
   `bash .opencode/skills/clean-code/scripts/check.sh`.
 - 11 crate; crate simulasi zero external dependency.
 - `fmt`, clippy `-D warnings`, dan pengecekan ASCII lulus.
@@ -718,4 +720,4 @@ Prioritas berikutnya:
 
 1. Interpolasi event UART, PWM, dan pin di dalam langkah.
 2. Integrasikan peta pin ke alur board dan GUI.
-3. Tambahkan verifikasi Thevenin untuk semua pin yang dipetakan.
+3. Tambahkan pin daya, reset, dan paket 32 pin penuh.

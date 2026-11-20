@@ -1962,6 +1962,44 @@ mod tests {
         assert_eq!(session.pin_count(), AVR_IO_PIN_COUNT);
     }
 
+    fn all_pins_program(high: bool) -> Vec<u16> {
+        let mut program = vec![0xEF0F, 0xB904, 0xB907, 0xB90A];
+        if high {
+            program.extend([0xB905, 0xB908, 0xB90B]);
+        }
+        program.push(0xCFFF);
+        program
+    }
+
+    fn all_pins_session(circuit: &Circuit, map: &AvrPinMap, high: bool) -> AvrSession {
+        AvrSession::with_pin_map(all_pins_program(high), circuit, &config(1e-5, 20), map)
+            .expect("session")
+    }
+
+    fn assert_all_pin_voltages(high: &AvrSession, low: &AvrSession) {
+        for index in 0..AVR_IO_PIN_COUNT {
+            let high_voltage = high.node_voltage(index).expect("high node");
+            let low_voltage = low.node_voltage(index).expect("low node");
+            assert!(high_voltage > 4.0, "pin {index} high={high_voltage}");
+            assert!(low_voltage < 1.0, "pin {index} low={low_voltage}");
+        }
+    }
+
+    #[test]
+    fn all_mapped_pins_drive_thevenin_nodes() {
+        let (circuit, links) = multi_pin_circuit(AVR_IO_PIN_COUNT);
+        let map = full_pin_map(&links);
+        let mut high = all_pins_session(&circuit, &map, true);
+        let mut low = all_pins_session(&circuit, &map, false);
+        for _ in 0..8 {
+            high.step().expect("step");
+        }
+        for _ in 0..6 {
+            low.step().expect("step");
+        }
+        assert_all_pin_voltages(&high, &low);
+    }
+
     #[test]
     fn timer_pwm_drives_analog_node() {
         let mut session = pwm_session(10_000.0, 1e-7);

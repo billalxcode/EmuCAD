@@ -314,6 +314,12 @@ Test `avr_pin_map_links_all_io`:
 - Urutan link dimulai dari port 0 bit 0 dan berakhir port 2 bit 7.
 - Session berjalan dengan 24 link pin.
 
+Test `all_mapped_pins_drive_thevenin_nodes`:
+
+- Program mengatur DDR B/C/D dan PORT B/C/D.
+- Semua 24 pin diuji high dan low dengan external resistance 1 kohm.
+- Node analog high di atas 4 V dan low di bawah 1 V untuk setiap pin.
+
 ## 5. Batas
 
 - Umpan balik analog hanya satu input dan satu threshold.
@@ -346,6 +352,8 @@ S7-09:
 - Wrapper AVR hybrid dengan beberapa link pin dan peta 24 pin IO.
 - Thevenin pin input, breakpoint perubahan pin, serta breakpoint
   tegangan pin, ADC, dan PWM.
+- Semua 24 pin IO diverifikasi untuk level high dan low dengan beban
+  Thevenin.
 - ADC multi-channel, PWM Timer0 multi-load, serta UART TX dan RX
   line-level.
 - Breakpoint event Timer0 untuk overflow dan compare.
