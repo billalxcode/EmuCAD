@@ -34,8 +34,9 @@ Setiap klaim harus punya:
 | JFET | Device model | DC bias dan AC gain | Model sederhana |
 | Register file | Struktural | Test logika | DFF ideal |
 | ALU/control | Struktural | ISA test vector | Delay dari sel |
-| SRAM | Behavioral | Firmware test | Timing kontrak |
-| Flash | Behavioral | Firmware test | Timing kontrak |
+| SRAM (data space AVR) | Behavioral | Firmware test | `Cpu.data: Vec<u8>`; bukan macro gate-level |
+| Flash (program AVR) | Behavioral | Firmware test | `ProgramMemory: Vec<u16>`; bukan macro gate-level |
+| Macro memory katalog | Gate-level digital (model) | Unit test fungsional | 15/15 entry punya `DigitalEntry`; 11/15 punya test langsung; 0/15 terverifikasi penuh |
 | GPIO | Struktural | Pin test | Model listrik terbatas |
 | Timer | Struktural | Periode/PWM test | Detail silikon tidak |
 | UART | Struktural | Loopback/hello | Tanpa noise |
@@ -54,6 +55,14 @@ Setiap klaim harus punya:
 ---
 
 Golden ngspice belum dijalankan. Kolom bukti menyebut test yang ada saat ini.
+
+Catatan status memory: 15/15 entry `Family::Memory` di
+`crates/device/src/catalog_data/memory.rs` memiliki model digital di
+`crates/cells/src/catalog_digital.rs:135-169`. Angka 15/15 adalah cakupan
+katalog, bukan verifikasi penuh: 0/15 punya reference vector atau data
+kalibrasi. SRAM dan Flash pada tabel di atas adalah memory jalur eksekusi
+AVR yang masih behavioral (`Cpu.data` dan `ProgramMemory`), bukan macro
+katalog. Rincian ada di `docs/63-fidelity.md` bagian 5.
 
 ## 3. Test Pyramid
 

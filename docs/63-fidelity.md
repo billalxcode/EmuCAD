@@ -28,8 +28,9 @@ ngspice belum dijalankan untuk seluruh keluarga.
 - Setiap entry solver-backed memiliki label fidelity dari
   `SimulationBinding::fidelity`.
 
-Kelas yang belum solver-backed tetap `unsupported` dan tidak diberi
-hasil simulasi. Entry unsupported harus ditolak oleh netlist GUI.
+Pada jalur solver analog, entry non-solver-backed tetap `unsupported`
+dan tidak diberi hasil simulasi analog. Entry yang punya model digital
+dijalankan oleh `cells`; 15 entry `Family::Memory` termasuk kelompok ini.
 
 Kelas `Sensor` sudah seluruhnya solver-backed: 35 sensor.
 Kelas `Actuator` dan `Display` sudah seluruhnya solver-backed: 20
@@ -75,9 +76,11 @@ Statistik sirkuit untuk program ALU: 120 gate, 3 komponen, 48 DFF,
 0 komponen siklik.
 
 Angka ini adalah sampel, bukan jaminan. AVR saat ini adalah core
-hybrid: datapath, register bank, dan beberapa unit memakai
-`cells`; kontrol dan peripheral belum seluruhnya gate-level.
-Benchmark ini belum membuktikan AVR full-chip gate-level.
+hybrid: hanya GPIO yang structural dan terhubung ke `DigitalCircuit`;
+register bank, instruction register, ALU, shift, dan multiply tersedia
+sebagai blok structural terpisah, tetapi belum dipakai jalur eksekusi.
+Kontrol dan peripheral belum gate-level. Benchmark ini belum
+membuktikan AVR full-chip gate-level.
 
 ## 4. Benchmark Memory
 
@@ -112,10 +115,55 @@ Kesimpulan: target real-time semua MCU dengan memory gate-level penuh
 belum terbukti. Fallback Q55 perlu dipakai sampai ada model memory
 yang lebih cepat atau batas abstraksi yang disepakati.
 
-## 5. Batas
+## 5. Status Memory
+
+Matriks ini memisahkan cakupan katalog, model digital, dan verifikasi.
+Angka 15/15 hanya berarti setiap entry katalog punya model digital,
+bukan verifikasi penuh.
+
+| Tingkat | Jumlah | Bukti | Arti |
+|---|---:|---|---|
+| Entry katalog `Family::Memory` | 15 | `crates/device/src/catalog_data/memory.rs`; `crates/device/src/catalog/tests.rs:50` | Seluruh entry memory di katalog. |
+| Entry dengan model digital `cells` | 15/15 | `crates/cells/src/catalog_digital.rs:135-169` | Setiap entry dipetakan ke `DigitalEntry` dua keadaan. |
+| Macro, array, atau controller digital | 12/15 | `crates/cells/src/catalog_memory.rs` | SRAM cell/array, DRAM cell, ROM, PROM, EEPROM, Flash, FRAM, MRAM, NVRAM, module, dan controller. |
+| Protocol wrapper digital | 3/15 | `crates/cells/src/catalog_flash.rs`, `crates/cells/src/catalog_eeprom.rs`, `crates/cells/src/catalog_sd.rs` | SPI flash, I2C EEPROM, dan SPI mode SD card. |
+| Entry dengan test unit langsung | 11/15 | modul `tests` di file sumber yang sama | EEPROM, Flash, MRAM, dan NVRAM memakai jalur `memory_array_entry` yang sama dengan FRAM, tetapi tidak punya test khusus entry. |
+| Entry terverifikasi penuh | 0/15 | tidak ada reference vector atau data kalibrasi | Unit test fungsional belum sama dengan verifikasi. |
+
+Ukuran model: 2 entry memakai sel 1-bit (`sram_cell` dan `dram_cell`),
+12 entry memakai array 128x8 (1024 bit), dan 1 entry memakai array
+512x8 (4096 bit, `sd_card`). Lihat `crates/cells/src/catalog_memory.rs`
+dan `crates/cells/src/catalog_sd.rs`.
+
+Baris `Memory,15,0,unsupported` di `docs/data/class-fidelity.csv`
+menghitung solver analog: 0 entry solver-backed. Baris itu tidak berarti
+15 entry tanpa model digital.
+
+Catatan:
+- `sram6t` di `crates/cells/src/sequential/memory.rs` adalah sel SRAM 6T
+  level transistor untuk referensi analog. Ini bukan model gate-level
+  dan tidak dipakai array katalog.
+- `memory_array_entry` di `crates/cells/src/catalog_memory.rs` adalah
+  array DFF digital, bukan sel 6T.
+- EEPROM, Flash, FRAM, MRAM, dan NVRAM memakai
+  `memory_array_entry(..., true)`, yaitu array DFF yang mempertahankan
+  isi saat reset. Model ini belum memodelkan program/erase, endurance,
+  atau retensi fisik.
+- `dram_cell` adalah model 1-bit dengan counter refresh, bukan sel
+  kapasitor.
+- SRAM data dan Flash program AVR tetap behavioral: `Cpu.data` berupa
+  `Vec<u8>` dan `ProgramMemory` berupa `Vec<u16>` di
+  `crates/avr/src/cpu/mod.rs` dan `crates/avr/src/fetch.rs`. Karena itu
+  label behavioral di `docs/07-verification.md` berlaku untuk memory
+  jalur eksekusi AVR, bukan untuk 15 entry katalog.
+- Benchmark di bagian 4 hanya mengukur `memory.device.sram_array`
+  (1/15 entry) dan register file 32x8 yang bukan entry katalog. 14 entry
+  katalog lain belum diukur.
+
+## 6. Batas
 
 - Belum ada reference vector per entry.
 - Belum ada golden ngspice di CI.
 - Belum ada full-chip AVR gate-level.
-- 15 dari 15 memory sudah gate-level; tidak ada yang tersisa.
+- 0 dari 15 entry memory terverifikasi penuh.
 - Benchmark bergantung pada CPU dan build `--release`.
