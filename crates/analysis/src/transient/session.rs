@@ -36,11 +36,8 @@ impl TransientSession {
         method: IntegrationMethod,
         newton: &NewtonConfig,
     ) -> Result<Self, SimError> {
-        validate_config(config)?;
-        validate_newton(newton)?;
-        let mut system = SimulationSystem::new(circuit)?;
-        let solution = initial_solution(&mut system, config)?;
-        system.update(&solution)?;
+        validate_solver(config, newton)?;
+        let (system, solution) = build_system(circuit, config)?;
         Ok(Self {
             circuit: circuit.clone(),
             system,
@@ -61,6 +58,10 @@ impl TransientSession {
                 "transient session is finished".to_string(),
             ));
         }
+        self.advance()
+    }
+
+    fn advance(&mut self) -> Result<TransientSample, SimError> {
         let (next, residual, iterations) = solve_step(
             &mut self.system,
             &self.solution,
@@ -111,6 +112,12 @@ impl TransientSession {
         self.time
     }
 
+    /// Returns the fixed transient step duration.
+    #[must_use]
+    pub const fn step_time(&self) -> Time {
+        self.step
+    }
+
     /// Returns the completed step count.
     #[must_use]
     pub fn completed_steps(&self) -> usize {
@@ -122,6 +129,21 @@ impl TransientSession {
     pub fn total_steps(&self) -> usize {
         self.config.steps
     }
+}
+
+fn build_system(
+    circuit: &Circuit,
+    config: &TransientConfig,
+) -> Result<(SimulationSystem, Solution), SimError> {
+    let mut system = SimulationSystem::new(circuit)?;
+    let solution = initial_solution(&mut system, config)?;
+    system.update(&solution)?;
+    Ok((system, solution))
+}
+
+fn validate_solver(config: &TransientConfig, newton: &NewtonConfig) -> Result<(), SimError> {
+    validate_config(config)?;
+    validate_newton(newton)
 }
 
 #[cfg(test)]

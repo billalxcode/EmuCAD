@@ -16,6 +16,8 @@ pub struct Timer0 {
     compare_match: bool,
     overflow_count: u32,
     compare_count: u32,
+    overflow_cycle: Option<u32>,
+    compare_cycle: Option<u32>,
 }
 
 impl Timer0 {
@@ -34,6 +36,8 @@ impl Timer0 {
             compare_match: false,
             overflow_count: 0,
             compare_count: 0,
+            overflow_cycle: None,
+            compare_cycle: None,
         })
     }
 
@@ -84,11 +88,15 @@ impl Timer0 {
 
     /// Advances the timer by CPU cycles.
     pub fn tick(&mut self, cycles: u32) -> Result<(), SimError> {
+        self.overflow_cycle = None;
+        self.compare_cycle = None;
+        let initial = self.prescaler;
         self.prescaler = self.prescaler.saturating_add(cycles);
         let ticks = self.prescaler / self.divider;
         self.prescaler %= self.divider;
-        for _ in 0..ticks {
-            self.step();
+        for index in 0..ticks {
+            let offset = (index + 1) * self.divider - initial;
+            self.step(offset.min(cycles));
         }
         Ok(())
     }
@@ -137,6 +145,18 @@ impl Timer0 {
         self.compare_count
     }
 
+    /// Returns the cycle offset of the first overflow in the last tick.
+    #[must_use]
+    pub const fn overflow_cycle(&self) -> Option<u32> {
+        self.overflow_cycle
+    }
+
+    /// Returns the cycle offset of the first compare in the last tick.
+    #[must_use]
+    pub const fn compare_cycle(&self) -> Option<u32> {
+        self.compare_cycle
+    }
+
     /// Resets the counter, prescaler, and flags.
     ///
     /// Event counters are preserved so observers keep their history.
@@ -148,17 +168,19 @@ impl Timer0 {
         Ok(())
     }
 
-    fn step(&mut self) {
+    fn step(&mut self, offset: u32) {
         let previous = self.counter;
         self.counter = self.counter.wrapping_add(1);
         self.update_pwm();
         if previous == 0xFF {
             self.overflow = true;
             self.overflow_count = self.overflow_count.wrapping_add(1);
+            self.overflow_cycle.get_or_insert(offset);
         }
         if self.counter == self.compare {
             self.compare_match = true;
             self.compare_count = self.compare_count.wrapping_add(1);
+            self.compare_cycle.get_or_insert(offset);
             if self.ctc {
                 self.counter = 0;
             }
@@ -246,6 +268,26 @@ mod tests {
         overflow.set_compare(200);
         overflow.tick(256).expect("tick");
         assert_eq!(overflow.overflow_count(), 1);
+    }
+
+    #[test]
+    fn event_cycle_offsets_are_recorded() {
+        let mut compare = timer();
+        compare.set_compare(1);
+        compare.tick(2).expect("tick");
+        assert_eq!(compare.compare_cycle(), Some(1));
+        let mut overflow = timer();
+        overflow.tick(256).expect("tick");
+        assert_eq!(overflow.overflow_cycle(), Some(256));
+    }
+
+    #[test]
+    fn prescaler_shifts_event_cycle_offset() {
+        let mut timer = timer();
+        timer.set_prescaler(1).expect("prescaler");
+        timer.set_compare(1);
+        timer.tick(8).expect("tick");
+        assert_eq!(timer.compare_cycle(), Some(8));
     }
 
     #[test]

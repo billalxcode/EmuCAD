@@ -603,8 +603,9 @@ impl AvrSession {
         self.apply_uart_rx_line();
         self.apply_inputs()?;
         let trace = self.cpu.step()?;
+        let cycles = trace.as_ref().map_or(1, |trace| trace.cycles).max(1);
         self.update_timer0_events();
-        self.record_timer0_events();
+        self.record_timer0_events(cycles);
         self.record_pwm_event();
         self.drain_uart_tx();
         self.record_adc_conversions();
@@ -655,13 +656,25 @@ impl AvrSession {
         }
     }
 
-    fn record_timer0_events(&mut self) {
+    fn record_timer0_events(&mut self, cycles: u8) {
         if self.event_state.timer0.overflow {
-            self.push_event(CoSimEventKind::Timer0Overflow);
+            let offset = self.cpu.timer0().overflow_cycle().unwrap_or(cycles.into());
+            let time = self.timer_event_time(offset, cycles);
+            self.push_event_at(CoSimEventKind::Timer0Overflow, time);
         }
         if self.event_state.timer0.compare {
-            self.push_event(CoSimEventKind::Timer0Compare);
+            let offset = self.cpu.timer0().compare_cycle().unwrap_or(cycles.into());
+            let time = self.timer_event_time(offset, cycles);
+            self.push_event_at(CoSimEventKind::Timer0Compare, time);
         }
+    }
+
+    fn timer_event_time(&self, offset: u32, cycles: u8) -> Time {
+        let cycles = u32::from(cycles.max(1));
+        let fraction = f64::from(offset.min(cycles)) / f64::from(cycles);
+        let step = self.analog.step_time();
+        let delta = (step.as_ps() as f64 * fraction).round() as u64;
+        self.analog.time().saturating_add(Time::from_ps(delta))
     }
 
     fn record_adc_conversions(&mut self) {
@@ -711,9 +724,14 @@ impl AvrSession {
     }
 
     fn push_event(&mut self, kind: CoSimEventKind) {
+        let time = self.analog.time().saturating_add(self.analog.step_time());
+        self.push_event_at(kind, time);
+    }
+
+    fn push_event_at(&mut self, kind: CoSimEventKind, time: Time) {
         self.events.push_back(CoSimEvent {
             cycles: self.cpu.cycles(),
-            time: self.analog.time(),
+            time,
             kind,
         });
     }
@@ -1876,8 +1894,21 @@ mod tests {
         let event = session.take_event().expect("event");
         assert_eq!(event.kind, CoSimEventKind::Timer0Compare);
         assert_eq!(event.cycles, 4);
-        assert_eq!(event.time.as_ps(), 10_000_000);
+        assert_eq!(event.time.as_ps(), 20_000_000);
         assert_eq!(session.event_count(), 0);
+    }
+
+    #[test]
+    fn timer0_event_interpolates_within_step() {
+        let mut session = pin_session(vec![0xCFFF]);
+        configure_timer0(&mut session, 1);
+        session.cpu_mut().timer0().set_ctc(true);
+        let trace = session.run_until_timer0_event(Timer0Event::Compare, 10);
+        assert!(trace.expect("run").is_some());
+        let event = session.take_event().expect("event");
+        assert_eq!(event.kind, CoSimEventKind::Timer0Compare);
+        assert_eq!(event.cycles, 2);
+        assert_eq!(event.time.as_ps(), 5_000_000);
     }
 
     #[test]

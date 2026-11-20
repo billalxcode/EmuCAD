@@ -113,6 +113,8 @@ analog:
 - Garis TX UART menggerakkan sumber analog mengikuti level frame.
 - Garis RX UART diset dari sampel analog sebelumnya sebelum instruksi.
 - Event Timer0 pada langkah tersebut dicatat tanpa menghapus flag model.
+- Timestamp event Timer0 memakai interpolasi offset siklus di dalam
+  langkah; event lain memakai batas akhir langkah.
 - Event pin, Timer0, UART TX, UART RX (`UartRx` atau `UartRx9`), edge
   PWM, edge garis TX UART, dan ADC masuk queue dengan timestamp.
 
@@ -280,7 +282,14 @@ Test `timer0_event_queue_records_time_and_cycles`:
 
 - Timer0 CTC compare 4 pada clock clk/1.
 - Event `Timer0Compare` tercatat pada 4 siklus CPU.
-- Timestamp event sama dengan awal langkah kedua.
+- Timestamp event berada di akhir langkah kedua karena compare terjadi
+  pada siklus terakhir instruction.
+
+Test `timer0_event_interpolates_within_step`:
+
+- Timer0 CTC compare 1 pada clock clk/1.
+- Compare terjadi pada siklus pertama dari instruction dua siklus.
+- Timestamp event berada di tengah langkah, bukan di awal langkah.
 
 Test `pin_event_queue_records_level`:
 
@@ -316,8 +325,9 @@ Test `avr_pin_map_links_all_io`:
 - Index pin pada session mengikuti urutan `links`, bukan nomor package.
 - Breakpoint pin berlaku untuk semua link yang terdaftar.
 - Breakpoint tegangan berlaku untuk node pin, ADC, dan PWM.
-- Queue event gabungan tersedia dengan resolusi satu langkah.
-- Interpolasi dan timestamp sub-langkah belum ada.
+- Queue event gabungan tersedia; event Timer0 memakai interpolasi
+  offset siklus, event lain memakai batas langkah.
+- Interpolasi sub-langkah untuk event UART, PWM, dan pin belum ada.
 - AVR masih hybrid, bukan full-chip structural.
 - Hanya sumber tegangan yang dapat diubah.
 - PWM baru mencakup Timer0 channel A.
@@ -345,5 +355,6 @@ S7-09:
 
 S7-04 tetap hybrid, bukan full-chip structural. S7-05 sudah mencakup
 semua pin IO yang dimodelkan, tetapi belum pin daya, reset, atau paket
-32 pin penuh. S7-08 belum mencakup flow control hardware; S7-09 belum
-mencakup interpolasi dan timestamp sub-langkah.
+32 pin penuh. S7-08 belum mencakup flow control hardware; S7-09 sudah
+menginterpolasi event Timer0 di dalam langkah, tetapi event UART, PWM,
+dan pin masih memakai batas langkah.

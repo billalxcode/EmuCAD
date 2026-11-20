@@ -81,7 +81,7 @@ jauh di atas budget jika setiap akses disimulasikan penuh. Register file
 | MCU gate-level | 11 | 1 hybrid (AVR) |
 | Memory gate-level | 15 | 15/15 entry katalog punya model digital `cells`; 12 macro/array dan 3 protocol; 0/15 terverifikasi penuh |
 | AVR full chip | Semua peripheral | Sebagian |
-| Mixed-signal scheduler | AVR + analog | Prototipe clock, feedback threshold, RC, beberapa pin AVR, peta 24 pin IO, ADC multi-channel, PWM multi-load, UART TX/RX line-level, 9-bit, dan parity, event timer, event ADC, dan queue event |
+| Mixed-signal scheduler | AVR + analog | Prototipe clock, feedback threshold, RC, beberapa pin AVR, peta 24 pin IO, ADC multi-channel, PWM multi-load, UART TX/RX line-level, 9-bit, dan parity, event timer dengan interpolasi offset siklus, event ADC, dan queue event |
 | Real-time semua MCU | Desktop | Belum terbukti |
 
 MCU yang belum dimulai: PIC, 8051, ARM Cortex-M, RISC-V, ESP32, STM32,

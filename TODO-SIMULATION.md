@@ -4,7 +4,7 @@ Status: S1-S4 selesai; S0, S5, S6, S7, dan S8 sebagian. S6 sudah
 mencakup 12 dari 15 memory; MCU gate-level, protocol memory, dan
 co-sim S7 belum selesai.
 
-Snapshot 2026-11-20: 1257 test lulus, 11 crate, branch `dev` sudah
+Snapshot 2026-11-20: 1260 test lulus, 11 crate, branch `dev` sudah
 di-push. `main` belum di-merge.
 
 Tujuan: membuat komponen di skematik GUI dapat disimulasikan dengan model
@@ -504,7 +504,8 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Urutan digital ke analog dan analog ke digital diuji di `mixed`.
   - Breakpoint event Timer0 tersedia per langkah.
   - Queue menggabungkan event pin, Timer0, UART, edge PWM, dan ADC.
-  - Interpolasi dan timestamp sub-langkah belum.
+  - Event Timer0 memakai interpolasi offset siklus di dalam langkah.
+  - Event UART, PWM, dan pin masih memakai batas langkah.
 - [x] S7-10 Test AVR + LED + resistor + voltage source.
   - Board test dan GUI simulation sudah mencakup LED, resistor, dan PB5.
 - [x] S7-11 Jalankan GPIO blink gate-level sebagai vertical slice.
@@ -616,7 +617,7 @@ dokumentasi menyebut batas fidelity.
 
 Status ringkas:
 
-- 1257 test lulus, 0 gagal melalui
+- 1260 test lulus, 0 gagal melalui
   `bash .opencode/skills/clean-code/scripts/check.sh`.
 - 11 crate; crate simulasi zero external dependency.
 - `fmt`, clippy `-D warnings`, dan pengecekan ASCII lulus.
@@ -683,6 +684,8 @@ S7 yang sudah berjalan:
   `run_until_timer0_event`.
 - Event: `CoSimEvent` membawa `cycles` dan `time`; tersedia
   `take_event`, `event_count`, dan `drain_events`.
+- Timestamp event Timer0 memakai interpolasi offset siklus di dalam
+  langkah; event lain memakai batas langkah.
 
 Commit fitur terakhir:
 
@@ -713,6 +716,6 @@ Gap S7 yang masih terbuka:
 
 Prioritas berikutnya:
 
-1. Tentukan dan implementasikan resolusi waktu event sub-langkah.
+1. Interpolasi event UART, PWM, dan pin di dalam langkah.
 2. Integrasikan peta pin ke alur board dan GUI.
 3. Tambahkan verifikasi Thevenin untuk semua pin yang dipetakan.
