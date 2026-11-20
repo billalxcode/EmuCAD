@@ -105,24 +105,38 @@ cargo run -p avr --example uart_hello
 
 ## 6. Packaging
 
-Script:
+Workflow rilis dan packaging lokal memakai satu jalur: `scripts/release.py`.
+Wrapper lokal:
 
 ```bash
 ./scripts/package.sh
 ```
 
-Menghasilkan:
+Wrapper membangun `emucad` dan `emucad-gui` release untuk host, lalu
+mendelegasikan packaging ke `scripts/release.py`. Menghasilkan:
 
-```
-dist/emucad-<target>.tar.gz
+```text
+dist/emucad-v<versi>-<target>.tar.gz
+dist/emucad-v<versi>-<target>.tar.gz.sha512
+dist/SHA512SUMS
 ```
 
 Isi arsip:
 
-- Binary `emucad`.
+- Binary `emucad` dan `emucad-gui`.
+- `build-info.txt` berisi versi, target, dan commit.
 - README dan LICENSE.
 - Dokumentasi Markdown.
 - Contoh.
+- Lisensi font dan simbol GUI.
+- Desktop entry di Linux.
+
+Verifikasi checksum:
+
+```bash
+cd dist
+sha512sum -c SHA512SUMS
+```
 
 `dist/` tidak di-commit.
 

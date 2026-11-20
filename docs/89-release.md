@@ -2,6 +2,8 @@
 
 Dokumen ini mencatat workflow rilis biner di
 `.github/workflows/release.yml` dan script `scripts/release.py`.
+`scripts/release.py` adalah satu-satunya jalur packaging; wrapper lokal
+`scripts/package.sh` memakai script yang sama.
 
 ## 1. Versi
 
@@ -61,8 +63,8 @@ emucad-v<versi>-<target>.zip
 
 ## 5. SHA512
 
-Setiap arsip memiliki file `<arsip>.sha512`. Workflow juga membuat
-satu file gabungan:
+Setiap arsip memiliki file `<arsip>.sha512`. `scripts/release.py` juga
+membuat satu file gabungan:
 
 ```
 SHA512SUMS
@@ -95,12 +97,45 @@ Konsekuensi:
 Workflow memakai `GITHUB_TOKEN` dengan `contents: write` untuk
 membuat release dan mengunggah aset. Tidak ada secret tambahan.
 
-## 8. Pemeriksaan Lokal
+## 8. Packaging Lokal
+
+`scripts/package.sh` adalah wrapper tipis untuk host target:
+
+- Membutuhkan `cargo` dan `python3` pada `PATH`.
+- Membangun `emucad` dan `emucad-gui` dengan
+  `cargo build --release -p cli -p gui`.
+- Meneruskan argumen ke `scripts/release.py`.
+- Memakai `target/release` dan `dist` sebagai default.
 
 ```bash
+./scripts/package.sh
+```
+
+Hasil di `dist/`:
+
+```text
+emucad-v<versi>-<host>.tar.gz
+emucad-v<versi>-<host>.tar.gz.sha512
+SHA512SUMS
+```
+
+Isi arsip, nama arsip, `build-info.txt`, dan checksum sepenuhnya ditentukan
+oleh `scripts/release.py`. Wrapper tidak menduplikasi logika tersebut.
+
+Verifikasi checksum:
+
+```bash
+cd dist
+sha512sum -c SHA512SUMS
+```
+
+Pemeriksaan script:
+
+```bash
+bash -n scripts/package.sh
+python3 -m py_compile scripts/release.py
 python3 scripts/release.py --print-version
 python3 scripts/release.py --checksums dist
-python3 -m py_compile scripts/release.py
 ```
 
 Untuk uji packaging tanpa build release:
@@ -109,7 +144,6 @@ Untuk uji packaging tanpa build release:
 cargo build -p cli -p gui
 python3 scripts/release.py \
   --version 0.1.0 \
-  --target x86_64-unknown-linux-gnu \
   --commit local \
   --binary-dir target/debug \
   --output-dir /tmp/emucad-release

@@ -29,6 +29,7 @@ Contoh `rc_analysis` menjalankan DC, transient, dan AC pada satu rangkaian RC.
 
 - Rust stable sesuai `rust-toolchain.toml`.
 - Linux, macOS, atau Windows dengan toolchain Rust.
+- Python 3 untuk `scripts/release.py` dan packaging lokal.
 - Tidak ada dependensi Rust eksternal.
 - Tidak ada `unsafe` di workspace.
 - `avr-gcc` hanya diperlukan untuk mengompilasi firmware AVR baru.
@@ -90,11 +91,25 @@ Perintah tersebut menjalankan `fmt`, `clippy`, dan seluruh test workspace.
 ./scripts/package.sh
 ```
 
-Hasil berada di:
+Wrapper membangun `emucad` dan `emucad-gui` release untuk host, lalu
+memanggil `scripts/release.py` dengan target host. Hasil di `dist/`:
 
 ```text
-dist/emucad-<target>.tar.gz
+dist/emucad-v<versi>-<target>.tar.gz
+dist/emucad-v<versi>-<target>.tar.gz.sha512
+dist/SHA512SUMS
 ```
+
+Verifikasi checksum:
+
+```bash
+cd dist
+sha512sum -c SHA512SUMS
+```
+
+Arsip memuat `build-info.txt`, sehingga checksum berubah pada setiap commit.
+Argumen tambahan diteruskan ke `scripts/release.py`, misalnya
+`--version` atau `--output-dir`.
 
 ---
 
