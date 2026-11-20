@@ -100,6 +100,13 @@ pub fn register_bit(builder: &mut DigitalBuilder, data: NetId, load: NetId) -> N
     output
 }
 
+/// Connects next-state values to existing storage nets.
+pub fn clock_vector(builder: &mut DigitalBuilder, bits: &[NetId], next: &[NetId]) {
+    for (bit, &value) in bits.iter().zip(next) {
+        builder.dff_into(value, *bit);
+    }
+}
+
 /// Builds a combinational incrementer.
 #[must_use]
 pub fn increment(builder: &mut DigitalBuilder, bits: &[NetId]) -> Vec<NetId> {

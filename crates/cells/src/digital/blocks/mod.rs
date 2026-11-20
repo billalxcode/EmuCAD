@@ -15,6 +15,6 @@ pub use combinational::{
 };
 pub use pointers::{ProgramCounter, StackPointer};
 pub use registers::{
-    RegisterControl, counter, decrement, full_adder, increment, register, register_bit,
-    register_extended, shift_register,
+    RegisterControl, clock_vector, counter, decrement, full_adder, increment, register,
+    register_bit, register_extended, shift_register,
 };

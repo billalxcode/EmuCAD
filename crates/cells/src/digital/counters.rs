@@ -1,6 +1,8 @@
 //! Loadable up/down counters and generic prescalers.
 
-use super::blocks::{and_all, decrement, increment, select_vector, validate_pair, validate_width};
+use super::blocks::{
+    and_all, clock_vector, decrement, increment, select_vector, validate_pair, validate_width,
+};
 use super::circuit::{DigitalBuilder, NetId};
 use kernel::SimError;
 
@@ -30,7 +32,7 @@ pub fn counter_loadable(
     let stepped = select_vector(builder, &decremented, &incremented, up_down)?;
     let enabled = select_vector(builder, &bits, &stepped, enable)?;
     let next = select_vector(builder, &enabled, load_value, load)?;
-    clock_bits(builder, &bits, &next);
+    clock_vector(builder, &bits, &next);
     Ok(bits)
 }
 
@@ -68,15 +70,9 @@ pub fn prescaler(
     let zeroes = vec![zero; width];
     let wrapped = select_vector(builder, &incremented, &zeroes, terminal)?;
     let next = select_vector(builder, &count, &wrapped, enable)?;
-    clock_bits(builder, &count, &next);
+    clock_vector(builder, &count, &next);
     let tick = builder.and(enable, terminal);
     Ok(Prescaler { count, tick })
-}
-
-fn clock_bits(builder: &mut DigitalBuilder, bits: &[NetId], next: &[NetId]) {
-    for (bit, &value) in bits.iter().zip(next) {
-        builder.dff_into(value, *bit);
-    }
 }
 
 fn constant_bits(builder: &mut DigitalBuilder, value: u64, width: usize) -> Vec<NetId> {
