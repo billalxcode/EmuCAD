@@ -3,7 +3,8 @@
 Tanggal: 2026-11-20
 Status: P0 selesai; P1 berjalan dengan ALU, register, counter,
 shifter, multiplier, divider, comparator, encoder, bit manipulation,
-bus mux/crossbar, FIFO sinkron, LUT/FSM generic, dan memory sinkron.
+bus mux/crossbar, FIFO sinkron, LUT/FSM generic, memory sinkron, dan
+valid/ready handshake.
 `DigitalVector`, `DigitalModule`, `BusResolver`, wired-AND,
 `ClockDomain`, `ResetDomain`, dan `reset_synchronizer` ada di `cells`.
 `McuSpec` dan `BusSpec` ada di crate `soc`.
@@ -53,7 +54,7 @@ Yang belum memadai untuk STM32/ESP32:
 - Interrupt controller, CSR, exception, privilege, MMU/MPU.
 - Multi-clock, PLL, clock divider, clock gating, reset synchronizer,
   CDC.
-- Async FIFO, pipeline register, scoreboard, hazard unit.
+- Async FIFO, skid buffer, scoreboard, hazard unit.
 - Cache, parity/ECC, dan memory macro lengkap.
 - Pin mux, pad model, open-drain resolution, high-Z bus, pull-up/down.
 - Spec MCU, validator address map, IRQ map, dan pin map.
@@ -133,6 +134,7 @@ Sudah:
 - FIFO sinkron dengan full, empty, dan count.
 - Memory sinkron `memory_sync` dengan byte mask, latency 0/1, dan
   read-during-write policy.
+- Buffer valid/ready satu entri.
 - SRAM 6T dan array 128 x 8 di katalog.
 
 Sebagian:

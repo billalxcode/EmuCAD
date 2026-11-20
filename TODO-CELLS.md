@@ -190,8 +190,12 @@ Exit P0:
 - [ ] CELL-02-06 Tambahkan cache tag/data array dan metadata valid,
   dirty, dan replacement.
 - [ ] CELL-02-07 Tambahkan parity, ECC, error injection, dan scrubber.
-- [ ] CELL-02-08 Tambahkan pipeline register, valid/ready handshake,
+- [~] CELL-02-08 Tambahkan pipeline register, valid/ready handshake,
   dan skid buffer.
+  - `handshake_register` menyediakan buffer satu entri dengan valid dan
+    ready.
+  - Pipeline register dapat dibangun dari `register_extended`.
+  - Skid buffer dua entri belum ada.
 - [ ] CELL-02-09 Tambahkan model flash/EEPROM dengan erase/write timing
   behavioral.
 - [x] CELL-03-01 Buat register file 32 x 32 dengan byte enable dan

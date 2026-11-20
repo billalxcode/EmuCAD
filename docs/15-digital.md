@@ -173,6 +173,17 @@ Test lapisan digital mencakup:
 - Test memeriksa word, byte mask, read-first, write-first, latency 1,
   reset, dan validasi shape.
 
+## 7.4 Buffer Valid/Ready
+
+- `handshake_register` menyediakan buffer satu entri dengan `valid_out`
+  dan `ready_in`.
+- `ready_in` tinggi saat buffer kosong atau downstream siap menerima.
+- Data ditahan saat `ready_out` rendah, dan buffer mengisi ulang pada
+  cycle yang sama ketika data lama dikonsumsi.
+- Test memeriksa empty, load, hold, consume, dan reload.
+- Pipeline register dapat dibangun dari `register_extended`; skid buffer
+  dua entri belum ada.
+
 ## 8. Program Counter, IR, dan Stack Pointer
 
 - PC 16-bit: increment setiap tick atau load alamat target.

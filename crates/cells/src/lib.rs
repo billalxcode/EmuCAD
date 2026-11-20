@@ -39,19 +39,19 @@ pub use characterize::{VtcMetrics, noise_margins};
 pub use digital::{
     BusDriver, BusPull, BusResolver, CircuitStats, ClockDomain, Comparison, Cpu, CpuTrace,
     DigitalAlu, DigitalBuilder, DigitalCircuit, DigitalModule, DigitalVector, Division, Fifo, Fsm,
-    FsmSpec, Memory, MemoryConfig, MemoryPorts, NetId, OP_ADD, OP_AND, OP_HLT, OP_JMP, OP_JNZ,
-    OP_JZ, OP_LDI, OP_MOV, OP_NOP, OP_OR, OP_SUB, OP_XOR, Prescaler, PriorityEncoding,
+    FsmSpec, Handshake, Memory, MemoryConfig, MemoryPorts, NetId, OP_ADD, OP_AND, OP_HLT, OP_JMP,
+    OP_JNZ, OP_JZ, OP_LDI, OP_MOV, OP_NOP, OP_OR, OP_SUB, OP_XOR, Prescaler, PriorityEncoding,
     ProgramCounter, ReadDuringWrite, RegisterControl, RegisterFile, RegisterPorts, ResetDomain,
     StackPointer, and_all, arithmetic_shift_right, barrel_shift_left, barrel_shift_right,
     bit_reverse, bus_mux, byte_swap, comparator_unsigned, counter, counter_loadable, counter_match,
     crossbar, decoder, decrement, digital_alu, digital_alu_width, divider_non_restoring,
     divider_restoring, encode_alu, encode_branch, encode_hlt, encode_ldi, fifo_sync,
     finite_state_machine, full_adder as digital_full_adder, funnel_shift_left, funnel_shift_right,
-    increment, leading_zero_count, lookup_table, memory_sync, multiplier_array, multiplier_booth,
-    mux_tree, one_hot_encoder, or_all, popcount, prescaler, priority_encoder, read_bits, register,
-    register_extended, register_file, register_file_masked, reset_synchronizer, resolve_bus,
-    resolve_open_drain, rotate_left, rotate_right, saturating_add_unsigned,
-    saturating_sub_unsigned, shift_register,
+    handshake_register, increment, leading_zero_count, lookup_table, memory_sync, multiplier_array,
+    multiplier_booth, mux_tree, one_hot_encoder, or_all, popcount, prescaler, priority_encoder,
+    read_bits, register, register_extended, register_file, register_file_masked,
+    reset_synchronizer, resolve_bus, resolve_open_drain, rotate_left, rotate_right,
+    saturating_add_unsigned, saturating_sub_unsigned, shift_register,
 };
 pub use registry::CellKind;
 pub use sequential::{d_flip_flop, d_latch, ring_oscillator, sram6t};
