@@ -94,8 +94,11 @@ Catatan:
   - `ResetDomain` dan `dff_with` menandai DFF per domain.
   - `reset_domain` mereset hanya domain yang diminta.
   - `reset_synchronizer` menyediakan async assert dan sync deassert.
-- [ ] CELL-00-06 Definisikan `McuSpec`, `CpuSpec`, `BusSpec`,
+- [x] CELL-00-06 Definisikan `McuSpec`, `CpuSpec`, `BusSpec`,
   `MemorySpec`, `PeripheralSpec`, `PinSpec`, dan `ClockSpec`.
+  - Semua tipe ada di crate `soc`.
+  - `BusSpec` mencakup protocol, data width, dan address width.
+  - Elaboration ke `cells` belum; lihat `docs/94-soc-spec.md`.
 - [ ] CELL-00-07 Buat validator address map, IRQ map, pin map, dan
   memory map.
 - [ ] CELL-00-08 Tambahkan enum fidelity per blok: behavioral,

@@ -138,6 +138,9 @@ mixed
   +-- cells
   +-- device
   `-- kernel
+
+soc
+  `-- kernel
 ```
 
 Aturan:
@@ -150,6 +153,9 @@ Aturan:
 - `board` hanya bergantung pada `kernel`, `device`, dan `avr`.
 - `mixed` hanya bergantung pada `kernel`, `device`, `analysis`, `cells`, dan `avr`.
 - `mixed` adalah scheduler co-sim dua arah; adapter boleh memakainya.
+- `soc` hanya bergantung pada `kernel`; crate ini menyimpan spec data,
+  bukan circuit atau model device.
+- `cells` dan `soc` tidak saling bergantung.
 - `cli` adalah adapter dan komposisi.
 - `gui` adalah adapter dan komposisi.
 - `python` adalah adapter binding Python untuk katalog dan netlist.

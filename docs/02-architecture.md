@@ -34,6 +34,7 @@ emucad/
 |   |-- avr/
 |   |-- board/
 |   |-- mixed/
+|   |-- soc/
 |   |-- cli/
 |   |-- gui/
 |   `-- python/
@@ -52,6 +53,7 @@ emucad/
 | `avr` | CPU AVR fast functional core, ISA, peripheral; primitif struktural untuk validasi | Board |
 | `board` | Board netlist, LED, tombol, UART host | Detail CPU |
 | `mixed` | Scheduler co-sim digital-analog dan wrapper AVR satu pin | GUI, CLI |
+| `soc` | Spec data MCU/SoC dan validasi | Circuit, device, AVR |
 | `cli` | Argumen, orkestrasi, output, monitor, catalog JSON | Implementasi internal device |
 | `gui` | UI egui, canvas, persistence, worker simulasi | Implementasi internal device dan solver |
 | `python` | Binding Python untuk katalog dan netlist | Simulasi, GUI, firmware |
@@ -84,6 +86,9 @@ mixed
   |-- avr
   |-- cells
   |-- device
+  `-- kernel
+
+soc
   `-- kernel
 
 python

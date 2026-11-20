@@ -1,9 +1,9 @@
 # 92 - Kebutuhan Cells untuk Multi-MCU
 
 Tanggal: 2026-11-20
-Status: P0 dimulai; `DigitalVector`, `DigitalModule`, `BusResolver`,
-wired-AND, `ClockDomain`, `ResetDomain`, dan `reset_synchronizer` sudah
-diimplementasikan.
+Status: P0 selesai; `DigitalVector`, `DigitalModule`, `BusResolver`,
+wired-AND, `ClockDomain`, `ResetDomain`, dan `reset_synchronizer` ada
+di `cells`. `McuSpec` dan `BusSpec` ada di crate `soc`.
 
 ## 1. Tujuan
 

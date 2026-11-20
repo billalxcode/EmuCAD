@@ -635,6 +635,8 @@ Status ringkas:
 - `ClockDomain` dan `tick_domain` untuk update flip-flop per domain.
 - `reset_synchronizer` untuk async assert dan sync deassert.
 - `ResetDomain` dan `reset_domain` untuk reset per kelompok DFF.
+- Crate `soc` menyediakan `McuSpec`, `CpuSpec`, `BusSpec`,
+  `MemorySpec`, `PeripheralSpec`, `PinSpec`, dan `ClockSpec`.
 - Audit struktur AVR ada di `docs/91-avr-audit.md`; status masih hybrid
   dan beberapa blok structural belum terhubung ke CPU.
 - Kebutuhan `cells` untuk multi-MCU ada di

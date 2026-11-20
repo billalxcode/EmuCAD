@@ -7,6 +7,7 @@ members = [
     "crates/cells",
     "crates/mixed",
     "crates/avr",
+    "crates/soc",
     "crates/board",
     "crates/cli",
     "crates/gui",
