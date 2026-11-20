@@ -699,6 +699,7 @@ S7 yang sudah berjalan:
 
 Commit fitur terakhir:
 
+- `99a2371 feat(gui): expand MCU symbol to TQFP-32`
 - `008ceb5 test(avr): cross-check package IO with pin map`
 - `a689dcb feat(avr): add ATmega328P package pin map`
 - `db9468f feat(mixed): interpolate PWM and UART edge events`
