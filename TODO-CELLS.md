@@ -80,7 +80,11 @@ Catatan:
   - `instantiate` menyalin gate dan DFF dengan remap net.
   - Instansiasi berulang menghasilkan net yang independen.
 - [~] CELL-00-03 Tambahkan high-Z, pull-up, pull-down, wired-AND, dan
-  resolusi bus contention. Tri-state inverter sudah ada, resolver belum.
+  resolusi bus contention.
+  - Tri-state inverter sudah ada.
+  - `BusResolver` menangani beberapa driver, pull low/high, dan
+    contention.
+  - Wired-AND dan open-drain belum terpisah.
 - [ ] CELL-00-04 Tambahkan API clock domain dan tick per domain.
 - [ ] CELL-00-05 Tambahkan reset domain, async assert, dan sync deassert.
 - [ ] CELL-00-06 Definisikan `McuSpec`, `CpuSpec`, `BusSpec`,

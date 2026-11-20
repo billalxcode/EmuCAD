@@ -2,6 +2,7 @@
 
 pub mod alu;
 pub mod blocks;
+pub mod bus;
 pub mod circuit;
 pub mod cpu;
 pub mod module;
@@ -13,6 +14,7 @@ pub use blocks::{
     ProgramCounter, StackPointer, and_all, counter, decoder, decrement, full_adder, increment,
     mux_tree, or_all, read_bits, register, shift_register,
 };
+pub use bus::{BusDriver, BusPull, BusResolver, resolve_bus};
 pub use circuit::{CircuitStats, DigitalBuilder, DigitalCircuit, NetId};
 pub use cpu::{
     Cpu, CpuTrace, OP_ADD, OP_AND, OP_HLT, OP_JMP, OP_JNZ, OP_JZ, OP_LDI, OP_MOV, OP_NOP, OP_OR,

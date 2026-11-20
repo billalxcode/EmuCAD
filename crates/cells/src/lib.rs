@@ -37,12 +37,12 @@ pub use builder::CellBuilder;
 pub use cell::Cell;
 pub use characterize::{VtcMetrics, noise_margins};
 pub use digital::{
-    CircuitStats, Cpu, CpuTrace, DigitalAlu, DigitalBuilder, DigitalCircuit, DigitalModule,
-    DigitalVector, NetId, OP_ADD, OP_AND, OP_HLT, OP_JMP, OP_JNZ, OP_JZ, OP_LDI, OP_MOV, OP_NOP,
-    OP_OR, OP_SUB, OP_XOR, ProgramCounter, RegisterFile, RegisterPorts, StackPointer, and_all,
-    counter, decoder, decrement, digital_alu, encode_alu, encode_branch, encode_hlt, encode_ldi,
-    full_adder as digital_full_adder, increment, mux_tree, or_all, read_bits, register,
-    register_file, shift_register,
+    BusDriver, BusPull, BusResolver, CircuitStats, Cpu, CpuTrace, DigitalAlu, DigitalBuilder,
+    DigitalCircuit, DigitalModule, DigitalVector, NetId, OP_ADD, OP_AND, OP_HLT, OP_JMP, OP_JNZ,
+    OP_JZ, OP_LDI, OP_MOV, OP_NOP, OP_OR, OP_SUB, OP_XOR, ProgramCounter, RegisterFile,
+    RegisterPorts, StackPointer, and_all, counter, decoder, decrement, digital_alu, encode_alu,
+    encode_branch, encode_hlt, encode_ldi, full_adder as digital_full_adder, increment, mux_tree,
+    or_all, read_bits, register, register_file, resolve_bus, shift_register,
 };
 pub use registry::CellKind;
 pub use sequential::{d_flip_flop, d_latch, ring_oscillator, sram6t};
