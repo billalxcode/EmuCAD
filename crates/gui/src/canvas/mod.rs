@@ -12,7 +12,9 @@ mod tests;
 
 pub(crate) use camera::ZOOM_PRESETS;
 pub use camera::{DVec2, GridCamera};
-use camera::{GridRange, handle_pan, handle_zoom, initialize_camera, pointer_world};
+use camera::{
+    GridRange, handle_pan, handle_scroll, handle_zoom_keys, initialize_camera, pointer_world,
+};
 #[cfg(test)]
 pub(crate) use camera::{MAX_ZOOM, MIN_ZOOM};
 pub use frame::show;

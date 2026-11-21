@@ -11,6 +11,17 @@ pub(crate) const ZOOM_PRESETS: &[f64] = &[
     30.0, 45.0, 65.0, 100.0,
 ];
 
+const SCROLL_NOTCH: f64 = 50.0;
+const ZOOM_PER_NOTCH: f64 = 1.24;
+const PAN_PER_NOTCH: f64 = 0.12;
+const ZOOM_HISTORY_LIMIT: usize = 8;
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct ZoomState {
+    pub zoom: f64,
+    pub pan: DVec2,
+}
+
 /// Double-precision screen-space vector.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct DVec2 {
@@ -37,6 +48,7 @@ pub struct GridCamera {
     pub zoom: f64,
     /// Base size of one grid cell in pixels at 100 percent zoom.
     pub cell_px: f64,
+    pub(crate) zoom_history: Vec<ZoomState>,
 }
 
 impl Default for GridCamera {
@@ -45,6 +57,7 @@ impl Default for GridCamera {
             pan: DVec2::ZERO,
             zoom: 1.0,
             cell_px: 20.0,
+            zoom_history: Vec::new(),
         }
     }
 }
@@ -54,6 +67,38 @@ impl GridCamera {
     #[must_use]
     pub(crate) fn clamp_zoom(zoom: f64) -> f64 {
         zoom.clamp(MIN_ZOOM, MAX_ZOOM)
+    }
+
+    /// Restores the view before the last zoom change.
+    pub(crate) fn undo_zoom(&mut self) -> bool {
+        let Some(state) = self.zoom_history.pop() else {
+            return false;
+        };
+        self.zoom = state.zoom;
+        self.pan = state.pan;
+        true
+    }
+
+    fn record_zoom(&mut self) {
+        let state = ZoomState {
+            zoom: self.zoom,
+            pan: self.pan,
+        };
+        if self.zoom_history.last() == Some(&state) {
+            return;
+        }
+        if self.zoom_history.len() == ZOOM_HISTORY_LIMIT {
+            self.zoom_history.remove(0);
+        }
+        self.zoom_history.push(state);
+    }
+
+    pub(super) fn zoom_factor(scroll: f32) -> f64 {
+        ZOOM_PER_NOTCH.powf(scroll as f64 / SCROLL_NOTCH)
+    }
+
+    pub(super) fn pan_delta(scroll: f32, size: f32) -> f64 {
+        scroll as f64 / SCROLL_NOTCH * size as f64 * PAN_PER_NOTCH
     }
 
     /// Returns pixels per world grid unit.
@@ -92,8 +137,13 @@ impl GridCamera {
 
     /// Zooms around a screen position while keeping that world point fixed.
     pub fn zoom_at(&mut self, rect: egui::Rect, cursor: egui::Pos2, factor: f64) {
+        let next = Self::clamp_zoom(self.zoom * factor);
+        if next == self.zoom {
+            return;
+        }
         let (world_x, world_y) = self.screen_to_world_f64(rect, cursor);
-        self.zoom = Self::clamp_zoom(self.zoom * factor);
+        self.record_zoom();
+        self.zoom = next;
         let scale = self.scale_f64();
         let x = rect.min.x as f64 + self.pan.x + world_x * scale;
         let y = rect.min.y as f64 + self.pan.y + world_y * scale;
@@ -108,6 +158,7 @@ impl GridCamera {
             (rect.size() - egui::vec2(padding * 2.0, padding * 2.0)).max(egui::vec2(1.0, 1.0));
         let zoom_x = available.x as f64 / (size.x as f64 * self.cell_px);
         let zoom_y = available.y as f64 / (size.y as f64 * self.cell_px);
+        self.record_zoom();
         self.zoom = Self::clamp_zoom(zoom_x.min(zoom_y));
         self.center_world(rect, min, max);
     }
@@ -172,7 +223,7 @@ pub(super) fn handle_pan(response: &egui::Response, ui: &egui::Ui, camera: &mut 
     camera.pan.y += delta.y as f64;
 }
 
-pub(super) fn handle_zoom(
+pub(super) fn handle_scroll(
     response: &egui::Response,
     ui: &egui::Ui,
     camera: &mut GridCamera,
@@ -181,12 +232,78 @@ pub(super) fn handle_zoom(
     if !response.hovered() {
         return;
     }
-    let scroll = ui.input(|input| input.smooth_scroll_delta.y);
+    let modifiers = ui.input(|input| input.modifiers);
+    let scroll = wheel_scroll(ui, modifiers);
     if scroll == 0.0 {
+        return;
+    }
+    apply_wheel(camera, rect, scroll, modifiers, response);
+}
+
+fn apply_wheel(
+    camera: &mut GridCamera,
+    rect: egui::Rect,
+    scroll: f32,
+    modifiers: egui::Modifiers,
+    response: &egui::Response,
+) {
+    if modifiers.shift {
+        pan_vertical(camera, rect, scroll);
+        return;
+    }
+    if modifiers.ctrl {
+        pan_horizontal(camera, rect, scroll);
         return;
     }
     let Some(cursor) = response.hover_pos() else {
         return;
     };
-    camera.zoom_at(rect, cursor, (scroll as f64 * 0.002).exp());
+    camera.zoom_at(rect, cursor, GridCamera::zoom_factor(scroll));
+}
+
+fn wheel_scroll(ui: &egui::Ui, modifiers: egui::Modifiers) -> f32 {
+    let (vertical, horizontal) =
+        ui.input(|input| (input.smooth_scroll_delta.y, input.smooth_scroll_delta.x));
+    if modifiers.shift && vertical == 0.0 {
+        horizontal
+    } else {
+        vertical
+    }
+}
+
+fn pan_vertical(camera: &mut GridCamera, rect: egui::Rect, scroll: f32) {
+    camera.pan.y -= GridCamera::pan_delta(scroll, rect.height());
+}
+
+fn pan_horizontal(camera: &mut GridCamera, rect: egui::Rect, scroll: f32) {
+    camera.pan.x -= GridCamera::pan_delta(scroll, rect.width());
+}
+
+pub(super) fn handle_zoom_keys(
+    response: &egui::Response,
+    ui: &egui::Ui,
+    camera: &mut GridCamera,
+    rect: egui::Rect,
+) {
+    if !(response.has_focus() || response.hovered()) {
+        return;
+    }
+    let factor = zoom_key_factor(ui);
+    if factor == 1.0 {
+        return;
+    }
+    let cursor = response.hover_pos().unwrap_or(rect.center());
+    camera.zoom_at(rect, cursor, factor);
+}
+
+fn zoom_key_factor(ui: &egui::Ui) -> f64 {
+    let zoom_in = ui.input(|input| input.key_pressed(egui::Key::F1));
+    let zoom_out = ui.input(|input| input.key_pressed(egui::Key::F2));
+    if zoom_in {
+        1.3
+    } else if zoom_out {
+        1.0 / 1.3
+    } else {
+        1.0
+    }
 }

@@ -24,6 +24,7 @@ pub enum Command {
     ToggleUart,
     ToggleLog,
     ZoomReset,
+    ZoomUndo,
     SelectTool,
     WireTool,
     AlignLeft,
@@ -38,7 +39,7 @@ pub enum Command {
 
 impl Command {
     /// All commands shown by the palette.
-    pub const ALL: [Self; 31] = [
+    pub const ALL: [Self; 32] = [
         Self::Save,
         Self::Open,
         Self::LoadHex,
@@ -60,6 +61,7 @@ impl Command {
         Self::ToggleUart,
         Self::ToggleLog,
         Self::ZoomReset,
+        Self::ZoomUndo,
         Self::SelectTool,
         Self::WireTool,
         Self::AlignLeft,
@@ -120,6 +122,7 @@ impl Command {
             Self::ToggleUart => "Toggle UART monitor",
             Self::ToggleLog => "Toggle log panel",
             Self::ZoomReset => "Reset zoom",
+            Self::ZoomUndo => "Undo last zoom",
             Self::SelectTool => "Select tool",
             Self::WireTool => "Wire tool",
             _ => self.align_label(),

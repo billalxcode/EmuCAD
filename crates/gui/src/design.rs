@@ -246,6 +246,8 @@ pub(crate) fn configure(context: &eframe::CreationContext<'_>) {
 
 pub(crate) fn configure_context(context: &egui::Context) {
     install_fonts(context);
+    // The canvas owns Ctrl+wheel for horizontal pan.
+    context.options_mut(|options| options.input_options.zoom_modifier = egui::Modifiers::NONE);
     context.style_mut_of(egui::Theme::Dark, |style| apply_style(style, DARK, true));
     context.style_mut_of(egui::Theme::Light, |style| apply_style(style, LIGHT, false));
     context.set_theme(egui::ThemePreference::Dark);

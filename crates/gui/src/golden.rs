@@ -63,6 +63,7 @@ fn golden_camera() -> crate::canvas::GridCamera {
         pan: DVec2::new(24.0, 20.0),
         zoom: 1.0,
         cell_px: 20.0,
+        zoom_history: Vec::new(),
     }
 }
 

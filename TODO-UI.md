@@ -2,8 +2,8 @@
 
 Backlog UI setelah migrasi ikon Tabler dan worker mixed.
 
-**Status:** U0 dan U8-01 selesai. U1 sampai U7 dan U8-02 sampai U8-11
-belum. Riset viewport dan grid KiCad selesai di
+**Status:** U0, U8-01, dan U8-02 selesai. U1 sampai U7 dan U8-03 sampai
+U8-11 belum. Riset viewport dan grid KiCad selesai di
 `docs/96-viewport-grid.md`; sisa U8 antre setelah U1 sampai U7 atau
 setelah prioritas diubah.
 
@@ -186,8 +186,10 @@ U8 mengatur perilaku viewport dan grid.
   preset Eeschema 5 sampai 10000 persen. Tambahkan test clamp dan
   transformasi pada zoom ekstrem. Selesai: `pan`, `zoom`, dan `cell_px`
   f64; combo preset memakai daftar Eeschema dan anchor di tengah kanvas.
-- [ ] U8-02 Normalisasi wheel zoom di kursor, tambahkan Shift/Ctrl wheel
-  pan, F1/F2 zoom di kursor, dan riwayat 8 level zoom.
+- [x] U8-02 Normalisasi wheel zoom di kursor, tambahkan Shift/Ctrl wheel
+  pan, F1/F2 zoom di kursor, dan riwayat 8 level zoom. Selesai: satu
+  notch 1.24, Shift/Ctrl pan, F1/F2, dan Undo last zoom di command
+  palette.
 - [ ] U8-03 Tambahkan fit all, fit objects, fit selection, fit sheet,
   margin 1.04/1.10, dan drag zoom area. Context click tetap bekerja.
 - [ ] U8-04 Tambahkan `GridStep` 1/2/5/10, `SnapGrid`

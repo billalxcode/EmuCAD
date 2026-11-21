@@ -252,6 +252,7 @@ impl ViewFile {
             pan: DVec2::new(self.pan[0], self.pan[1]),
             zoom: GridCamera::clamp_zoom(self.zoom),
             cell_px: 20.0,
+            zoom_history: Vec::new(),
         }
     }
 }
@@ -420,6 +421,7 @@ mod tests {
             pan: DVec2::new(12.5, -3.25),
             zoom: 2.5,
             cell_px: 20.0,
+            zoom_history: Vec::new(),
         };
         let text = to_json(&Document::new(), &camera, true).expect("json");
         let project = from_json(&text, library::builtin()).expect("load");

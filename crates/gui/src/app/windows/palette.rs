@@ -151,6 +151,9 @@ impl GuiApp {
             Command::ToggleUart => self.uart_open = !self.uart_open,
             Command::ToggleLog => self.log_open = !self.log_open,
             Command::ZoomReset => self.zoom_to(1.0),
+            Command::ZoomUndo => {
+                self.camera.undo_zoom();
+            }
             Command::SelectTool => self.set_tool(Tool::Select),
             Command::WireTool => self.set_tool(Tool::Wire),
             _ => {}

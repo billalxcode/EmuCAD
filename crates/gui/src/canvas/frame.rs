@@ -14,7 +14,8 @@ pub fn show(
     let rect = response.rect;
     initialize_camera(rect, camera, initialized);
     handle_pan(&response, ui, camera);
-    handle_zoom(&response, ui, camera, rect);
+    handle_scroll(&response, ui, camera, rect);
+    handle_zoom_keys(&response, ui, camera, rect);
     let pointer = pointer_world(&response, rect, camera);
     focus_canvas(&response);
     let frame = CanvasFrame::new(&response, &painter, rect, camera, grid_visible, pointer);

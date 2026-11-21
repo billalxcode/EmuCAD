@@ -72,6 +72,7 @@ fn high_zoom_round_trip_keeps_position() {
         pan: DVec2::new(123.456, -78.9),
         zoom: MAX_ZOOM,
         cell_px: 20.0,
+        zoom_history: Vec::new(),
     };
     let world = egui::pos2(1234.5, -567.25);
     let screen = camera.world_to_screen(rect(), world);
@@ -90,6 +91,43 @@ fn fit_world_clamps_to_min_zoom() {
         0.0,
     );
     assert_eq!(camera.zoom, MIN_ZOOM);
+}
+
+#[test]
+fn scroll_notches_map_to_zoom_steps() {
+    assert!((GridCamera::zoom_factor(50.0) - 1.24).abs() < 1e-9);
+    assert!((GridCamera::zoom_factor(-50.0) - 1.0 / 1.24).abs() < 1e-9);
+    assert_eq!(GridCamera::zoom_factor(0.0), 1.0);
+}
+
+#[test]
+fn wheel_pan_is_viewport_relative() {
+    assert!((GridCamera::pan_delta(50.0, 1000.0) - 120.0).abs() < 1e-9);
+    assert_eq!(GridCamera::pan_delta(0.0, 1000.0), 0.0);
+}
+
+#[test]
+fn zoom_history_restores_previous_view() {
+    let mut camera = GridCamera::default();
+    camera.zoom_at(rect(), egui::pos2(100.0, 100.0), 2.0);
+    let first_zoom = camera.zoom;
+    let first_pan = camera.pan;
+    camera.zoom_at(rect(), egui::pos2(200.0, 200.0), 2.0);
+    assert!(camera.undo_zoom());
+    assert_eq!(camera.zoom, first_zoom);
+    assert_eq!(camera.pan, first_pan);
+    assert!(camera.undo_zoom());
+    assert_eq!(camera.zoom, 1.0);
+    assert!(!camera.undo_zoom());
+}
+
+#[test]
+fn zoom_history_keeps_eight_steps() {
+    let mut camera = GridCamera::default();
+    for _ in 0..12 {
+        camera.zoom_at(rect(), rect().center(), 1.1);
+    }
+    assert_eq!(camera.zoom_history.len(), 8);
 }
 
 #[test]

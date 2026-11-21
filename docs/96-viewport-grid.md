@@ -427,13 +427,13 @@ dokumentasi resmi, bukan dari klik tambahan.
 | Zoom range | 0.01 sampai 100 | 0.01 sampai 100 | Selesai |
 | Zoom anchor | Kursor | Kursor | Sudah sesuai |
 | Preset zoom | 21 langkah eeschema | 21 langkah eeschema | Selesai |
-| Wheel zoom | `1 + rot * 0.002` | `exp(scroll * 0.002)` | Mirip, perlu normalisasi |
-| Wheel pan | Shift/Ctrl | Tidak ada | Belum ada |
+| Wheel zoom | `1 + rot * 0.002` | `1.24` per notch | Selesai |
+| Wheel pan | Shift/Ctrl | Shift/Ctrl | Selesai |
 | Drag pan | Tengah dan kanan | Tengah dan Space+kiri | Sebagian |
 | Autopan | 2 persen tepi | Tidak ada | Belum ada |
 | Fit | All, objects, selection, margin | Fit content dan selection | Sebagian |
 | Zoom area | Drag kotak | Tidak ada | Belum ada |
-| Zoom history | Undo last zoom | Tidak ada | Belum ada |
+| Zoom history | Undo last zoom | 8 level dan command palette | Selesai |
 | Grid logical | Ukuran tetap | 1 unit integer | Sudah, tetapi tidak bisa diubah |
 | Grid tampilan | Coarse tick 10, min 10 px | 1/2/5, major 5 | Berbeda |
 | Gaya grid | Dots, lines, crosses | Dots + major lines | Belum bisa dipilih |
@@ -531,6 +531,9 @@ Urutan prioritas implementasi:
 6. Drag kanan untuk pan hanya jika context click tetap bekerja.
 7. Autopan ditunda sampai ada tool drag yang berjalan lama.
 
+U8-02 menyelesaikan langkah 1, 2, dan 4. Langkah 3 sudah ada sebelumnya.
+Drag kanan, fit baru, dan autopan belum dikerjakan.
+
 ### 7.6 Fit dan riwayat zoom
 
 - `fit_all`: seluruh konten termasuk sheet.
@@ -591,6 +594,10 @@ Test yang harus ada:
 
 U8-01 sudah ditutup oleh test clamp zoom, daftar preset, round-trip
 koordinat pada zoom maksimum, dan round-trip pan serta zoom di JSON.
+
+U8-02 sudah ditutup oleh test normalisasi satu notch wheel, pan delta
+terhadap ukuran viewport, dan riwayat zoom yang mengembalikan pan serta
+zoom sebelumnya.
 
 ## 9. Batas dan Risiko
 
