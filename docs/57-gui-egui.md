@@ -208,22 +208,30 @@ Aturan layout:
 ### 5.3 Kamera
 
 - Pan dengan drag tengah, Space + drag, atau dua jari.
+- Drag kanan dapat menjadi pan jika context click tetap bekerja.
 - Zoom dengan wheel di sekitar kursor.
-- Preset zoom: 25, 50, 75, 100, 150, 200, 400 persen.
+- Batas zoom 1 sampai 10000 persen, mengikuti Eeschema.
+- Preset zoom memakai daftar Eeschema 5 sampai 10000 persen.
 - Zoom halus tersedia di antara preset.
-- Fit selection, fit all, dan center origin.
+- Fit all, fit objects, fit selection, fit sheet, dan center origin.
+- Riwayat 8 level zoom untuk undo last zoom.
 - Level of detail: label kecil dan grid minor disembunyikan saat zoom
   rendah.
+
+Referensi perilaku: [`96-viewport-grid.md`](96-viewport-grid.md).
 
 ### 5.4 Rendering grid
 
 - Ukuran sel default 20 px pada zoom 100 persen.
-- Grid minor setiap sel.
-- Grid major setiap 5 atau 10 sel.
-- Latar gelap dengan titik grid halus.
-- Sumbu X dan Y berbeda warna.
-- Culling hanya menggambar garis yang terlihat.
-- Grid dapat dimatikan sementara untuk melihat rangkaian.
+- Gaya grid: dots, lines, atau cross. Default dots.
+- Coarse tick setiap 10 unit logis, digambar dua kali lebih tebal.
+- Grid adaptif menaikkan kelipatan sampai jarak layar minimal 10 px.
+- Snap memakai grid logical, bukan grid yang sedang digambar.
+- Sumbu X dan Y opsional dan default mati.
+- Ruler adalah overlay EmuCAD dan dapat dimatikan.
+- Culling hanya menggambar marker yang terlihat.
+- Grid dapat dimatikan tanpa mematikan snap grid.
+- Status bar menampilkan koordinat snapped, delta, grid step, dan unit.
 
 ### 5.5 Minimap
 
@@ -298,7 +306,10 @@ Setiap instance memiliki:
 ### 6.4 Penempatan
 
 - Ghost komponen mengikuti kursor.
-- Snap selalu aktif; Alt menonaktifkan snap sementara.
+- Snap grid mengikuti `GridStep`; snap objek mencakup pin, ujung wire,
+  junction, dan label.
+- Shift menonaktifkan snap objek sementara.
+- Ctrl menonaktifkan preview snap grid, tetapi commit tetap integer.
 - Hijau jika valid, merah jika bertabrakan.
 - Komponen tidak boleh saling menimpa.
 - R rotate, M mirror, Esc cancel.
@@ -417,7 +428,16 @@ Aturan:
 | W | Wire |
 | G | Probe |
 | Space + drag | Pan |
-| Wheel | Zoom |
+| Wheel | Zoom di kursor |
+| Shift + wheel | Pan vertikal |
+| Ctrl + wheel | Pan horizontal |
+| F1 / F2 | Zoom in / out di kursor |
+| Home | Fit all |
+| Ctrl+Home | Fit objects |
+| N / Shift+N | Grid berikutnya / sebelumnya |
+| Alt+1 / Alt+2 | Fast grid 1 / 2 |
+| Panah | Cursor per grid |
+| Ctrl+Panah | Cursor 10x grid |
 | R | Rotate |
 | M | Mirror |
 | Delete | Hapus seleksi |

@@ -872,6 +872,7 @@ dikembangkan ke Windows/macOS.
 Desain: [`docs/57-gui-egui.md`](docs/57-gui-egui.md).
 Backlog detail: [`TODO-GUI.md`](TODO-GUI.md).
 Backlog UI Tabler: [`TODO-UI.md`](TODO-UI.md).
+Referensi viewport dan grid: [`docs/96-viewport-grid.md`](docs/96-viewport-grid.md).
 
 - [x] P20-01 Setujui pengecualian `egui`, `eframe`, `serde`, `serde_json`, `rfd`, dan `png` untuk `gui`.
 - [x] P20-02 Tulis desain canvas, grid, wire, probe, dan grafik.

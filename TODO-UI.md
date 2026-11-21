@@ -2,12 +2,16 @@
 
 Backlog UI setelah migrasi ikon Tabler dan worker mixed.
 
-**Status:** U0 selesai. U1 sampai U7 belum.
+**Status:** U0 selesai. U1 sampai U8 belum. Riset viewport dan grid
+KiCad selesai di `docs/96-viewport-grid.md`; implementasi U8 antre setelah
+U1 sampai U7 atau setelah prioritas diubah.
 
 **Sumber kebenaran:**
 
 - [`docs/57-gui-egui.md`](docs/57-gui-egui.md) untuk desain GUI.
 - [`docs/95-ui-icons.md`](docs/95-ui-icons.md) untuk kebijakan ikon.
+- [`docs/96-viewport-grid.md`](docs/96-viewport-grid.md) untuk referensi
+  viewport dan grid KiCad.
 - [`docs/90-mixed-signal.md`](docs/90-mixed-signal.md) untuk mixed signal.
 - [`TODO-GUI.md`](TODO-GUI.md) untuk backlog GUI lama.
 - [`TODO-SIMULATION.md`](TODO-SIMULATION.md) untuk backlog simulasi.
@@ -37,10 +41,10 @@ File ini tidak menggantikan backlog lama. Item yang sudah ada di
 | Grafik AVR | `app/graph_ui/` | Run, pause | Probe dan sample |
 | Grafik transient | `app/graph_ui/` | Teks | Probe dan cursor |
 | Grafik mixed | `app/windows/panels.rs` | Grafik pin output | Net, ADC, PWM |
-| Canvas | `app/view.rs`, `scene/` | Teks | Grid, zoom, fit, probe |
+| Canvas | `app/view.rs`, `scene/` | Teks | Grid style/step, zoom preset, crosshair, fit, probe |
 | Context menu | `app/context_ui.rs` | Teks | Aksi komponen dan net |
 | Command palette | `app/palette_ui.rs` | Teks | Ikon per command |
-| Status bar | `app/status.rs` | Teks | Status dan ikon |
+| Status bar | `app/status.rs` | Teks | Snap coords, delta, grid, unit |
 
 ---
 
@@ -168,6 +172,49 @@ Setiap ikon baru harus:
 - [ ] U7-05 Audit ulang lisensi Tabler dan `NOTICE.md`.
 - [ ] U7-06 Jalankan fmt, clippy, test, ASCII, dan packaging.
 
+### U8 - Viewport dan Grid (Referensi KiCad)
+
+Riset: [`docs/96-viewport-grid.md`](docs/96-viewport-grid.md).
+
+U8 tidak dimulai sebelum U1 sampai U7 selesai, kecuali user meminta
+prioritas berbeda. Item U4-01 sampai U4-03 tetap berlaku untuk ikon;
+U8 mengatur perilaku viewport dan grid.
+
+- [ ] U8-01 Ubah `GridCamera` ke f64, batas zoom 0.01 sampai 100, dan
+  preset Eeschema 5 sampai 10000 persen. Tambahkan test clamp dan
+  transformasi pada zoom ekstrem.
+- [ ] U8-02 Normalisasi wheel zoom di kursor, tambahkan Shift/Ctrl wheel
+  pan, F1/F2 zoom di kursor, dan riwayat 8 level zoom.
+- [ ] U8-03 Tambahkan fit all, fit objects, fit selection, fit sheet,
+  margin 1.04/1.10, dan drag zoom area. Context click tetap bekerja.
+- [ ] U8-04 Tambahkan `GridStep` 1/2/5/10, `SnapGrid`
+  Always/WithGrid/Never, snap objek pin/wire/junction/label, dan status
+  sumber snap.
+- [ ] U8-05 Ganti gambar grid menjadi gaya Dots/Lines/Cross, coarse tick
+  10, jarak minimum 10 px, serta toggle axes dan ruler. Hapus urutan
+  visual 1/2/5 yang lama.
+- [ ] U8-06 Tambahkan crosshair small/full/diagonal, cursor snapped,
+  panah per grid, dan Ctrl+panah 10x grid.
+- [ ] U8-07 Perbaiki status bar: X/Y snapped, dx/dy/dist, grid step,
+  zoom persen, snap state, dan unit. Hapus label "Snap grid" statis.
+- [ ] U8-08 Tambahkan dialog Grid Settings: daftar preset, grid aktif,
+  dua fast grid, gaya, ketebalan, min spacing, axes, dan crosshair.
+- [ ] U8-09 Simpan field grid baru di JSON proyek dengan default
+  kompatibel. Test proyek lama tanpa field baru.
+- [ ] U8-10 Tambahkan test transformasi, anchor zoom, clamp, preset, fit,
+  snap origin, adaptive grid, coarse tick, cursor, dan persistensi.
+- [ ] U8-11 Perbarui `docs/57-gui-egui.md`, `docs/96-viewport-grid.md`,
+  `TODO-GUI.md` G1/G2/G5/G9, dan golden screenshot grid.
+
+Batasan U8:
+
+- Model `GridPos` tetap integer.
+- Grid lebih halus dari 1 unit tidak didukung.
+- Grid non-persegi ditunda.
+- Ctrl untuk mematikan snap grid tidak dapat diterapkan penuh; commit
+  tetap integer.
+- Autopan dan infinite pan ditunda sampai event loop egui stabil.
+
 ---
 
 ## 4. Peta Cross-Reference
@@ -180,10 +227,17 @@ Setiap ikon baru harus:
 | Panel simulasi | `TODO-GUI.md` G6 | U5 |
 | Probe dan grafik | `TODO-GUI.md` G7 | U5 |
 | Polish dan aksesibilitas | `TODO-GUI.md` G9 | U6 |
+| Viewport dan zoom | `TODO-GUI.md` G1-03, G1-15 | U8 |
+| Grid dan coarse tick | `TODO-GUI.md` G1-04, G1-05 | U8 |
+| Snap sementara | `TODO-GUI.md` G2-13 | U8, free placement tetap terblokir |
+| Ruler dan probe | `TODO-GUI.md` G5-10 | U5 dan U8 |
+| Status bar koordinat | `TODO-GUI.md` G1-08, G1-13 | U8 |
+| Golden screenshot | `TODO-GUI.md` G9-09 | U6 dan U8 |
 | Mixed worker dan pin map | `TODO-SIMULATION.md` S7-05 | U5 |
 | Event mixed | `TODO-SIMULATION.md` S7-09 | U5 |
 | Desain GUI | `docs/57-gui-egui.md` | Semua U |
 | Kebijakan ikon | `docs/95-ui-icons.md` | Semua U |
+| Referensi KiCad | `docs/96-viewport-grid.md` | U8 |
 | Mixed signal | `docs/90-mixed-signal.md` | U5 |
 
 ---
@@ -200,4 +254,8 @@ Setiap ikon baru harus:
 - [ ] Grafik mixed deterministik dan diuji.
 - [ ] Toolbar, library, inspector, context menu, dan palette memakai
   ikon yang konsisten.
+- [ ] Viewport memakai batas zoom dan preset referensi KiCad.
+- [ ] Grid mendukung gaya, step, coarse tick, dan adaptive spacing.
+- [ ] Snap grid dan snap objek memiliki state serta indikator yang jelas.
+- [ ] Status bar menampilkan koordinat snapped, delta, grid, dan unit.
 - [ ] `fmt`, clippy, test, ASCII, dan packaging lulus.

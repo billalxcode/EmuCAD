@@ -164,6 +164,7 @@ Dokumen yang sering dipakai:
 | [`docs/93-catalog-coverage.md`](docs/93-catalog-coverage.md) | Cakupan deterministik 500 entri katalog |
 | [`docs/94-soc-spec.md`](docs/94-soc-spec.md) | Schema `McuSpec` dan batas crate `soc` |
 | [`docs/95-ui-icons.md`](docs/95-ui-icons.md) | Kebijakan dan integrasi ikon UI Tabler |
+| [`docs/96-viewport-grid.md`](docs/96-viewport-grid.md) | Referensi viewport, grid, zoom, dan snap dari KiCad |
 | [`docs/61-design-system.md`](docs/61-design-system.md) | Design system GUI, font, warna, dan spacing |
 | [`TODO-COMPONENTS.md`](TODO-COMPONENTS.md) | Backlog katalog komponen dan Python builder |
 | [`TODO-CELLS.md`](TODO-CELLS.md) | Backlog library cells untuk multi-MCU |

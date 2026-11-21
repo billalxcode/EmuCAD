@@ -91,6 +91,9 @@ membangun crate, dan tidak ada dependensi eksternal di luar daftar
 
 ## G1 - Canvas, Grid, dan Layout
 
+Referensi perilaku viewport dan grid: [`docs/96-viewport-grid.md`](docs/96-viewport-grid.md).
+Pekerjaan lanjutan dipetakan ke `TODO-UI.md` U8.
+
 - [x] G1-01 Buat app shell dengan central panel, toolbar, dan status bar.
 - [x] G1-02 Implementasikan kamera world ke screen dan screen ke world.
 - [x] G1-03 Implementasikan pan, zoom preset, zoom halus, fit all, dan fit selection.
@@ -133,7 +136,7 @@ pan dan zoom stabil, dan area canvas mendominasi layout.
 - [x] G2-10 Definisikan trait internal `ComponentProvider` untuk plugin komponen.
 - [x] G2-11 Tampilkan label referensi dan nilai komponen secara default.
 - [x] G2-12 Simpan definisi library sebagai kode Rust internal.
-- [ ] G2-13 Terapkan snap selalu aktif dan Alt menonaktifkan sementara. (blocked: model grid integer)
+- [ ] G2-13 Terapkan snap sementara. (blocked: model grid integer; diganti `TODO-UI.md` U8-04 dengan grid step dan snap objek)
 - [x] G2-14 Tolak penempatan komponen yang saling menimpa.
 
 **Acceptance G2:** pengguna dapat memilih komponen dari library,

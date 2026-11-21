@@ -16,7 +16,7 @@ yang disetujui di `AGENTS.md`. Tag `v0.1` tersedia.
 | Memahami arsitektur | [Visi](00-vision.md), [Keputusan](01-decisions.md), [Arsitektur](02-architecture.md) |
 | Berkontribusi | [AGENTS.md](../AGENTS.md), [TODO.md](../TODO.md), [Verifikasi](07-verification.md) |
 | Memeriksa fidelity | [Fidelity](24-fidelity.md), [Verifikasi](07-verification.md) |
-| Merencanakan GUI | [Desain GUI](57-gui-egui.md), [Backlog GUI](../TODO-GUI.md) |
+| Merencanakan GUI | [Desain GUI](57-gui-egui.md), [Backlog GUI](../TODO-GUI.md), [Backlog UI](../TODO-UI.md) |
 | Melihat isi rilis | [Release notes](53-release-notes.md) |
 | Melihat contoh kode | [Examples](../examples/README.md) |
 
@@ -102,6 +102,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | 93 | [Catalog coverage](93-catalog-coverage.md) | Cakupan 500 entri dan status model |
 | 94 | [SoC specification](94-soc-spec.md) | Schema `McuSpec` dan batas crate `soc` |
 | 95 | [UI icons Tabler](95-ui-icons.md) | Kebijakan, lisensi, dan integrasi ikon UI |
+| 96 | [Viewport dan grid KiCad](96-viewport-grid.md) | Referensi viewport, grid, zoom, snap, dan status bar |
 
 ### 3.2 Fondasi
 
