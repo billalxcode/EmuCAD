@@ -26,6 +26,8 @@ pub(crate) use uart_ui::*;
 pub(crate) use wire_ui::*;
 mod toolbar;
 mod view;
+#[cfg(test)]
+pub(crate) use view::fit_margin;
 mod windows;
 
 use crate::analysis::{AnalysisKind, AnalysisState, SimulationDomain};
@@ -77,10 +79,17 @@ pub(crate) enum Tool {
     Place,
     Wire,
     Probe,
+    Zoom,
 }
 
 impl Tool {
-    const ALL: [Self; 4] = [Self::Select, Self::Place, Self::Wire, Self::Probe];
+    const ALL: [Self; 5] = [
+        Self::Select,
+        Self::Place,
+        Self::Wire,
+        Self::Probe,
+        Self::Zoom,
+    ];
 
     const fn label(self) -> &'static str {
         match self {
@@ -88,6 +97,7 @@ impl Tool {
             Self::Place => "Place",
             Self::Wire => "Wire",
             Self::Probe => "Probe",
+            Self::Zoom => "Zoom",
         }
     }
 
@@ -97,8 +107,17 @@ impl Tool {
             Self::Place => "+",
             Self::Wire => "~",
             Self::Probe => "?",
+            Self::Zoom => "Z",
         }
     }
+}
+
+/// Area used by a fit command.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum FitTarget {
+    All,
+    Objects,
+    Selection,
 }
 
 #[derive(Clone, Debug, PartialEq)]

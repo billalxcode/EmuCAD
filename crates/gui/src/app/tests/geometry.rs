@@ -1,5 +1,39 @@
 use super::*;
 
+fn test_rect(width: f32, height: f32) -> eframe::egui::Rect {
+    eframe::egui::Rect::from_min_size(
+        eframe::egui::pos2(0.0, 0.0),
+        eframe::egui::vec2(width, height),
+    )
+}
+
+#[test]
+fn fit_margin_uses_short_viewport_rule() {
+    assert_eq!(fit_margin(test_rect(800.0, 600.0)), 1.10);
+    assert_eq!(fit_margin(test_rect(800.0, 900.0)), 1.04);
+}
+
+#[test]
+fn fit_selection_is_tighter_than_all() {
+    let library = crate::library::builtin();
+    let resistor = crate::library::find("resistor").expect("resistor");
+    let mut document = Document::new();
+    document.add(resistor, GridPos::new(0, 0), Rotation::Deg0, Mirror::None);
+    document.add(resistor, GridPos::new(20, 0), Rotation::Deg0, Mirror::None);
+    let id = document.components()[0].id;
+    let mut app = GuiApp {
+        library,
+        document,
+        canvas_rect: Some(test_rect(800.0, 600.0)),
+        ..GuiApp::default()
+    };
+    app.fit_view(FitTarget::All);
+    let all_zoom = app.camera.zoom;
+    app.selection.select_component(id);
+    app.fit_view(FitTarget::Selection);
+    assert!(app.camera.zoom > all_zoom);
+}
+
 #[test]
 fn content_bounds_cover_components() {
     let library = crate::library::builtin();

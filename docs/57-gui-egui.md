@@ -213,7 +213,9 @@ Aturan layout:
 - Batas zoom 1 sampai 10000 persen, mengikuti Eeschema.
 - Preset zoom memakai daftar Eeschema 5 sampai 10000 persen.
 - Zoom halus tersedia di antara preset.
-- Fit all, fit objects, fit selection, fit sheet, dan center origin.
+- Fit all, fit objects, fit selection, dan center origin.
+- Fit sheet menunggu model halaman atau sheet.
+- Zoom area lewat tool Zoom dan drag kotak.
 - Riwayat 8 level zoom untuk undo last zoom.
 - Level of detail: label kecil dan grid minor disembunyikan saat zoom
   rendah.

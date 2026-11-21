@@ -46,6 +46,22 @@ fn fit_world_centers_and_scales() {
 }
 
 #[test]
+fn fit_world_margin_reduces_zoom() {
+    let mut camera = GridCamera::default();
+    let rect = eframe::egui::Rect::from_min_size(
+        eframe::egui::pos2(0.0, 0.0),
+        eframe::egui::vec2(200.0, 100.0),
+    );
+    camera.fit_world(
+        rect,
+        eframe::egui::pos2(0.0, 0.0),
+        eframe::egui::pos2(10.0, 10.0),
+        1.1,
+    );
+    assert!(camera.zoom < 0.5);
+}
+
+#[test]
 fn zoom_is_clamped() {
     let mut camera = GridCamera::default();
     camera.zoom_at(rect(), egui::pos2(100.0, 100.0), 100.0);

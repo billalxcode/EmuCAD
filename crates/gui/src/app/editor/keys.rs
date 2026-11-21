@@ -13,6 +13,24 @@ impl GuiApp {
         self.handle_clipboard_keys(ui);
         self.handle_edit_keys(ui);
         self.handle_nudge_keys(ui);
+        self.handle_view_keys(ui);
+    }
+
+    pub(crate) fn handle_view_keys(&mut self, ui: &egui::Ui) {
+        if !self.canvas_focused {
+            return;
+        }
+        let (home, objects) = ui.input(|input| {
+            let home = input.key_pressed(egui::Key::Home);
+            (home, home && input.modifiers.command)
+        });
+        if objects {
+            self.fit_view(FitTarget::Objects);
+            return;
+        }
+        if home {
+            self.fit_view(FitTarget::All);
+        }
     }
 
     pub(crate) fn handle_history_keys(&mut self, ui: &egui::Ui) {

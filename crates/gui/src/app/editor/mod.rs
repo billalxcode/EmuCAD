@@ -41,6 +41,10 @@ impl GuiApp {
             self.handle_wire(state);
             return;
         }
+        if self.tool == Tool::Zoom {
+            self.handle_zoom_box(&state);
+            return;
+        }
         self.handle_select_canvas(&state);
     }
 
@@ -65,3 +69,4 @@ mod placement;
 mod selection;
 mod transform;
 mod wire;
+mod zoom;

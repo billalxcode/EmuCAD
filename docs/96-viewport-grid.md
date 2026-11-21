@@ -431,8 +431,9 @@ dokumentasi resmi, bukan dari klik tambahan.
 | Wheel pan | Shift/Ctrl | Shift/Ctrl | Selesai |
 | Drag pan | Tengah dan kanan | Tengah dan Space+kiri | Sebagian |
 | Autopan | 2 persen tepi | Tidak ada | Belum ada |
-| Fit | All, objects, selection, margin | Fit content dan selection | Sebagian |
-| Zoom area | Drag kotak | Tidak ada | Belum ada |
+| Fit | All, objects, selection, margin | All, objects, selection, margin 1.04/1.10 | Selesai |
+| Fit sheet | Area sheet | Belum ada model sheet | Tertunda |
+| Zoom area | Drag kotak | Tool Zoom dan drag kotak | Selesai |
 | Zoom history | Undo last zoom | 8 level dan command palette | Selesai |
 | Grid logical | Ukuran tetap | 1 unit integer | Sudah, tetapi tidak bisa diubah |
 | Grid tampilan | Coarse tick 10, min 10 px | 1/2/5, major 5 | Berbeda |
@@ -532,14 +533,17 @@ Urutan prioritas implementasi:
 7. Autopan ditunda sampai ada tool drag yang berjalan lama.
 
 U8-02 menyelesaikan langkah 1, 2, dan 4. Langkah 3 sudah ada sebelumnya.
-Drag kanan, fit baru, dan autopan belum dikerjakan.
+U8-03 menambahkan fit all, fit objects, fit selection, margin viewport,
+dan zoom area. Fit sheet menunggu model sheet. Drag kanan dan autopan
+belum dikerjakan.
 
 ### 7.6 Fit dan riwayat zoom
 
-- `fit_all`: seluruh konten termasuk sheet.
-- `fit_objects`: konten tanpa sheet.
+- `fit_all`: seluruh konten.
+- `fit_objects`: konten tanpa sheet. Saat ini sama dengan `fit_all`
+  karena scene belum memiliki objek sheet.
 - `fit_selection`: hanya seleksi.
-- `fit_sheet`: area sheet.
+- `fit_sheet`: area sheet, tertunda sampai model sheet tersedia.
 - Margin 1.04; 1.10 jika tinggi viewport kurang dari 768 px.
 - Simpan maksimal 8 level zoom terakhir untuk "Undo last zoom".
 
@@ -598,6 +602,9 @@ koordinat pada zoom maksimum, dan round-trip pan serta zoom di JSON.
 U8-02 sudah ditutup oleh test normalisasi satu notch wheel, pan delta
 terhadap ukuran viewport, dan riwayat zoom yang mengembalikan pan serta
 zoom sebelumnya.
+
+U8-03 sudah ditutup oleh test aturan margin viewport, fit selection yang
+lebih rapat dari fit all, dan zoom box yang mengubah skala kamera.
 
 ## 9. Batas dan Risiko
 

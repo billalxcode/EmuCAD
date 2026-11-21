@@ -168,5 +168,9 @@ impl GuiApp {
         }
         self.tool = tool;
         self.wire_points.clear();
+        self.box_start = None;
+        self.box_current = None;
+        self.dragging = None;
+        self.dragging_segment = None;
     }
 }

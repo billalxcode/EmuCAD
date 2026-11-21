@@ -112,6 +112,44 @@ fn nudge_selection_moves_component() {
     assert_component_position(&app, id, GridPos::new(1, 2));
 }
 
+fn zoom_app() -> GuiApp {
+    GuiApp {
+        canvas_rect: Some(eframe::egui::Rect::from_min_size(
+            eframe::egui::pos2(0.0, 0.0),
+            eframe::egui::vec2(800.0, 600.0),
+        )),
+        tool: Tool::Zoom,
+        ..GuiApp::default()
+    }
+}
+
+fn zoom_state(
+    pointer: eframe::egui::Pos2,
+    started: bool,
+    dragged: bool,
+) -> crate::canvas::CanvasState {
+    crate::canvas::CanvasState {
+        pointer_world: Some(pointer),
+        drag_started: started,
+        dragged,
+        ..Default::default()
+    }
+}
+
+#[test]
+fn zoom_box_fits_dragged_area() {
+    let mut app = zoom_app();
+    app.handle_zoom_box(&zoom_state(eframe::egui::pos2(0.0, 0.0), true, false));
+    app.handle_zoom_box(&zoom_state(eframe::egui::pos2(4.0, 4.0), false, true));
+    let stop = crate::canvas::CanvasState {
+        drag_stopped: true,
+        ..Default::default()
+    };
+    app.handle_zoom_box(&stop);
+    assert!(app.camera.zoom > 1.0);
+    assert!(app.selection_box().is_none());
+}
+
 #[test]
 fn every_tool_has_an_icon() {
     for tool in super::Tool::ALL {

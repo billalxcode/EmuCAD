@@ -152,12 +152,11 @@ impl GridCamera {
     }
 
     /// Fits a world-space box into the canvas with padding.
-    pub fn fit_world(&mut self, rect: egui::Rect, min: egui::Pos2, max: egui::Pos2, padding: f32) {
+    pub fn fit_world(&mut self, rect: egui::Rect, min: egui::Pos2, max: egui::Pos2, margin: f64) {
         let size = (max - min).max(egui::vec2(1.0, 1.0));
-        let available =
-            (rect.size() - egui::vec2(padding * 2.0, padding * 2.0)).max(egui::vec2(1.0, 1.0));
-        let zoom_x = available.x as f64 / (size.x as f64 * self.cell_px);
-        let zoom_y = available.y as f64 / (size.y as f64 * self.cell_px);
+        let factor = margin.max(1.0);
+        let zoom_x = rect.width() as f64 / (size.x as f64 * self.cell_px * factor);
+        let zoom_y = rect.height() as f64 / (size.y as f64 * self.cell_px * factor);
         self.record_zoom();
         self.zoom = Self::clamp_zoom(zoom_x.min(zoom_y));
         self.center_world(rect, min, max);

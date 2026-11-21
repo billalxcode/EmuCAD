@@ -2,8 +2,8 @@
 
 Backlog UI setelah migrasi ikon Tabler dan worker mixed.
 
-**Status:** U0, U8-01, dan U8-02 selesai. U1 sampai U7 dan U8-03 sampai
-U8-11 belum. Riset viewport dan grid KiCad selesai di
+**Status:** U0 dan U8-01 sampai U8-03 selesai. U1 sampai U7, U8-03b, dan
+U8-04 sampai U8-11 belum. Riset viewport dan grid KiCad selesai di
 `docs/96-viewport-grid.md`; sisa U8 antre setelah U1 sampai U7 atau
 setelah prioritas diubah.
 
@@ -190,8 +190,11 @@ U8 mengatur perilaku viewport dan grid.
   pan, F1/F2 zoom di kursor, dan riwayat 8 level zoom. Selesai: satu
   notch 1.24, Shift/Ctrl pan, F1/F2, dan Undo last zoom di command
   palette.
-- [ ] U8-03 Tambahkan fit all, fit objects, fit selection, fit sheet,
-  margin 1.04/1.10, dan drag zoom area. Context click tetap bekerja.
+- [x] U8-03 Tambahkan fit all, fit objects, fit selection, margin
+  1.04/1.10, drag zoom area, dan shortcut Home/Ctrl+Home. Context click
+  tetap bekerja. Fit sheet dipisah ke U8-03b.
+- [ ] U8-03b Tambahkan fit sheet setelah model halaman atau sheet
+  tersedia. Scene saat ini belum memiliki objek sheet.
 - [ ] U8-04 Tambahkan `GridStep` 1/2/5/10, `SnapGrid`
   Always/WithGrid/Never, snap objek pin/wire/junction/label, dan status
   sumber snap.

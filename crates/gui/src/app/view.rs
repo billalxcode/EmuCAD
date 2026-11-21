@@ -631,12 +631,22 @@ impl GuiApp {
         if chosen != current {
             self.zoom_to(chosen);
         }
-        if ui.button("Fit").clicked() {
-            self.fit_content(false);
-        }
-        if ui.button("Fit Sel").clicked() {
-            self.fit_content(true);
-        }
+        self.fit_menu(ui);
+    }
+
+    fn fit_menu(&mut self, ui: &mut egui::Ui) {
+        ui.menu_button("Fit", |ui| {
+            for (label, target) in [
+                ("All", FitTarget::All),
+                ("Objects", FitTarget::Objects),
+                ("Selection", FitTarget::Selection),
+            ] {
+                if ui.button(label).clicked() {
+                    self.fit_view(target);
+                    ui.close();
+                }
+            }
+        });
     }
 
     pub(super) fn zoom_to(&mut self, zoom: f64) {
@@ -652,16 +662,20 @@ impl GuiApp {
         self.camera.zoom_at(rect, rect.center(), factor);
     }
 
-    pub(super) fn fit_content(&mut self, selection_only: bool) {
+    pub(super) fn fit_view(&mut self, target: FitTarget) {
         let Some(rect) = self.canvas_rect else {
             return;
         };
-        let selection = selection_only.then_some(&self.selection);
+        let selection = match target {
+            FitTarget::Selection => Some(&self.selection),
+            FitTarget::All | FitTarget::Objects => None,
+        };
         let Some((min, max)) = content_bounds(&self.document, self.library, selection) else {
             return;
         };
+        let margin = fit_margin(rect);
         self.camera
-            .fit_world(rect, grid_pos_f(min), grid_pos_f(max), 24.0);
+            .fit_world(rect, grid_pos_f(min), grid_pos_f(max), margin);
     }
 
     pub(super) fn wire_controls(&mut self, ui: &mut egui::Ui) {
@@ -749,6 +763,10 @@ impl GuiApp {
             }
         }
     }
+}
+
+pub(crate) fn fit_margin(rect: egui::Rect) -> f64 {
+    if rect.height() < 768.0 { 1.10 } else { 1.04 }
 }
 
 pub(super) fn default_transient_selection(trace: &TransientTrace) -> BTreeSet<usize> {

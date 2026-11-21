@@ -1,6 +1,6 @@
 use super::{
-    AUTOSAVE_DELAY, ConflictAction, GuiApp, WATCH_INTERVAL, content_bounds, cycle_at_x, file_stamp,
-    l_route, move_segment, watch_remaining, z_route,
+    AUTOSAVE_DELAY, ConflictAction, FitTarget, GuiApp, WATCH_INTERVAL, content_bounds, cycle_at_x,
+    file_stamp, fit_margin, l_route, move_segment, watch_remaining, z_route,
 };
 use crate::canvas::GridCamera;
 use crate::model::{
