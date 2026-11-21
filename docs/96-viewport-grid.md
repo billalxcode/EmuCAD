@@ -423,10 +423,10 @@ dokumentasi resmi, bukan dari klik tambahan.
 | Fitur | KiCad | EmuCAD sekarang | Gap |
 |---|---|---|---|
 | Pemisahan kamera dan render | VIEW + GAL | `GridCamera` + `canvas::show` | Cukup, tetap dipertahankan |
-| Tipe koordinat | double | f32 | Presisi menurun saat zoom besar |
-| Zoom range | 0.01 sampai 100 | 0.25 sampai 4.0 | Terlalu sempit |
+| Tipe koordinat | double | f64 untuk kamera, f32 di API egui | Sebagian |
+| Zoom range | 0.01 sampai 100 | 0.01 sampai 100 | Selesai |
 | Zoom anchor | Kursor | Kursor | Sudah sesuai |
-| Preset zoom | 21 langkah eeschema | 50, 100, 200 persen | Kurang lengkap |
+| Preset zoom | 21 langkah eeschema | 21 langkah eeschema | Selesai |
 | Wheel zoom | `1 + rot * 0.002` | `exp(scroll * 0.002)` | Mirip, perlu normalisasi |
 | Wheel pan | Shift/Ctrl | Tidak ada | Belum ada |
 | Drag pan | Tengah dan kanan | Tengah dan Space+kiri | Sebagian |
@@ -476,12 +476,13 @@ keputusan terpisah.
 
 ### 7.2 Kamera f64
 
-Ganti field kamera menjadi f64 untuk `pan`, `zoom`, dan `cell_px`.
-Konversi ke f32 hanya saat menggambar. Ini mengikuti presisi double
-KiCad dan mencegah jitter saat zoom 100x.
+Field kamera `pan`, `zoom`, dan `cell_px` memakai f64. Konversi ke f32
+dilakukan di boundary egui saat menggambar dan membaca pointer. Ini
+mengikuti presisi double KiCad dan mencegah jitter saat zoom 100x.
 
-Batas zoom yang diusulkan: 0.01 sampai 100, sama dengan Eeschema.
+Batas zoom yang dipakai: 0.01 sampai 100, sama dengan Eeschema.
 Preset memakai daftar Eeschema di atas, ditampilkan sebagai persen.
+Perubahan ini selesai di U8-01.
 
 ### 7.3 Grid style dan coarse tick
 
@@ -587,6 +588,9 @@ Test yang harus ada:
 - Persistensi field grid baru membaca proyek lama tanpa error.
 - Golden screenshot grid dots, lines, dan cross pada zoom rendah dan
   tinggi.
+
+U8-01 sudah ditutup oleh test clamp zoom, daftar preset, round-trip
+koordinat pada zoom maksimum, dan round-trip pan serta zoom di JSON.
 
 ## 9. Batas dan Risiko
 

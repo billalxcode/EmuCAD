@@ -1,5 +1,6 @@
 //! Headless RGBA golden renderer for GUI regression tests.
 
+use crate::canvas::DVec2;
 use crate::design;
 use crate::model::{Document, GridPos, Mirror, NetClass, Rotation};
 use crate::scene::{self, Scene};
@@ -59,7 +60,7 @@ fn draw_golden_scene(painter: &egui::Painter, rect: Rect) {
 
 fn golden_camera() -> crate::canvas::GridCamera {
     crate::canvas::GridCamera {
-        pan: Vec2::new(24.0, 20.0),
+        pan: DVec2::new(24.0, 20.0),
         zoom: 1.0,
         cell_px: 20.0,
     }

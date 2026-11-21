@@ -5,7 +5,7 @@ memory sudah punya model digital tetapi belum terverifikasi reference
 vector; MCU gate-level, integrasi mixed di GUI, dan co-sim S7 penuh
 belum selesai.
 
-Snapshot 2026-11-20: 1277 test lulus, 11 crate, branch `dev` sudah
+Snapshot 2026-11-21: 1282 test lulus, 11 crate, branch `dev` sudah
 di-push. `main` belum di-merge.
 
 Tujuan: membuat komponen di skematik GUI dapat disimulasikan dengan model
@@ -630,15 +630,15 @@ dokumentasi menyebut batas fidelity.
 - [ ] Hasil transient disimpan di JSON + file biner.
 - [ ] Dokumentasi fidelity diperbarui.
 
-## 16. Snapshot Progress - 2026-11-20
+## 16. Snapshot Progress - 2026-11-21
 
 Status ringkas:
 
-- 1277 test lulus, 0 gagal melalui
+- 1282 test lulus, 0 gagal melalui
   `bash .opencode/skills/clean-code/scripts/check.sh`.
 - 11 crate; crate simulasi zero external dependency.
 - `fmt`, clippy `-D warnings`, dan pengecekan ASCII lulus.
-- Branch `dev` sudah di-push; commit fitur terakhir `a35930d`.
+- Branch `dev` sudah di-push.
 - `main` belum di-merge karena merge memicu workflow rilis.
 - Phase 0 selesai: S2-06 branch current, coverage report `docs/93`,
   harness ngspice, rekonsiliasi dokumentasi fidelity, release dry-run,

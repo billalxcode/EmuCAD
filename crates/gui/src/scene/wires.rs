@@ -86,7 +86,7 @@ pub(crate) fn draw_wire_labels(
     }
 }
 
-pub(crate) fn show_wire_label(selected: bool, hovered: bool, zoom: f32) -> bool {
+pub(crate) fn show_wire_label(selected: bool, hovered: bool, zoom: f64) -> bool {
     selected || hovered || zoom >= 1.5
 }
 

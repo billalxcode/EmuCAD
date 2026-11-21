@@ -150,7 +150,7 @@ impl GuiApp {
             Command::ToggleWaveform => self.waveform_open = !self.waveform_open,
             Command::ToggleUart => self.uart_open = !self.uart_open,
             Command::ToggleLog => self.log_open = !self.log_open,
-            Command::ZoomReset => self.camera.zoom = 1.0,
+            Command::ZoomReset => self.zoom_to(1.0),
             Command::SelectTool => self.set_tool(Tool::Select),
             Command::WireTool => self.set_tool(Tool::Wire),
             _ => {}

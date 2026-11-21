@@ -1,5 +1,5 @@
-use super::GridCamera;
 use super::grid::grid_step;
+use super::{DVec2, GridCamera, MAX_ZOOM, MIN_ZOOM, ZOOM_PRESETS};
 use eframe::egui;
 
 fn rect() -> egui::Rect {
@@ -49,9 +49,47 @@ fn fit_world_centers_and_scales() {
 fn zoom_is_clamped() {
     let mut camera = GridCamera::default();
     camera.zoom_at(rect(), egui::pos2(100.0, 100.0), 100.0);
-    assert_eq!(camera.zoom, 4.0);
-    camera.zoom_at(rect(), egui::pos2(100.0, 100.0), 0.001);
-    assert_eq!(camera.zoom, 0.25);
+    assert_eq!(camera.zoom, MAX_ZOOM);
+    camera.zoom_at(rect(), egui::pos2(100.0, 100.0), 0.000001);
+    assert_eq!(camera.zoom, MIN_ZOOM);
+}
+
+#[test]
+fn zoom_presets_are_sorted_and_bounded() {
+    assert!(ZOOM_PRESETS.windows(2).all(|pair| pair[0] < pair[1]));
+    assert!(
+        ZOOM_PRESETS
+            .iter()
+            .all(|zoom| (MIN_ZOOM..=MAX_ZOOM).contains(zoom))
+    );
+    assert_eq!(ZOOM_PRESETS.first(), Some(&0.05));
+    assert_eq!(ZOOM_PRESETS.last(), Some(&MAX_ZOOM));
+}
+
+#[test]
+fn high_zoom_round_trip_keeps_position() {
+    let camera = GridCamera {
+        pan: DVec2::new(123.456, -78.9),
+        zoom: MAX_ZOOM,
+        cell_px: 20.0,
+    };
+    let world = egui::pos2(1234.5, -567.25);
+    let screen = camera.world_to_screen(rect(), world);
+    let result = camera.screen_to_world(rect(), screen);
+    assert!((result.x - world.x).abs() < 1e-2);
+    assert!((result.y - world.y).abs() < 1e-2);
+}
+
+#[test]
+fn fit_world_clamps_to_min_zoom() {
+    let mut camera = GridCamera::default();
+    camera.fit_world(
+        rect(),
+        egui::pos2(0.0, 0.0),
+        egui::pos2(100_000.0, 100_000.0),
+        0.0,
+    );
+    assert_eq!(camera.zoom, MIN_ZOOM);
 }
 
 #[test]

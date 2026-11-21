@@ -1,12 +1,11 @@
 //! JSON project persistence for the GUI.
 
 use crate::analysis::AnalysisState;
-use crate::canvas::GridCamera;
+use crate::canvas::{DVec2, GridCamera};
 use crate::model::{
     ComponentDefinition, ComponentId, ComponentInstance, Document, GridPos, McuPinMode, Mirror,
     NetClass, Rotation, Wire,
 };
-use eframe::egui;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
@@ -37,8 +36,8 @@ struct ProjectFile {
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ViewFile {
-    pan: [f32; 2],
-    zoom: f32,
+    pan: [f64; 2],
+    zoom: f64,
     grid_visible: bool,
 }
 
@@ -250,8 +249,8 @@ impl ProjectFile {
 impl ViewFile {
     fn camera(&self) -> GridCamera {
         GridCamera {
-            pan: egui::vec2(self.pan[0], self.pan[1]),
-            zoom: self.zoom.clamp(0.25, 4.0),
+            pan: DVec2::new(self.pan[0], self.pan[1]),
+            zoom: GridCamera::clamp_zoom(self.zoom),
             cell_px: 20.0,
         }
     }
@@ -372,7 +371,7 @@ fn parse_class(value: &str) -> Result<NetClass, String> {
 mod tests {
     use super::{backup_path, from_json, save, to_json, to_json_with_analysis};
     use crate::analysis::AnalysisState;
-    use crate::canvas::GridCamera;
+    use crate::canvas::{DVec2, GridCamera};
     use crate::library;
     use crate::model::{Document, GridPos, Mirror, NetClass, Rotation};
     use std::path::PathBuf;
@@ -413,6 +412,35 @@ mod tests {
             Some([10, 20, 30])
         );
         assert_eq!(project.document.wires()[0].label.as_deref(), Some("LED_A"));
+    }
+
+    #[test]
+    fn camera_round_trips_zoom_and_pan() {
+        let camera = GridCamera {
+            pan: DVec2::new(12.5, -3.25),
+            zoom: 2.5,
+            cell_px: 20.0,
+        };
+        let text = to_json(&Document::new(), &camera, true).expect("json");
+        let project = from_json(&text, library::builtin()).expect("load");
+        assert_eq!(project.camera.zoom, 2.5);
+        assert_eq!(project.camera.pan, DVec2::new(12.5, -3.25));
+    }
+
+    #[test]
+    fn camera_zoom_clamps_on_load() {
+        let high = super::ViewFile {
+            pan: [0.0, 0.0],
+            zoom: 500.0,
+            grid_visible: true,
+        };
+        assert_eq!(high.camera().zoom, crate::canvas::MAX_ZOOM);
+        let low = super::ViewFile {
+            pan: [0.0, 0.0],
+            zoom: -1.0,
+            grid_visible: true,
+        };
+        assert_eq!(low.camera().zoom, crate::canvas::MIN_ZOOM);
     }
 
     #[test]

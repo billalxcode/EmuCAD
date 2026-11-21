@@ -1,4 +1,5 @@
 use super::*;
+use crate::canvas::ZOOM_PRESETS;
 use crate::transient::TransientTrace;
 
 impl GuiApp {
@@ -618,23 +619,37 @@ impl GuiApp {
     }
 
     pub(super) fn zoom_controls(&mut self, ui: &mut egui::Ui) {
+        let current = self.camera.zoom;
+        let mut chosen = current;
         egui::ComboBox::from_id_salt("zoom_preset")
-            .selected_text(format!("{:.0}%", self.camera.zoom * 100.0))
+            .selected_text(format!("{:.0}%", current * 100.0))
             .show_ui(ui, |ui| {
-                for zoom in [0.5, 1.0, 2.0] {
-                    ui.selectable_value(
-                        &mut self.camera.zoom,
-                        zoom,
-                        format!("{:.0}%", zoom * 100.0),
-                    );
+                for &zoom in ZOOM_PRESETS {
+                    ui.selectable_value(&mut chosen, zoom, format!("{:.0}%", zoom * 100.0));
                 }
             });
+        if chosen != current {
+            self.zoom_to(chosen);
+        }
         if ui.button("Fit").clicked() {
             self.fit_content(false);
         }
         if ui.button("Fit Sel").clicked() {
             self.fit_content(true);
         }
+    }
+
+    pub(super) fn zoom_to(&mut self, zoom: f64) {
+        let target = GridCamera::clamp_zoom(zoom);
+        if (target - self.camera.zoom).abs() < f64::EPSILON {
+            return;
+        }
+        let Some(rect) = self.canvas_rect else {
+            self.camera.zoom = target;
+            return;
+        };
+        let factor = target / self.camera.zoom;
+        self.camera.zoom_at(rect, rect.center(), factor);
     }
 
     pub(super) fn fit_content(&mut self, selection_only: bool) {

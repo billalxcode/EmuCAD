@@ -51,7 +51,7 @@ pub(crate) fn draw_component(
     }
 }
 
-pub(crate) fn show_component_labels(selected: bool, zoom: f32) -> bool {
+pub(crate) fn show_component_labels(selected: bool, zoom: f64) -> bool {
     selected || zoom >= 0.7
 }
 
@@ -107,7 +107,7 @@ pub(crate) fn draw_pin_details(
     stub: egui::Pos2,
     pin: &crate::model::PinDefinition,
     direction: GridPos,
-    zoom: f32,
+    zoom: f64,
     hovered: bool,
 ) {
     if zoom >= 0.75 {
