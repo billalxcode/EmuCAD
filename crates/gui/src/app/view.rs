@@ -622,15 +622,33 @@ impl GuiApp {
         ui.menu_button(format!("Grid x{}", self.grid_step.label()), |ui| {
             ui.checkbox(&mut self.grid_visible, "Show grid");
             ui.separator();
-            for step in GridStep::ALL {
-                ui.selectable_value(&mut self.grid_step, step, format!("Step {}", step.label()));
-            }
+            self.grid_style_choices(ui);
             ui.separator();
-            for mode in SnapMode::ALL {
-                ui.selectable_value(&mut self.snap_mode, mode, mode.label());
-            }
-            ui.checkbox(&mut self.snap_objects, "Snap objects");
+            self.grid_step_choices(ui);
+            ui.checkbox(&mut self.grid_axes, "Axes");
+            ui.checkbox(&mut self.grid_rulers, "Rulers");
+            ui.separator();
+            self.snap_choices(ui);
         });
+    }
+
+    fn grid_style_choices(&mut self, ui: &mut egui::Ui) {
+        for style in canvas::GridStyle::ALL {
+            ui.selectable_value(&mut self.grid_style, style, style.label());
+        }
+    }
+
+    fn grid_step_choices(&mut self, ui: &mut egui::Ui) {
+        for step in GridStep::ALL {
+            ui.selectable_value(&mut self.grid_step, step, format!("Step {}", step.label()));
+        }
+    }
+
+    fn snap_choices(&mut self, ui: &mut egui::Ui) {
+        for mode in SnapMode::ALL {
+            ui.selectable_value(&mut self.snap_mode, mode, mode.label());
+        }
+        ui.checkbox(&mut self.snap_objects, "Snap objects");
     }
 
     pub(super) fn zoom_controls(&mut self, ui: &mut egui::Ui) {

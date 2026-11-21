@@ -1,5 +1,5 @@
 use super::grid::grid_step;
-use super::{DVec2, GridCamera, MAX_ZOOM, MIN_ZOOM, ZOOM_PRESETS};
+use super::{DVec2, GridCamera, GridOptions, GridStyle, MAX_ZOOM, MIN_ZOOM, ZOOM_PRESETS};
 use eframe::egui;
 
 fn rect() -> egui::Rect {
@@ -144,6 +144,34 @@ fn zoom_history_keeps_eight_steps() {
         camera.zoom_at(rect(), rect().center(), 1.1);
     }
     assert_eq!(camera.zoom_history.len(), 8);
+}
+
+fn render_grid_style(style: GridStyle) {
+    let context = egui::Context::default();
+    let mut output = context.run_ui(Default::default(), |context| {
+        let painter = context.layer_painter(egui::LayerId::background());
+        let options = GridOptions {
+            style,
+            axes: true,
+            rulers: false,
+            ..Default::default()
+        };
+        super::grid::draw_grid(
+            &painter,
+            rect(),
+            &GridCamera::default(),
+            options,
+            &crate::design::DARK,
+        );
+    });
+    output.textures_delta.clear();
+}
+
+#[test]
+fn grid_styles_render() {
+    for style in GridStyle::ALL {
+        render_grid_style(style);
+    }
 }
 
 #[test]

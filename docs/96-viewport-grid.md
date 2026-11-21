@@ -436,10 +436,10 @@ dokumentasi resmi, bukan dari klik tambahan.
 | Zoom area | Drag kotak | Tool Zoom dan drag kotak | Selesai |
 | Zoom history | Undo last zoom | 8 level dan command palette | Selesai |
 | Grid logical | Ukuran tetap | 1 unit integer + GridStep 1/2/5/10 | Selesai untuk step |
-| Grid tampilan | Coarse tick 10, min 10 px | Step logical, coarse 10, min 10 px | Sebagian, gaya belum |
-| Gaya grid | Dots, lines, crosses | Dots + major lines | Belum bisa dipilih |
-| Axes | Opsional | Selalu digambar | Perlu toggle |
-| Ruler | Tidak ada di kanvas | Selalu digambar | Pertahankan sebagai overlay opsional |
+| Grid tampilan | Coarse tick 10, min 10 px | Step logical, coarse 10, min 10 px | Selesai |
+| Gaya grid | Dots, lines, crosses | Dots, lines, cross | Selesai |
+| Axes | Opsional | Opsional, default mati | Selesai |
+| Ruler | Tidak ada di kanvas | Overlay EmuCAD, dapat dimatikan | Selesai |
 | Grid origin | 0 untuk schematic | 0 | Sudah sesuai |
 | Snap grid | Mode always/with grid/never | Always/WithGrid/Never | Selesai |
 | Snap objek | Pin, wire, junction, label | Pin, wire, junction | Sebagian, label U8-04b |
@@ -487,7 +487,7 @@ Perubahan ini selesai di U8-01.
 
 ### 7.3 Grid style dan coarse tick
 
-Tambahkan enum:
+Enum yang dipakai:
 
 ```
 GridStyle { Dots, Lines, Cross }
@@ -496,7 +496,8 @@ GridStyle { Dots, Lines, Cross }
 Default `Dots`. Marker major setiap 10 unit logis, dengan ukuran dua
 kali. Grid adaptif memakai kelipatan 10 dan `min_spacing = 10 px`.
 Sumbu X/Y menjadi toggle, default mati. Ruler dipertahankan sebagai
-overlay EmuCAD, default mati atau opsional.
+overlay EmuCAD, default aktif dan dapat dimatikan. Perubahan ini selesai
+di U8-05.
 
 ### 7.4 Snap state
 
@@ -614,6 +615,9 @@ lebih rapat dari fit all, dan zoom box yang mengubah skala kamera.
 U8-04 sudah ditutup oleh test pembulatan GridStep, mode snap, snap pin,
 wire, junction, dan koordinat snapped di status bar. Snap label menunggu
 anchor label eksplisit.
+
+U8-05 sudah ditutup oleh smoke test render gaya Dots, Lines, dan Cross
+dengan axes aktif. Golden screenshot grid tetap di U8-11.
 
 ## 9. Batas dan Risiko
 

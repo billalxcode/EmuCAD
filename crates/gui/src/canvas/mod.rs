@@ -2,6 +2,51 @@
 
 use eframe::egui;
 
+/// Visual style of the grid.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(crate) enum GridStyle {
+    #[default]
+    Dots,
+    Lines,
+    Cross,
+}
+
+impl GridStyle {
+    pub(crate) const ALL: [Self; 3] = [Self::Dots, Self::Lines, Self::Cross];
+
+    /// Returns a short label.
+    #[must_use]
+    pub(crate) const fn label(self) -> &'static str {
+        match self {
+            Self::Dots => "Dots",
+            Self::Lines => "Lines",
+            Self::Cross => "Cross",
+        }
+    }
+}
+
+/// Grid and overlay options for one canvas frame.
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct GridOptions {
+    pub(crate) visible: bool,
+    pub(crate) step: u32,
+    pub(crate) style: GridStyle,
+    pub(crate) axes: bool,
+    pub(crate) rulers: bool,
+}
+
+impl Default for GridOptions {
+    fn default() -> Self {
+        Self {
+            visible: true,
+            step: 1,
+            style: GridStyle::Dots,
+            axes: false,
+            rulers: true,
+        }
+    }
+}
+
 /// Screen-space state of the grid camera.
 mod camera;
 mod frame;

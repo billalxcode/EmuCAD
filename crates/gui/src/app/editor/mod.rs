@@ -10,11 +10,20 @@ impl GuiApp {
             wire_preview: &self.wire_points,
         };
         let scene = build_scene(refs, state);
+        let grid = self.grid_options();
         let camera = &mut self.camera;
-        let grid_visible = self.grid_visible;
-        let grid_step = self.grid_step.value();
         let initialized = &mut self.initialized;
-        show_canvas(ui, camera, grid_visible, grid_step, initialized, scene)
+        show_canvas(ui, camera, grid, initialized, scene)
+    }
+
+    fn grid_options(&self) -> canvas::GridOptions {
+        canvas::GridOptions {
+            visible: self.grid_visible,
+            step: self.grid_step.value(),
+            style: self.grid_style,
+            axes: self.grid_axes,
+            rulers: self.grid_rulers,
+        }
     }
 
     pub(crate) fn scene_state(&self, time: f64) -> SceneState {

@@ -5,8 +5,7 @@ use crate::design;
 pub fn show(
     ui: &mut egui::Ui,
     camera: &mut GridCamera,
-    grid_visible: bool,
-    grid_step: u32,
+    grid: GridOptions,
     initialized: &mut bool,
     draw_scene: impl FnOnce(&egui::Painter, egui::Rect, &GridCamera, Option<egui::Pos2>),
 ) -> CanvasState {
@@ -14,10 +13,6 @@ pub fn show(
         ui.allocate_painter(ui.available_size(), egui::Sense::click_and_drag());
     let rect = response.rect;
     let pointer = handle_viewport_input(ui, &response, camera, rect, initialized);
-    let grid = GridOptions {
-        visible: grid_visible,
-        step: grid_step,
-    };
     let frame = CanvasFrame::new(&response, &painter, rect, camera, grid, pointer);
     frame.paint(draw_scene);
     canvas_state(ui, &response, rect, camera, pointer)
@@ -36,12 +31,6 @@ fn handle_viewport_input(
     handle_zoom_keys(response, ui, camera, rect);
     focus_canvas(response);
     pointer_world(response, rect, camera)
-}
-
-#[derive(Clone, Copy)]
-struct GridOptions {
-    visible: bool,
-    step: u32,
 }
 
 struct CanvasFrame<'a> {
@@ -79,9 +68,7 @@ impl<'a> CanvasFrame<'a> {
         let painter = self.painter;
         let palette = design::palette_for(painter.ctx());
         painter.rect_filled(self.rect, egui::CornerRadius::ZERO, palette.canvas);
-        if self.grid.visible {
-            draw_grid(painter, self.rect, self.camera, self.grid.step, &palette);
-        }
+        draw_grid(painter, self.rect, self.camera, self.grid, &palette);
         draw_scene(painter, self.rect, self.camera, self.pointer);
         paint_focus_ring(self.response, painter, self.rect, &palette);
     }

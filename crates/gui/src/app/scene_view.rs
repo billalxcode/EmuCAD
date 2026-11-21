@@ -3,8 +3,7 @@ use super::*;
 pub(crate) fn show_canvas(
     ui: &mut egui::Ui,
     camera: &mut GridCamera,
-    grid_visible: bool,
-    grid_step: u32,
+    grid: canvas::GridOptions,
     initialized: &mut bool,
     scene: Scene<'_>,
 ) -> canvas::CanvasState {
@@ -14,8 +13,7 @@ pub(crate) fn show_canvas(
                 pointer: Option<egui::Pos2>| {
         draw_scene(painter, rect, camera, pointer, scene);
     };
-    let show =
-        |ui: &mut egui::Ui| canvas::show(ui, camera, grid_visible, grid_step, initialized, draw);
+    let show = |ui: &mut egui::Ui| canvas::show(ui, camera, grid, initialized, draw);
     egui::CentralPanel::default().show(ui, show).inner
 }
 
