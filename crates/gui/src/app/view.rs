@@ -50,6 +50,12 @@ impl GuiApp {
         if !self.analog_busy || self.analog_paused {
             return;
         }
+        if self.simulation_domain == SimulationDomain::Mixed {
+            if let Some(worker) = self.mixed_worker.as_ref() {
+                worker.pause();
+            }
+            return;
+        }
         if let Some(worker) = self.analog.as_ref() {
             worker.pause();
         }
@@ -59,12 +65,25 @@ impl GuiApp {
         if !self.analog_busy || !self.analog_paused {
             return;
         }
+        if self.simulation_domain == SimulationDomain::Mixed {
+            if let Some(worker) = self.mixed_worker.as_ref() {
+                worker.step();
+            }
+            return;
+        }
         if let Some(worker) = self.analog.as_ref() {
             worker.step();
         }
     }
 
     pub(super) fn reset_transient_session(&mut self) {
+        if self.simulation_domain == SimulationDomain::Mixed {
+            if let Some(worker) = self.mixed_worker.as_ref() {
+                worker.reset();
+            }
+            self.analog_paused = true;
+            return;
+        }
         if let Some(worker) = self.analog.as_ref() {
             worker.reset();
         }
@@ -87,10 +106,41 @@ impl GuiApp {
     }
 
     pub(super) fn run_mixed(&mut self) {
+        if self.mixed_worker.is_some() {
+            if let Err(error) = self.start_mixed_worker() {
+                self.message = error;
+            }
+            return;
+        }
         match self.mixed_message() {
             Ok(message) => self.message = message,
             Err(error) => self.message = error,
         }
+    }
+
+    fn start_mixed_worker(&mut self) -> Result<(), String> {
+        if self.firmware_words.is_empty() {
+            return Err("Load firmware before mixed simulation".to_string());
+        }
+        let plan = {
+            let component = self.mixed_component()?;
+            Self::mixed_plan(component)?
+        };
+        let Some(worker) = self.mixed_worker.as_mut() else {
+            return Err("Mixed worker unavailable".to_string());
+        };
+        let request = worker.start(
+            self.document.clone(),
+            self.transient_settings,
+            self.firmware_words.clone(),
+            plan,
+        );
+        self.mixed_trace = None;
+        self.mixed_request = Some(request);
+        self.analog_busy = true;
+        self.analog_paused = false;
+        self.message = "Mixed running".to_string();
+        Ok(())
     }
 
     fn mixed_message(&self) -> Result<String, String> {
@@ -276,6 +326,107 @@ impl GuiApp {
         for event in events {
             self.apply_analog_event(event);
         }
+    }
+
+    pub(super) fn poll_mixed(&mut self) {
+        let Some(worker) = self.mixed_worker.as_ref() else {
+            return;
+        };
+        for event in worker.poll() {
+            self.apply_mixed_event(event);
+        }
+    }
+
+    fn apply_mixed_event(&mut self, event: crate::mixed_worker::Event) {
+        match event {
+            crate::mixed_worker::Event::Started {
+                request,
+                outputs,
+                steps,
+            } => self.mixed_started(request, outputs, steps),
+            crate::mixed_worker::Event::Samples { request, samples } => {
+                self.mixed_samples(request, samples);
+            }
+            crate::mixed_worker::Event::Paused { request } => self.mixed_paused(request),
+            crate::mixed_worker::Event::Finished { request } => self.mixed_finished(request),
+            crate::mixed_worker::Event::Reset {
+                request,
+                outputs,
+                steps,
+            } => self.mixed_reset(request, outputs, steps),
+            crate::mixed_worker::Event::Error { request, error } => {
+                self.mixed_error(request, error);
+            }
+        }
+    }
+
+    fn mixed_started(&mut self, request: u64, outputs: Vec<u8>, steps: usize) {
+        if self.mixed_request != Some(request) {
+            return;
+        }
+        self.mixed_trace = Some(crate::mixed_worker::MixedTrace {
+            outputs,
+            samples: Vec::new(),
+        });
+        self.analog_busy = true;
+        self.analog_paused = false;
+        self.message = format!("Mixed running: {steps} steps");
+    }
+
+    fn mixed_samples(&mut self, request: u64, samples: Vec<crate::mixed_worker::MixedSample>) {
+        if self.mixed_request != Some(request) {
+            return;
+        }
+        let Some(trace) = self.mixed_trace.as_mut() else {
+            return;
+        };
+        trace.samples.extend(samples);
+        if trace.samples.len() > 100_000 {
+            let excess = trace.samples.len() - 100_000;
+            trace.samples.drain(..excess);
+        }
+    }
+
+    fn mixed_paused(&mut self, request: u64) {
+        if self.mixed_request != Some(request) {
+            return;
+        }
+        self.analog_busy = true;
+        self.analog_paused = true;
+        self.message = "Mixed paused".to_string();
+    }
+
+    fn mixed_finished(&mut self, request: u64) {
+        if self.mixed_request != Some(request) {
+            return;
+        }
+        self.analog_busy = false;
+        self.analog_paused = false;
+        let samples = self
+            .mixed_trace
+            .as_ref()
+            .map_or(0, |trace| trace.samples.len());
+        self.message = format!("Mixed finished: {samples} samples");
+    }
+
+    fn mixed_reset(&mut self, request: u64, outputs: Vec<u8>, steps: usize) {
+        if self.mixed_request != Some(request) {
+            return;
+        }
+        self.mixed_trace = Some(crate::mixed_worker::MixedTrace {
+            outputs,
+            samples: Vec::new(),
+        });
+        self.message = format!("Mixed reset: {steps} steps");
+    }
+
+    fn mixed_error(&mut self, request: u64, error: String) {
+        if self.mixed_request != Some(request) {
+            return;
+        }
+        self.analog_busy = false;
+        self.analog_paused = false;
+        self.message = error;
     }
 
     fn apply_analog_event(&mut self, event: crate::analog::Event) {

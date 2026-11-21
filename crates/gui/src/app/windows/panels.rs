@@ -157,6 +157,7 @@ impl GuiApp {
         let kind = &mut self.analysis_kind;
         let dc = self.analog_dc.as_ref();
         let trace = self.transient.as_ref();
+        let mixed_trace = self.mixed_trace.as_ref();
         let busy = self.analog_busy;
         let paused = self.analog_paused;
         let has_trace = self.transient.is_some();
@@ -213,7 +214,9 @@ impl GuiApp {
                         reset = true;
                     }
                 });
-                if *kind == crate::analysis::AnalysisKind::Dc {
+                if *domain == crate::analysis::SimulationDomain::Mixed {
+                    show_mixed_summary(ui, mixed_trace);
+                } else if *kind == crate::analysis::AnalysisKind::Dc {
                     show_dc_results(ui, dc);
                 } else {
                     show_transient_summary(ui, trace, &mut open_transient);
@@ -322,4 +325,76 @@ fn show_transient_summary(
     if ui.button("Open graph").clicked() {
         *open = true;
     }
+}
+
+fn show_mixed_summary(ui: &mut egui::Ui, trace: Option<&crate::mixed_worker::MixedTrace>) {
+    let Some(trace) = trace else {
+        ui.label("No mixed result");
+        return;
+    };
+    ui.label(format!(
+        "Mixed: {} samples, {} output pins",
+        trace.samples.len(),
+        trace.outputs.len()
+    ));
+    let Some(last) = trace.samples.last() else {
+        return;
+    };
+    for (index, &pin) in trace.outputs.iter().enumerate() {
+        let voltage = last
+            .outputs
+            .get(index)
+            .map_or(f64::NAN, |(_, value)| *value);
+        ui.label(format!("Pin {pin}: {voltage:.2} V"));
+    }
+    show_mixed_graph(ui, trace);
+}
+
+fn show_mixed_graph(ui: &mut egui::Ui, trace: &crate::mixed_worker::MixedTrace) {
+    if trace.samples.len() < 2 || trace.outputs.is_empty() {
+        return;
+    }
+    let height = 120.0;
+    let (response, painter) = ui.allocate_painter(
+        egui::vec2(ui.available_width(), height),
+        egui::Sense::hover(),
+    );
+    let rect = response.rect;
+    painter.rect_filled(rect, 0.0, egui::Color32::from_gray(20));
+    for series in 0..trace.outputs.len() {
+        let color = mixed_series_color(series);
+        let points = mixed_series_points(rect, trace, series);
+        painter.add(egui::Shape::line(points, egui::Stroke::new(1.0, color)));
+    }
+}
+
+fn mixed_series_points(
+    rect: egui::Rect,
+    trace: &crate::mixed_worker::MixedTrace,
+    series: usize,
+) -> Vec<egui::Pos2> {
+    let last = (trace.samples.len() - 1) as f32;
+    trace
+        .samples
+        .iter()
+        .enumerate()
+        .map(|(index, sample)| {
+            let voltage = sample.outputs.get(series).map_or(0.0, |(_, value)| *value);
+            let x = rect.left() + rect.width() * (index as f32 / last);
+            let y = rect.bottom() - rect.height() * (voltage.clamp(0.0, 5.0) as f32 / 5.0);
+            egui::pos2(x, y)
+        })
+        .collect()
+}
+
+fn mixed_series_color(series: usize) -> egui::Color32 {
+    const COLORS: [egui::Color32; 6] = [
+        egui::Color32::LIGHT_GREEN,
+        egui::Color32::LIGHT_BLUE,
+        egui::Color32::YELLOW,
+        egui::Color32::ORANGE,
+        egui::Color32::LIGHT_RED,
+        egui::Color32::CYAN,
+    ];
+    COLORS[series % COLORS.len()]
 }

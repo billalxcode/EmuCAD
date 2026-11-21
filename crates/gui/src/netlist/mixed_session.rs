@@ -8,6 +8,7 @@ use mixed::{AdcLink, AvrPin, AvrSession, PwmLink, UartRxLink, UartTxLink};
 use std::collections::{BTreeMap, BTreeSet};
 
 /// Analog connections for one mixed session.
+#[derive(Clone)]
 pub(crate) struct MixedPinPlan {
     /// GPIO output package pins.
     pub outputs: Vec<u8>,

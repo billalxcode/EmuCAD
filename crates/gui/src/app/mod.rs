@@ -259,6 +259,9 @@ pub struct GuiApp {
     transient_selected_currents: BTreeSet<usize>,
     transient_open: bool,
     analog: Option<crate::analog::AnalogHandle>,
+    mixed_worker: Option<crate::mixed_worker::MixedHandle>,
+    mixed_trace: Option<crate::mixed_worker::MixedTrace>,
+    mixed_request: Option<u64>,
     analog_request: Option<u64>,
     analog_busy: bool,
     analog_paused: bool,
@@ -287,6 +290,7 @@ impl GuiApp {
             inspector_open: true,
             sim: Some(SimHandle::spawn()),
             analog: Some(crate::analog::AnalogHandle::spawn()),
+            mixed_worker: Some(crate::mixed_worker::MixedHandle::spawn()),
             config_path,
             config,
             ..Self::default()
@@ -302,6 +306,7 @@ impl eframe::App for GuiApp {
         self.palette_shortcut(ui);
         self.poll_sim();
         self.poll_analog();
+        self.poll_mixed();
         self.watch_file(ui.ctx());
         self.autosave(ui.ctx());
         self.poll_png();

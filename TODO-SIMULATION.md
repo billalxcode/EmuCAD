@@ -5,7 +5,7 @@ memory sudah punya model digital tetapi belum terverifikasi reference
 vector; MCU gate-level, integrasi mixed di GUI, dan co-sim S7 penuh
 belum selesai.
 
-Snapshot 2026-11-20: 1272 test lulus, 11 crate, branch `dev` sudah
+Snapshot 2026-11-20: 1273 test lulus, 11 crate, branch `dev` sudah
 di-push. `main` belum di-merge.
 
 Tujuan: membuat komponen di skematik GUI dapat disimulasikan dengan model
@@ -481,7 +481,9 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Mode pin MCU dapat diatur di inspector dan disimpan di JSON proyek.
   - Domain Mixed menjalankan firmware secara sinkron dan melaporkan
     tegangan pin output.
-  - Worker mixed interaktif, waveform, dan probe belum ada.
+  - Worker mixed mendukung pause, step, reset, dan grafik inline
+    tegangan pin output.
+  - Probe per net, channel ADC, dan PWM belum masuk grafik.
 - [x] S7-06 Hubungkan pin electrical sebagai Thevenin.
   - Satu pin AVR output diuji dengan resistor seri 45 ohm menuju RC.
   - `AvrPinMap` membawa config dan external resistance per pin.
@@ -632,7 +634,7 @@ dokumentasi menyebut batas fidelity.
 
 Status ringkas:
 
-- 1272 test lulus, 0 gagal melalui
+- 1273 test lulus, 0 gagal melalui
   `bash .opencode/skills/clean-code/scripts/check.sh`.
 - 11 crate; crate simulasi zero external dependency.
 - `fmt`, clippy `-D warnings`, dan pengecekan ASCII lulus.
@@ -719,15 +721,15 @@ Commit fitur terakhir:
 Gap S7 yang masih terbuka:
 
 - S7-02 dan S7-04: kontrol dan peripheral belum full structural.
-- S7-05: simbol GUI 32 pin, pemetaan paket, mode pin, firmware, dan
-  run mixed sinkron sudah ada; worker interaktif dan probe belum.
+- S7-05: simbol GUI 32 pin, mode pin, firmware, worker mixed, dan
+  grafik pin output sudah ada; probe per net dan integrasi board belum.
 - Flow control hardware dan integrasi board/GUI penuh belum.
 - S7-06 dan S7-09 sudah selesai untuk 24 pin IO dan event siklus;
   event pin memakai batas langkah karena dibaca setelah sampel analog.
 
 Prioritas berikutnya:
 
-1. Pindahkan run mixed ke worker interaktif dengan probe dan waveform.
+1. Tambahkan probe per net, channel ADC, dan PWM ke grafik mixed.
 2. Integrasikan kontrol mixed ke board dan panel simulasi.
 3. Lanjutkan S6: model digital MCU lain dan verifikasi memory dengan
    reference vector.

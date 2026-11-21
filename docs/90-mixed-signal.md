@@ -348,6 +348,11 @@ Test `mixed_domain_runs_pb5_firmware` di GUI:
 - Firmware dan mode pin Output dipakai oleh domain Mixed.
 - Hasil berupa tegangan pin output, misalnya `17=5.00V`.
 
+Test `missing_schematic_reports_error` di worker mixed:
+
+- Start dengan dokumen kosong menghasilkan event `Error`.
+- Request ID tetap cocok dan pesan error tidak kosong.
+
 ## 5. Batas
 
 - Umpan balik analog hanya satu input dan satu threshold.
@@ -363,9 +368,9 @@ Test `mixed_domain_runs_pb5_firmware` di GUI:
 - Prototipe `build_mixed_session` membangun `AvrSession` dari netlist,
   sumber tersembunyi, ADC, PWM, dan UART.
 - Mode pin MCU diatur di inspector dan disimpan di JSON proyek.
-- Domain Mixed menjalankan firmware secara sinkron dan menampilkan
-  tegangan pin output.
-- Worker mixed interaktif dan waveform belum ada.
+- Domain Mixed menjalankan firmware lewat worker dengan pause, step,
+  reset, dan grafik inline tegangan pin output.
+- Probe per net, channel ADC, dan PWM belum masuk grafik.
 - Pin daya, reset, dan paket 32 pin belum disimulasikan secara elektrik.
 - Index pin pada session mengikuti urutan `links`, bukan nomor package.
 - Breakpoint pin berlaku untuk semua link yang terdaftar.
@@ -403,8 +408,8 @@ S7-09:
 
 S7-04 tetap hybrid, bukan full-chip structural. S7-05 sudah mencakup
 semua pin IO, simbol GUI 32 pin TQFP, pemetaan paket ke node netlist,
-mode pin di JSON, dan run mixed sinkron; worker interaktif dan simulasi
-pin daya/reset belum ada. S7-08 belum mencakup flow control hardware;
-S7-09 sudah menginterpolasi event Timer0, PWM, dan UART TX di dalam
-langkah. Event pin tetap memakai batas langkah karena dibaca setelah
-sampel analog.
+mode pin di JSON, serta worker mixed dengan grafik pin output; probe per
+net dan simulasi pin daya/reset belum ada. S7-08 belum mencakup flow
+control hardware; S7-09 sudah menginterpolasi event Timer0, PWM, dan UART
+TX di dalam langkah. Event pin tetap memakai batas langkah karena dibaca
+setelah sampel analog.

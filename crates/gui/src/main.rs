@@ -15,6 +15,7 @@ mod history;
 mod layout;
 mod library;
 mod log;
+mod mixed_worker;
 mod model;
 mod netlist;
 mod palette;
