@@ -449,7 +449,7 @@ dokumentasi resmi, bukan dari klik tambahan.
 | Snap objek | Pin, wire, junction, label | Pin, wire, junction | Sebagian, label U8-04b |
 | Modifier snap | Ctrl dan Shift | Tidak ada | Belum ada |
 | Cursor crosshair | 3 mode | Small, full, diagonal | Selesai |
-| Status bar | Snap coords, delta, grid, unit | Snap coords, grid step, snap source | Sebagian |
+| Status bar | Snap coords, delta, grid, unit | Snap coords, delta, grid, snap source, unit | Selesai, local origin 0 |
 | Keyboard cursor | Panah per grid | Panah per grid, Ctrl 10x | Selesai |
 | Grid settings UI | Dialog lengkap | Menu Grid | Sebagian |
 | Persistensi grid | Gaya, daftar, fast grid | Hanya visible | Belum ada |
@@ -563,6 +563,10 @@ belum dikerjakan.
 - Crosshair digambar di atas scene.
 - Status bar: X/Y snapped, dx/dy/dist, grid step, zoom persen, snap state,
   unit.
+- Local origin saat ini 0; delta dihitung relatif ke titik itu.
+- Satuan tampilan: 1 unit logis = 50 mil = 1.27 mm. Model tetap integer.
+- U8-07 selesai untuk status bar; local origin yang dapat diubah masuk
+  pekerjaan lanjutan.
 - Panah menggerakkan cursor per grid; Ctrl+panah 10x grid.
 - Posisi mouse mentah tetap dipakai untuk hover dan context menu.
 
@@ -626,6 +630,9 @@ dengan axes aktif. Golden screenshot grid tetap di U8-11.
 U8-06 sudah ditutup oleh smoke test crosshair Small, Full, dan Diagonal.
 Perpindahan pointer keyboard belum diuji end-to-end karena bergantung
 pada viewport backend.
+
+U8-07 sudah ditutup oleh test format mils, mm, unit logis, dan delta
+terhadap local origin.
 
 ## 9. Batas dan Risiko
 

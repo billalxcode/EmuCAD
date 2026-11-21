@@ -66,6 +66,7 @@ Dokumen ini mencatat seluruh keputusan desain yang diambil selama brainstorming,
 | D54 | Model kapasitansi transistor | Meyer |
 | D55 | Proses | PTM 350 nm generik, kalibrasi pin-level |
 | D56 | Binding Python | `pyo3` hanya di `python`; katalog dan netlist |
+| D57 | Satuan tampilan grid | 1 unit logis = 50 mil = 1.27 mm; hanya tampilan, model tetap integer |
 
 ---
 

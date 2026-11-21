@@ -604,6 +604,7 @@ impl GuiApp {
     pub(super) fn view_options(&mut self, ui: &mut egui::Ui) {
         self.grid_menu(ui);
         self.crosshair_control(ui);
+        self.units_control(ui);
         self.zoom_controls(ui);
         ui.checkbox(&mut self.minimap_open, "Mini");
         ui.checkbox(&mut self.flow_animation, "Flow");
@@ -658,6 +659,16 @@ impl GuiApp {
             .show_ui(ui, |ui| {
                 for mode in scene::CrosshairMode::ALL {
                     ui.selectable_value(&mut self.crosshair, mode, mode.label());
+                }
+            });
+    }
+
+    fn units_control(&mut self, ui: &mut egui::Ui) {
+        egui::ComboBox::from_id_salt("units")
+            .selected_text(self.units.label())
+            .show_ui(ui, |ui| {
+                for units in Units::ALL {
+                    ui.selectable_value(&mut self.units, units, units.label());
                 }
             });
     }

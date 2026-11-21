@@ -190,6 +190,8 @@ Aturan layout:
 
 - Model memakai `GridPoint { x: i32, y: i32 }`.
 - Satu unit grid adalah satuan logis, bukan piksel.
+- Satuan tampilan: 1 unit logis = 50 mil = 1.27 mm. Ini konvensi
+  tampilan, bukan perubahan model.
 - Piksel hanya dipakai saat rendering.
 - Semua pin, vertex kabel, junction, dan label anchor berada di grid.
 - Body komponen boleh digambar setengah sel untuk simetri visual, tetapi
@@ -237,7 +239,8 @@ Referensi perilaku: [`96-viewport-grid.md`](96-viewport-grid.md).
 - Ruler adalah overlay EmuCAD dan dapat dimatikan.
 - Culling hanya menggambar marker yang terlihat.
 - Grid dapat dimatikan tanpa mematikan snap grid.
-- Status bar menampilkan koordinat snapped, grid step, dan sumber snap.
+- Status bar menampilkan koordinat snapped, delta, grid step, sumber
+  snap, dan unit. Local origin saat ini 0 dan dapat dikembangkan nanti.
 
 ### 5.5 Minimap
 

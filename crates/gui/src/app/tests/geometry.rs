@@ -180,13 +180,43 @@ fn snap_world_finds_junction() {
 fn status_uses_snapped_coordinates() {
     let mut app = GuiApp {
         grid_step: GridStep::ALL[1],
+        units: Units::Logical,
         pointer_world: Some(eframe::egui::pos2(1.1, 3.9)),
         ..GuiApp::default()
     };
-    assert_eq!(app.pointer_text(), "x=2 y=4");
+    assert_eq!(app.pointer_text(), "X 2 Y 4");
+    assert_eq!(app.delta_text(), "dx 2 dy 4 dist 4.5");
     assert!(app.snap_status().contains("grid"));
     app.snap_mode = SnapMode::Never;
     assert!(app.snap_status().contains("off"));
+}
+
+#[test]
+fn units_format_coordinates() {
+    let point = Some(eframe::egui::pos2(2.0, 4.0));
+    let mils = GuiApp {
+        units: Units::Mils,
+        pointer_world: point,
+        ..GuiApp::default()
+    };
+    assert_eq!(mils.pointer_text(), "X 100 Y 200");
+    let millimeters = GuiApp {
+        units: Units::Millimeters,
+        pointer_world: point,
+        ..GuiApp::default()
+    };
+    assert_eq!(millimeters.pointer_text(), "X 2.54 Y 5.08");
+}
+
+#[test]
+fn delta_uses_local_origin() {
+    let relative = GuiApp {
+        units: Units::Logical,
+        local_origin: GridPos::new(1, 1),
+        pointer_world: Some(eframe::egui::pos2(2.0, 4.0)),
+        ..GuiApp::default()
+    };
+    assert_eq!(relative.delta_text(), "dx 1 dy 3 dist 3.2");
 }
 
 #[test]

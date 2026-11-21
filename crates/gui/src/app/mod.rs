@@ -153,6 +153,53 @@ impl Default for GridStep {
     }
 }
 
+const MILS_PER_UNIT: f64 = 50.0;
+const MM_PER_MIL: f64 = 0.0254;
+const MM_PER_UNIT: f64 = MILS_PER_UNIT * MM_PER_MIL;
+
+/// Display units for grid coordinates.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(crate) enum Units {
+    #[default]
+    Mils,
+    Millimeters,
+    Logical,
+}
+
+impl Units {
+    pub(crate) const ALL: [Self; 3] = [Self::Mils, Self::Millimeters, Self::Logical];
+
+    /// Returns the status label.
+    #[must_use]
+    pub(crate) const fn label(self) -> &'static str {
+        match self {
+            Self::Mils => "mils",
+            Self::Millimeters => "mm",
+            Self::Logical => "u",
+        }
+    }
+
+    /// Formats one grid coordinate.
+    #[must_use]
+    pub(crate) fn format_coord(self, value: i32) -> String {
+        match self {
+            Self::Mils => format!("{}", value as i64 * MILS_PER_UNIT as i64),
+            Self::Millimeters => format!("{:.2}", value as f64 * MM_PER_UNIT),
+            Self::Logical => format!("{value}"),
+        }
+    }
+
+    /// Formats a distance in logical grid units.
+    #[must_use]
+    pub(crate) fn format_distance(self, value: f64) -> String {
+        match self {
+            Self::Mils => format!("{:.0}", value * MILS_PER_UNIT),
+            Self::Millimeters => format!("{:.2}", value * MM_PER_UNIT),
+            Self::Logical => format!("{value:.1}"),
+        }
+    }
+}
+
 /// When grid snapping applies.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub(crate) enum SnapMode {
@@ -284,6 +331,8 @@ pub struct GuiApp {
     grid_axes: bool,
     grid_rulers: bool,
     crosshair: crate::scene::CrosshairMode,
+    units: Units,
+    local_origin: GridPos,
     snap_mode: SnapMode,
     snap_objects: bool,
     minimap_open: bool,
@@ -367,28 +416,27 @@ impl GuiApp {
     pub fn new(context: &eframe::CreationContext<'_>) -> Self {
         crate::design::configure(context);
         let (config_path, config) = load_config();
-        let mut app = Self {
-            library: BuiltinComponents.definitions(),
-            document: Document::new(),
-            grid_visible: true,
-            grid_step: GridStep::default(),
-            grid_style: canvas::GridStyle::Dots,
-            grid_axes: false,
-            grid_rulers: true,
-            crosshair: crate::scene::CrosshairMode::Small,
-            snap_mode: SnapMode::Always,
-            snap_objects: true,
-            inspector_open: true,
-            sim: Some(SimHandle::spawn()),
-            analog: Some(crate::analog::AnalogHandle::spawn()),
-            mixed_worker: Some(crate::mixed_worker::MixedHandle::spawn()),
-            config_path,
-            config,
-            ..Self::default()
-        };
+        let mut app = Self::base(config_path, config);
+        app.sim = Some(SimHandle::spawn());
+        app.analog = Some(crate::analog::AnalogHandle::spawn());
+        app.mixed_worker = Some(crate::mixed_worker::MixedHandle::spawn());
         app.add_pb5_probe();
         app.add_led_probe();
         app
+    }
+
+    fn base(config_path: Option<PathBuf>, config: config::AppConfig) -> Self {
+        Self {
+            library: BuiltinComponents.definitions(),
+            document: Document::new(),
+            grid_visible: true,
+            grid_rulers: true,
+            snap_objects: true,
+            inspector_open: true,
+            config_path,
+            config,
+            ..Self::default()
+        }
     }
 }
 

@@ -22,11 +22,31 @@ impl GuiApp {
     pub(super) fn view_status(&self, ui: &mut egui::Ui) {
         ui.label(self.pointer_text());
         ui.separator();
+        ui.label(self.delta_text());
+        ui.separator();
         ui.label(format!("Zoom {:.0}%", self.camera.zoom * 100.0));
         ui.separator();
         ui.label(format!("Grid x{}", self.grid_step.label()));
         ui.separator();
         ui.label(self.snap_status());
+        ui.separator();
+        ui.label(self.units.label());
+    }
+
+    pub(super) fn delta_text(&self) -> String {
+        let Some(world) = self.pointer_world else {
+            return "dx=- dy=- dist=-".to_string();
+        };
+        let point = self.snap_world(world).point;
+        let dx = point.x - self.local_origin.x;
+        let dy = point.y - self.local_origin.y;
+        let distance = ((dx * dx + dy * dy) as f64).sqrt();
+        format!(
+            "dx {} dy {} dist {}",
+            self.units.format_coord(dx),
+            self.units.format_coord(dy),
+            self.units.format_distance(distance)
+        )
     }
 
     pub(super) fn snap_status(&self) -> String {
@@ -90,9 +110,13 @@ impl GuiApp {
         match self.pointer_world {
             Some(world) => {
                 let point = self.snap_world(world).point;
-                format!("x={} y={}", point.x, point.y)
+                format!(
+                    "X {} Y {}",
+                    self.units.format_coord(point.x),
+                    self.units.format_coord(point.y)
+                )
             }
-            None => "x=- y=-".to_string(),
+            None => "X - Y -".to_string(),
         }
     }
 
