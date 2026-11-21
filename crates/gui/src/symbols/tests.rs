@@ -28,9 +28,10 @@ fn transform_moves_geometry() {
 }
 
 #[test]
-fn arcs_are_reported_as_unsupported() {
+fn arcs_are_supported() {
     let text = r##"<svg><path d="M0 0A1 1 0 0 0 2 2"/></svg>"##;
-    assert_eq!(svg::parse(text), Err(SvgError::UnsupportedCommand('A')));
+    let symbol = svg::parse(text).expect("arc symbol");
+    assert!(!symbol.shapes.is_empty());
 }
 
 #[test]

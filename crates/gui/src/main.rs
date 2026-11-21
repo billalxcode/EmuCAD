@@ -12,6 +12,7 @@ mod export;
 #[cfg(test)]
 mod golden;
 mod history;
+mod icons;
 mod layout;
 mod library;
 mod log;

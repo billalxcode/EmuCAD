@@ -1,4 +1,5 @@
 use super::*;
+use crate::icons::IconKind;
 
 impl GuiApp {
     pub(super) fn windows(&mut self, ui: &mut egui::Ui) {
@@ -46,10 +47,10 @@ impl GuiApp {
 
     pub(super) fn edit_buttons(&mut self, ui: &mut egui::Ui) {
         let undo = ui
-            .add_enabled(self.history.can_undo(), icon_button("<-", "Undo"))
+            .add_enabled(self.history.can_undo(), icon_button(IconKind::Undo, "Undo"))
             .clicked();
         let redo = ui
-            .add_enabled(self.history.can_redo(), icon_button("->", "Redo"))
+            .add_enabled(self.history.can_redo(), icon_button(IconKind::Redo, "Redo"))
             .clicked();
         if undo {
             self.undo();
@@ -60,13 +61,13 @@ impl GuiApp {
     }
 
     pub(super) fn file_buttons(&mut self, ui: &mut egui::Ui) {
-        if ui.add(icon_button("[/]", "Open")).clicked() {
+        if ui.add(icon_button(IconKind::Open, "Open")).clicked() {
             self.open_project();
         }
-        if ui.add(icon_button("[S]", "Save")).clicked() {
+        if ui.add(icon_button(IconKind::Save, "Save")).clicked() {
             self.save_project();
         }
-        if ui.add(icon_button("[P]", "PNG")).clicked() {
+        if ui.add(icon_button(IconKind::Png, "PNG")).clicked() {
             self.export_png(ui.ctx());
         }
         self.recent_menu(ui);
@@ -93,20 +94,26 @@ impl GuiApp {
     }
 
     pub(super) fn sim_buttons(&mut self, ui: &mut egui::Ui) {
-        if ui.add(icon_button("[H]", "Load HEX")).clicked() {
+        if ui.add(icon_button(IconKind::LoadHex, "Load HEX")).clicked() {
             self.open_hex();
         }
-        if ui.add(icon_button("[N]", "Check netlist")).clicked() {
+        if ui
+            .add(icon_button(IconKind::Netlist, "Check netlist"))
+            .clicked()
+        {
             self.check_netlist();
         }
         if ui
-            .add_enabled(!self.analog_busy, icon_button("[D]", "DC op"))
+            .add_enabled(!self.analog_busy, icon_button(IconKind::Dc, "DC op"))
             .clicked()
         {
             self.solve_dc();
         }
         if ui
-            .add_enabled(!self.analog_busy, icon_button("[T]", "Transient"))
+            .add_enabled(
+                !self.analog_busy,
+                icon_button(IconKind::Transient, "Transient"),
+            )
             .clicked()
         {
             self.run_transient();
@@ -128,9 +135,11 @@ impl GuiApp {
         let running = self.sim_status.running;
         let run = ui.add_enabled(loaded, run_button_label(running)).clicked();
         let step = ui
-            .add_enabled(loaded && !running, icon_button(">|", "Step"))
+            .add_enabled(loaded && !running, icon_button(IconKind::Step, "Step"))
             .clicked();
-        let reset = ui.add_enabled(loaded, icon_button("[]", "Reset")).clicked();
+        let reset = ui
+            .add_enabled(loaded, icon_button(IconKind::Reset, "Reset"))
+            .clicked();
         self.apply_run_actions(run, step, reset);
     }
 

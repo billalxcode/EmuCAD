@@ -97,7 +97,6 @@ pub(crate) enum SvgError {
     MissingNumber,
     MissingCommand,
     UnknownCommand(char),
-    UnsupportedCommand(char),
     Empty,
     InvalidBounds,
 }

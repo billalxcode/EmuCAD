@@ -1,7 +1,7 @@
 //! Paints parsed SVG symbols into egui rectangles.
 
 use super::assets;
-use super::svg::{Bounds, Point, SvgShape};
+use super::svg::{Bounds, Point, SvgShape, SvgSymbol};
 use crate::model::SymbolKind;
 use eframe::egui;
 
@@ -21,14 +21,23 @@ pub(crate) fn draw_symbol(
     let Some(symbol) = assets::symbol(kind) else {
         return;
     };
+    draw_svg(painter, body, symbol, color);
+    if let SymbolKind::Catalog { variant, .. } = kind {
+        draw_variant_code(painter, body, variant, color);
+    }
+}
+
+pub(crate) fn draw_svg(
+    painter: &egui::Painter,
+    body: egui::Rect,
+    symbol: &SvgSymbol,
+    color: egui::Color32,
+) {
     let Some(fit) = Fit::new(symbol.bounds, body) else {
         return;
     };
     for shape in &symbol.shapes {
         draw_shape(painter, shape, fit, color);
-    }
-    if let SymbolKind::Catalog { variant, .. } = kind {
-        draw_variant_code(painter, body, variant, color);
     }
 }
 

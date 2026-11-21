@@ -4,7 +4,7 @@
 yang memodelkan transistor, gerbang CMOS, CPU AVR, peripheral, dan board,
 serta mampu menjalankan firmware AVR.
 
-> **Status v0.1:** 1273 test lulus, 11 crate, crate simulasi zero external
+> **Status v0.1:** 1277 test lulus, 11 crate, crate simulasi zero external
 > dependency; dependensi GUI dan binding Python dibatasi pada daftar yang
 > disetujui di `AGENTS.md`.
 > Rilis biner GitHub mengikuti versi workspace; aset dan SHA512
@@ -163,11 +163,13 @@ Dokumen yang sering dipakai:
 | [`docs/92-cells-mcu-requirements.md`](docs/92-cells-mcu-requirements.md) | Kesiapan cells untuk multi-MCU dan prioritas library |
 | [`docs/93-catalog-coverage.md`](docs/93-catalog-coverage.md) | Cakupan deterministik 500 entri katalog |
 | [`docs/94-soc-spec.md`](docs/94-soc-spec.md) | Schema `McuSpec` dan batas crate `soc` |
+| [`docs/95-ui-icons.md`](docs/95-ui-icons.md) | Kebijakan dan integrasi ikon UI Tabler |
 | [`docs/61-design-system.md`](docs/61-design-system.md) | Design system GUI, font, warna, dan spacing |
 | [`TODO-COMPONENTS.md`](TODO-COMPONENTS.md) | Backlog katalog komponen dan Python builder |
 | [`TODO-CELLS.md`](TODO-CELLS.md) | Backlog library cells untuk multi-MCU |
 | [`TODO.md`](TODO.md) | Pekerjaan yang tersisa |
 | [`TODO-GUI.md`](TODO-GUI.md) | Backlog GUI egui |
+| [`TODO-UI.md`](TODO-UI.md) | Rollout ikon Tabler dan UI mixed worker |
 
 ---
 
@@ -175,7 +177,7 @@ Dokumen yang sering dipakai:
 
 Sudah:
 
-- 1273 test workspace.
+- 1277 test workspace.
 - fmt, clippy, test, dan build release lulus.
 - Paket Linux dapat dibuat.
 - Determinisme Linux diuji.

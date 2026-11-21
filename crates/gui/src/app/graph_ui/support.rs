@@ -1,4 +1,6 @@
 use super::*;
+use crate::icons::IconKind;
+pub(crate) use crate::icons::{IconButton, icon_button};
 
 pub(crate) fn world_to_grid(position: egui::Pos2) -> GridPos {
     GridPos::new(position.x.round() as i32, position.y.round() as i32)
@@ -9,10 +11,6 @@ pub(crate) fn wire_color_message(has_color: bool) -> String {
         return "Wire color updated".to_string();
     }
     "Wire color reset".to_string()
-}
-
-pub(crate) fn icon_button(icon: &str, label: &str) -> egui::Button<'static> {
-    egui::Button::new(format!("{icon} {label}"))
 }
 
 pub(crate) fn pb5_probe_spec() -> ProbeSpec {
@@ -53,11 +51,11 @@ pub(crate) fn sample_combo(ui: &mut egui::Ui, current: u64) -> u64 {
     every
 }
 
-pub(crate) fn run_button_label(running: bool) -> egui::Button<'static> {
+pub(crate) fn run_button_label(running: bool) -> IconButton {
     if running {
-        icon_button("||", "Pause")
+        icon_button(IconKind::Pause, "Pause")
     } else {
-        icon_button(">", "Run")
+        icon_button(IconKind::Run, "Run")
     }
 }
 

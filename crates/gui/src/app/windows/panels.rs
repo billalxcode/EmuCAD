@@ -1,4 +1,5 @@
 use super::*;
+use crate::icons::IconKind;
 
 impl GuiApp {
     pub(crate) fn inspector_window(&mut self, ui: &mut egui::Ui) {
@@ -192,23 +193,26 @@ impl GuiApp {
                     ui.label("Solving...");
                 }
                 ui.horizontal(|ui| {
-                    if ui.add_enabled(!busy, egui::Button::new("Run")).clicked() {
+                    if ui
+                        .add_enabled(!busy, icon_button(IconKind::Run, "Run"))
+                        .clicked()
+                    {
                         run = true;
                     }
                     if ui
-                        .add_enabled(busy && !paused, egui::Button::new("Pause"))
+                        .add_enabled(busy && !paused, icon_button(IconKind::Pause, "Pause"))
                         .clicked()
                     {
                         pause = true;
                     }
                     if ui
-                        .add_enabled(busy && paused, egui::Button::new("Step"))
+                        .add_enabled(busy && paused, icon_button(IconKind::Step, "Step"))
                         .clicked()
                     {
                         step = true;
                     }
                     if ui
-                        .add_enabled(busy || has_trace, egui::Button::new("Reset"))
+                        .add_enabled(busy || has_trace, icon_button(IconKind::Reset, "Reset"))
                         .clicked()
                     {
                         reset = true;

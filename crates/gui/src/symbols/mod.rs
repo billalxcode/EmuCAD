@@ -11,4 +11,5 @@ mod tests;
 #[cfg(test)]
 pub(crate) use assets::contains as asset_exists;
 pub(crate) use catalog::base_for;
-pub(crate) use draw::draw_symbol;
+pub(crate) use draw::{draw_svg, draw_symbol};
+pub(crate) use svg::{SvgSymbol, parse as parse_svg};
