@@ -261,6 +261,7 @@ pub(crate) struct SceneState {
     wire_class: NetClass,
     selection_box: Option<(GridPos, GridPos)>,
     snap: Option<crate::scene::SnapMarker>,
+    crosshair: crate::scene::CrosshairMode,
     minimap: bool,
     flow_phase: Option<f32>,
 }
@@ -282,6 +283,7 @@ pub struct GuiApp {
     grid_style: canvas::GridStyle,
     grid_axes: bool,
     grid_rulers: bool,
+    crosshair: crate::scene::CrosshairMode,
     snap_mode: SnapMode,
     snap_objects: bool,
     minimap_open: bool,
@@ -373,6 +375,7 @@ impl GuiApp {
             grid_style: canvas::GridStyle::Dots,
             grid_axes: false,
             grid_rulers: true,
+            crosshair: crate::scene::CrosshairMode::Small,
             snap_mode: SnapMode::Always,
             snap_objects: true,
             inspector_open: true,

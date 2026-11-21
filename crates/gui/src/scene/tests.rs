@@ -1,6 +1,7 @@
 use super::{
-    minimap_map, net_color, pin_label_text, pin_tooltip, placement_position, preview_rect,
-    segment_visible, show_component_labels, show_wire_label, wire_midpoint,
+    CrosshairMode, SnapKind, SnapMarker, draw_crosshair, minimap_map, net_color, pin_label_text,
+    pin_tooltip, placement_position, preview_rect, segment_visible, show_component_labels,
+    show_wire_label, wire_midpoint,
 };
 use crate::library;
 use crate::model::{Document, GridPos, Mirror, NetClass, Rotation, Wire, WireId};
@@ -11,6 +12,27 @@ fn component_labels_use_lod_except_selection() {
     assert!(show_component_labels(true, 0.4));
     assert!(show_component_labels(false, 0.7));
     assert!(!show_component_labels(false, 0.69));
+}
+
+#[test]
+fn crosshair_modes_render() {
+    let context = eframe::egui::Context::default();
+    let rect = eframe::egui::Rect::from_min_size(
+        eframe::egui::pos2(0.0, 0.0),
+        eframe::egui::vec2(200.0, 150.0),
+    );
+    let camera = crate::canvas::GridCamera::default();
+    let snap = Some(SnapMarker {
+        point: GridPos::new(1, 1),
+        kind: SnapKind::Grid,
+    });
+    for mode in CrosshairMode::ALL {
+        let mut output = context.run_ui(Default::default(), |context| {
+            let painter = context.layer_painter(eframe::egui::LayerId::background());
+            draw_crosshair(&painter, rect, &camera, snap, mode);
+        });
+        output.textures_delta.clear();
+    }
 }
 
 #[test]
@@ -104,21 +126,9 @@ fn sample_scene<'a>(
     library: &'a [crate::model::ComponentDefinition],
     selection: &'a Selection,
 ) -> super::Scene<'a> {
-    super::Scene {
-        document,
-        library,
-        selection,
-        hover_wire: None,
-        placing: None,
-        rotation: Rotation::Deg0,
-        mirror: Mirror::None,
-        wire_preview: &[],
-        wire_class: NetClass::Digital,
-        selection_box: None,
-        snap: None,
-        minimap: true,
-        flow_phase: None,
-    }
+    let mut scene = super::Scene::new((document, library, selection));
+    scene.minimap = true;
+    scene
 }
 
 #[test]

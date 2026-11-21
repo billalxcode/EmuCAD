@@ -12,6 +12,29 @@ pub(crate) fn palette(painter: &egui::Painter) -> crate::design::Palette {
     crate::design::palette_for(painter.ctx())
 }
 
+/// Crosshair shape drawn at the snapped cursor.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum CrosshairMode {
+    #[default]
+    Small,
+    Full,
+    Diagonal,
+}
+
+impl CrosshairMode {
+    pub const ALL: [Self; 3] = [Self::Small, Self::Full, Self::Diagonal];
+
+    /// Returns a short label.
+    #[must_use]
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::Small => "Small",
+            Self::Full => "Full",
+            Self::Diagonal => "Diagonal",
+        }
+    }
+}
+
 /// Source of the current snap point.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SnapKind {
@@ -65,8 +88,37 @@ pub struct Scene<'a> {
     pub wire_class: NetClass,
     pub selection_box: Option<(GridPos, GridPos)>,
     pub snap: Option<SnapMarker>,
+    pub crosshair: CrosshairMode,
     pub minimap: bool,
     pub flow_phase: Option<f32>,
+}
+
+#[cfg(test)]
+type SceneParts<'a> = (&'a Document, &'a [ComponentDefinition], &'a Selection);
+
+impl<'a> Scene<'a> {
+    /// Builds an empty scene with default interaction state.
+    #[cfg(test)]
+    #[must_use]
+    pub(crate) fn new(parts: SceneParts<'a>) -> Self {
+        let (document, library, selection) = parts;
+        Self {
+            document,
+            library,
+            selection,
+            hover_wire: None,
+            placing: None,
+            rotation: Rotation::Deg0,
+            mirror: Mirror::None,
+            wire_preview: &[],
+            wire_class: NetClass::Digital,
+            selection_box: None,
+            snap: None,
+            crosshair: CrosshairMode::Small,
+            minimap: false,
+            flow_phase: None,
+        }
+    }
 }
 
 /// Draws all wires, components, and the placement ghost.
@@ -83,6 +135,7 @@ pub fn draw(
     draw_wire_handles(painter, rect, camera, &scene);
     draw_wire_preview(painter, rect, camera, &scene, hover);
     draw_ghost_layer(painter, rect, camera, &scene, hover);
+    draw_crosshair(painter, rect, camera, scene.snap, scene.crosshair);
     draw_snap_marker(painter, rect, camera, scene.snap);
     draw_selection_box(painter, rect, camera, scene.selection_box);
     if scene.minimap {
@@ -121,6 +174,79 @@ fn draw_ghost_layer(
         return;
     };
     draw_ghost(painter, rect, camera, scene, definition, hover);
+}
+
+fn draw_crosshair(
+    painter: &egui::Painter,
+    rect: egui::Rect,
+    camera: &crate::canvas::GridCamera,
+    snap: Option<SnapMarker>,
+    mode: CrosshairMode,
+) {
+    let Some(marker) = snap else {
+        return;
+    };
+    let point = egui::pos2(marker.point.x as f32, marker.point.y as f32);
+    let screen = camera.world_to_screen(rect, point);
+    let stroke = egui::Stroke::new(1.0, palette(painter).text_muted);
+    match mode {
+        CrosshairMode::Small => draw_small_cross(painter, screen, stroke),
+        CrosshairMode::Full => draw_full_cross(painter, rect, screen, stroke),
+        CrosshairMode::Diagonal => draw_diagonal_cross(painter, rect, screen, stroke),
+    }
+}
+
+fn draw_small_cross(painter: &egui::Painter, point: egui::Pos2, stroke: egui::Stroke) {
+    painter.line_segment(
+        [point - egui::vec2(6.0, 0.0), point + egui::vec2(6.0, 0.0)],
+        stroke,
+    );
+    painter.line_segment(
+        [point - egui::vec2(0.0, 6.0), point + egui::vec2(0.0, 6.0)],
+        stroke,
+    );
+}
+
+fn draw_full_cross(
+    painter: &egui::Painter,
+    rect: egui::Rect,
+    point: egui::Pos2,
+    stroke: egui::Stroke,
+) {
+    draw_horizontal_span(painter, rect, point.y, stroke);
+    draw_vertical_span(painter, rect, point.x, stroke);
+}
+
+fn draw_horizontal_span(painter: &egui::Painter, rect: egui::Rect, y: f32, stroke: egui::Stroke) {
+    painter.line_segment(
+        [egui::pos2(rect.left(), y), egui::pos2(rect.right(), y)],
+        stroke,
+    );
+}
+
+fn draw_vertical_span(painter: &egui::Painter, rect: egui::Rect, x: f32, stroke: egui::Stroke) {
+    painter.line_segment(
+        [egui::pos2(x, rect.top()), egui::pos2(x, rect.bottom())],
+        stroke,
+    );
+}
+
+fn draw_diagonal_cross(
+    painter: &egui::Painter,
+    rect: egui::Rect,
+    point: egui::Pos2,
+    stroke: egui::Stroke,
+) {
+    let reach = rect.width().max(rect.height());
+    let delta = egui::vec2(reach, reach);
+    painter.line_segment([point - delta, point + delta], stroke);
+    painter.line_segment(
+        [
+            point + egui::vec2(-reach, reach),
+            point + egui::vec2(reach, -reach),
+        ],
+        stroke,
+    );
 }
 
 fn draw_snap_marker(

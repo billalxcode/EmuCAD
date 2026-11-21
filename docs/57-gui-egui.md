@@ -216,6 +216,7 @@ Aturan layout:
 - Fit all, fit objects, fit selection, dan center origin.
 - Fit sheet menunggu model halaman atau sheet.
 - Zoom area lewat tool Zoom dan drag kotak.
+- Crosshair small, full, dan diagonal.
 - Riwayat 8 level zoom untuk undo last zoom.
 - Level of detail: label kecil dan grid minor disembunyikan saat zoom
   rendah.
@@ -443,6 +444,7 @@ Aturan:
 | Alt+1 / Alt+2 | Fast grid 1 / 2 |
 | Panah | Cursor per grid |
 | Ctrl+Panah | Cursor 10x grid |
+| Shift+Panah | Nudge seleksi |
 | R | Rotate |
 | M | Mirror |
 | Delete | Hapus seleksi |

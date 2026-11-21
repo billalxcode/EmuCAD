@@ -12,8 +12,44 @@ impl GuiApp {
         self.handle_history_keys(ui);
         self.handle_clipboard_keys(ui);
         self.handle_edit_keys(ui);
+        self.handle_cursor_keys(ui);
         self.handle_nudge_keys(ui);
         self.handle_view_keys(ui);
+    }
+
+    pub(crate) fn handle_cursor_keys(&mut self, ui: &egui::Ui) {
+        if !self.canvas_focused || ui.input(|input| input.modifiers.shift) {
+            return;
+        }
+        let step = self.cursor_step(ui);
+        let (dx, dy) = cursor_delta(ui, step);
+        if dx == 0 && dy == 0 {
+            return;
+        }
+        let base = self
+            .pointer_world
+            .map(|world| self.snap_world(world).point)
+            .unwrap_or_default();
+        self.warp_cursor(ui, base.offset(GridPos::new(dx, dy)));
+    }
+
+    fn cursor_step(&self, ui: &egui::Ui) -> i32 {
+        let step = self.grid_step.value() as i32;
+        if ui.input(|input| input.modifiers.command) {
+            step * 10
+        } else {
+            step
+        }
+    }
+
+    fn warp_cursor(&self, ui: &egui::Ui, target: GridPos) {
+        let Some(rect) = self.canvas_rect else {
+            return;
+        };
+        let world = egui::pos2(target.x as f32, target.y as f32);
+        let screen = self.camera.world_to_screen(rect, world);
+        ui.ctx()
+            .send_viewport_cmd(egui::ViewportCommand::CursorPosition(screen));
     }
 
     pub(crate) fn handle_view_keys(&mut self, ui: &egui::Ui) {
@@ -109,7 +145,7 @@ impl GuiApp {
     }
 
     pub(crate) fn handle_nudge_keys(&mut self, ui: &egui::Ui) {
-        if !self.canvas_focused {
+        if !self.canvas_focused || !ui.input(|input| input.modifiers.shift) {
             return;
         }
         let (dx, dy) = nudge_delta(ui);
@@ -118,4 +154,13 @@ impl GuiApp {
         }
         self.nudge_selection(dx, dy);
     }
+}
+
+fn cursor_delta(ui: &egui::Ui, step: i32) -> (i32, i32) {
+    let mut delta = (0, 0);
+    ui.input(|input| {
+        delta.0 = axis_delta(input, egui::Key::ArrowLeft, egui::Key::ArrowRight, step);
+        delta.1 = axis_delta(input, egui::Key::ArrowUp, egui::Key::ArrowDown, step);
+    });
+    delta
 }

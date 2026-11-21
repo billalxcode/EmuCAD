@@ -2,7 +2,7 @@
 
 use crate::canvas::DVec2;
 use crate::design;
-use crate::model::{Document, GridPos, Mirror, NetClass, Rotation};
+use crate::model::{Document, GridPos, Mirror, Rotation};
 use crate::scene::{self, Scene};
 use crate::selection::Selection;
 use eframe::egui::{self, Color32, Pos2, Rect, Vec2};
@@ -68,21 +68,7 @@ fn golden_camera() -> crate::canvas::GridCamera {
 }
 
 fn golden_scene<'a>(document: &'a Document, selection: &'a Selection) -> Scene<'a> {
-    Scene {
-        document,
-        library: crate::library::builtin(),
-        selection,
-        hover_wire: None,
-        placing: None,
-        rotation: Rotation::Deg0,
-        mirror: Mirror::None,
-        wire_preview: &[],
-        wire_class: NetClass::Digital,
-        selection_box: None,
-        snap: None,
-        minimap: false,
-        flow_phase: None,
-    }
+    Scene::new((document, crate::library::builtin(), selection))
 }
 
 fn golden_document() -> Document {

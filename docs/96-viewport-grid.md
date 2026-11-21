@@ -400,6 +400,10 @@ adalah posisi yang sudah di-snap, sedangkan posisi mouse mentah tetap
 disimpan terpisah. Panah keyboard menggerakkan cursor per grid; Ctrl
 ditambah panah menggerakkan 10x grid.
 
+U8-06 memakai tiga mode crosshair dan memindahkan pointer nyata dengan
+`ViewportCommand::CursorPosition`. Shift+panah tetap menjadi nudge seleksi
+agar perilaku lama tidak hilang.
+
 ## 5. Observasi GUI
 
 Observasi dilakukan pada demo `ecc83-pp` dengan KiCad 10.0.8 AppImage.
@@ -444,9 +448,9 @@ dokumentasi resmi, bukan dari klik tambahan.
 | Snap grid | Mode always/with grid/never | Always/WithGrid/Never | Selesai |
 | Snap objek | Pin, wire, junction, label | Pin, wire, junction | Sebagian, label U8-04b |
 | Modifier snap | Ctrl dan Shift | Tidak ada | Belum ada |
-| Cursor crosshair | 3 mode | Tidak ada | Belum ada |
+| Cursor crosshair | 3 mode | Small, full, diagonal | Selesai |
 | Status bar | Snap coords, delta, grid, unit | Snap coords, grid step, snap source | Sebagian |
-| Keyboard cursor | Panah per grid | Tidak ada | Belum ada |
+| Keyboard cursor | Panah per grid | Panah per grid, Ctrl 10x | Selesai |
 | Grid settings UI | Dialog lengkap | Menu Grid | Sebagian |
 | Persistensi grid | Gaya, daftar, fast grid | Hanya visible | Belum ada |
 
@@ -618,6 +622,10 @@ anchor label eksplisit.
 
 U8-05 sudah ditutup oleh smoke test render gaya Dots, Lines, dan Cross
 dengan axes aktif. Golden screenshot grid tetap di U8-11.
+
+U8-06 sudah ditutup oleh smoke test crosshair Small, Full, dan Diagonal.
+Perpindahan pointer keyboard belum diuji end-to-end karena bergantung
+pada viewport backend.
 
 ## 9. Batas dan Risiko
 

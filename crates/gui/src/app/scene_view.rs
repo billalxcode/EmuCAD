@@ -30,6 +30,7 @@ pub(crate) fn build_scene(refs: SceneRefs<'_>, state: SceneState) -> Scene<'_> {
         wire_class: state.wire_class,
         selection_box: state.selection_box,
         snap: state.snap,
+        crosshair: state.crosshair,
         minimap: state.minimap,
         flow_phase: state.flow_phase,
     }
