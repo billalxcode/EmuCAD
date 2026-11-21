@@ -4,6 +4,7 @@ pub(crate) fn show_canvas(
     ui: &mut egui::Ui,
     camera: &mut GridCamera,
     grid_visible: bool,
+    grid_step: u32,
     initialized: &mut bool,
     scene: Scene<'_>,
 ) -> canvas::CanvasState {
@@ -13,7 +14,8 @@ pub(crate) fn show_canvas(
                 pointer: Option<egui::Pos2>| {
         draw_scene(painter, rect, camera, pointer, scene);
     };
-    let show = |ui: &mut egui::Ui| canvas::show(ui, camera, grid_visible, initialized, draw);
+    let show =
+        |ui: &mut egui::Ui| canvas::show(ui, camera, grid_visible, grid_step, initialized, draw);
     egui::CentralPanel::default().show(ui, show).inner
 }
 
@@ -29,6 +31,7 @@ pub(crate) fn build_scene(refs: SceneRefs<'_>, state: SceneState) -> Scene<'_> {
         wire_preview: refs.wire_preview,
         wire_class: state.wire_class,
         selection_box: state.selection_box,
+        snap: state.snap,
         minimap: state.minimap,
         flow_phase: state.flow_phase,
     }
@@ -41,7 +44,10 @@ pub(crate) fn draw_scene(
     pointer: Option<egui::Pos2>,
     scene: Scene<'_>,
 ) {
-    let hover = pointer.map(world_to_grid);
+    let hover = scene
+        .snap
+        .map(|marker| marker.point)
+        .or_else(|| pointer.map(world_to_grid));
     scene::draw(painter, rect, camera, scene, hover);
 }
 

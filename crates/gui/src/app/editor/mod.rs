@@ -12,8 +12,9 @@ impl GuiApp {
         let scene = build_scene(refs, state);
         let camera = &mut self.camera;
         let grid_visible = self.grid_visible;
+        let grid_step = self.grid_step.value();
         let initialized = &mut self.initialized;
-        show_canvas(ui, camera, grid_visible, initialized, scene)
+        show_canvas(ui, camera, grid_visible, grid_step, initialized, scene)
     }
 
     pub(crate) fn scene_state(&self, time: f64) -> SceneState {
@@ -26,6 +27,7 @@ impl GuiApp {
             mirror: self.placement_mirror,
             wire_class: self.wire_class,
             selection_box: self.selection_box(),
+            snap: self.pointer_world.map(|world| self.snap_world(world)),
             minimap: self.minimap_open,
             flow_phase: flow_phase(self.flow_animation, time),
         }

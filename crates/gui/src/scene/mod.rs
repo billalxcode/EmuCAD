@@ -12,6 +12,37 @@ pub(crate) fn palette(painter: &egui::Painter) -> crate::design::Palette {
     crate::design::palette_for(painter.ctx())
 }
 
+/// Source of the current snap point.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SnapKind {
+    Grid,
+    Off,
+    Pin,
+    Wire,
+    Junction,
+}
+
+impl SnapKind {
+    /// Returns a short status label.
+    #[must_use]
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::Grid => "grid",
+            Self::Off => "off",
+            Self::Pin => "pin",
+            Self::Wire => "wire",
+            Self::Junction => "junction",
+        }
+    }
+}
+
+/// Snapped cursor position and its source.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct SnapMarker {
+    pub point: GridPos,
+    pub kind: SnapKind,
+}
+
 #[derive(Clone, Copy)]
 pub(crate) struct WireStyle {
     color: egui::Color32,
@@ -33,6 +64,7 @@ pub struct Scene<'a> {
     pub wire_preview: &'a [GridPos],
     pub wire_class: NetClass,
     pub selection_box: Option<(GridPos, GridPos)>,
+    pub snap: Option<SnapMarker>,
     pub minimap: bool,
     pub flow_phase: Option<f32>,
 }
@@ -51,6 +83,7 @@ pub fn draw(
     draw_wire_handles(painter, rect, camera, &scene);
     draw_wire_preview(painter, rect, camera, &scene, hover);
     draw_ghost_layer(painter, rect, camera, &scene, hover);
+    draw_snap_marker(painter, rect, camera, scene.snap);
     draw_selection_box(painter, rect, camera, scene.selection_box);
     if scene.minimap {
         draw_minimap(painter, rect, camera, &scene);
@@ -88,6 +121,33 @@ fn draw_ghost_layer(
         return;
     };
     draw_ghost(painter, rect, camera, scene, definition, hover);
+}
+
+fn draw_snap_marker(
+    painter: &egui::Painter,
+    rect: egui::Rect,
+    camera: &crate::canvas::GridCamera,
+    marker: Option<SnapMarker>,
+) {
+    let Some(marker) = marker else {
+        return;
+    };
+    let Some(color) = snap_color(marker.kind, &palette(painter)) else {
+        return;
+    };
+    let point = egui::pos2(marker.point.x as f32, marker.point.y as f32);
+    let screen = camera.world_to_screen(rect, point);
+    painter.circle_stroke(screen, 5.0, egui::Stroke::new(1.5, color));
+    painter.circle_filled(screen, 2.0, color);
+}
+
+fn snap_color(kind: SnapKind, colors: &crate::design::Palette) -> Option<egui::Color32> {
+    match kind {
+        SnapKind::Pin => Some(colors.accent),
+        SnapKind::Wire => Some(colors.success),
+        SnapKind::Junction => Some(colors.warning),
+        SnapKind::Grid | SnapKind::Off => None,
+    }
 }
 
 fn draw_selection_box(

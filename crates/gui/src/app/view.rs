@@ -602,8 +602,8 @@ impl GuiApp {
     }
 
     pub(super) fn view_options(&mut self, ui: &mut egui::Ui) {
+        self.grid_menu(ui);
         self.zoom_controls(ui);
-        ui.checkbox(&mut self.grid_visible, "Grid");
         ui.checkbox(&mut self.minimap_open, "Mini");
         ui.checkbox(&mut self.flow_animation, "Flow");
         if self.flow_animation {
@@ -616,6 +616,21 @@ impl GuiApp {
                 egui::ThemePreference::Dark
             });
         }
+    }
+
+    fn grid_menu(&mut self, ui: &mut egui::Ui) {
+        ui.menu_button(format!("Grid x{}", self.grid_step.label()), |ui| {
+            ui.checkbox(&mut self.grid_visible, "Show grid");
+            ui.separator();
+            for step in GridStep::ALL {
+                ui.selectable_value(&mut self.grid_step, step, format!("Step {}", step.label()));
+            }
+            ui.separator();
+            for mode in SnapMode::ALL {
+                ui.selectable_value(&mut self.snap_mode, mode, mode.label());
+            }
+            ui.checkbox(&mut self.snap_objects, "Snap objects");
+        });
     }
 
     pub(super) fn zoom_controls(&mut self, ui: &mut egui::Ui) {
@@ -737,7 +752,7 @@ impl GuiApp {
         horizontal_first: bool,
     ) -> Option<Vec<GridPos>> {
         let last = *self.wire_points.last()?;
-        let target = world_to_grid(self.pointer_world?);
+        let target = self.snap_world(self.pointer_world?).point;
         let path = build(last, target, horizontal_first);
         let mut current = last;
         for &point in &path {

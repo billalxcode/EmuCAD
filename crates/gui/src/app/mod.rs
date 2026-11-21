@@ -9,6 +9,8 @@ mod library_ui;
 mod palette_ui;
 mod project;
 mod scene_view;
+mod snap;
+pub(crate) use snap::world_to_grid_step;
 mod status;
 mod support;
 #[cfg(test)]
@@ -120,6 +122,60 @@ pub(crate) enum FitTarget {
     Selection,
 }
 
+/// Logical grid multiplier used for drawing and snapping.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct GridStep(u32);
+
+impl GridStep {
+    pub(crate) const ALL: [Self; 4] = [Self(1), Self(2), Self(5), Self(10)];
+
+    /// Returns the integer multiplier.
+    #[must_use]
+    pub(crate) const fn value(self) -> u32 {
+        self.0
+    }
+
+    /// Returns a short label.
+    #[must_use]
+    pub(crate) const fn label(self) -> &'static str {
+        match self.0 {
+            2 => "2",
+            5 => "5",
+            10 => "10",
+            _ => "1",
+        }
+    }
+}
+
+impl Default for GridStep {
+    fn default() -> Self {
+        Self(1)
+    }
+}
+
+/// When grid snapping applies.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(crate) enum SnapMode {
+    #[default]
+    Always,
+    WithGrid,
+    Never,
+}
+
+impl SnapMode {
+    pub(crate) const ALL: [Self; 3] = [Self::Always, Self::WithGrid, Self::Never];
+
+    /// Returns a short label.
+    #[must_use]
+    pub(crate) const fn label(self) -> &'static str {
+        match self {
+            Self::Always => "Always",
+            Self::WithGrid => "With grid",
+            Self::Never => "Never",
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) enum InspectorAction {
     Rotate,
@@ -204,6 +260,7 @@ pub(crate) struct SceneState {
     mirror: Mirror,
     wire_class: NetClass,
     selection_box: Option<(GridPos, GridPos)>,
+    snap: Option<crate::scene::SnapMarker>,
     minimap: bool,
     flow_phase: Option<f32>,
 }
@@ -221,6 +278,9 @@ pub struct GuiApp {
     camera: GridCamera,
     canvas_rect: Option<egui::Rect>,
     grid_visible: bool,
+    grid_step: GridStep,
+    snap_mode: SnapMode,
+    snap_objects: bool,
     minimap_open: bool,
     flow_animation: bool,
     light_theme: bool,
@@ -306,6 +366,9 @@ impl GuiApp {
             library: BuiltinComponents.definitions(),
             document: Document::new(),
             grid_visible: true,
+            grid_step: GridStep::default(),
+            snap_mode: SnapMode::Always,
+            snap_objects: true,
             inspector_open: true,
             sim: Some(SimHandle::spawn()),
             analog: Some(crate::analog::AnalogHandle::spawn()),

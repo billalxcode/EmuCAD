@@ -16,7 +16,7 @@ impl GuiApp {
         let Some(world) = state.click_world else {
             return;
         };
-        self.wire_click(world_to_grid(world));
+        self.wire_click(self.snap_world(world).point);
     }
 
     pub(crate) fn wire_click(&mut self, point: GridPos) {

@@ -11,7 +11,7 @@ impl GuiApp {
         let Some(world) = state.pointer_world else {
             return;
         };
-        let point = world_to_grid(world);
+        let point = self.snap_world(world).point;
         let Some(id) = self.document.hit_test(self.library, point) else {
             self.begin_box(point, state.multi_select);
             return;
@@ -105,7 +105,7 @@ impl GuiApp {
     ) -> Option<Vec<(ComponentId, GridPos)>> {
         let drag = self.dragging.as_ref()?;
         let world = state.pointer_world?;
-        let point = world_to_grid(world);
+        let point = self.snap_world(world).point;
         Some(
             drag.offsets
                 .iter()
@@ -127,7 +127,7 @@ impl GuiApp {
             return false;
         }
         if let Some(world) = state.pointer_world {
-            self.box_current = Some(world_to_grid(world));
+            self.box_current = Some(self.snap_world(world).point);
         }
         true
     }
@@ -156,7 +156,7 @@ impl GuiApp {
         let Some(mut points) = self.segment_points(drag) else {
             return;
         };
-        if !move_segment(&mut points, drag.index, world_to_grid(world)) {
+        if !move_segment(&mut points, drag.index, self.snap_world(world).point) {
             return;
         }
         let before = self.document.clone();

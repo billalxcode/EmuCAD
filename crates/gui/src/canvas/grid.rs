@@ -5,9 +5,10 @@ pub(super) fn draw_grid(
     painter: &egui::Painter,
     rect: egui::Rect,
     camera: &GridCamera,
+    logical_step: u32,
     palette: &design::Palette,
 ) {
-    let step = grid_step(camera.scale());
+    let step = grid_step(camera.scale(), logical_step);
     let range = camera.visible_range(rect, step);
     draw_minor_dots(painter, rect, camera, range, step, palette);
     draw_major_lines(painter, rect, camera, range, step, palette);
@@ -35,7 +36,7 @@ fn draw_x_ruler(
     step: i32,
     palette: &design::Palette,
 ) {
-    let major = step * 5;
+    let major = step * 10;
     let font = design::mono(10.0);
     for index in (range.min_x..=range.max_x).filter(|index| index * step % major == 0) {
         let world = (index * step) as f32;
@@ -53,7 +54,7 @@ fn draw_y_ruler(
     step: i32,
     palette: &design::Palette,
 ) {
-    let major = step * 5;
+    let major = step * 10;
     let font = design::mono(10.0);
     for index in (range.min_y..=range.max_y).filter(|index| index * step % major == 0) {
         let world = (index * step) as f32;
@@ -104,7 +105,7 @@ fn draw_major_lines(
     step: i32,
     palette: &design::Palette,
 ) {
-    let major = step * 5;
+    let major = step * 10;
     let stroke = egui::Stroke::new(1.0, palette.grid_major);
     for index in (range.min_x..=range.max_x).filter(|index| index * step % major == 0) {
         draw_vertical_line(painter, rect, camera, (index * step) as f32, stroke);
@@ -174,12 +175,13 @@ fn draw_horizontal_axis(painter: &egui::Painter, rect: egui::Rect, y: f32, strok
     );
 }
 
-pub(super) fn grid_step(scale: f32) -> i32 {
-    if scale >= 12.0 {
-        1
-    } else if scale >= 6.0 {
-        2
-    } else {
-        5
+pub(super) fn grid_step(scale: f32, logical_step: u32) -> i32 {
+    let mut step = logical_step.max(1) as i32;
+    if scale <= 0.0 {
+        return step;
     }
+    while (step as f32 * scale) < 10.0 {
+        step *= 10;
+    }
+    step
 }

@@ -31,8 +31,11 @@ impl GuiApp {
         definition: &ComponentDefinition,
         world: egui::Pos2,
     ) -> Option<GridPos> {
-        let position =
-            scene::placement_position(definition, world_to_grid(world), self.placement_rotation);
+        let position = scene::placement_position(
+            definition,
+            self.snap_world(world).point,
+            self.placement_rotation,
+        );
         self.document
             .can_place(
                 self.library,

@@ -435,19 +435,19 @@ dokumentasi resmi, bukan dari klik tambahan.
 | Fit sheet | Area sheet | Belum ada model sheet | Tertunda |
 | Zoom area | Drag kotak | Tool Zoom dan drag kotak | Selesai |
 | Zoom history | Undo last zoom | 8 level dan command palette | Selesai |
-| Grid logical | Ukuran tetap | 1 unit integer | Sudah, tetapi tidak bisa diubah |
-| Grid tampilan | Coarse tick 10, min 10 px | 1/2/5, major 5 | Berbeda |
+| Grid logical | Ukuran tetap | 1 unit integer + GridStep 1/2/5/10 | Selesai untuk step |
+| Grid tampilan | Coarse tick 10, min 10 px | Step logical, coarse 10, min 10 px | Sebagian, gaya belum |
 | Gaya grid | Dots, lines, crosses | Dots + major lines | Belum bisa dipilih |
 | Axes | Opsional | Selalu digambar | Perlu toggle |
 | Ruler | Tidak ada di kanvas | Selalu digambar | Pertahankan sebagai overlay opsional |
 | Grid origin | 0 untuk schematic | 0 | Sudah sesuai |
-| Snap grid | Mode always/with grid/never | Selalu | Belum ada mode |
-| Snap objek | Pin, wire, junction, label | Pin untuk wire | Sebagian |
+| Snap grid | Mode always/with grid/never | Always/WithGrid/Never | Selesai |
+| Snap objek | Pin, wire, junction, label | Pin, wire, junction | Sebagian, label U8-04b |
 | Modifier snap | Ctrl dan Shift | Tidak ada | Belum ada |
 | Cursor crosshair | 3 mode | Tidak ada | Belum ada |
-| Status bar | Snap coords, delta, grid, unit | Raw coords, zoom, cell px | Perlu diperbaiki |
+| Status bar | Snap coords, delta, grid, unit | Snap coords, grid step, snap source | Sebagian |
 | Keyboard cursor | Panah per grid | Tidak ada | Belum ada |
-| Grid settings UI | Dialog lengkap | Tidak ada | Belum ada |
+| Grid settings UI | Dialog lengkap | Menu Grid | Sebagian |
 | Persistensi grid | Gaya, daftar, fast grid | Hanya visible | Belum ada |
 
 ## 7. Keputusan Desain untuk EmuCAD
@@ -508,8 +508,13 @@ snap_objects: bool
 ```
 
 Snap grid dihitung dari `GridStep`. Snap objek mencakup pin, ujung wire,
-junction, dan label. Jika snap objek aktif dan ada kandidat, posisi objek
-menang. Status bar menampilkan sumber snap: `grid`, `object`, atau `off`.
+dan junction. Label menunggu anchor label eksplisit. Jika snap objek aktif
+dan ada kandidat, posisi objek menang. Status bar menampilkan sumber snap:
+`grid`, `pin`, `wire`, `junction`, atau `off`.
+
+U8-04 sudah mengimplementasikan state, snap objek, dan indikator. Snap
+objek tetap aktif ketika snap grid `Never`; keduanya independen. Modifier
+bypass belum diterapkan.
 
 Ctrl untuk menonaktifkan snap grid tidak dapat diterapkan sepenuhnya
 karena commit posisi tetap harus integer. Yang dapat dilakukan:
@@ -605,6 +610,10 @@ zoom sebelumnya.
 
 U8-03 sudah ditutup oleh test aturan margin viewport, fit selection yang
 lebih rapat dari fit all, dan zoom box yang mengubah skala kamera.
+
+U8-04 sudah ditutup oleh test pembulatan GridStep, mode snap, snap pin,
+wire, junction, dan koordinat snapped di status bar. Snap label menunggu
+anchor label eksplisit.
 
 ## 9. Batas dan Risiko
 

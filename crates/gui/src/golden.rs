@@ -79,6 +79,7 @@ fn golden_scene<'a>(document: &'a Document, selection: &'a Selection) -> Scene<'
         wire_preview: &[],
         wire_class: NetClass::Digital,
         selection_box: None,
+        snap: None,
         minimap: false,
         flow_phase: None,
     }

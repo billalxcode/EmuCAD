@@ -2,7 +2,7 @@ use super::*;
 
 impl GuiApp {
     pub(crate) fn select_at(&mut self, world: egui::Pos2, additive: bool) {
-        let point = world_to_grid(world);
+        let point = self.snap_world(world).point;
         if self.select_pin_at(point, additive) {
             return;
         }
@@ -63,7 +63,7 @@ impl GuiApp {
     }
 
     pub(crate) fn select_context_target(&mut self, world: egui::Pos2) {
-        let point = world_to_grid(world);
+        let point = self.snap_world(world).point;
         if self.context_pin(point) {
             return;
         }

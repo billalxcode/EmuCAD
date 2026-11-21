@@ -2,10 +2,10 @@
 
 Backlog UI setelah migrasi ikon Tabler dan worker mixed.
 
-**Status:** U0 dan U8-01 sampai U8-03 selesai. U1 sampai U7, U8-03b, dan
-U8-04 sampai U8-11 belum. Riset viewport dan grid KiCad selesai di
-`docs/96-viewport-grid.md`; sisa U8 antre setelah U1 sampai U7 atau
-setelah prioritas diubah.
+**Status:** U0 dan U8-01 sampai U8-04 selesai. U1 sampai U7, U8-03b,
+U8-04b, dan U8-05 sampai U8-11 belum. Riset viewport dan grid KiCad
+selesai di `docs/96-viewport-grid.md`; sisa U8 antre setelah U1 sampai
+U7 atau setelah prioritas diubah.
 
 **Sumber kebenaran:**
 
@@ -195,9 +195,11 @@ U8 mengatur perilaku viewport dan grid.
   tetap bekerja. Fit sheet dipisah ke U8-03b.
 - [ ] U8-03b Tambahkan fit sheet setelah model halaman atau sheet
   tersedia. Scene saat ini belum memiliki objek sheet.
-- [ ] U8-04 Tambahkan `GridStep` 1/2/5/10, `SnapGrid`
-  Always/WithGrid/Never, snap objek pin/wire/junction/label, dan status
-  sumber snap.
+- [x] U8-04 Tambahkan `GridStep` 1/2/5/10, `SnapGrid`
+  Always/WithGrid/Never, snap objek pin/wire/junction, dan status sumber
+  snap. Snap label dipisah ke U8-04b.
+- [ ] U8-04b Tambahkan snap label setelah anchor label eksplisit
+  tersedia. Label saat ini digambar di tengah segmen, bukan titik grid.
 - [ ] U8-05 Ganti gambar grid menjadi gaya Dots/Lines/Cross, coarse tick
   10, jarak minimum 10 px, serta toggle axes dan ruler. Hapus urutan
   visual 1/2/5 yang lama.

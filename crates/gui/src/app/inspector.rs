@@ -209,7 +209,10 @@ impl GuiApp {
         let Some(world) = self.pointer_world else {
             return GridPos::new(2, 2);
         };
-        let offset = world_to_grid(world).subtract(self.clipboard.origin());
+        let offset = self
+            .snap_world(world)
+            .point
+            .subtract(self.clipboard.origin());
         if offset == GridPos::new(0, 0) {
             GridPos::new(2, 2)
         } else {

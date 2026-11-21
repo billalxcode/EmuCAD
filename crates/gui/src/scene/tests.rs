@@ -115,6 +115,7 @@ fn sample_scene<'a>(
         wire_preview: &[],
         wire_class: NetClass::Digital,
         selection_box: None,
+        snap: None,
         minimap: true,
         flow_phase: None,
     }

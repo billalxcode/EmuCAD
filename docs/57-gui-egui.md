@@ -225,6 +225,9 @@ Referensi perilaku: [`96-viewport-grid.md`](96-viewport-grid.md).
 ### 5.4 Rendering grid
 
 - Ukuran sel default 20 px pada zoom 100 persen.
+- Grid step 1, 2, 5, dan 10 lewat menu Grid.
+- Mode snap grid: Always, With grid, dan Never.
+- Snap objek: pin, ujung wire, dan junction.
 - Gaya grid: dots, lines, atau cross. Default dots.
 - Coarse tick setiap 10 unit logis, digambar dua kali lebih tebal.
 - Grid adaptif menaikkan kelipatan sampai jarak layar minimal 10 px.
@@ -233,7 +236,7 @@ Referensi perilaku: [`96-viewport-grid.md`](96-viewport-grid.md).
 - Ruler adalah overlay EmuCAD dan dapat dimatikan.
 - Culling hanya menggambar marker yang terlihat.
 - Grid dapat dimatikan tanpa mematikan snap grid.
-- Status bar menampilkan koordinat snapped, delta, grid step, dan unit.
+- Status bar menampilkan koordinat snapped, grid step, dan sumber snap.
 
 ### 5.5 Minimap
 
@@ -309,9 +312,9 @@ Setiap instance memiliki:
 
 - Ghost komponen mengikuti kursor.
 - Snap grid mengikuti `GridStep`; snap objek mencakup pin, ujung wire,
-  junction, dan label.
-- Shift menonaktifkan snap objek sementara.
-- Ctrl menonaktifkan preview snap grid, tetapi commit tetap integer.
+  dan junction. Label menunggu anchor label eksplisit.
+- Modifier bypass snap (Shift untuk objek, Ctrl untuk grid) belum
+  diterapkan; commit tetap integer.
 - Hijau jika valid, merah jika bertabrakan.
 - Komponen tidak boleh saling menimpa.
 - R rotate, M mirror, Esc cancel.

@@ -24,9 +24,26 @@ impl GuiApp {
         ui.separator();
         ui.label(format!("Zoom {:.0}%", self.camera.zoom * 100.0));
         ui.separator();
-        ui.label(format!("Grid {:.0}px", self.camera.cell_px));
+        ui.label(format!("Grid x{}", self.grid_step.label()));
         ui.separator();
-        ui.label("Snap grid");
+        ui.label(self.snap_status());
+    }
+
+    pub(super) fn snap_status(&self) -> String {
+        let mode = if !self.grid_snap_enabled() {
+            "off"
+        } else if self.snap_objects {
+            "grid+objects"
+        } else {
+            "grid"
+        };
+        let source = self
+            .pointer_world
+            .map(|world| self.snap_world(world).kind.label());
+        match source {
+            Some(source) => format!("Snap {mode} ({source})"),
+            None => format!("Snap {mode}"),
+        }
     }
 
     pub(super) fn edit_status(&self, ui: &mut egui::Ui) {
@@ -71,7 +88,10 @@ impl GuiApp {
 
     pub(super) fn pointer_text(&self) -> String {
         match self.pointer_world {
-            Some(point) => format!("x={:.1} y={:.1}", point.x, point.y),
+            Some(world) => {
+                let point = self.snap_world(world).point;
+                format!("x={} y={}", point.x, point.y)
+            }
             None => "x=- y=-".to_string(),
         }
     }

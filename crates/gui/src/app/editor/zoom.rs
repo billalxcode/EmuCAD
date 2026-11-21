@@ -18,7 +18,7 @@ impl GuiApp {
         let Some(world) = state.pointer_world else {
             return;
         };
-        let point = world_to_grid(world);
+        let point = world_to_grid_step(world, self.grid_step);
         self.box_start = Some(point);
         self.box_current = Some(point);
         self.box_additive = false;
@@ -31,7 +31,7 @@ impl GuiApp {
         let Some(world) = state.pointer_world else {
             return;
         };
-        self.box_current = Some(world_to_grid(world));
+        self.box_current = Some(world_to_grid_step(world, self.grid_step));
     }
 
     fn end_zoom_box(&mut self, state: &canvas::CanvasState) {
