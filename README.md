@@ -186,7 +186,8 @@ Sudah:
 - Firmware `avr-gcc` bare-metal dan sketsa Arduino core
   `Serial.println("Hello World")` berjalan.
 - GUI egui untuk editing skematik, simulasi PB5, monitor UART TX,
-  graph digital, minimap, dan export PNG.
+  graph digital, minimap, export PNG, toolbar Tabler dengan mode ikon
+  saja, probe net mixed, grafik ADC/PWM, dan golden scene/grid/toolbar.
 - Co-sim AVR hybrid dengan peta 24 pin IO, ADC multi-channel, PWM
   multi-load, UART TX/RX line-level, dan queue event.
 - Library GUI memuat 6 komponen kurasi dan 500 entri katalog dengan 16 kategori, definisi pin, dan simbol SVG unik per entri.

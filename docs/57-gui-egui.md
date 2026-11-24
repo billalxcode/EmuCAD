@@ -17,12 +17,12 @@ recently used, net highlight, override warna wire, label net kustom,
 migrasi JSON v1, preview library, drag-and-drop library, ruler grid,
 probe tegangan PB5, arus LED, animasi aliran sinyal opsional, graph
 analog PB5/LED, sampling probe N cycle, batas 8 series, API probe
-read-only, spatial hash hit testing, app error type, toolbar ikon ASCII,
+read-only, spatial hash hit testing, app error type, toolbar ikon Tabler,
 simulasi PB5, graph digital PB5/LED dengan cursor, dan UART RX dari GUI
 juga sudah ada.
-Probe net generik memerlukan integrasi netlist; probe PB5 dan arus LED
-sudah berjalan melalui API read-only. Golden RGBA headless sudah ada
-dengan snapshot 320 x 240 dan prosedur di `docs/59-gui-golden.md`.
+Probe net generik tersedia di domain Mixed; probe PB5 dan arus LED
+berjalan melalui API read-only. Golden RGBA headless mencakup scene,
+grid, dan toolbar dengan prosedur di `docs/59-gui-golden.md`.
 Dependensi
 GUI yang disetujui hanya untuk crate `gui`: `egui`, `eframe`,
 `serde`, `serde_json`, `rfd`, dan `png`. `egui_plot`,
@@ -99,6 +99,19 @@ Keputusan yang sudah dikunci:
 - Sheet dapat dipin atau dilepas.
 - Test model, interaksi, dan golden image RGBA.
 - Plugin API berupa trait internal untuk komponen dan analisis.
+
+### 1.4 Ikon UI
+
+- Ikon chrome GUI memakai Tabler Icons 3.52.0 (MIT).
+- Asset di-vendor di `crates/gui/assets/icons/`; tidak ada akses CDN
+  atau crate ikon saat runtime.
+- Simbol skematik tetap berada di `crates/gui/assets/symbols/` dan
+  memakai pipeline SVG yang sama.
+- Tombol ikon selalu memiliki tooltip label dan shortcut bila ada.
+- Mode ikon saja tersedia untuk toolbar; tooltip tetap menjadi sumber
+  teks aksesibilitas.
+- Setiap ikon baru harus dicatat, diparse oleh `all_icons_parse`, dan
+  lolos audit lisensi di `NOTICE.md`.
 
 ---
 

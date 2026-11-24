@@ -203,7 +203,7 @@ Setiap dokumen muncul satu kali pada peta ini.
 | Versi workspace | `0.1.0` |
 | Tag | `v0.1` |
 | Test | 1349 lulus |
-| Crate | 10 |
+| Crate | 11 |
 | Dependensi eksternal | 0 untuk crate simulasi; `pyo3` hanya di `python` |
 | `unsafe` | Dilarang manual; glue `pyo3` diisolasi di `python` |
 | Build release | Lulus |

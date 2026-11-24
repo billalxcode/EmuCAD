@@ -9,9 +9,10 @@ Version: 3.52.0
 License: MIT, copyright (c) 2020-2026 Pawel Kuna. The name is an ASCII
 transliteration of the upstream license name.
 
-Only the icons listed in this directory are vendored. The full set is not
+Only the 76 SVG files in this directory are vendored. The full set is not
 included. Icons are used for GUI chrome and category affordances; schematic
-symbols remain in `../symbols/`.
+symbols remain in `../symbols/`. The files were fetched from the v3.52.0
+tag of the upstream `tabler/tabler-icons` repository.
 
 ## MIT License
 

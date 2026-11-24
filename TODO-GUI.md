@@ -106,7 +106,8 @@ Pekerjaan lanjutan dipetakan ke `TODO-UI.md` U8.
 - [x] G1-09 Tambahkan tema gelap, terang, high-DPI, dan aksen blue.
 - [x] G1-10 Test transformasi, zoom, snap, dan culling.
 - [x] G1-11 Implementasikan minimap opsional di kanan bawah.
-- [x] G1-12 Terapkan latar dark dotted dan toolbar ikon serta teks.
+- [x] G1-12 Terapkan latar dark dotted dan toolbar ikon serta teks,
+  termasuk mode ikon saja dengan tooltip.
 - [x] G1-13 Tampilkan koordinat, zoom, seleksi, sim time, dan FPS di status bar.
 - [x] G1-14 Gunakan Source Sans 3 untuk UI dan Source Code Pro untuk data teknis.
 - [x] G1-16 Terapkan design token warna, tipe, spacing, radius, dan kontrol.
@@ -288,7 +289,7 @@ data, dan semua aksi editing dapat di-undo.
 - [x] G9-06 Tambahkan interaction test dengan `egui::Context`.
 - [x] G9-07 Tulis user guide GUI dan screenshot.
 - [x] G9-08 Implementasikan export PNG melalui crate `png`.
-- [x] G9-09 Tambahkan golden image RGBA untuk scene dan grid.
+- [x] G9-09 Tambahkan golden image RGBA untuk scene, grid, dan toolbar.
 - [x] G9-10 Lengkapi test model, interaction, integrasi, dan visual.
 - [x] G9-11 Verifikasi kontras WCAG AA dan shortcut keyboard.
 - [x] G9-12 Sediakan minimap opsional dengan toggle.

@@ -28,7 +28,7 @@ Itu transliterasi dari nama pada lisensi upstream.
 
 - Lokasi: `crates/gui/assets/icons/`.
 - Format: SVG Tabler 24 x 24, stroke 2 px.
-- Jumlah saat ini: 77 ikon.
+- Jumlah saat ini: 76 ikon.
 - Semua file harus ASCII.
 - Versi dan sumber dicatat di `NOTICE.md`.
 
@@ -108,3 +108,23 @@ Sudah memakai ikon:
 ## 8. Rencana Lanjutan
 
 Lihat `TODO-UI.md` untuk rollout lengkap dan pemetaan per surface.
+
+## 9. Daftar Final
+
+Sumber kebenaran adalah `IconKind::ALL` dengan 76 varian. Setiap varian
+memiliki satu file SVG di `crates/gui/assets/icons/` dan tercatat di
+`NOTICE.md`.
+
+```text
+Undo, Redo, Open, Save, Png, LoadHex, Netlist, Dc, Transient, Run,
+Pause, Step, Reset, ZoomIn, ZoomOut, Fit, Grid, Map, Search,
+Settings, Help, Alert, Check, Close, Cpu, Resistor, Capacitor,
+Diode, Inductor, Database, Chart, Bug, Crosshair, Math, Ruler,
+Binary, FileText, Folder, Package, Trash, Copy, Cut, Clipboard, Sun,
+Moon, Pointer, Route, Palette, Export, AlignLeft, AlignRight,
+AlignTop, AlignBottom, AlignCenter, DistributeHorizontal,
+DistributeVertical, Battery, Transistor, Shield, SwitchClosed, Bolt,
+Temperature, Engine, Antenna, History, Filter, Rotate,
+FlipHorizontal, FlipVertical, Pencil, Junction, ArrowDown, ArrowUp,
+ArrowLeft, ArrowRight, WaveSquare
+```

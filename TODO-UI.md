@@ -2,10 +2,9 @@
 
 Backlog UI setelah migrasi ikon Tabler dan worker mixed.
 
-**Status:** U0 sampai U6 dan U8-01 sampai U8-11 selesai, kecuali
-U8-03b dan U8-04b yang terblokir model halaman dan anchor label. U7
-belum. Riset viewport dan grid KiCad selesai di
-`docs/96-viewport-grid.md`.
+**Status:** U0 sampai U8 selesai, kecuali U8-03b dan U8-04b yang
+terblokir model halaman dan anchor label. Riset viewport dan grid KiCad
+selesai di `docs/96-viewport-grid.md`.
 
 **Sumber kebenaran:**
 
@@ -168,12 +167,12 @@ Setiap ikon baru harus:
 
 ### U7 - Rilis dan Dokumentasi
 
-- [ ] U7-01 Perbarui `docs/57-gui-egui.md` dengan kebijakan ikon.
-- [ ] U7-02 Perbarui `docs/95-ui-icons.md` dengan daftar final.
-- [ ] U7-03 Perbarui `TODO-GUI.md` G1-12 dan G9 bila perlu.
-- [ ] U7-04 Perbarui `README.md` dan `docs/README.md`.
-- [ ] U7-05 Audit ulang lisensi Tabler dan `NOTICE.md`.
-- [ ] U7-06 Jalankan fmt, clippy, test, ASCII, dan packaging.
+- [x] U7-01 Perbarui `docs/57-gui-egui.md` dengan kebijakan ikon.
+- [x] U7-02 Perbarui `docs/95-ui-icons.md` dengan daftar final.
+- [x] U7-03 Perbarui `TODO-GUI.md` G1-12 dan G9 bila perlu.
+- [x] U7-04 Perbarui `README.md` dan `docs/README.md`.
+- [x] U7-05 Audit ulang lisensi Tabler dan `NOTICE.md`.
+- [x] U7-06 Jalankan fmt, clippy, test, ASCII, dan packaging.
 
 ### U8 - Viewport dan Grid (Referensi KiCad)
 
@@ -262,18 +261,18 @@ Batasan U8:
 
 ## 5. Definition of Done
 
-- [ ] Semua surface pada bagian 1 memiliki ikon atau alasan eksplisit
+- [x] Semua surface pada bagian 1 memiliki ikon atau alasan eksplisit
   untuk tetap teks.
-- [ ] Setiap icon button memiliki tooltip teks.
-- [ ] Semua ikon berasal dari Tabler dan tercatat di `NOTICE.md`.
-- [ ] Tidak ada crate ikon eksternal baru.
-- [ ] Semua SVG ASCII dan lolos test parse.
-- [ ] Mixed worker mendukung probe per net, ADC, dan PWM.
-- [ ] Grafik mixed deterministik dan diuji.
-- [ ] Toolbar, library, inspector, context menu, dan palette memakai
+- [x] Setiap icon button memiliki tooltip teks.
+- [x] Semua ikon berasal dari Tabler dan tercatat di `NOTICE.md`.
+- [x] Tidak ada crate ikon eksternal baru.
+- [x] Semua SVG ASCII dan lolos test parse.
+- [x] Mixed worker mendukung probe per net, ADC, dan PWM.
+- [x] Grafik mixed deterministik dan diuji.
+- [x] Toolbar, library, inspector, context menu, dan palette memakai
   ikon yang konsisten.
-- [ ] Viewport memakai batas zoom dan preset referensi KiCad.
-- [ ] Grid mendukung gaya, step, coarse tick, dan adaptive spacing.
-- [ ] Snap grid dan snap objek memiliki state serta indikator yang jelas.
-- [ ] Status bar menampilkan koordinat snapped, delta, grid, dan unit.
-- [ ] `fmt`, clippy, test, ASCII, dan packaging lulus.
+- [x] Viewport memakai batas zoom dan preset referensi KiCad.
+- [x] Grid mendukung gaya, step, coarse tick, dan adaptive spacing.
+- [x] Snap grid dan snap objek memiliki state serta indikator yang jelas.
+- [x] Status bar menampilkan koordinat snapped, delta, grid, dan unit.
+- [x] `fmt`, clippy, test, ASCII, dan packaging lulus.
