@@ -76,12 +76,14 @@ Sudah memakai ikon:
 - Inspector: aksi komponen, wire class, warna, label, dan delete.
 - Context menu: edit, transform, net, probe, chart, dan tool.
 - MCU pin mode: input, output, ADC, PWM, UART TX, dan UART RX.
+- Canvas view: zoom in/out, fit, grid, minimap, flow, unit, dan tema.
+- Status bar: crosshair, ruler, zoom, grid, snap, CPU, diode, FPS,
+  alert, dan check.
 - Panel simulasi: run, pause, step, dan reset.
 - Grafik AVR: run dan pause.
 
 Belum memakai ikon:
 
-- Status bar dan minimap.
 - Setting probe mixed.
 
 ## 6. Batas

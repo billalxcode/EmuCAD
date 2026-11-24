@@ -56,6 +56,26 @@ fn scene_renders_in_egui_context() {
 }
 
 #[test]
+fn snap_marker_overlay_renders_in_egui_context() {
+    let library = library::builtin();
+    let resistor = crate::library::find("resistor").expect("resistor");
+    let mut document = Document::new();
+    document.add(resistor, GridPos::new(0, 0), Rotation::Deg0, Mirror::None);
+    let selection = Selection::default();
+    let camera = crate::canvas::GridCamera::default();
+    let mut scene = sample_scene(&document, library, &selection);
+    scene.snap = Some(super::SnapMarker {
+        point: GridPos::new(1, 1),
+        kind: super::SnapKind::Junction,
+    });
+    let mut output = eframe::egui::Context::default().run_ui(test_input(), |ui| {
+        render_into(ui, scene, &camera);
+    });
+    output.textures_delta.clear();
+    assert!(!output.shapes.is_empty());
+}
+
+#[test]
 fn flow_overlay_renders_in_egui_context() {
     let output = sample_render_with(Some(12.0));
     assert!(!output.shapes.is_empty());

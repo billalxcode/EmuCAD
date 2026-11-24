@@ -50,6 +50,35 @@ fn palette_renders_with_icons() {
 }
 
 #[test]
+fn status_bar_renders_with_icons() {
+    let app = GuiApp::default();
+    let mut output =
+        eframe::egui::Context::default().run_ui(test_input(), |ui| app.status_contents(ui));
+    output.textures_delta.clear();
+    assert!(!output.shapes.is_empty());
+}
+
+#[test]
+fn view_controls_render_with_icons() {
+    let mut app = GuiApp::default();
+    let mut output = eframe::egui::Context::default().run_ui(test_input(), |ui| {
+        app.zoom_controls(ui);
+        app.view_options(ui);
+    });
+    output.textures_delta.clear();
+    assert!(!output.shapes.is_empty());
+}
+
+#[test]
+fn theme_preference_matches_flag() {
+    use eframe::egui::ThemePreference;
+    let light = crate::app::view::theme_preference(true);
+    let dark = crate::app::view::theme_preference(false);
+    assert_eq!(light, ThemePreference::Light);
+    assert_eq!(dark, ThemePreference::Dark);
+}
+
+#[test]
 fn tool_icons_are_distinct() {
     let icons: std::collections::BTreeSet<_> = Tool::ALL.iter().map(|tool| tool.icon()).collect();
     assert_eq!(icons.len(), Tool::ALL.len());

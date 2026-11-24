@@ -599,22 +599,30 @@ impl GuiApp {
         self.grid_menu(ui);
         self.units_control(ui);
         self.zoom_controls(ui);
-        ui.checkbox(&mut self.minimap_open, "Mini");
-        ui.checkbox(&mut self.flow_animation, "Flow");
+        toggle_button(ui, IconKind::Map, "Mini", &mut self.minimap_open);
+        toggle_button(ui, IconKind::Route, "Flow", &mut self.flow_animation);
         if self.flow_animation {
             ui.ctx().request_repaint();
         }
-        if ui.checkbox(&mut self.light_theme, "Light").changed() {
-            ui.ctx().set_theme(if self.light_theme {
-                egui::ThemePreference::Light
-            } else {
-                egui::ThemePreference::Dark
-            });
+        self.theme_button(ui);
+    }
+
+    fn theme_button(&mut self, ui: &mut egui::Ui) {
+        let (icon, label) = if self.light_theme {
+            (IconKind::Moon, "Dark")
+        } else {
+            (IconKind::Sun, "Light")
+        };
+        let button = icon_button(icon, label).selected(self.light_theme);
+        if ui.add(button).clicked() {
+            self.light_theme = !self.light_theme;
+            ui.ctx().set_theme(theme_preference(self.light_theme));
         }
     }
 
     fn grid_menu(&mut self, ui: &mut egui::Ui) {
         ui.menu_button(format!("Grid x{}", self.grid_step.label()), |ui| {
+            icon_heading(ui, IconKind::Grid, "Grid");
             ui.checkbox(&mut self.grid_visible, "Show grid");
             ui.separator();
             self.grid_style_choices(ui);
@@ -652,16 +660,36 @@ impl GuiApp {
     }
 
     fn units_control(&mut self, ui: &mut egui::Ui) {
-        egui::ComboBox::from_id_salt("units")
-            .selected_text(self.units.label())
-            .show_ui(ui, |ui| {
-                for units in Units::ALL {
-                    ui.selectable_value(&mut self.units, units, units.label());
-                }
-            });
+        ui.horizontal(|ui| {
+            icon_slot(ui, IconKind::Ruler);
+            egui::ComboBox::from_id_salt("units")
+                .selected_text(self.units.label())
+                .show_ui(ui, |ui| {
+                    for units in Units::ALL {
+                        ui.selectable_value(&mut self.units, units, units.label());
+                    }
+                });
+        });
     }
 
     pub(super) fn zoom_controls(&mut self, ui: &mut egui::Ui) {
+        let out = icon_button(IconKind::ZoomOut, "")
+            .tooltip("Zoom out")
+            .shortcut("F2");
+        if ui.add(out).clicked() {
+            self.zoom_to(self.camera.zoom / 1.3);
+        }
+        self.zoom_preset_combo(ui);
+        let zoom_in = icon_button(IconKind::ZoomIn, "")
+            .tooltip("Zoom in")
+            .shortcut("F1");
+        if ui.add(zoom_in).clicked() {
+            self.zoom_to(self.camera.zoom * 1.3);
+        }
+        self.fit_menu(ui);
+    }
+
+    fn zoom_preset_combo(&mut self, ui: &mut egui::Ui) {
         let current = self.camera.zoom;
         let mut chosen = current;
         egui::ComboBox::from_id_salt("zoom_preset")
@@ -674,17 +702,16 @@ impl GuiApp {
         if chosen != current {
             self.zoom_to(chosen);
         }
-        self.fit_menu(ui);
     }
 
     fn fit_menu(&mut self, ui: &mut egui::Ui) {
         ui.menu_button("Fit", |ui| {
-            for (label, target) in [
-                ("All", FitTarget::All),
-                ("Objects", FitTarget::Objects),
-                ("Selection", FitTarget::Selection),
+            for (label, target, icon) in [
+                ("All", FitTarget::All, IconKind::Fit),
+                ("Objects", FitTarget::Objects, IconKind::Package),
+                ("Selection", FitTarget::Selection, IconKind::Pointer),
             ] {
-                if ui.button(label).clicked() {
+                if ui.add(icon_button(icon, label)).clicked() {
                     self.fit_view(target);
                     ui.close();
                 }
@@ -818,6 +845,22 @@ impl GuiApp {
 
 pub(crate) fn fit_margin(rect: egui::Rect) -> f64 {
     if rect.height() < 768.0 { 1.10 } else { 1.04 }
+}
+
+fn toggle_button(ui: &mut egui::Ui, icon: IconKind, label: &'static str, value: &mut bool) {
+    let button = icon_button(icon, label).selected(*value);
+    if ui.add(button).clicked() {
+        *value = !*value;
+    }
+}
+
+/// Returns the egui theme preference for the light-theme flag.
+pub(crate) fn theme_preference(light: bool) -> egui::ThemePreference {
+    if light {
+        egui::ThemePreference::Light
+    } else {
+        egui::ThemePreference::Dark
+    }
 }
 
 fn panel_button(

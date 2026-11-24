@@ -2,8 +2,8 @@
 
 Backlog UI setelah migrasi ikon Tabler dan worker mixed.
 
-**Status:** U0, U1, U2, U3, dan U8-01 sampai U8-11 selesai, kecuali
-U8-03b dan U8-04b yang terblokir model halaman dan anchor label. U4
+**Status:** U0 sampai U4 dan U8-01 sampai U8-11 selesai, kecuali
+U8-03b dan U8-04b yang terblokir model halaman dan anchor label. U5
 sampai U7 belum. Riset viewport dan grid KiCad selesai di
 `docs/96-viewport-grid.md`.
 
@@ -137,12 +137,12 @@ Setiap ikon baru harus:
 
 ### U4 - Canvas dan Status
 
-- [ ] U4-01 Tambahkan ikon zoom in, zoom out, dan fit.
-- [ ] U4-02 Tambahkan ikon grid dan minimap.
-- [ ] U4-03 Tambahkan ikon probe dan crosshair.
-- [ ] U4-04 Tambahkan ikon status simulation dan FPS.
-- [ ] U4-05 Tambahkan ikon tema terang dan gelap.
-- [ ] U4-06 Test status bar dan overlay canvas.
+- [x] U4-01 Tambahkan ikon zoom in, zoom out, dan fit.
+- [x] U4-02 Tambahkan ikon grid dan minimap.
+- [x] U4-03 Tambahkan ikon probe dan crosshair.
+- [x] U4-04 Tambahkan ikon status simulation dan FPS.
+- [x] U4-05 Tambahkan ikon tema terang dan gelap.
+- [x] U4-06 Test status bar dan overlay canvas.
 
 ### U5 - Simulasi dan Mixed Worker
 

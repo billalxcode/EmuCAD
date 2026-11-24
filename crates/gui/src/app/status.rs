@@ -1,4 +1,12 @@
 use super::*;
+use crate::icons::IconKind;
+
+fn status_label(ui: &mut egui::Ui, icon: IconKind, text: impl Into<String>) {
+    ui.horizontal(|ui| {
+        icon_slot(ui, icon);
+        ui.label(text.into());
+    });
+}
 
 impl GuiApp {
     pub(super) fn status_bar(&mut self, ui: &mut egui::Ui) {
@@ -15,22 +23,25 @@ impl GuiApp {
             ui.separator();
             self.sim_status_labels(ui);
             ui.separator();
-            ui.label(self.fps_text(ui));
+            let fps = self.fps_text(ui);
+            status_label(ui, IconKind::Dc, fps);
         });
     }
 
     pub(super) fn view_status(&self, ui: &mut egui::Ui) {
-        ui.label(self.pointer_text());
+        status_label(ui, IconKind::Crosshair, self.pointer_text());
         ui.separator();
-        ui.label(self.delta_text());
+        status_label(ui, IconKind::Ruler, self.delta_text());
         ui.separator();
-        ui.label(format!("Zoom {:.0}%", self.camera.zoom * 100.0));
+        let zoom = format!("Zoom {:.0}%", self.camera.zoom * 100.0);
+        status_label(ui, IconKind::ZoomIn, zoom);
         ui.separator();
-        ui.label(format!("Grid x{}", self.grid_step.label()));
+        let grid = format!("Grid x{}", self.grid_step.label());
+        status_label(ui, IconKind::Grid, grid);
         ui.separator();
-        ui.label(self.snap_status());
+        status_label(ui, IconKind::Settings, self.snap_status());
         ui.separator();
-        ui.label(self.units.label());
+        status_label(ui, IconKind::Ruler, self.units.label());
     }
 
     pub(super) fn delta_text(&self) -> String {
@@ -80,17 +91,20 @@ impl GuiApp {
     fn dangling_status(&self, ui: &mut egui::Ui) {
         let count = self.document.dangling_endpoints(self.library).len();
         if count == 0 {
-            ui.label("Dangling 0");
+            status_label(ui, IconKind::Check, "Dangling 0");
             return;
         }
         let color = crate::design::palette_for(ui.ctx()).danger;
-        ui.colored_label(color, format!("Dangling {count}"));
+        ui.horizontal(|ui| {
+            icon_slot(ui, IconKind::Alert);
+            ui.colored_label(color, format!("Dangling {count}"));
+        });
     }
 
     pub(super) fn sim_status_labels(&self, ui: &mut egui::Ui) {
-        ui.label(self.sim_text());
+        status_label(ui, IconKind::Cpu, self.sim_text());
         ui.separator();
-        ui.label(self.led_text());
+        status_label(ui, IconKind::Diode, self.led_text());
     }
 
     pub(super) fn sim_text(&self) -> String {
