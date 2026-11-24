@@ -62,9 +62,12 @@ Jika perubahan visual disengaja:
 
 ## Batasan
 
-- Golden hanya divalidasi di Linux.
+- Snapshot golden hanya dibandingkan di Linux. Di macOS dan Windows,
+  perbandingan byte dilewati karena rasterisasi font berbeda; test
+  determinisme renderer tetap berjalan di semua platform.
 - Perubahan versi `egui`, font default, atau tessellator dapat mengubah
-  output dan memerlukan update golden.
+  output dan memerlukan update golden. Regenerasi golden dilakukan di
+  Linux.
 - Renderer test memakai rasterizer internal, bukan backend GPU `eframe`.
   Golden menjaga regresi scene dan teks, bukan kesamaan piksel dengan GPU.
 - Scene golden harus tetap deterministik: tanpa animasi, pointer, atau
@@ -76,7 +79,7 @@ Jika perubahan visual disengaja:
 - Tidak ada akses jaringan atau wall-clock.
 - Golden dapat diregenerasi dari commit yang sama.
 - Perbedaan byte dilaporkan dengan jumlah byte yang berbeda.
-- Ukuran file harus sama dengan 320 x 240 x 4 byte.
+- Ukuran scene dan grid 320 x 240 x 4 byte; toolbar 2400 x 120 x 4 byte.
 
 ## Referensi
 

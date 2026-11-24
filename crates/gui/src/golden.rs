@@ -407,6 +407,12 @@ mod tests {
     }
 
     fn check_golden(image: &[u8], path: std::path::PathBuf, width: usize) {
+        // Font rasterization differs between platforms. Committed snapshots
+        // are generated and compared on Linux; other platforms still run the
+        // deterministic renderer test above.
+        if !cfg!(target_os = "linux") {
+            return;
+        }
         if std::env::var_os("UPDATE_GOLDEN").is_some() {
             if let Some(parent) = path.parent() {
                 std::fs::create_dir_all(parent).expect("golden dir");
