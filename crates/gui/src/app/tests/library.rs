@@ -112,6 +112,44 @@ fn library_value_omits_duplicate_names() {
 }
 
 #[test]
+fn every_category_has_a_vendored_icon() {
+    for category in crate::model::Category::ALL {
+        let icon = crate::app::library_ui::category_icon(category);
+        assert!(crate::icons::IconKind::ALL.contains(&icon));
+    }
+}
+
+#[test]
+fn library_rows_report_model_status() {
+    use crate::netlist::{ModelStatus, model_status};
+    let resistor = crate::library::find("resistor").expect("resistor");
+    let gnd = crate::library::find("gnd").expect("gnd");
+    let behavioral =
+        crate::library::find("source.behavioral.behavioral_voltage_source").expect("behavioral");
+    assert_eq!(model_status(resistor), ModelStatus::Device);
+    assert_eq!(model_status(gnd), ModelStatus::Marker);
+    assert_eq!(model_status(behavioral), ModelStatus::Unsupported);
+}
+
+#[test]
+fn library_search_field_renders() {
+    let (_, output) = run_library_ui(400.0, 100.0, |ui| {
+        let mut search = "led".to_string();
+        crate::app::library_ui::search_field(ui, &mut search);
+    });
+    assert!(!output.shapes.is_empty());
+}
+
+#[test]
+fn category_buttons_render_with_icons() {
+    let (_, output) = run_library_ui(600.0, 300.0, |ui| {
+        let mut category = Some(crate::model::Category::Passive);
+        crate::app::library_ui::category_buttons(ui, &mut category);
+    });
+    assert!(output.shapes.len() > crate::model::Category::ALL.len());
+}
+
+#[test]
 fn library_rows_use_a_fixed_height() {
     assert_eq!(crate::design::ROW_HEIGHT, 28.0);
     let definitions = crate::library::builtin();

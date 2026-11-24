@@ -28,7 +28,7 @@ Itu transliterasi dari nama pada lisensi upstream.
 
 - Lokasi: `crates/gui/assets/icons/`.
 - Format: SVG Tabler 24 x 24, stroke 2 px.
-- Jumlah saat ini: 57 ikon.
+- Jumlah saat ini: 67 ikon.
 - Semua file harus ASCII.
 - Versi dan sumber dicatat di `NOTICE.md`.
 
@@ -43,6 +43,8 @@ Ikon mencakup:
 - Tool: pointer, route.
 - Layout: palette, export, align kiri/kanan/atas/bawah/center, dan
   distribute horizontal/vertikal.
+- Library: battery, transistor, shield, switch, bolt, temperature,
+  engine, antenna, history, dan filter.
 
 ## 4. Integrasi
 
@@ -68,12 +70,12 @@ Sudah memakai ikon:
 - Toolbar tool: select, place, wire, probe, dan zoom.
 - Toolbar sheet: library, inspector, dan legend.
 - Command palette: ikon per command dan hint shortcut.
+- Library: kategori, search, clear, recent, filter, dan status model.
 - Panel simulasi: run, pause, step, dan reset.
 - Grafik AVR: run dan pause.
 
 Belum memakai ikon:
 
-- Kategori library.
 - Inspector dan context menu.
 - Kontrol wire, junction, dan probe.
 - Status bar dan minimap.

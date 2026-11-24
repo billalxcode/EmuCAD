@@ -2,8 +2,8 @@
 
 Backlog UI setelah migrasi ikon Tabler dan worker mixed.
 
-**Status:** U0, U1, dan U8-01 sampai U8-11 selesai, kecuali U8-03b dan
-U8-04b yang terblokir model halaman dan anchor label. U2 sampai U7
+**Status:** U0, U1, U2, dan U8-01 sampai U8-11 selesai, kecuali U8-03b
+dan U8-04b yang terblokir model halaman dan anchor label. U3 sampai U7
 belum. Riset viewport dan grid KiCad selesai di
 `docs/96-viewport-grid.md`.
 
@@ -119,12 +119,12 @@ Setiap ikon baru harus:
 
 ### U2 - Library
 
-- [ ] U2-01 Petakan 16 kategori ke ikon Tabler.
-- [ ] U2-02 Tambahkan ikon kategori pada header library.
-- [ ] U2-03 Tambahkan ikon search dan clear pada kolom pencarian.
-- [ ] U2-04 Tambahkan ikon recent dan filter.
-- [ ] U2-05 Tambahkan indikator status model per baris.
-- [ ] U2-06 Test filter kategori dengan ikon.
+- [x] U2-01 Petakan 16 kategori ke ikon Tabler.
+- [x] U2-02 Tambahkan ikon kategori pada header library.
+- [x] U2-03 Tambahkan ikon search dan clear pada kolom pencarian.
+- [x] U2-04 Tambahkan ikon recent dan filter.
+- [x] U2-05 Tambahkan indikator status model per baris.
+- [x] U2-06 Test filter kategori dengan ikon.
 
 ### U3 - Inspector dan Context Menu
 

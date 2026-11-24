@@ -293,10 +293,13 @@ Setiap instance memiliki:
 - Kategori: Board, Passive, Source, Diode, Transistor, Protection,
   Switch, Analog, Logic, Memory, MCU, Power, Sensor, Actuator, RF, dan
   Behavioral.
-- Pencarian nama dan kategori.
+- Pencarian nama dan kategori dengan ikon search dan clear.
+- Setiap kategori memakai ikon Tabler; tombol All memakai ikon filter.
+- Status model per baris: hijau device, warning net marker, danger tanpa
+  model. Tooltip baris menampilkan nama dan status model.
 - Preview simbol.
 - Drag-and-drop ke canvas atau klik lalu tempatkan.
-- Recently used.
+- Recently used dengan ikon history dan package.
 - Filter berdasarkan tipe pin atau domain sinyal.
 - Simbol bawaan untuk MVP; editor simbol belum tersedia.
 - Simbol dimuat dari aset SVG di `crates/gui/assets/symbols/`.

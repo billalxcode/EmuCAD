@@ -83,6 +83,16 @@ icon_assets! {
     AlignCenter => "layout-align-center.svg",
     DistributeHorizontal => "layout-distribute-horizontal.svg",
     DistributeVertical => "layout-distribute-vertical.svg",
+    Battery => "circuit-battery.svg",
+    Transistor => "circuit-changeover.svg",
+    Shield => "shield.svg",
+    SwitchClosed => "circuit-switch-closed.svg",
+    Bolt => "bolt.svg",
+    Temperature => "temperature.svg",
+    Engine => "engine.svg",
+    Antenna => "antenna.svg",
+    History => "history.svg",
+    Filter => "filter.svg",
 }
 
 static ICONS: OnceLock<BTreeMap<IconKind, SvgSymbol>> = OnceLock::new();

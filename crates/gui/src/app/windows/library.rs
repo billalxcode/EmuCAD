@@ -71,11 +71,12 @@ impl GuiApp {
         if self.recent_components.is_empty() {
             return None;
         }
-        ui.label("Recent");
+        icon_heading(ui, crate::icons::IconKind::History, "Recent");
         let mut chosen = None;
         ui.horizontal_wrapped(|ui| {
             for definition in &self.recent_components {
-                if ui.button(definition.name).clicked() {
+                let button = icon_button(crate::icons::IconKind::Package, definition.name);
+                if ui.add(button).clicked() {
                     chosen = Some(*definition);
                 }
             }
@@ -90,7 +91,7 @@ impl GuiApp {
         search: &mut String,
         category: &mut Option<Category>,
     ) {
-        ui.text_edit_singleline(search);
+        search_field(ui, search);
         ui.horizontal_wrapped(|ui| category_buttons(ui, category));
     }
 }

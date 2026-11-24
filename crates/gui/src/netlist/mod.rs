@@ -493,6 +493,30 @@ fn part_kind(definition: &ComponentDefinition) -> PartKind {
     }
 }
 
+/// Model availability shown by the library rows.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum ModelStatus {
+    Device,
+    Marker,
+    Unsupported,
+}
+
+/// Classifies a definition for the library status indicator.
+#[must_use]
+pub(crate) fn model_status(definition: &ComponentDefinition) -> ModelStatus {
+    match part_kind(definition) {
+        PartKind::Mcu => ModelStatus::Device,
+        PartKind::Vcc | PartKind::Gnd => ModelStatus::Marker,
+        PartKind::Device => {
+            if device_spec(definition).is_ok() {
+                ModelStatus::Device
+            } else {
+                ModelStatus::Unsupported
+            }
+        }
+    }
+}
+
 fn device_spec(definition: &ComponentDefinition) -> Result<&'static ComponentSpec, NetlistError> {
     let part = builtin_part(definition.id).unwrap_or(definition.id);
     let spec = part_spec(part)
