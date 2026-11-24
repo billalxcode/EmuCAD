@@ -41,13 +41,7 @@ impl GuiApp {
             self.message = "Save cancelled".to_string();
             return;
         };
-        match persist::save_with_analysis(
-            &path,
-            &self.document,
-            &self.camera,
-            self.grid_visible,
-            self.analysis_state(),
-        ) {
+        match self.save_current(&path) {
             Ok(()) => {
                 let warning = self.store_transient(&path);
                 self.after_save(path);
@@ -57,6 +51,16 @@ impl GuiApp {
             }
             Err(error) => self.message = error,
         }
+    }
+
+    fn save_current(&self, path: &Path) -> Result<(), String> {
+        persist::save_with_view(
+            path,
+            &self.document,
+            &self.camera,
+            self.view_settings(),
+            self.analysis_state(),
+        )
     }
 
     pub(super) fn after_save(&mut self, path: PathBuf) {
@@ -169,13 +173,7 @@ impl GuiApp {
             self.message = "File changed on disk".to_string();
             return;
         }
-        match persist::save_with_analysis(
-            &path,
-            &self.document,
-            &self.camera,
-            self.grid_visible,
-            self.analysis_state(),
-        ) {
+        match self.save_current(&path) {
             Ok(()) => {
                 let warning = self.store_transient(&path);
                 self.finish_autosave(&path);
@@ -284,10 +282,29 @@ impl GuiApp {
         }
     }
 
+    fn view_settings(&self) -> persist::ViewSettings {
+        persist::ViewSettings {
+            grid_visible: self.grid_visible,
+            grid_step: self.grid_step,
+            fast_grid_1: self.fast_grid_1,
+            fast_grid_2: self.fast_grid_2,
+            grid_style: self.grid_style,
+            grid_axes: self.grid_axes,
+            grid_rulers: self.grid_rulers,
+            grid_line_width: self.grid_line_width,
+            grid_min_spacing: self.grid_min_spacing,
+            crosshair: self.crosshair,
+            units: self.units,
+            local_origin: [self.local_origin.x, self.local_origin.y],
+            snap_mode: self.snap_mode,
+            snap_objects: self.snap_objects,
+        }
+    }
+
     pub(super) fn apply_project(&mut self, project: persist::Project, path: PathBuf) {
         self.document = project.document;
         self.camera = project.camera;
-        self.grid_visible = project.grid_visible;
+        self.apply_view_settings(project.view);
         self.apply_analysis_state(project.analysis);
         self.reset_transient();
         self.history.clear();
@@ -297,6 +314,23 @@ impl GuiApp {
         self.dirty = false;
         self.last_edit = None;
         self.message = "Loaded".to_string();
+    }
+
+    fn apply_view_settings(&mut self, view: persist::ViewSettings) {
+        self.grid_visible = view.grid_visible;
+        self.grid_step = view.grid_step;
+        self.fast_grid_1 = view.fast_grid_1;
+        self.fast_grid_2 = view.fast_grid_2;
+        self.grid_style = view.grid_style;
+        self.grid_axes = view.grid_axes;
+        self.grid_rulers = view.grid_rulers;
+        self.grid_line_width = view.grid_line_width;
+        self.grid_min_spacing = view.grid_min_spacing;
+        self.crosshair = view.crosshair;
+        self.units = view.units;
+        self.local_origin = GridPos::new(view.local_origin[0], view.local_origin[1]);
+        self.snap_mode = view.snap_mode;
+        self.snap_objects = view.snap_objects;
     }
 
     pub(super) fn open_hex(&mut self) {

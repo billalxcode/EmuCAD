@@ -642,7 +642,20 @@ Contoh skema:
   "view": {
     "pan": [0.0, 0.0],
     "zoom": 1.0,
-    "grid_visible": true
+    "grid_visible": true,
+    "grid_step": 1,
+    "fast_grid_1": 1,
+    "fast_grid_2": 10,
+    "grid_style": "dots",
+    "grid_axes": false,
+    "grid_rulers": true,
+    "grid_line_width": 1.0,
+    "grid_min_spacing": 10.0,
+    "crosshair": "small",
+    "units": "mils",
+    "local_origin": [0, 0],
+    "snap_mode": "always",
+    "snap_objects": true
   },
   "components": [
     {

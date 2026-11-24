@@ -575,13 +575,22 @@ belum dikerjakan.
 Proyek menyimpan:
 
 ```
-view.grid = {
-  visible: bool,
-  step: 1,
-  style: "dots",
-  axes: bool,
-  crosshair: "small",
-  snap: "always",
+view = {
+  pan: [f64; 2],
+  zoom: f64,
+  grid_visible: bool,
+  grid_step: u32,
+  fast_grid_1: u32,
+  fast_grid_2: u32,
+  grid_style: "dots" | "lines" | "cross",
+  grid_axes: bool,
+  grid_rulers: bool,
+  grid_line_width: f32,
+  grid_min_spacing: f32,
+  crosshair: "small" | "full" | "diagonal",
+  units: "mils" | "millimeters" | "logical",
+  local_origin: [i32; 2],
+  snap_mode: "always" | "with_grid" | "never",
   snap_objects: bool
 }
 ```
@@ -590,9 +599,8 @@ Field baru memakai default jika tidak ada, sehingga proyek lama tetap
 bisa dibuka. Format versi tidak perlu dinaikkan jika semua field
 opsional.
 
-U8-08 sudah menyediakan dialog Grid Settings untuk step, fast grid, gaya,
-ketebalan, min spacing, axes, rulers, crosshair, unit, dan local origin.
-Field tersebut belum disimpan; persistensi masuk U8-09.
+U8-08 menyediakan dialog Grid Settings. U8-09 menyimpan seluruh field
+tersebut melalui `ViewSettings` dan memakai default untuk JSON lama.
 
 ## 8. Rencana Verifikasi
 
@@ -639,6 +647,9 @@ U8-07 sudah ditutup oleh test format mils, mm, unit logis, dan delta
 terhadap local origin.
 
 U8-08 sudah ditutup oleh smoke test render dialog Grid Settings.
+
+U8-09 sudah ditutup oleh round-trip `ViewSettings`, default untuk JSON
+lama, dan test pemetaan `apply_project`.
 
 ## 9. Batas dan Risiko
 

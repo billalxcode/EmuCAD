@@ -1,7 +1,7 @@
 //! JSON project persistence for the GUI.
 
 use crate::analysis::AnalysisState;
-use crate::canvas::{DVec2, GridCamera};
+use crate::canvas::{CrosshairMode, DVec2, GridCamera, GridStep, GridStyle, SnapMode, Units};
 use crate::model::{
     ComponentDefinition, ComponentId, ComponentInstance, Document, GridPos, McuPinMode, Mirror,
     NetClass, Rotation, Wire,
@@ -17,8 +17,49 @@ const VERSION: u32 = 2;
 pub struct Project {
     pub document: Document,
     pub camera: GridCamera,
-    pub grid_visible: bool,
+    pub(crate) view: ViewSettings,
     pub analysis: AnalysisState,
+}
+
+/// Persisted view and grid settings.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub(crate) struct ViewSettings {
+    pub(crate) grid_visible: bool,
+    pub(crate) grid_step: GridStep,
+    pub(crate) fast_grid_1: GridStep,
+    pub(crate) fast_grid_2: GridStep,
+    pub(crate) grid_style: GridStyle,
+    pub(crate) grid_axes: bool,
+    pub(crate) grid_rulers: bool,
+    pub(crate) grid_line_width: f32,
+    pub(crate) grid_min_spacing: f32,
+    pub(crate) crosshair: CrosshairMode,
+    pub(crate) units: Units,
+    pub(crate) local_origin: [i32; 2],
+    pub(crate) snap_mode: SnapMode,
+    pub(crate) snap_objects: bool,
+}
+
+impl Default for ViewSettings {
+    fn default() -> Self {
+        Self {
+            grid_visible: true,
+            grid_step: GridStep::default(),
+            fast_grid_1: GridStep::ALL[0],
+            fast_grid_2: GridStep::ALL[3],
+            grid_style: GridStyle::Dots,
+            grid_axes: false,
+            grid_rulers: true,
+            grid_line_width: 1.0,
+            grid_min_spacing: 10.0,
+            crosshair: CrosshairMode::Small,
+            units: Units::Mils,
+            local_origin: [0, 0],
+            snap_mode: SnapMode::Always,
+            snap_objects: true,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -33,12 +74,12 @@ struct ProjectFile {
     analysis: AnalysisState,
 }
 
-#[derive(Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Default, Serialize, Deserialize)]
 struct ViewFile {
     pan: [f64; 2],
     zoom: f64,
-    grid_visible: bool,
+    #[serde(flatten)]
+    view: ViewSettings,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -80,20 +121,35 @@ pub fn to_json(
 }
 
 /// Serializes the project with explicit analysis settings.
+#[cfg(test)]
 pub fn to_json_with_analysis(
     document: &Document,
     camera: &GridCamera,
     grid_visible: bool,
     analysis: AnalysisState,
 ) -> Result<String, String> {
-    let file = project_file(document, camera, grid_visible, analysis);
+    let view = ViewSettings {
+        grid_visible,
+        ..ViewSettings::default()
+    };
+    to_json_with_view(document, camera, view, analysis)
+}
+
+/// Serializes the project with explicit view settings.
+pub(crate) fn to_json_with_view(
+    document: &Document,
+    camera: &GridCamera,
+    view: ViewSettings,
+    analysis: AnalysisState,
+) -> Result<String, String> {
+    let file = project_file(document, camera, view, analysis);
     serde_json::to_string_pretty(&file).map_err(|error| error.to_string())
 }
 
 fn project_file(
     document: &Document,
     camera: &GridCamera,
-    grid_visible: bool,
+    view: ViewSettings,
     analysis: AnalysisState,
 ) -> ProjectFile {
     ProjectFile {
@@ -102,7 +158,7 @@ fn project_file(
         view: ViewFile {
             pan: [camera.pan.x, camera.pan.y],
             zoom: camera.zoom,
-            grid_visible,
+            view,
         },
         components: component_files(document),
         wires: wire_files(document),
@@ -135,10 +191,11 @@ pub fn from_json(text: &str, library: &[ComponentDefinition]) -> Result<Project,
     let components = file.components(library)?;
     let mut document = Document::restore(components, Vec::new());
     file.wires(&mut document, library)?;
+    let view = file.view.settings();
     Ok(Project {
         document,
         camera: file.view.camera(),
-        grid_visible: file.view.grid_visible,
+        view,
         analysis: file.analysis,
     })
 }
@@ -161,6 +218,7 @@ pub fn save(
 }
 
 /// Saves a project with explicit analysis settings.
+#[cfg(test)]
 pub fn save_with_analysis(
     path: &Path,
     document: &Document,
@@ -169,6 +227,19 @@ pub fn save_with_analysis(
     analysis: AnalysisState,
 ) -> Result<(), String> {
     let text = to_json_with_analysis(document, camera, grid_visible, analysis)?;
+    backup(path)?;
+    write_atomic(path, &text)
+}
+
+/// Saves a project with explicit view settings.
+pub(crate) fn save_with_view(
+    path: &Path,
+    document: &Document,
+    camera: &GridCamera,
+    view: ViewSettings,
+    analysis: AnalysisState,
+) -> Result<(), String> {
+    let text = to_json_with_view(document, camera, view, analysis)?;
     backup(path)?;
     write_atomic(path, &text)
 }
@@ -247,6 +318,10 @@ impl ProjectFile {
 }
 
 impl ViewFile {
+    fn settings(&self) -> ViewSettings {
+        self.view
+    }
+
     fn camera(&self) -> GridCamera {
         GridCamera {
             pan: DVec2::new(self.pan[0], self.pan[1]),
@@ -370,9 +445,12 @@ fn parse_class(value: &str) -> Result<NetClass, String> {
 
 #[cfg(test)]
 mod tests {
-    use super::{backup_path, from_json, save, to_json, to_json_with_analysis};
+    use super::{
+        ViewSettings, backup_path, from_json, save, to_json, to_json_with_analysis,
+        to_json_with_view,
+    };
     use crate::analysis::AnalysisState;
-    use crate::canvas::{DVec2, GridCamera};
+    use crate::canvas::{CrosshairMode, DVec2, GridCamera, GridStep, GridStyle, SnapMode, Units};
     use crate::library;
     use crate::model::{Document, GridPos, Mirror, NetClass, Rotation};
     use std::path::PathBuf;
@@ -415,6 +493,50 @@ mod tests {
         assert_eq!(project.document.wires()[0].label.as_deref(), Some("LED_A"));
     }
 
+    fn sample_view() -> ViewSettings {
+        ViewSettings {
+            grid_visible: false,
+            grid_step: GridStep::ALL[2],
+            fast_grid_1: GridStep::ALL[1],
+            fast_grid_2: GridStep::ALL[3],
+            grid_style: GridStyle::Cross,
+            grid_axes: true,
+            grid_rulers: false,
+            grid_line_width: 2.0,
+            grid_min_spacing: 20.0,
+            crosshair: CrosshairMode::Diagonal,
+            units: Units::Logical,
+            local_origin: [3, -4],
+            snap_mode: SnapMode::Never,
+            snap_objects: false,
+        }
+    }
+
+    #[test]
+    fn view_settings_round_trip() {
+        let view = sample_view();
+        let text = to_json_with_view(
+            &Document::new(),
+            &GridCamera::default(),
+            view,
+            AnalysisState::default(),
+        )
+        .expect("json");
+        assert!(text.contains("\"grid_step\""));
+        let project = from_json(&text, library::builtin()).expect("load");
+        assert_eq!(project.view, view);
+    }
+
+    #[test]
+    fn old_view_uses_grid_defaults() {
+        let text = r#"{"format":"emucad-gui","version":2,"view":{"pan":[0.0,0.0],"zoom":1.0,"grid_visible":true},"components":[],"wires":[]}"#;
+        let project = from_json(text, library::builtin()).expect("load");
+        assert_eq!(project.view.grid_step, GridStep::default());
+        assert_eq!(project.view.grid_style, GridStyle::Dots);
+        assert_eq!(project.view.crosshair, CrosshairMode::Small);
+        assert!(project.view.grid_rulers);
+    }
+
     #[test]
     fn camera_round_trips_zoom_and_pan() {
         let camera = GridCamera {
@@ -434,13 +556,13 @@ mod tests {
         let high = super::ViewFile {
             pan: [0.0, 0.0],
             zoom: 500.0,
-            grid_visible: true,
+            ..Default::default()
         };
         assert_eq!(high.camera().zoom, crate::canvas::MAX_ZOOM);
         let low = super::ViewFile {
             pan: [0.0, 0.0],
             zoom: -1.0,
-            grid_visible: true,
+            ..Default::default()
         };
         assert_eq!(low.camera().zoom, crate::canvas::MIN_ZOOM);
     }

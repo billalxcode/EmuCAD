@@ -12,28 +12,7 @@ pub(crate) fn palette(painter: &egui::Painter) -> crate::design::Palette {
     crate::design::palette_for(painter.ctx())
 }
 
-/// Crosshair shape drawn at the snapped cursor.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub enum CrosshairMode {
-    #[default]
-    Small,
-    Full,
-    Diagonal,
-}
-
-impl CrosshairMode {
-    pub const ALL: [Self; 3] = [Self::Small, Self::Full, Self::Diagonal];
-
-    /// Returns a short label.
-    #[must_use]
-    pub const fn label(self) -> &'static str {
-        match self {
-            Self::Small => "Small",
-            Self::Full => "Full",
-            Self::Diagonal => "Diagonal",
-        }
-    }
-}
+pub(crate) use crate::canvas::CrosshairMode;
 
 /// Source of the current snap point.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

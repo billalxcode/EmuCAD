@@ -55,7 +55,7 @@ impl GuiApp {
         });
         ui.horizontal(|ui| {
             ui.label("Crosshair");
-            for mode in scene::CrosshairMode::ALL {
+            for mode in CrosshairMode::ALL {
                 ui.radio_value(&mut self.crosshair, mode, mode.label());
             }
         });

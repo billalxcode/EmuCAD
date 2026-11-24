@@ -2,10 +2,10 @@
 
 Backlog UI setelah migrasi ikon Tabler dan worker mixed.
 
-**Status:** U0 dan U8-01 sampai U8-08 selesai. U1 sampai U7, U8-03b,
-U8-04b, U8-09, U8-10, dan U8-11 belum. Riset viewport dan grid KiCad
-selesai di `docs/96-viewport-grid.md`; sisa U8 antre setelah U1 sampai
-U7 atau setelah prioritas diubah.
+**Status:** U0 dan U8-01 sampai U8-09 selesai. U1 sampai U7, U8-03b,
+U8-04b, U8-10, dan U8-11 belum. Riset viewport dan grid KiCad selesai di
+`docs/96-viewport-grid.md`; sisa U8 antre setelah U1 sampai U7 atau
+setelah prioritas diubah.
 
 **Sumber kebenaran:**
 
@@ -213,8 +213,9 @@ U8 mengatur perilaku viewport dan grid.
 - [x] U8-08 Tambahkan dialog Grid Settings: daftar preset, grid aktif,
   dua fast grid, gaya, ketebalan, min spacing, axes, rulers, crosshair,
   unit, dan local origin. Selesai lewat menu Grid > Settings.
-- [ ] U8-09 Simpan field grid baru di JSON proyek dengan default
-  kompatibel. Test proyek lama tanpa field baru.
+- [x] U8-09 Simpan field grid baru di JSON proyek dengan default
+  kompatibel. Test proyek lama tanpa field baru. Selesai lewat
+  `ViewSettings` dan `ViewFile` flatten.
 - [ ] U8-10 Tambahkan test transformasi, anchor zoom, clamp, preset, fit,
   snap origin, adaptive grid, coarse tick, cursor, dan persistensi.
 - [ ] U8-11 Perbarui `docs/57-gui-egui.md`, `docs/96-viewport-grid.md`,

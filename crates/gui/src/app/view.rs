@@ -662,7 +662,7 @@ impl GuiApp {
         egui::ComboBox::from_id_salt("crosshair_mode")
             .selected_text(self.crosshair.label())
             .show_ui(ui, |ui| {
-                for mode in scene::CrosshairMode::ALL {
+                for mode in CrosshairMode::ALL {
                     ui.selectable_value(&mut self.crosshair, mode, mode.label());
                 }
             });
