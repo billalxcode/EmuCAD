@@ -5,7 +5,7 @@ memory sudah punya model digital tetapi belum terverifikasi reference
 vector; MCU gate-level, integrasi mixed di GUI, dan co-sim S7 penuh
 belum selesai.
 
-Snapshot 2026-11-24: 1341 test lulus, 11 crate, branch `dev` sudah
+Snapshot 2026-11-24: 1344 test lulus, 11 crate, branch `dev` sudah
 di-push. `main` belum di-merge.
 
 Tujuan: membuat komponen di skematik GUI dapat disimulasikan dengan model
@@ -481,9 +481,11 @@ gate-level Rust yang dapat diaudit, dengan test dan batas performa.
   - Mode pin MCU dapat diatur di inspector dan disimpan di JSON proyek.
   - Domain Mixed menjalankan firmware secara sinkron dan melaporkan
     tegangan pin output.
-  - Worker mixed mendukung pause, step, reset, dan grafik inline
-    tegangan pin output.
-  - Probe per net, channel ADC, dan PWM belum masuk grafik.
+  - Worker mixed mendukung pause, step, reset, dan grafik inline untuk
+    pin output, channel ADC, PWM, dan probe net.
+  - Panel simulasi mengatur high, low, resistance, ADC reference, UART
+    threshold, dt, steps, durasi, dan probe net.
+  - Probe net divalidasi terhadap nama netlist dan disampel per langkah.
 - [x] S7-06 Hubungkan pin electrical sebagai Thevenin.
   - Satu pin AVR output diuji dengan resistor seri 45 ohm menuju RC.
   - `AvrPinMap` membawa config dan external resistance per pin.
@@ -634,7 +636,7 @@ dokumentasi menyebut batas fidelity.
 
 Status ringkas:
 
-- 1341 test lulus, 0 gagal melalui
+- 1344 test lulus, 0 gagal melalui
   `bash .opencode/skills/clean-code/scripts/check.sh`.
 - 11 crate; crate simulasi zero external dependency.
 - `fmt`, clippy `-D warnings`, dan pengecekan ASCII lulus.

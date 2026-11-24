@@ -1,5 +1,6 @@
 use super::*;
 use crate::icons::IconKind;
+use crate::mixed_worker::{MixedSample, MixedTrace};
 
 impl GuiApp {
     pub(crate) fn inspector_window(&mut self, ui: &mut egui::Ui) {
@@ -153,6 +154,10 @@ impl GuiApp {
         let mut open_transient = false;
         let status = self.netlist_status();
         let previous_domain = self.simulation_domain;
+        let mixed_nets = self.mixed_net_names();
+        let mut mixed = self.mixed;
+        let mut mixed_probes = self.mixed_probes.clone();
+        let mut mixed_settings = self.transient_settings;
         let domain = &mut self.simulation_domain;
         let previous = self.analysis_kind;
         let kind = &mut self.analysis_kind;
@@ -219,6 +224,13 @@ impl GuiApp {
                     }
                 });
                 if *domain == crate::analysis::SimulationDomain::Mixed {
+                    show_mixed_controls(
+                        ui,
+                        &mixed_nets,
+                        &mut mixed,
+                        &mut mixed_probes,
+                        &mut mixed_settings,
+                    );
                     show_mixed_summary(ui, mixed_trace);
                 } else if *kind == crate::analysis::AnalysisKind::Dc {
                     show_dc_results(ui, dc);
@@ -227,6 +239,11 @@ impl GuiApp {
                 }
             });
         self.simulation_open = open;
+        self.mixed = mixed;
+        self.mixed_probes = mixed_probes;
+        if self.transient_settings != mixed_settings {
+            self.transient_settings = mixed_settings;
+        }
         if self.analysis_kind != previous || self.simulation_domain != previous_domain {
             self.mark_dirty();
         }
@@ -331,31 +348,114 @@ fn show_transient_summary(
     }
 }
 
+fn show_mixed_controls(
+    ui: &mut egui::Ui,
+    nets: &[String],
+    mixed: &mut MixedSettings,
+    probes: &mut Vec<String>,
+    settings: &mut crate::transient::TransientSettings,
+) {
+    icon_heading(ui, IconKind::Settings, "Mixed settings");
+    show_mixed_levels(ui, mixed);
+    show_mixed_timing(ui, settings);
+    show_mixed_probes(ui, nets, probes);
+}
+
+fn show_mixed_levels(ui: &mut egui::Ui, mixed: &mut MixedSettings) {
+    egui::Grid::new("mixed_levels")
+        .num_columns(3)
+        .show(ui, |ui| {
+            mixed_number(ui, "High", &mut mixed.high, "V");
+            mixed_number(ui, "Low", &mut mixed.low, "V");
+            mixed_number(ui, "Resistance", &mut mixed.resistance, "ohm");
+            mixed_number(ui, "ADC ref", &mut mixed.adc_reference, "V");
+            mixed_number(ui, "UART threshold", &mut mixed.uart_threshold, "V");
+        });
+}
+
+fn mixed_number(ui: &mut egui::Ui, label: &str, value: &mut f64, unit: &str) {
+    ui.label(label);
+    ui.add(egui::DragValue::new(value).speed(0.1));
+    ui.label(unit);
+    ui.end_row();
+}
+
+fn show_mixed_timing(ui: &mut egui::Ui, settings: &mut crate::transient::TransientSettings) {
+    ui.horizontal(|ui| {
+        ui.label("dt");
+        ui.add(egui::DragValue::new(&mut settings.dt).speed(1e-6));
+        ui.label("s");
+        ui.label("steps");
+        ui.add(egui::DragValue::new(&mut settings.steps));
+    });
+    let duration = settings.dt * settings.steps as f64 * 1e3;
+    ui.label(format!("Duration {duration:.3} ms"));
+}
+
+fn show_mixed_probes(ui: &mut egui::Ui, nets: &[String], probes: &mut Vec<String>) {
+    icon_heading(ui, IconKind::Crosshair, "Net probes");
+    let mut chosen = None;
+    egui::ComboBox::from_id_salt("mixed_probe_net")
+        .selected_text("Add net")
+        .show_ui(ui, |ui| {
+            for name in nets {
+                if ui.selectable_label(false, name).clicked() {
+                    chosen = Some(name.clone());
+                }
+            }
+        });
+    if let Some(name) = chosen {
+        if !probes.contains(&name) {
+            probes.push(name);
+        }
+    }
+    show_mixed_probe_list(ui, probes);
+}
+
+fn show_mixed_probe_list(ui: &mut egui::Ui, probes: &mut Vec<String>) {
+    let mut remove = None;
+    ui.horizontal_wrapped(|ui| {
+        for name in probes.iter() {
+            let button = icon_button(IconKind::Close, name.clone()).tooltip("Remove probe");
+            if ui.add(button).clicked() {
+                remove = Some(name.clone());
+            }
+        }
+    });
+    if let Some(name) = remove {
+        probes.retain(|probe| *probe != name);
+    }
+}
+
 fn show_mixed_summary(ui: &mut egui::Ui, trace: Option<&crate::mixed_worker::MixedTrace>) {
     let Some(trace) = trace else {
         ui.label("No mixed result");
         return;
     };
-    ui.label(format!(
-        "Mixed: {} samples, {} output pins",
-        trace.samples.len(),
-        trace.outputs.len()
-    ));
+    icon_heading(ui, IconKind::Chart, "Mixed trace");
+    ui.label(format!("{} samples", trace.samples.len()));
     let Some(last) = trace.samples.last() else {
         return;
     };
-    for (index, &pin) in trace.outputs.iter().enumerate() {
-        let voltage = last
-            .outputs
-            .get(index)
-            .map_or(f64::NAN, |(_, value)| *value);
-        ui.label(format!("Pin {pin}: {voltage:.2} V"));
-    }
+    show_mixed_values(ui, trace, last);
     show_mixed_graph(ui, trace);
 }
 
-fn show_mixed_graph(ui: &mut egui::Ui, trace: &crate::mixed_worker::MixedTrace) {
-    if trace.samples.len() < 2 || trace.outputs.is_empty() {
+fn show_mixed_values(ui: &mut egui::Ui, trace: &MixedTrace, sample: &MixedSample) {
+    egui::Grid::new("mixed_values")
+        .num_columns(2)
+        .show(ui, |ui| {
+            for (index, label) in mixed_series_labels(trace).iter().enumerate() {
+                ui.label(label);
+                ui.label(format!("{:.2} V", mixed_series_value(trace, sample, index)));
+                ui.end_row();
+            }
+        });
+}
+
+fn show_mixed_graph(ui: &mut egui::Ui, trace: &MixedTrace) {
+    let count = mixed_series_labels(trace).len();
+    if trace.samples.len() < 2 || count == 0 {
         return;
     }
     let height = 120.0;
@@ -365,25 +465,67 @@ fn show_mixed_graph(ui: &mut egui::Ui, trace: &crate::mixed_worker::MixedTrace) 
     );
     let rect = response.rect;
     painter.rect_filled(rect, 0.0, egui::Color32::from_gray(20));
-    for series in 0..trace.outputs.len() {
+    for series in 0..count {
         let color = mixed_series_color(series);
         let points = mixed_series_points(rect, trace, series);
         painter.add(egui::Shape::line(points, egui::Stroke::new(1.0, color)));
     }
+    show_mixed_legend(ui, trace);
 }
 
-fn mixed_series_points(
-    rect: egui::Rect,
-    trace: &crate::mixed_worker::MixedTrace,
-    series: usize,
-) -> Vec<egui::Pos2> {
+fn show_mixed_legend(ui: &mut egui::Ui, trace: &MixedTrace) {
+    ui.horizontal_wrapped(|ui| {
+        for (index, label) in mixed_series_labels(trace).iter().enumerate() {
+            ui.colored_label(mixed_series_color(index), label);
+        }
+    });
+}
+
+fn mixed_series_labels(trace: &MixedTrace) -> Vec<String> {
+    let mut labels: Vec<String> = trace
+        .outputs
+        .iter()
+        .map(|pin| format!("Pin {pin}"))
+        .collect();
+    labels.extend(
+        trace
+            .adc_channels
+            .iter()
+            .map(|channel| format!("ADC {channel}")),
+    );
+    labels.extend(trace.pwm_pins.iter().map(|pin| format!("PWM {pin}")));
+    labels.extend(trace.probes.iter().cloned());
+    labels
+}
+
+fn mixed_series_value(trace: &MixedTrace, sample: &MixedSample, index: usize) -> f64 {
+    let mut offset = index;
+    if offset < trace.outputs.len() {
+        return sample
+            .outputs
+            .get(offset)
+            .map_or(f64::NAN, |(_, value)| *value);
+    }
+    offset -= trace.outputs.len();
+    if offset < trace.adc_channels.len() {
+        return sample.adcs.get(offset).copied().unwrap_or(f64::NAN);
+    }
+    offset -= trace.adc_channels.len();
+    if offset < trace.pwm_pins.len() {
+        return sample.pwms.get(offset).copied().unwrap_or(f64::NAN);
+    }
+    offset -= trace.pwm_pins.len();
+    sample.probes.get(offset).copied().unwrap_or(f64::NAN)
+}
+
+fn mixed_series_points(rect: egui::Rect, trace: &MixedTrace, series: usize) -> Vec<egui::Pos2> {
     let last = (trace.samples.len() - 1) as f32;
     trace
         .samples
         .iter()
         .enumerate()
         .map(|(index, sample)| {
-            let voltage = sample.outputs.get(series).map_or(0.0, |(_, value)| *value);
+            let voltage = mixed_series_value(trace, sample, series);
             let x = rect.left() + rect.width() * (index as f32 / last);
             let y = rect.bottom() - rect.height() * (voltage.clamp(0.0, 5.0) as f32 / 5.0);
             egui::pos2(x, y)
@@ -401,4 +543,61 @@ fn mixed_series_color(series: usize) -> egui::Color32 {
         egui::Color32::CYAN,
     ];
     COLORS[series % COLORS.len()]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{mixed_series_labels, mixed_series_value, show_mixed_controls, show_mixed_summary};
+    use crate::mixed_worker::{MixedSample, MixedTrace};
+
+    fn sample(output: f64, adc: f64, pwm: f64, probes: [f64; 2]) -> MixedSample {
+        MixedSample {
+            time: kernel::Time::ZERO,
+            cycles: 0,
+            outputs: vec![(17, output)],
+            adcs: vec![adc],
+            pwms: vec![pwm],
+            probes: probes.to_vec(),
+        }
+    }
+
+    fn trace() -> MixedTrace {
+        MixedTrace {
+            outputs: vec![17],
+            adc_channels: vec![0],
+            pwm_pins: vec![5],
+            probes: vec!["VOUT".to_string(), "VIN".to_string()],
+            samples: vec![sample(5.0, 2.5, 1.0, [3.0, 4.0])],
+        }
+    }
+
+    #[test]
+    fn mixed_series_cover_outputs_adc_pwm_and_probes() {
+        let trace = trace();
+        assert_eq!(
+            mixed_series_labels(&trace),
+            vec!["Pin 17", "ADC 0", "PWM 5", "VOUT", "VIN"]
+        );
+        let sample = &trace.samples[0];
+        assert_eq!(mixed_series_value(&trace, sample, 0), 5.0);
+        assert_eq!(mixed_series_value(&trace, sample, 1), 2.5);
+        assert_eq!(mixed_series_value(&trace, sample, 2), 1.0);
+        assert_eq!(mixed_series_value(&trace, sample, 3), 3.0);
+        assert_eq!(mixed_series_value(&trace, sample, 4), 4.0);
+    }
+
+    #[test]
+    fn mixed_summary_and_controls_render() {
+        let trace = trace();
+        let mut mixed = crate::app::MixedSettings::default();
+        let mut probes = Vec::new();
+        let mut settings = crate::transient::TransientSettings::default();
+        let nets = vec!["0".to_string(), "VOUT".to_string()];
+        let mut output = eframe::egui::Context::default().run_ui(Default::default(), |ui| {
+            show_mixed_controls(ui, &nets, &mut mixed, &mut probes, &mut settings);
+            show_mixed_summary(ui, Some(&trace));
+        });
+        output.textures_delta.clear();
+        assert!(!output.shapes.is_empty());
+    }
 }

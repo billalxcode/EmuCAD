@@ -30,6 +30,8 @@ pub(crate) struct MixedPinPlan {
     pub adc_reference: f64,
     /// UART RX threshold voltage.
     pub uart_threshold: f64,
+    /// Net names sampled on every mixed step.
+    pub probes: Vec<String>,
 }
 
 /// Builds a mixed AVR and analog session from a netlist.
@@ -40,6 +42,7 @@ pub(crate) fn build_mixed_session(
     config: &TransientConfig,
 ) -> Result<AvrSession, String> {
     validate_plan(plan)?;
+    probe_nodes(netlist, &plan.probes)?;
     let sources = source_pins(plan)?;
     let (circuit, source_ids) = build_circuit_with_sources(netlist, &sources)?;
     let pins = output_links(netlist, plan, &source_ids)?;
@@ -210,6 +213,30 @@ fn pin_node(netlist: &Netlist, pin: u8) -> Result<NodeId, String> {
         .get(&pin)
         .ok_or_else(|| format!("MCU pin {pin} is not mapped"))?;
     let raw = u32::try_from(*node).map_err(|_| "MCU node index out of range".to_string())?;
+    Ok(NodeId::new(raw))
+}
+
+/// Resolves net probe names to analog node identifiers.
+pub(crate) fn probe_nodes(
+    netlist: &Netlist,
+    names: &[String],
+) -> Result<Vec<(String, NodeId)>, String> {
+    names
+        .iter()
+        .map(|name| Ok((name.clone(), probe_node(netlist, name)?)))
+        .collect()
+}
+
+fn probe_node(netlist: &Netlist, name: &str) -> Result<NodeId, String> {
+    if name.trim().is_empty() {
+        return Err("mixed probe name is empty".to_string());
+    }
+    let index = netlist
+        .nodes
+        .iter()
+        .position(|node| node.name == name)
+        .ok_or_else(|| format!("unknown mixed probe: {name}"))?;
+    let raw = u32::try_from(index).map_err(|_| "probe node index out of range".to_string())?;
     Ok(NodeId::new(raw))
 }
 

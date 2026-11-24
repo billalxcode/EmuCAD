@@ -79,12 +79,9 @@ Sudah memakai ikon:
 - Canvas view: zoom in/out, fit, grid, minimap, flow, unit, dan tema.
 - Status bar: crosshair, ruler, zoom, grid, snap, CPU, diode, FPS,
   alert, dan check.
-- Panel simulasi: run, pause, step, dan reset.
+- Panel simulasi: run, pause, step, reset, dan pengaturan mixed.
+- Mixed panel: settings, probe net, dan chart trace.
 - Grafik AVR: run dan pause.
-
-Belum memakai ikon:
-
-- Setting probe mixed.
 
 ## 6. Batas
 

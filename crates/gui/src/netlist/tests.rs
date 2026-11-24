@@ -147,6 +147,7 @@ fn mixed_plan() -> MixedPinPlan {
         external_resistance: 1000.0,
         adc_reference: 5.0,
         uart_threshold: 2.5,
+        probes: Vec::new(),
     }
 }
 
@@ -165,6 +166,15 @@ fn builds_mixed_session_from_netlist() {
         session.step().expect("step");
     }
     assert!(session.node_voltage(0).unwrap_or(0.0) > 4.0);
+}
+
+#[test]
+fn mixed_probe_names_resolve_to_nodes() {
+    let netlist = extract(&mixed_mcu_document()).expect("netlist");
+    let names: Vec<String> = netlist.nodes.iter().map(|node| node.name.clone()).collect();
+    let probes = super::probe_nodes(&netlist, &names).expect("probes");
+    assert_eq!(probes.len(), names.len());
+    assert!(super::probe_nodes(&netlist, &["missing".to_string()]).is_err());
 }
 
 #[test]

@@ -369,8 +369,12 @@ Test `missing_schematic_reports_error` di worker mixed:
   sumber tersembunyi, ADC, PWM, dan UART.
 - Mode pin MCU diatur di inspector dan disimpan di JSON proyek.
 - Domain Mixed menjalankan firmware lewat worker dengan pause, step,
-  reset, dan grafik inline tegangan pin output.
-- Probe per net, channel ADC, dan PWM belum masuk grafik.
+  reset, dan grafik inline untuk pin output, channel ADC, PWM, dan probe
+  net.
+- Panel simulasi menyediakan high, low, external resistance, ADC
+  reference, UART threshold, dt, steps, durasi, dan pemilihan probe net.
+- Probe net disimpan sebagai nama net pada `MixedPinPlan`, divalidasi
+  terhadap netlist, lalu disampel setiap langkah lewat node analog.
 - Pin daya, reset, dan paket 32 pin belum disimulasikan secara elektrik.
 - Index pin pada session mengikuti urutan `links`, bukan nomor package.
 - Breakpoint pin berlaku untuk semua link yang terdaftar.

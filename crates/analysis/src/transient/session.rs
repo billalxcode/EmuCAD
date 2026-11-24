@@ -51,6 +51,12 @@ impl TransientSession {
         })
     }
 
+    /// Returns the last solved voltage of one node.
+    #[must_use]
+    pub fn node_voltage(&self, node: NodeId) -> Option<f64> {
+        self.solution.voltage(node)
+    }
+
     /// Advances one step and returns the sample.
     pub fn step(&mut self) -> Result<TransientSample, SimError> {
         if self.is_finished() {

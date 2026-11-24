@@ -5,7 +5,7 @@ use crate::netlist::{self, MixedPinPlan};
 use crate::transient::TransientSettings;
 use ::mixed::AvrSession;
 use analysis::TransientConfig;
-use kernel::Time;
+use kernel::{NodeId, Time};
 use std::sync::mpsc::{self, Receiver, Sender, TryRecvError};
 use std::thread::{self, JoinHandle};
 
@@ -17,12 +17,18 @@ pub(crate) struct MixedSample {
     pub time: Time,
     pub cycles: u64,
     pub outputs: Vec<(u8, f64)>,
+    pub adcs: Vec<f64>,
+    pub pwms: Vec<f64>,
+    pub probes: Vec<f64>,
 }
 
 /// Trace collected by the mixed worker.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub(crate) struct MixedTrace {
     pub outputs: Vec<u8>,
+    pub adc_channels: Vec<u8>,
+    pub pwm_pins: Vec<u8>,
+    pub probes: Vec<String>,
     pub samples: Vec<MixedSample>,
 }
 
@@ -50,6 +56,9 @@ pub(crate) enum Event {
     Started {
         request: u64,
         outputs: Vec<u8>,
+        adc_channels: Vec<u8>,
+        pwm_pins: Vec<u8>,
+        probes: Vec<String>,
         steps: usize,
     },
     Samples {
@@ -65,6 +74,9 @@ pub(crate) enum Event {
     Reset {
         request: u64,
         outputs: Vec<u8>,
+        adc_channels: Vec<u8>,
+        pwm_pins: Vec<u8>,
+        probes: Vec<String>,
         steps: usize,
     },
     Error {
@@ -174,6 +186,9 @@ struct SessionState {
     settings: TransientSettings,
     firmware: Vec<u16>,
     plan: MixedPinPlan,
+    probes: Vec<(String, NodeId)>,
+    adc_channels: Vec<u8>,
+    pwm_pins: Vec<u8>,
     session: AvrSession,
     paused: bool,
     finished: bool,
@@ -185,13 +200,7 @@ fn worker(commands: Receiver<Command>, events: Sender<Event>) {
     while let Ok(command) = commands.recv() {
         match command {
             Command::Start { request, payload } => {
-                let StartPayload {
-                    document,
-                    settings,
-                    firmware,
-                    plan,
-                } = *payload;
-                state = start_session(request, document, settings, firmware, plan, &events);
+                state = start_session(request, *payload, &events);
                 if let Some(active) = state.as_mut() {
                     drive_session(active, &commands, &events);
                 }
@@ -206,19 +215,12 @@ fn worker(commands: Receiver<Command>, events: Sender<Event>) {
 
 fn start_session(
     request: u64,
-    document: Document,
-    settings: TransientSettings,
-    firmware: Vec<u16>,
-    plan: MixedPinPlan,
+    payload: StartPayload,
     events: &Sender<Event>,
 ) -> Option<SessionState> {
-    match build_state(request, document, settings, firmware, plan) {
+    match build_state(request, payload) {
         Ok(state) => {
-            let _ = events.send(Event::Started {
-                request,
-                outputs: state.plan.outputs.clone(),
-                steps: state.settings.steps,
-            });
+            let _ = events.send(started_event(&state));
             Some(state)
         }
         Err(error) => {
@@ -228,26 +230,76 @@ fn start_session(
     }
 }
 
-fn build_state(
-    request: u64,
-    document: Document,
-    settings: TransientSettings,
+fn started_event(state: &SessionState) -> Event {
+    Event::Started {
+        request: state.request,
+        outputs: state.plan.outputs.clone(),
+        adc_channels: state.adc_channels.clone(),
+        pwm_pins: state.pwm_pins.clone(),
+        probes: state.plan.probes.clone(),
+        steps: state.settings.steps,
+    }
+}
+
+fn reset_event(state: &SessionState) -> Event {
+    Event::Reset {
+        request: state.request,
+        outputs: state.plan.outputs.clone(),
+        adc_channels: state.adc_channels.clone(),
+        pwm_pins: state.pwm_pins.clone(),
+        probes: state.plan.probes.clone(),
+        steps: state.settings.steps,
+    }
+}
+
+struct ResolvedSession {
+    probes: Vec<(String, NodeId)>,
+    adc_channels: Vec<u8>,
+    pwm_pins: Vec<u8>,
+    session: AvrSession,
+}
+
+impl SessionState {
+    fn new(request: u64, payload: StartPayload, resolved: ResolvedSession) -> Self {
+        Self {
+            request,
+            document: payload.document,
+            settings: payload.settings,
+            firmware: payload.firmware,
+            plan: payload.plan,
+            probes: resolved.probes,
+            adc_channels: resolved.adc_channels,
+            pwm_pins: resolved.pwm_pins,
+            session: resolved.session,
+            paused: false,
+            finished: false,
+            steps: 0,
+        }
+    }
+}
+
+fn build_state(request: u64, payload: StartPayload) -> Result<SessionState, String> {
+    let netlist = netlist::extract(&payload.document).map_err(|error| error.to_string())?;
+    let config = mixed_config(&payload.settings);
+    let resolved = resolve_session(&netlist, &payload.plan, payload.firmware.clone(), &config)?;
+    Ok(SessionState::new(request, payload, resolved))
+}
+
+fn resolve_session(
+    netlist: &netlist::Netlist,
+    plan: &MixedPinPlan,
     firmware: Vec<u16>,
-    plan: MixedPinPlan,
-) -> Result<SessionState, String> {
-    let netlist = netlist::extract(&document).map_err(|error| error.to_string())?;
-    let config = mixed_config(&settings);
-    let session = netlist::build_mixed_session(&netlist, firmware.clone(), &plan, &config)?;
-    Ok(SessionState {
-        request,
-        document,
-        settings,
-        firmware,
-        plan,
+    config: &TransientConfig,
+) -> Result<ResolvedSession, String> {
+    let probes = netlist::probe_nodes(netlist, &plan.probes)?;
+    let adc_channels = plan.adcs.iter().map(|(channel, _)| *channel).collect();
+    let pwm_pins = plan.pwms.clone();
+    let session = netlist::build_mixed_session(netlist, firmware, plan, config)?;
+    Ok(ResolvedSession {
+        probes,
+        adc_channels,
+        pwm_pins,
         session,
-        paused: false,
-        finished: false,
-        steps: 0,
     })
 }
 
@@ -329,11 +381,37 @@ fn sample_state(state: &SessionState) -> MixedSample {
         .enumerate()
         .map(|(index, &pin)| (pin, state.session.node_voltage(index).unwrap_or(f64::NAN)))
         .collect();
+    let adcs = sample_adcs(state);
+    let pwms = sample_pwms(state);
+    let probes = sample_probes(state);
     MixedSample {
         time: state.session.time(),
         cycles: state.session.cpu().cycles(),
         outputs,
+        adcs,
+        pwms,
+        probes,
     }
+}
+
+fn sample_adcs(state: &SessionState) -> Vec<f64> {
+    (0..state.adc_channels.len())
+        .map(|index| state.session.adc_voltage_at(index).unwrap_or(f64::NAN))
+        .collect()
+}
+
+fn sample_pwms(state: &SessionState) -> Vec<f64> {
+    (0..state.pwm_pins.len())
+        .map(|index| state.session.pwm_voltage_at(index).unwrap_or(f64::NAN))
+        .collect()
+}
+
+fn sample_probes(state: &SessionState) -> Vec<f64> {
+    state
+        .probes
+        .iter()
+        .map(|(_, node)| state.session.analog_node_voltage(*node).unwrap_or(f64::NAN))
+        .collect()
 }
 
 fn pause_session(state: Option<&mut SessionState>, events: &Sender<Event>) {
@@ -381,23 +459,18 @@ fn reset_session(state: Option<&mut SessionState>, events: &Sender<Event>) {
     let Some(state) = state else {
         return;
     };
-    match build_state(
-        state.request,
-        state.document.clone(),
-        state.settings,
-        state.firmware.clone(),
-        state.plan.clone(),
-    ) {
+    let payload = StartPayload {
+        document: state.document.clone(),
+        settings: state.settings,
+        firmware: state.firmware.clone(),
+        plan: state.plan.clone(),
+    };
+    match build_state(state.request, payload) {
         Ok(mut fresh) => {
             fresh.paused = true;
-            let outputs = fresh.plan.outputs.clone();
-            let steps = fresh.settings.steps;
+            let event = reset_event(&fresh);
             *state = fresh;
-            let _ = events.send(Event::Reset {
-                request: state.request,
-                outputs,
-                steps,
-            });
+            let _ = events.send(event);
             let _ = events.send(Event::Paused {
                 request: state.request,
             });
@@ -451,6 +524,7 @@ mod tests {
             external_resistance: 1000.0,
             adc_reference: 5.0,
             uart_threshold: 2.5,
+            probes: Vec::new(),
         }
     }
 }

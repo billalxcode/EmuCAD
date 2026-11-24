@@ -1042,6 +1042,12 @@ impl AvrSession {
         self.pins.get(index).map(|pin| pin.voltage)
     }
 
+    /// Returns the last solved voltage of an arbitrary analog node.
+    #[must_use]
+    pub fn analog_node_voltage(&self, node: NodeId) -> Option<f64> {
+        self.analog.node_voltage(node)
+    }
+
     /// Returns the first analog node voltage.
     #[must_use]
     pub fn voltage(&self) -> f64 {

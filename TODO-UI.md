@@ -2,9 +2,9 @@
 
 Backlog UI setelah migrasi ikon Tabler dan worker mixed.
 
-**Status:** U0 sampai U4 dan U8-01 sampai U8-11 selesai, kecuali
-U8-03b dan U8-04b yang terblokir model halaman dan anchor label. U5
-sampai U7 belum. Riset viewport dan grid KiCad selesai di
+**Status:** U0 sampai U5 dan U8-01 sampai U8-11 selesai, kecuali
+U8-03b dan U8-04b yang terblokir model halaman dan anchor label. U6
+dan U7 belum. Riset viewport dan grid KiCad selesai di
 `docs/96-viewport-grid.md`.
 
 **Sumber kebenaran:**
@@ -146,15 +146,15 @@ Setiap ikon baru harus:
 
 ### U5 - Simulasi dan Mixed Worker
 
-- [ ] U5-01 Tambahkan probe per net ke trace mixed.
-- [ ] U5-02 Tambahkan channel ADC ke grafik mixed.
-- [ ] U5-03 Tambahkan sinyal PWM ke grafik mixed.
-- [ ] U5-04 Tambahkan setting level high, low, resistance, ADC reference,
+- [x] U5-01 Tambahkan probe per net ke trace mixed.
+- [x] U5-02 Tambahkan channel ADC ke grafik mixed.
+- [x] U5-03 Tambahkan sinyal PWM ke grafik mixed.
+- [x] U5-04 Tambahkan setting level high, low, resistance, ADC reference,
   dan UART threshold.
-- [ ] U5-05 Tambahkan pilihan sample dan durasi ke panel mixed.
-- [ ] U5-06 Tambahkan ikon probe dan chart pada panel mixed.
-- [ ] U5-07 Test trace mixed dengan dua net dan satu channel ADC.
-- [ ] U5-08 Hubungkan kontrol mixed ke board dan panel simulasi.
+- [x] U5-05 Tambahkan pilihan sample dan durasi ke panel mixed.
+- [x] U5-06 Tambahkan ikon probe dan chart pada panel mixed.
+- [x] U5-07 Test trace mixed dengan dua net dan satu channel ADC.
+- [x] U5-08 Hubungkan kontrol mixed ke board dan panel simulasi.
   Item ini melengkapi `TODO-SIMULATION.md` S7-05.
 
 ### U6 - Aksesibilitas dan Polish

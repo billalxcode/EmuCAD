@@ -231,6 +231,28 @@ pub(crate) struct LibraryState {
     dragged: Option<&'static ComponentDefinition>,
 }
 
+/// Electrical settings for one mixed session.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct MixedSettings {
+    pub high: f64,
+    pub low: f64,
+    pub resistance: f64,
+    pub adc_reference: f64,
+    pub uart_threshold: f64,
+}
+
+impl Default for MixedSettings {
+    fn default() -> Self {
+        Self {
+            high: 5.0,
+            low: 0.0,
+            resistance: 1000.0,
+            adc_reference: 5.0,
+            uart_threshold: 2.5,
+        }
+    }
+}
+
 #[derive(Default)]
 pub struct GuiApp {
     camera: GridCamera,
@@ -308,6 +330,8 @@ pub struct GuiApp {
     analog: Option<crate::analog::AnalogHandle>,
     mixed_worker: Option<crate::mixed_worker::MixedHandle>,
     mixed_trace: Option<crate::mixed_worker::MixedTrace>,
+    mixed: MixedSettings,
+    mixed_probes: Vec<String>,
     mixed_request: Option<u64>,
     analog_request: Option<u64>,
     analog_busy: bool,

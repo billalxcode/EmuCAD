@@ -1082,4 +1082,4 @@ mod tests;
 pub(crate) use circuit::{
     build_circuit, build_circuit_with_sources, device_currents, node_voltages, solve_dc,
 };
-pub(crate) use mixed_session::{MixedPinPlan, build_mixed_session};
+pub(crate) use mixed_session::{MixedPinPlan, build_mixed_session, probe_nodes};

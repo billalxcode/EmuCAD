@@ -126,7 +126,7 @@ impl GuiApp {
         }
         let plan = {
             let component = self.mixed_component()?;
-            Self::mixed_plan(component)?
+            self.mixed_plan(component)?
         };
         let Some(worker) = self.mixed_worker.as_mut() else {
             return Err("Mixed worker unavailable".to_string());
@@ -151,7 +151,7 @@ impl GuiApp {
         }
         let netlist = self.mixed_netlist()?;
         let component = self.mixed_component()?;
-        let plan = Self::mixed_plan(component)?;
+        let plan = self.mixed_plan(component)?;
         let config = Self::mixed_config(&self.transient_settings);
         let mut session = self.mixed_session(&netlist, &plan, &config)?;
         Self::run_mixed_steps(&mut session, config.steps)?;
@@ -160,6 +160,13 @@ impl GuiApp {
 
     fn mixed_netlist(&self) -> Result<crate::netlist::Netlist, String> {
         crate::netlist::extract(&self.document).map_err(|error| error.to_string())
+    }
+
+    pub(crate) fn mixed_net_names(&self) -> Vec<String> {
+        crate::netlist::extract(&self.document).map_or_else(
+            |_| Vec::new(),
+            |netlist| netlist.nodes.iter().map(|node| node.name.clone()).collect(),
+        )
     }
 
     fn mixed_component(&self) -> Result<&ComponentInstance, String> {
@@ -198,8 +205,11 @@ impl GuiApp {
         }
     }
 
-    fn mixed_plan(component: &ComponentInstance) -> Result<crate::netlist::MixedPinPlan, String> {
-        let mut plan = Self::empty_plan();
+    fn mixed_plan(
+        &self,
+        component: &ComponentInstance,
+    ) -> Result<crate::netlist::MixedPinPlan, String> {
+        let mut plan = self.empty_plan();
         for (&pin, &mode) in &component.pin_modes {
             Self::apply_pin_mode(&mut plan, pin, mode)?;
         }
@@ -209,18 +219,19 @@ impl GuiApp {
         Ok(plan)
     }
 
-    fn empty_plan() -> crate::netlist::MixedPinPlan {
+    fn empty_plan(&self) -> crate::netlist::MixedPinPlan {
         crate::netlist::MixedPinPlan {
             outputs: Vec::new(),
             adcs: Vec::new(),
             pwms: Vec::new(),
             uart_tx: None,
             uart_rx: None,
-            high: 5.0,
-            low: 0.0,
-            external_resistance: 1000.0,
-            adc_reference: 5.0,
-            uart_threshold: 2.5,
+            high: self.mixed.high,
+            low: self.mixed.low,
+            external_resistance: self.mixed.resistance,
+            adc_reference: self.mixed.adc_reference,
+            uart_threshold: self.mixed.uart_threshold,
+            probes: self.mixed_probes.clone(),
         }
     }
 
@@ -344,8 +355,20 @@ impl GuiApp {
             crate::mixed_worker::Event::Started {
                 request,
                 outputs,
+                adc_channels,
+                pwm_pins,
+                probes,
                 steps,
-            } => self.mixed_started(request, outputs, steps),
+            } => {
+                let trace = crate::mixed_worker::MixedTrace {
+                    outputs,
+                    adc_channels,
+                    pwm_pins,
+                    probes,
+                    samples: Vec::new(),
+                };
+                self.mixed_started(request, trace, steps);
+            }
             crate::mixed_worker::Event::Samples { request, samples } => {
                 self.mixed_samples(request, samples);
             }
@@ -354,22 +377,36 @@ impl GuiApp {
             crate::mixed_worker::Event::Reset {
                 request,
                 outputs,
+                adc_channels,
+                pwm_pins,
+                probes,
                 steps,
-            } => self.mixed_reset(request, outputs, steps),
+            } => {
+                let trace = crate::mixed_worker::MixedTrace {
+                    outputs,
+                    adc_channels,
+                    pwm_pins,
+                    probes,
+                    samples: Vec::new(),
+                };
+                self.mixed_reset(request, trace, steps);
+            }
             crate::mixed_worker::Event::Error { request, error } => {
                 self.mixed_error(request, error);
             }
         }
     }
 
-    fn mixed_started(&mut self, request: u64, outputs: Vec<u8>, steps: usize) {
+    fn mixed_started(
+        &mut self,
+        request: u64,
+        trace: crate::mixed_worker::MixedTrace,
+        steps: usize,
+    ) {
         if self.mixed_request != Some(request) {
             return;
         }
-        self.mixed_trace = Some(crate::mixed_worker::MixedTrace {
-            outputs,
-            samples: Vec::new(),
-        });
+        self.mixed_trace = Some(trace);
         self.analog_busy = true;
         self.analog_paused = false;
         self.message = format!("Mixed running: {steps} steps");
@@ -411,14 +448,11 @@ impl GuiApp {
         self.message = format!("Mixed finished: {samples} samples");
     }
 
-    fn mixed_reset(&mut self, request: u64, outputs: Vec<u8>, steps: usize) {
+    fn mixed_reset(&mut self, request: u64, trace: crate::mixed_worker::MixedTrace, steps: usize) {
         if self.mixed_request != Some(request) {
             return;
         }
-        self.mixed_trace = Some(crate::mixed_worker::MixedTrace {
-            outputs,
-            samples: Vec::new(),
-        });
+        self.mixed_trace = Some(trace);
         self.message = format!("Mixed reset: {steps} steps");
     }
 
