@@ -58,10 +58,40 @@ impl GuiApp {
         if !self.canvas_focused {
             return;
         }
+        if self.handle_grid_keys(ui) {
+            return;
+        }
         if self.handle_fast_grid(ui) {
             return;
         }
         self.handle_fit_keys(ui);
+    }
+
+    fn handle_grid_keys(&mut self, ui: &egui::Ui) -> bool {
+        let (next, previous) = ui.input(|input| {
+            let plain = !input.modifiers.command && !input.modifiers.alt && !input.modifiers.ctrl;
+            (
+                plain && !input.modifiers.shift && input.key_pressed(egui::Key::N),
+                plain && input.modifiers.shift && input.key_pressed(egui::Key::N),
+            )
+        });
+        if next {
+            self.cycle_grid_step(1);
+        }
+        if previous {
+            self.cycle_grid_step(-1);
+        }
+        next || previous
+    }
+
+    fn cycle_grid_step(&mut self, delta: isize) {
+        let count = GridStep::ALL.len() as isize;
+        let current = GridStep::ALL
+            .iter()
+            .position(|step| *step == self.grid_step)
+            .unwrap_or(0) as isize;
+        let next = (current + delta).rem_euclid(count) as usize;
+        self.grid_step = GridStep::ALL[next];
     }
 
     fn handle_fast_grid(&mut self, ui: &egui::Ui) -> bool {

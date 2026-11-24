@@ -430,7 +430,8 @@ Aturan:
 - Probe: memilih pin atau net untuk grafik.
 - Pan: drag kanvas.
 - Measure: ruler grid dan probe tegangan.
-- Toolbar memakai ikon dan teks singkat.
+- Toolbar memakai ikon dan teks singkat; mode ikon saja tersedia dengan
+  tooltip label dan shortcut.
 - Error ditampilkan sebagai toast singkat dan status bar.
 - Log error opsional tersedia sebagai tab di analysis drawer.
 - Font UI Source Sans 3; data teknis memakai Source Code Pro.

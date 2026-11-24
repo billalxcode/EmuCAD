@@ -18,6 +18,9 @@ Golden RGBA sudah tersedia dan berjalan headless di test Linux:
 - Font: Source Sans 3 untuk label dan Source Code Pro untuk teks teknis.
 - Golden scene: `crates/gui/tests/golden/scene-320x240.rgba`.
 - Golden grid: `crates/gui/tests/golden/grid-320x240.rgba`.
+- Golden toolbar: `crates/gui/tests/golden/toolbar-2400x120.rgba`.
+- Toolbar scene: satu baris toolbar penuh dengan ikon, label, dan
+  shortcut hint pada tooltip.
 - Perbandingan: byte RGBA exact, tanpa toleransi.
 - Diagnostik: piksel, channel, dan nilai byte pertama yang berbeda.
 - Determinisme: test merender dua kali dan memastikan hasil identik.
@@ -37,20 +40,22 @@ Test yang berjalan:
 - `golden_render_is_deterministic`
 - `golden_scene_matches_snapshot`
 - `golden_grid_matches_snapshot`
+- `golden_toolbar_matches_snapshot`
 
 ## Prosedur Update
 
 Jika perubahan visual disengaja:
 
-1. Jalankan renderer untuk menulis kedua golden baru:
+1. Jalankan renderer untuk menulis semua golden baru:
 
    ```bash
    UPDATE_GOLDEN=1 cargo test -p gui golden
    ```
 
-2. Periksa `crates/gui/tests/golden/scene-320x240.rgba` dan
-   `crates/gui/tests/golden/grid-320x240.rgba`.
-3. Konversi atau buka file sebagai RGBA 320 x 240 untuk review visual.
+2. Periksa `scene-320x240.rgba`, `grid-320x240.rgba`, dan
+   `toolbar-2400x120.rgba` di `crates/gui/tests/golden/`.
+3. Konversi atau buka file sebagai RGBA sesuai ukurannya untuk review
+   visual.
 4. Pastikan hanya perubahan yang dimaksud yang terlihat.
 5. Commit golden dan perubahan renderer dalam satu perubahan terpisah.
 6. Jalankan `cargo test -p gui golden` tanpa env update.

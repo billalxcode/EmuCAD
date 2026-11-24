@@ -19,7 +19,7 @@ impl GuiApp {
         self.show_toast(ui);
         self.conflict_modal(ui);
     }
-    pub(super) fn toolbar(&mut self, ui: &mut egui::Ui) {
+    pub(crate) fn toolbar(&mut self, ui: &mut egui::Ui) {
         egui::Panel::top("toolbar").show(ui, |ui| {
             ui.horizontal_wrapped(|ui| {
                 self.toolbar_tools(ui);

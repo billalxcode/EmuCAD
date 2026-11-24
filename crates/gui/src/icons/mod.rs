@@ -141,6 +141,20 @@ pub(crate) struct IconButton {
     shortcut: Option<&'static str>,
 }
 
+const ICON_ONLY_KEY: &str = "emucad-icon-only";
+
+/// Enables or disables the icon-only button mode.
+pub(crate) fn set_icon_only(ctx: &egui::Context, enabled: bool) {
+    ctx.data_mut(|data| data.insert_temp(egui::Id::unique(ICON_ONLY_KEY), enabled));
+}
+
+fn icon_only(ctx: &egui::Context) -> bool {
+    ctx.data(|data| {
+        let value: Option<bool> = data.get_temp(egui::Id::unique(ICON_ONLY_KEY));
+        value.unwrap_or(false)
+    })
+}
+
 /// Builds an icon button.
 pub(crate) fn icon_button(icon: IconKind, label: impl Into<String>) -> IconButton {
     IconButton {
@@ -184,14 +198,27 @@ impl IconButton {
 
 impl egui::Widget for IconButton {
     fn ui(self, ui: &mut egui::Ui) -> egui::Response {
-        let button = egui::Button::new(format!("      {}", self.label)).selected(self.selected);
+        let icon_only = icon_only(ui.ctx());
+        let text = if icon_only {
+            String::new()
+        } else {
+            format!("      {}", self.label)
+        };
+        let mut button = egui::Button::new(text).selected(self.selected);
+        if icon_only {
+            button = button.min_size(egui::vec2(28.0, 22.0));
+        }
         let response = ui.add(button);
         let color = ui.style().interact(&response).fg_stroke.color;
         let size = 14.0;
-        let rect = egui::Rect::from_min_size(
-            response.rect.left_center() + egui::vec2(6.0, -size * 0.5),
-            egui::vec2(size, size),
-        );
+        let rect = if icon_only {
+            egui::Rect::from_center_size(response.rect.center(), egui::vec2(size, size))
+        } else {
+            egui::Rect::from_min_size(
+                response.rect.left_center() + egui::vec2(6.0, -size * 0.5),
+                egui::vec2(size, size),
+            )
+        };
         draw_icon(ui.painter(), rect, self.icon, color);
         let hint = self.hint();
         response.on_hover_text(hint)
@@ -205,6 +232,45 @@ mod tests {
     #[test]
     fn all_icons_parse() {
         assert_eq!(icons().len(), IconKind::ALL.len());
+    }
+
+    #[test]
+    fn icon_button_hint_includes_shortcut() {
+        let button = super::icon_button(IconKind::Cpu, "CPU").shortcut("C");
+        assert_eq!(button.hint(), "CPU (C)");
+    }
+
+    #[test]
+    fn icon_only_mode_narrows_buttons() {
+        let context = eframe::egui::Context::default();
+        let mut width = 0.0;
+        let mut output = context.run_ui(Default::default(), |ui| {
+            super::set_icon_only(ui.ctx(), true);
+            let response = ui.add(super::icon_button(IconKind::Cpu, "CPU"));
+            width = response.rect.width();
+        });
+        output.textures_delta.clear();
+        assert!(width < 60.0);
+    }
+
+    #[test]
+    fn icon_draws_at_high_dpi() {
+        let context = eframe::egui::Context::default();
+        context.set_pixels_per_point(2.0);
+        let mut output = context.run_ui(Default::default(), |context| {
+            let painter = context.layer_painter(eframe::egui::LayerId::background());
+            draw_icon(
+                &painter,
+                eframe::egui::Rect::from_min_size(
+                    eframe::egui::Pos2::ZERO,
+                    eframe::egui::vec2(28.0, 28.0),
+                ),
+                IconKind::Cpu,
+                eframe::egui::Color32::WHITE,
+            );
+        });
+        output.textures_delta.clear();
+        assert!(!output.shapes.is_empty());
     }
 
     #[test]

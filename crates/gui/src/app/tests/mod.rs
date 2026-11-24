@@ -23,12 +23,19 @@ fn test_input() -> eframe::egui::RawInput {
 }
 
 fn key_event(key: eframe::egui::Key) -> eframe::egui::Event {
+    key_event_with(key, eframe::egui::Modifiers::NONE)
+}
+
+fn key_event_with(
+    key: eframe::egui::Key,
+    modifiers: eframe::egui::Modifiers,
+) -> eframe::egui::Event {
     eframe::egui::Event::Key {
         key,
         physical_key: None,
         pressed: true,
         repeat: false,
-        modifiers: eframe::egui::Modifiers::NONE,
+        modifiers,
     }
 }
 

@@ -2,9 +2,9 @@
 
 Backlog UI setelah migrasi ikon Tabler dan worker mixed.
 
-**Status:** U0 sampai U5 dan U8-01 sampai U8-11 selesai, kecuali
-U8-03b dan U8-04b yang terblokir model halaman dan anchor label. U6
-dan U7 belum. Riset viewport dan grid KiCad selesai di
+**Status:** U0 sampai U6 dan U8-01 sampai U8-11 selesai, kecuali
+U8-03b dan U8-04b yang terblokir model halaman dan anchor label. U7
+belum. Riset viewport dan grid KiCad selesai di
 `docs/96-viewport-grid.md`.
 
 **Sumber kebenaran:**
@@ -159,12 +159,12 @@ Setiap ikon baru harus:
 
 ### U6 - Aksesibilitas dan Polish
 
-- [ ] U6-01 Pastikan setiap icon button punya tooltip teks.
-- [ ] U6-02 Tambahkan mode ikon saja dengan tooltip.
-- [ ] U6-03 Periksa kontras ikon pada tema gelap dan terang.
-- [ ] U6-04 Periksa ukuran ikon pada high-DPI.
-- [ ] U6-05 Tambahkan golden screenshot toolbar.
-- [ ] U6-06 Tambahkan test keyboard navigation.
+- [x] U6-01 Pastikan setiap icon button punya tooltip teks.
+- [x] U6-02 Tambahkan mode ikon saja dengan tooltip.
+- [x] U6-03 Periksa kontras ikon pada tema gelap dan terang.
+- [x] U6-04 Periksa ukuran ikon pada high-DPI.
+- [x] U6-05 Tambahkan golden screenshot toolbar.
+- [x] U6-06 Tambahkan test keyboard navigation.
 
 ### U7 - Rilis dan Dokumentasi
 

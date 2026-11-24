@@ -638,7 +638,17 @@ impl GuiApp {
         if self.flow_animation {
             ui.ctx().request_repaint();
         }
+        self.compact_toggle(ui);
         self.theme_button(ui);
+    }
+
+    fn compact_toggle(&mut self, ui: &mut egui::Ui) {
+        let button = icon_button(IconKind::Settings, "Icons")
+            .selected(self.compact_icons)
+            .tooltip("Icon-only toolbar");
+        if ui.add(button).clicked() {
+            self.compact_icons = !self.compact_icons;
+        }
     }
 
     fn theme_button(&mut self, ui: &mut egui::Ui) {

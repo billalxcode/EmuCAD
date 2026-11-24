@@ -445,6 +445,14 @@ mod tests {
                 contrast(palette.text_muted, palette.panel) >= 4.5,
                 "{name} muted"
             );
+            for color in [
+                palette.accent,
+                palette.success,
+                palette.warning,
+                palette.danger,
+            ] {
+                assert!(contrast(color, palette.panel) >= 3.0, "{name} icon");
+            }
         }
     }
 

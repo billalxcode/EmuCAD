@@ -274,6 +274,7 @@ pub struct GuiApp {
     minimap_open: bool,
     flow_animation: bool,
     light_theme: bool,
+    compact_icons: bool,
     tool: Tool,
     pointer_world: Option<egui::Pos2>,
     initialized: bool,
@@ -384,6 +385,7 @@ impl GuiApp {
 
 impl eframe::App for GuiApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        crate::icons::set_icon_only(ui.ctx(), self.compact_icons);
         self.palette_shortcut(ui);
         self.poll_sim();
         self.poll_analog();

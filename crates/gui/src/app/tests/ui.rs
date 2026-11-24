@@ -31,6 +31,38 @@ fn panel_shortcut_toggles_library() {
     assert!(app.library_open);
 }
 
+fn press_key(app: &mut GuiApp, key: eframe::egui::Key, modifiers: eframe::egui::Modifiers) {
+    let input = eframe::egui::RawInput {
+        events: vec![
+            eframe::egui::Event::ModifiersChanged(modifiers),
+            key_event_with(key, modifiers),
+        ],
+        ..test_input()
+    };
+    let mut output = eframe::egui::Context::default().run_ui(input, |ui| app.handle_keys(ui));
+    output.textures_delta.clear();
+}
+
+#[test]
+fn grid_shortcut_cycles_steps() {
+    let mut app = GuiApp {
+        canvas_focused: true,
+        ..GuiApp::default()
+    };
+    press_key(
+        &mut app,
+        eframe::egui::Key::N,
+        eframe::egui::Modifiers::NONE,
+    );
+    assert_eq!(app.grid_step, crate::canvas::GridStep::ALL[1]);
+    press_key(
+        &mut app,
+        eframe::egui::Key::N,
+        eframe::egui::Modifiers::SHIFT,
+    );
+    assert_eq!(app.grid_step, crate::canvas::GridStep::ALL[0]);
+}
+
 #[test]
 fn toolbar_renders_with_icons() {
     let mut app = GuiApp::default();

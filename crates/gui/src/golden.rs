@@ -20,21 +20,26 @@ struct Texture {
 
 /// Renders the fixed golden scene into straight RGBA bytes.
 pub fn render_golden() -> Vec<u8> {
-    render_with(draw_golden)
+    render_with(WIDTH, HEIGHT, draw_golden)
 }
 
 /// Renders the fixed grid golden into straight RGBA bytes.
 pub fn render_grid_golden() -> Vec<u8> {
-    render_with(draw_grid_golden)
+    render_with(WIDTH, HEIGHT, draw_grid_golden)
 }
 
-fn render_with(draw: impl Fn(&mut egui::Ui)) -> Vec<u8> {
+/// Renders the toolbar golden into straight RGBA bytes.
+pub fn render_toolbar_golden() -> Vec<u8> {
+    render_with(2400, 120, draw_toolbar_golden)
+}
+
+fn render_with(width: usize, height: usize, draw: impl Fn(&mut egui::Ui)) -> Vec<u8> {
     let context = egui::Context::default();
     design::install_fonts(&context);
     let input = egui::RawInput {
         screen_rect: Some(Rect::from_min_size(
             Pos2::ZERO,
-            Vec2::new(WIDTH as f32, HEIGHT as f32),
+            Vec2::new(width as f32, height as f32),
         )),
         ..Default::default()
     };
@@ -42,7 +47,7 @@ fn render_with(draw: impl Fn(&mut egui::Ui)) -> Vec<u8> {
     let textures = collect_textures(&output.textures_delta);
     output.textures_delta.clear();
     let primitives = context.tessellate(output.shapes, 1.0);
-    rasterize(primitives, &textures)
+    rasterize(primitives, &textures, width, height)
 }
 
 fn draw_golden(ui: &mut egui::Ui) {
@@ -65,6 +70,13 @@ fn draw_grid_golden(ui: &mut egui::Ui) {
     };
     crate::canvas::draw_grid(painter, rect, &golden_camera(), options, &design::DARK);
     golden_caption(painter, "EmuCAD grid golden");
+}
+
+fn draw_toolbar_golden(ui: &mut egui::Ui) {
+    let rect = ui.max_rect();
+    ui.painter().rect_filled(rect, 0.0, design::DARK.canvas);
+    let mut app = crate::app::GuiApp::default();
+    app.toolbar(ui);
 }
 
 fn golden_caption(painter: &egui::Painter, text: &str) {
@@ -160,21 +172,33 @@ fn blit(texture: &mut Texture, x: usize, y: usize, image: &egui::ColorImage) {
 fn rasterize(
     primitives: Vec<egui::ClippedPrimitive>,
     textures: &HashMap<egui::TextureId, Texture>,
+    width: usize,
+    height: usize,
 ) -> Vec<u8> {
-    let mut pixels = vec![[0.0_f32; 4]; WIDTH * HEIGHT];
+    let mut pixels = vec![[0.0_f32; 4]; width * height];
     for clipped in primitives {
-        let egui::epaint::Primitive::Mesh(mesh) = clipped.primitive else {
-            continue;
-        };
-        let texture = textures.get(&mesh.texture_id);
-        for triangle in mesh.indices.chunks_exact(3) {
-            let Some(vertices) = mesh_vertices(&mesh, triangle) else {
-                continue;
-            };
-            raster_triangle(&mut pixels, clipped.clip_rect, vertices, texture);
-        }
+        raster_clipped(&mut pixels, width, height, clipped, textures);
     }
     pixels.into_iter().flat_map(pixel_rgba).collect()
+}
+
+fn raster_clipped(
+    pixels: &mut [[f32; 4]],
+    width: usize,
+    height: usize,
+    clipped: egui::ClippedPrimitive,
+    textures: &HashMap<egui::TextureId, Texture>,
+) {
+    let egui::epaint::Primitive::Mesh(mesh) = clipped.primitive else {
+        return;
+    };
+    let texture = textures.get(&mesh.texture_id);
+    for triangle in mesh.indices.chunks_exact(3) {
+        let Some(vertices) = mesh_vertices(&mesh, triangle) else {
+            continue;
+        };
+        raster_triangle(pixels, width, height, clipped.clip_rect, vertices, texture);
+    }
 }
 
 fn mesh_vertices(mesh: &egui::epaint::Mesh, triangle: &[u32]) -> Option<[egui::epaint::Vertex; 3]> {
@@ -186,6 +210,8 @@ fn mesh_vertices(mesh: &egui::epaint::Mesh, triangle: &[u32]) -> Option<[egui::e
 
 fn raster_triangle(
     pixels: &mut [[f32; 4]],
+    width: usize,
+    height: usize,
     clip: Rect,
     vertices: [egui::epaint::Vertex; 3],
     texture: Option<&Texture>,
@@ -195,17 +221,30 @@ fn raster_triangle(
     if area.abs() < f32::EPSILON {
         return;
     }
-    let (min_x, min_y, max_x, max_y) = pixel_bounds(clip, a.pos, b.pos, c.pos);
+    let bounds = pixel_bounds(clip, a.pos, b.pos, c.pos, width, height);
+    raster_area(pixels, width, area, [a, b, c], bounds, texture);
+}
+
+fn raster_area(
+    pixels: &mut [[f32; 4]],
+    width: usize,
+    area: f32,
+    vertices: [egui::epaint::Vertex; 3],
+    bounds: (usize, usize, usize, usize),
+    texture: Option<&Texture>,
+) {
+    let (min_x, min_y, max_x, max_y) = bounds;
     for y in min_y..max_y {
         for x in min_x..max_x {
             let point = egui::pos2(x as f32 + 0.5, y as f32 + 0.5);
-            raster_pixel(pixels, area, [a, b, c], point, texture);
+            raster_pixel(pixels, width, area, vertices, point, texture);
         }
     }
 }
 
 fn raster_pixel(
     pixels: &mut [[f32; 4]],
+    width: usize,
     area: f32,
     vertices: [egui::epaint::Vertex; 3],
     point: Pos2,
@@ -217,7 +256,7 @@ fn raster_pixel(
     let mut color = interpolate(vertices, weights);
     apply_texture(&mut color, vertices, weights, texture);
     blend(
-        &mut pixels[point.y as usize * WIDTH + point.x as usize],
+        &mut pixels[point.y as usize * width + point.x as usize],
         color,
     );
 }
@@ -251,17 +290,21 @@ fn apply_texture(
     }
 }
 
-fn pixel_bounds(clip: Rect, a: Pos2, b: Pos2, c: Pos2) -> (usize, usize, usize, usize) {
+fn pixel_bounds(
+    clip: Rect,
+    a: Pos2,
+    b: Pos2,
+    c: Pos2,
+    width: usize,
+    height: usize,
+) -> (usize, usize, usize, usize) {
     let min = a.min(b).min(c).max(clip.min).max(Pos2::ZERO);
-    let max = a
-        .max(b)
-        .max(c)
-        .min(clip.max)
-        .min(egui::pos2(WIDTH as f32, HEIGHT as f32));
+    let size = egui::pos2(width as f32, height as f32);
+    let max = a.max(b).max(c).min(clip.max).min(size);
     let min_x = min.x.floor().max(0.0) as usize;
     let min_y = min.y.floor().max(0.0) as usize;
-    let max_x = (max.x.ceil().max(0.0) as usize).min(WIDTH);
-    let max_y = (max.y.ceil().max(0.0) as usize).min(HEIGHT);
+    let max_x = (max.x.ceil().max(0.0) as usize).min(width);
+    let max_y = (max.y.ceil().max(0.0) as usize).min(height);
     (min_x, min_y, max_x, max_y)
 }
 
@@ -330,27 +373,40 @@ fn grid_golden_path() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/golden/grid-320x240.rgba")
 }
 
+fn toolbar_golden_path() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/golden/toolbar-2400x120.rgba")
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{golden_path, grid_golden_path, render_golden, render_grid_golden};
+    use super::{
+        golden_path, grid_golden_path, render_golden, render_grid_golden, render_toolbar_golden,
+        toolbar_golden_path,
+    };
 
     #[test]
     fn golden_render_is_deterministic() {
         assert_eq!(render_golden(), render_golden());
         assert_eq!(render_grid_golden(), render_grid_golden());
+        assert_eq!(render_toolbar_golden(), render_toolbar_golden());
     }
 
     #[test]
     fn golden_scene_matches_snapshot() {
-        check_golden(&render_golden(), golden_path());
+        check_golden(&render_golden(), golden_path(), super::WIDTH);
     }
 
     #[test]
     fn golden_grid_matches_snapshot() {
-        check_golden(&render_grid_golden(), grid_golden_path());
+        check_golden(&render_grid_golden(), grid_golden_path(), super::WIDTH);
     }
 
-    fn check_golden(image: &[u8], path: std::path::PathBuf) {
+    #[test]
+    fn golden_toolbar_matches_snapshot() {
+        check_golden(&render_toolbar_golden(), toolbar_golden_path(), 2400);
+    }
+
+    fn check_golden(image: &[u8], path: std::path::PathBuf, width: usize) {
         if std::env::var_os("UPDATE_GOLDEN").is_some() {
             if let Some(parent) = path.parent() {
                 std::fs::create_dir_all(parent).expect("golden dir");
@@ -359,20 +415,15 @@ mod tests {
             return;
         }
         let expected = std::fs::read(&path).expect("read golden");
-        assert_snapshot(image, &expected);
+        assert_snapshot(image, &expected, width);
     }
 
-    fn assert_snapshot(actual: &[u8], expected: &[u8]) {
-        assert_eq!(
-            actual.len(),
-            super::WIDTH * super::HEIGHT * 4,
-            "render size"
-        );
+    fn assert_snapshot(actual: &[u8], expected: &[u8], width: usize) {
         assert_eq!(actual.len(), expected.len(), "golden size mismatch");
         let Some((index, left, right)) = first_difference(actual, expected) else {
             return;
         };
-        panic_mismatch(index, left, right);
+        panic_mismatch(index, left, right, width);
     }
 
     fn first_difference(actual: &[u8], expected: &[u8]) -> Option<(usize, u8, u8)> {
@@ -384,10 +435,10 @@ mod tests {
             .map(|(index, (left, right))| (index, *left, *right))
     }
 
-    fn panic_mismatch(index: usize, left: u8, right: u8) -> ! {
+    fn panic_mismatch(index: usize, left: u8, right: u8, width: usize) -> ! {
         let pixel = index / 4;
-        let x = pixel % super::WIDTH;
-        let y = pixel / super::WIDTH;
+        let x = pixel % width;
+        let y = pixel / width;
         panic!(
             "golden mismatch at pixel ({x}, {y}) channel {}: {left} != {right}",
             index % 4

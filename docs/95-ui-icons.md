@@ -95,6 +95,13 @@ Sudah memakai ikon:
 
 - `all_icons_parse` memastikan semua `IconKind` berhasil diparse.
 - `draw_icon_paints_known_asset` memastikan jalur gambar tidak panic.
+- `icon_button_hint_includes_shortcut` memastikan tooltip berisi label
+  dan shortcut.
+- `icon_only_mode_narrows_buttons` memastikan mode ikon saja bekerja.
+- `text_contrast_is_readable` memeriksa warna ikon minimal 3:1 pada tema
+  gelap dan terang.
+- `icon_draws_at_high_dpi` merender ikon pada skala 2x.
+- Golden toolbar mencakup ikon, label, dan tombol utama.
 - Test parser path mencakup busur absolut dan flag kompak.
 - ASCII gate mencakup file SVG dan `NOTICE.md`.
 
