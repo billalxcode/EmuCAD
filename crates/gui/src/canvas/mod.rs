@@ -33,6 +33,8 @@ pub(crate) struct GridOptions {
     pub(crate) style: GridStyle,
     pub(crate) axes: bool,
     pub(crate) rulers: bool,
+    pub(crate) line_width: f32,
+    pub(crate) min_spacing: f32,
 }
 
 impl Default for GridOptions {
@@ -43,6 +45,8 @@ impl Default for GridOptions {
             style: GridStyle::Dots,
             axes: false,
             rulers: true,
+            line_width: 1.0,
+            min_spacing: 10.0,
         }
     }
 }

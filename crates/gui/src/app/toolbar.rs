@@ -12,6 +12,7 @@ impl GuiApp {
         self.log_window(ui);
         self.simulation_window(ui);
         self.transient_window(ui);
+        self.grid_settings_window(ui);
         self.show_context_menu(ui);
         self.command_palette(ui);
         self.delete_modal(ui);

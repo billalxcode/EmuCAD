@@ -220,6 +220,25 @@ fn delta_uses_local_origin() {
 }
 
 #[test]
+fn grid_settings_window_renders() {
+    let context = eframe::egui::Context::default();
+    let input = eframe::egui::RawInput {
+        screen_rect: Some(eframe::egui::Rect::from_min_size(
+            eframe::egui::Pos2::ZERO,
+            eframe::egui::vec2(480.0, 360.0),
+        )),
+        ..Default::default()
+    };
+    let mut app = GuiApp {
+        grid_settings_open: true,
+        ..GuiApp::default()
+    };
+    let mut output = context.run_ui(input, |ui| app.grid_settings_window(ui));
+    output.textures_delta.clear();
+    assert!(app.grid_settings_open);
+}
+
+#[test]
 fn content_bounds_cover_components() {
     let library = crate::library::builtin();
     let resistor = crate::library::find("resistor").expect("resistor");

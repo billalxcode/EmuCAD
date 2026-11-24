@@ -23,6 +23,8 @@ impl GuiApp {
             style: self.grid_style,
             axes: self.grid_axes,
             rulers: self.grid_rulers,
+            line_width: self.grid_line_width,
+            min_spacing: self.grid_min_spacing,
         }
     }
 

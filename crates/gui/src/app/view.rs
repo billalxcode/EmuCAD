@@ -631,6 +631,11 @@ impl GuiApp {
             ui.checkbox(&mut self.grid_rulers, "Rulers");
             ui.separator();
             self.snap_choices(ui);
+            ui.separator();
+            if ui.button("Settings...").clicked() {
+                self.grid_settings_open = true;
+                ui.close();
+            }
         });
     }
 

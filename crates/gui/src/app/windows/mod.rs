@@ -17,6 +17,7 @@ impl GuiApp {
 }
 
 mod context;
+mod grid_settings;
 mod library;
 mod modals;
 mod palette;

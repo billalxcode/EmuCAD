@@ -2,8 +2,8 @@
 
 Backlog UI setelah migrasi ikon Tabler dan worker mixed.
 
-**Status:** U0 dan U8-01 sampai U8-07 selesai. U1 sampai U7, U8-03b,
-U8-04b, dan U8-08 sampai U8-11 belum. Riset viewport dan grid KiCad
+**Status:** U0 dan U8-01 sampai U8-08 selesai. U1 sampai U7, U8-03b,
+U8-04b, U8-09, U8-10, dan U8-11 belum. Riset viewport dan grid KiCad
 selesai di `docs/96-viewport-grid.md`; sisa U8 antre setelah U1 sampai
 U7 atau setelah prioritas diubah.
 
@@ -210,8 +210,9 @@ U8 mengatur perilaku viewport dan grid.
 - [x] U8-07 Perbaiki status bar: X/Y snapped, dx/dy/dist, grid step,
   zoom persen, snap state, dan unit. Hapus label "Snap grid" statis.
   Selesai dengan konvensi 1 unit = 50 mil = 1.27 mm dan local origin 0.
-- [ ] U8-08 Tambahkan dialog Grid Settings: daftar preset, grid aktif,
-  dua fast grid, gaya, ketebalan, min spacing, axes, dan crosshair.
+- [x] U8-08 Tambahkan dialog Grid Settings: daftar preset, grid aktif,
+  dua fast grid, gaya, ketebalan, min spacing, axes, rulers, crosshair,
+  unit, dan local origin. Selesai lewat menu Grid > Settings.
 - [ ] U8-09 Simpan field grid baru di JSON proyek dengan default
   kompatibel. Test proyek lama tanpa field baru.
 - [ ] U8-10 Tambahkan test transformasi, anchor zoom, clamp, preset, fit,

@@ -176,9 +176,10 @@ fn grid_styles_render() {
 
 #[test]
 fn grid_step_keeps_readable_spacing() {
-    assert_eq!(grid_step(20.0, 1), 1);
-    assert_eq!(grid_step(8.0, 1), 10);
-    assert_eq!(grid_step(5.0, 1), 10);
-    assert_eq!(grid_step(20.0, 2), 2);
-    assert_eq!(grid_step(20.0, 5), 5);
+    assert_eq!(grid_step(20.0, 1, 10.0), 1);
+    assert_eq!(grid_step(8.0, 1, 10.0), 10);
+    assert_eq!(grid_step(5.0, 1, 10.0), 10);
+    assert_eq!(grid_step(20.0, 2, 10.0), 2);
+    assert_eq!(grid_step(20.0, 5, 10.0), 5);
+    assert_eq!(grid_step(8.0, 1, 5.0), 1);
 }

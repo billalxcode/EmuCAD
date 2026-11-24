@@ -229,6 +229,8 @@ Referensi perilaku: [`96-viewport-grid.md`](96-viewport-grid.md).
 
 - Ukuran sel default 20 px pada zoom 100 persen.
 - Grid step 1, 2, 5, dan 10 lewat menu Grid.
+- Dialog Grid Settings mengatur fast grid, gaya, ketebalan, min spacing,
+  axes, rulers, crosshair, unit, dan local origin.
 - Mode snap grid: Always, With grid, dan Never.
 - Snap objek: pin, ujung wire, dan junction.
 - Gaya grid: dots, lines, atau cross. Default dots.

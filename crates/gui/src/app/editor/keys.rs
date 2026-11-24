@@ -56,6 +56,30 @@ impl GuiApp {
         if !self.canvas_focused {
             return;
         }
+        if self.handle_fast_grid(ui) {
+            return;
+        }
+        self.handle_fit_keys(ui);
+    }
+
+    fn handle_fast_grid(&mut self, ui: &egui::Ui) -> bool {
+        let (fast1, fast2) = ui.input(|input| {
+            let fast1 = input.modifiers.alt && input.key_pressed(egui::Key::Num1);
+            let fast2 = input.modifiers.alt && input.key_pressed(egui::Key::Num2);
+            (fast1, fast2)
+        });
+        if fast1 {
+            self.grid_step = self.fast_grid_1;
+            return true;
+        }
+        if fast2 {
+            self.grid_step = self.fast_grid_2;
+            return true;
+        }
+        false
+    }
+
+    fn handle_fit_keys(&mut self, ui: &egui::Ui) {
         let (home, objects) = ui.input(|input| {
             let home = input.key_pressed(egui::Key::Home);
             (home, home && input.modifiers.command)

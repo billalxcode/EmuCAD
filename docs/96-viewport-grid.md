@@ -451,7 +451,7 @@ dokumentasi resmi, bukan dari klik tambahan.
 | Cursor crosshair | 3 mode | Small, full, diagonal | Selesai |
 | Status bar | Snap coords, delta, grid, unit | Snap coords, delta, grid, snap source, unit | Selesai, local origin 0 |
 | Keyboard cursor | Panah per grid | Panah per grid, Ctrl 10x | Selesai |
-| Grid settings UI | Dialog lengkap | Menu Grid | Sebagian |
+| Grid settings UI | Dialog lengkap | Dialog Grid Settings | Selesai |
 | Persistensi grid | Gaya, daftar, fast grid | Hanya visible | Belum ada |
 
 ## 7. Keputusan Desain untuk EmuCAD
@@ -590,6 +590,10 @@ Field baru memakai default jika tidak ada, sehingga proyek lama tetap
 bisa dibuka. Format versi tidak perlu dinaikkan jika semua field
 opsional.
 
+U8-08 sudah menyediakan dialog Grid Settings untuk step, fast grid, gaya,
+ketebalan, min spacing, axes, rulers, crosshair, unit, dan local origin.
+Field tersebut belum disimpan; persistensi masuk U8-09.
+
 ## 8. Rencana Verifikasi
 
 Test yang harus ada:
@@ -633,6 +637,8 @@ pada viewport backend.
 
 U8-07 sudah ditutup oleh test format mils, mm, unit logis, dan delta
 terhadap local origin.
+
+U8-08 sudah ditutup oleh smoke test render dialog Grid Settings.
 
 ## 9. Batas dan Risiko
 
