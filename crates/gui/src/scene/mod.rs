@@ -106,6 +106,7 @@ pub fn draw(
 ) {
     draw_wire_layer(painter, rect, camera, &scene);
     draw_junctions(painter, rect, camera, scene.document);
+    draw_dangling_layer(painter, rect, camera, &scene);
     draw_components(painter, rect, camera, &scene, hover);
     draw_wire_handles(painter, rect, camera, &scene);
     draw_wire_preview(painter, rect, camera, &scene, hover);
@@ -132,6 +133,17 @@ fn draw_wire_layer(
         scene.hover_wire,
         scene.flow_phase,
     );
+}
+
+fn draw_dangling_layer(
+    painter: &egui::Painter,
+    rect: egui::Rect,
+    camera: &crate::canvas::GridCamera,
+    scene: &Scene<'_>,
+) {
+    for point in scene.document.dangling_endpoints(scene.library) {
+        draw_dangling_marker(painter, rect, camera, point);
+    }
 }
 
 fn draw_ghost_layer(

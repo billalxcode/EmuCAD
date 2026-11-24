@@ -345,7 +345,7 @@ impl PlacedPart {
 pub(crate) fn extract(document: &Document) -> Result<Netlist, NetlistError> {
     let parts = collect_parts(document)?;
     validate_pin_positions(&parts)?;
-    validate_wire_endpoints(document, &parts)?;
+    validate_wire_endpoints(document)?;
     let points = collect_points(document, &parts);
     let index = PointIndex::new(points);
     let mut set = DisjointSet::new(index.len());
@@ -381,30 +381,12 @@ fn validate_pin_positions(parts: &[PlacedPart]) -> Result<(), NetlistError> {
     Ok(())
 }
 
-fn validate_wire_endpoints(document: &Document, parts: &[PlacedPart]) -> Result<(), NetlistError> {
-    let pins: BTreeSet<GridPos> = parts
-        .iter()
-        .flat_map(|part| part.pins.iter().map(|pin| pin.point))
-        .collect();
-    let junctions: BTreeSet<GridPos> = document.junctions().into_iter().collect();
-    let mut endpoints: BTreeMap<GridPos, usize> = BTreeMap::new();
-    for wire in document.wires() {
-        count_endpoint(&mut endpoints, wire.points.first());
-        count_endpoint(&mut endpoints, wire.points.last());
-    }
-    for (point, count) in endpoints {
-        if count >= 2 || pins.contains(&point) || junctions.contains(&point) {
-            continue;
-        }
-        return Err(NetlistError::WireStub { point });
-    }
-    Ok(())
-}
-
-fn count_endpoint(endpoints: &mut BTreeMap<GridPos, usize>, point: Option<&GridPos>) {
-    if let Some(point) = point {
-        *endpoints.entry(*point).or_default() += 1;
-    }
+fn validate_wire_endpoints(document: &Document) -> Result<(), NetlistError> {
+    let dangling = document.dangling_endpoints(library::builtin());
+    let Some(point) = dangling.first() else {
+        return Ok(());
+    };
+    Err(NetlistError::WireStub { point: *point })
 }
 
 fn is_source(part: &str) -> bool {

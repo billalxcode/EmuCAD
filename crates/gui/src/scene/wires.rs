@@ -167,6 +167,27 @@ pub(crate) fn draw_wire_ends(
     }
 }
 
+pub(crate) fn draw_dangling_marker(
+    painter: &egui::Painter,
+    rect: egui::Rect,
+    camera: &crate::canvas::GridCamera,
+    point: GridPos,
+) {
+    let screen = screen_pos(rect, camera, point);
+    if !rect.contains(screen) {
+        return;
+    }
+    let color = palette(painter).danger;
+    painter.circle_stroke(screen, 4.0, egui::Stroke::new(1.5, color));
+    painter.line_segment(
+        [
+            screen + egui::vec2(-3.0, -3.0),
+            screen + egui::vec2(3.0, 3.0),
+        ],
+        egui::Stroke::new(1.0, color),
+    );
+}
+
 pub(crate) fn draw_junctions(
     painter: &egui::Painter,
     rect: egui::Rect,

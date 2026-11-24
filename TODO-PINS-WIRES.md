@@ -5,7 +5,7 @@ Backlog perbaikan dua bug yang ditemukan pada schematic:
 1. Wire tertinggal saat komponen dipindahkan.
 2. Posisi pin tidak mengikuti simbol komponen.
 
-**Status:** P0, P1, P2, W1, dan W2 selesai. W3 belum.
+**Status:** P0, P1, P2, W1, W2, dan W3 selesai.
 
 **Sumber analisis:** diskusi screenshot R1/SW1 tanggal 2026-11-24.
 
@@ -83,9 +83,11 @@ Backlog perbaikan dua bug yang ditemukan pada schematic:
 
 ### W3 - Deteksi Dangling
 
-- [ ] W3-01 Tandai endpoint wire yang tidak terhubung.
-- [ ] W3-02 Tambahkan pemeriksaan netlist atau ERC.
-- [ ] W3-03 Test marker dan peringatan dangling.
+- [x] W3-01 Tandai endpoint wire yang tidak terhubung dengan marker danger
+  di canvas.
+- [x] W3-02 Tambahkan pemeriksaan `WireStub` di netlist dan hitungan
+  `Dangling` di status bar.
+- [x] W3-03 Test marker dan peringatan dangling.
 
 ---
 
@@ -97,6 +99,7 @@ Backlog perbaikan dua bug yang ditemukan pada schematic:
 - [x] Pin model dan pin visual memakai layout yang sama.
 - [x] Switch, button, SPDT, transistor, dan opamp memiliki pin yang
   sesuai simbol.
+- [x] Endpoint wire yang dangling ditandai dan dilaporkan.
 - [x] Semua test lama tetap lulus.
 - [x] Test baru mencakup kedua bug.
 - [x] ASCII, fmt, clippy, dan test lulus.

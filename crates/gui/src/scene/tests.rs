@@ -61,6 +61,34 @@ fn flow_overlay_renders_in_egui_context() {
     assert!(!output.shapes.is_empty());
 }
 
+#[test]
+fn dangling_endpoint_renders_in_egui_context() {
+    let library = library::builtin();
+    let resistor = crate::library::find("resistor").expect("resistor");
+    let mut document = Document::new();
+    let first = document.add(resistor, GridPos::new(0, 0), Rotation::Deg0, Mirror::None);
+    document.add(resistor, GridPos::new(6, 0), Rotation::Deg0, Mirror::None);
+    let wire = vec![GridPos::new(4, 1), GridPos::new(6, 1)];
+    assert!(
+        document
+            .add_wire(library, wire, NetClass::Digital)
+            .is_some()
+    );
+    document.remove(first);
+    assert_eq!(
+        document.dangling_endpoints(library),
+        vec![GridPos::new(4, 1)]
+    );
+    let selection = Selection::default();
+    let camera = crate::canvas::GridCamera::default();
+    let scene = sample_scene(&document, library, &selection);
+    let mut output = eframe::egui::Context::default().run_ui(test_input(), |ui| {
+        render_into(ui, scene, &camera);
+    });
+    output.textures_delta.clear();
+    assert!(!output.shapes.is_empty());
+}
+
 fn sample_render_with(flow_phase: Option<f32>) -> eframe::egui::FullOutput {
     let library = library::builtin();
     let resistor = crate::library::find("resistor").expect("resistor");

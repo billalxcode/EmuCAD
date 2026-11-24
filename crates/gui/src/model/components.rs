@@ -295,6 +295,42 @@ impl Document {
         })
     }
 
+    /// Returns wire endpoints not attached to a pin, junction, or peer endpoint.
+    #[must_use]
+    pub fn dangling_endpoints(&self, library: &[ComponentDefinition]) -> Vec<GridPos> {
+        let pins = self.pin_points(library);
+        let junctions: BTreeSet<GridPos> = self.junctions().into_iter().collect();
+        let mut counts = BTreeMap::new();
+        for wire in &self.wires {
+            count_endpoint(&mut counts, wire.points.first());
+            count_endpoint(&mut counts, wire.points.last());
+        }
+        self.wires
+            .iter()
+            .flat_map(|wire| [wire.points.first(), wire.points.last()])
+            .flatten()
+            .copied()
+            .filter(|point| {
+                !pins.contains(point)
+                    && !junctions.contains(point)
+                    && counts.get(point).copied().unwrap_or(0) < 2
+            })
+            .collect()
+    }
+
+    fn pin_points(&self, library: &[ComponentDefinition]) -> BTreeSet<GridPos> {
+        let mut points = BTreeSet::new();
+        for instance in &self.components {
+            let Some(definition) = find_definition(library, instance.definition) else {
+                continue;
+            };
+            for pin in definition.pins {
+                points.insert(world_pin(instance, definition, pin));
+            }
+        }
+        points
+    }
+
     /// Returns the topmost component at a grid point.
     #[must_use]
     pub fn hit_test(&self, library: &[ComponentDefinition], point: GridPos) -> Option<ComponentId> {
@@ -450,6 +486,12 @@ impl Document {
             .filter(|component| component.label.starts_with(prefix))
             .count()
             + 1
+    }
+}
+
+fn count_endpoint(counts: &mut BTreeMap<GridPos, usize>, point: Option<&GridPos>) {
+    if let Some(point) = point {
+        *counts.entry(*point).or_default() += 1;
     }
 }
 

@@ -139,3 +139,19 @@ fn rotate_and_mirror_reject_connected_wires() {
     assert!(!document.mirror_components(library, &[first]));
     assert_eq!(document.wires()[0].points, before);
 }
+
+#[test]
+fn dangling_endpoints_follow_removed_components() {
+    let (mut document, first, second, _wire) = wired_resistors();
+    let library = library::builtin();
+    assert!(document.dangling_endpoints(library).is_empty());
+    document.remove(first);
+    assert_eq!(
+        document.dangling_endpoints(library),
+        vec![GridPos::new(4, 1)]
+    );
+    document.remove(second);
+    let mut dangling = document.dangling_endpoints(library);
+    dangling.sort();
+    assert_eq!(dangling, vec![GridPos::new(4, 1), GridPos::new(10, 1)]);
+}

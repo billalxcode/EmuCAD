@@ -73,6 +73,18 @@ impl GuiApp {
         ui.label(format!("Sel {selection}"));
         ui.separator();
         ui.label(format!("Parts {}", self.document.components().len()));
+        ui.separator();
+        self.dangling_status(ui);
+    }
+
+    fn dangling_status(&self, ui: &mut egui::Ui) {
+        let count = self.document.dangling_endpoints(self.library).len();
+        if count == 0 {
+            ui.label("Dangling 0");
+            return;
+        }
+        let color = crate::design::palette_for(ui.ctx()).danger;
+        ui.colored_label(color, format!("Dangling {count}"));
     }
 
     pub(super) fn sim_status_labels(&self, ui: &mut egui::Ui) {
