@@ -46,7 +46,9 @@ impl GuiApp {
         if self.document.rotate_components(self.library, &ids) {
             self.history.record(&before);
             self.mark_dirty();
+            return;
         }
+        self.message = "Rotate blocked by wire or overlap".to_string();
     }
 
     pub(crate) fn mirror(&mut self) {
@@ -62,7 +64,9 @@ impl GuiApp {
         if self.document.mirror_components(self.library, &ids) {
             self.history.record(&before);
             self.mark_dirty();
+            return;
         }
+        self.message = "Mirror blocked by wire or overlap".to_string();
     }
 
     pub(crate) fn align_selection(&mut self, align: Align) {

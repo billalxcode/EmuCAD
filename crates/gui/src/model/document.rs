@@ -249,7 +249,7 @@ impl Document {
             let definition = find_definition(library, instance.definition)?;
             definition.pins.iter().find_map(|pin| {
                 let world = world_pin(instance, definition, pin);
-                let direction = pin_direction(definition, pin, instance.rotation, instance.mirror);
+                let direction = pin_direction(pin, instance.rotation, instance.mirror);
                 (point == world || point == world.offset(direction)).then_some(world)
             })
         })

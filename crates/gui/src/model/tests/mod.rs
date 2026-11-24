@@ -1,7 +1,7 @@
 use super::GridRect;
 use super::{
-    ComponentDefinition, Document, GridPos, GridSize, Mirror, NetClass, PinDefinition, Rotation,
-    SymbolKind, Wire, WireId, body_size, world_pin,
+    ComponentDefinition, ComponentId, Document, GridPos, GridSize, Mirror, NetClass, PinDefinition,
+    PinDirection, Rotation, SymbolKind, Wire, WireId, body_size, world_pin,
 };
 use crate::library;
 
@@ -10,11 +10,13 @@ const PINS: &[PinDefinition] = &[
         name: "1",
         number: "1",
         offset: GridPos::new(0, 1),
+        direction: PinDirection::Left,
     },
     PinDefinition {
         name: "2",
         number: "2",
         offset: GridPos::new(4, 1),
+        direction: PinDirection::Right,
     },
 ];
 

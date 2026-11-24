@@ -19,6 +19,7 @@ fn pin_tooltip_reports_name_and_side() {
         name: "A",
         number: "1",
         offset: GridPos::new(0, 1),
+        direction: crate::model::PinDirection::Left,
     };
     assert_eq!(pin_tooltip(&pin, GridPos::new(-1, 0)), "A (1) left");
     assert_eq!(pin_label_text(&pin), "A/1");

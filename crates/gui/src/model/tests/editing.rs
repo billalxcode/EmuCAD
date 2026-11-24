@@ -89,3 +89,53 @@ fn hit_test_finds_topmost_component() {
     assert_eq!(document.hit_test(LIBRARY, GridPos::new(2, 1)), Some(id));
     assert_eq!(document.hit_test(LIBRARY, GridPos::new(10, 10)), None);
 }
+
+fn wired_resistors() -> (Document, ComponentId, ComponentId, WireId) {
+    let library = library::builtin();
+    let resistor = library::find("resistor").expect("resistor");
+    let mut document = Document::new();
+    let first = document.add(resistor, GridPos::new(0, 0), Rotation::Deg0, Mirror::None);
+    let second = document.add(resistor, GridPos::new(10, 0), Rotation::Deg0, Mirror::None);
+    let wire = document
+        .add_wire(
+            library,
+            vec![GridPos::new(4, 1), GridPos::new(10, 1)],
+            NetClass::Digital,
+        )
+        .expect("wire");
+    (document, first, second, wire)
+}
+
+#[test]
+fn move_component_drags_wire_endpoint() {
+    let (mut document, first, _second, _wire) = wired_resistors();
+    let library = library::builtin();
+    assert!(document.move_components(library, &[(first, GridPos::new(1, 0))]));
+    assert_eq!(
+        document.wires()[0].points,
+        vec![GridPos::new(5, 1), GridPos::new(10, 1)]
+    );
+}
+
+#[test]
+fn move_rejects_diagonal_wire() {
+    let (mut document, first, _second, _wire) = wired_resistors();
+    let library = library::builtin();
+    let before = document.wires()[0].points.clone();
+    assert!(!document.move_components(library, &[(first, GridPos::new(1, 1))]));
+    assert_eq!(
+        document.component(first).expect("first").position,
+        GridPos::new(0, 0)
+    );
+    assert_eq!(document.wires()[0].points, before);
+}
+
+#[test]
+fn rotate_and_mirror_reject_connected_wires() {
+    let (mut document, first, _second, _wire) = wired_resistors();
+    let library = library::builtin();
+    let before = document.wires()[0].points.clone();
+    assert!(!document.rotate_components(library, &[first]));
+    assert!(!document.mirror_components(library, &[first]));
+    assert_eq!(document.wires()[0].points, before);
+}

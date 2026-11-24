@@ -4,7 +4,7 @@
 yang memodelkan transistor, gerbang CMOS, CPU AVR, peripheral, dan board,
 serta mampu menjalankan firmware AVR.
 
-> **Status v0.1:** 1303 test lulus, 11 crate, crate simulasi zero external
+> **Status v0.1:** 1309 test lulus, 11 crate, crate simulasi zero external
 > dependency; dependensi GUI dan binding Python dibatasi pada daftar yang
 > disetujui di `AGENTS.md`.
 > Rilis biner GitHub mengikuti versi workspace; aset dan SHA512
@@ -171,6 +171,7 @@ Dokumen yang sering dipakai:
 | [`TODO.md`](TODO.md) | Pekerjaan yang tersisa |
 | [`TODO-GUI.md`](TODO-GUI.md) | Backlog GUI egui |
 | [`TODO-UI.md`](TODO-UI.md) | Rollout ikon Tabler dan UI mixed worker |
+| [`TODO-PINS-WIRES.md`](TODO-PINS-WIRES.md) | Perbaikan pin layout dan wire movement |
 
 ---
 
@@ -178,7 +179,7 @@ Dokumen yang sering dipakai:
 
 Sudah:
 
-- 1303 test workspace.
+- 1309 test workspace.
 - fmt, clippy, test, dan build release lulus.
 - Paket Linux dapat dibuat.
 - Determinisme Linux diuji.

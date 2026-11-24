@@ -93,7 +93,7 @@ pub(crate) fn draw_pin(
 ) {
     let world = world_pin(instance, definition, pin);
     let screen = screen_pos(rect, camera, world);
-    let direction = pin_direction(definition, pin, instance.rotation, instance.mirror);
+    let direction = pin_direction(pin, instance.rotation, instance.mirror);
     let stub = pin_stub(rect, camera, world, direction);
     let colors = palette(painter);
     painter.line_segment([screen, stub], egui::Stroke::new(1.5, colors.pin));

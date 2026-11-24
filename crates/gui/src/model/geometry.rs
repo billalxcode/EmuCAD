@@ -47,27 +47,9 @@ pub fn world_pin(
 
 /// Returns the outward direction of a pin in world grid units.
 #[must_use]
-pub fn pin_direction(
-    definition: &ComponentDefinition,
-    pin: &PinDefinition,
-    rotation: Rotation,
-    mirror: Mirror,
-) -> GridPos {
-    let delta = outward_delta(definition, pin.offset);
-    let mirrored = mirror.apply(delta);
+pub fn pin_direction(pin: &PinDefinition, rotation: Rotation, mirror: Mirror) -> GridPos {
+    let mirrored = mirror.apply(pin.direction.delta());
     rotation.apply(mirrored)
-}
-
-pub(super) fn outward_delta(definition: &ComponentDefinition, offset: GridPos) -> GridPos {
-    if offset.x == 0 {
-        GridPos::new(-1, 0)
-    } else if offset.x == definition.size.width {
-        GridPos::new(1, 0)
-    } else if offset.y == 0 {
-        GridPos::new(0, -1)
-    } else {
-        GridPos::new(0, 1)
-    }
 }
 
 pub(super) fn transform_point(

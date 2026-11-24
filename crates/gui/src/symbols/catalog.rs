@@ -72,10 +72,10 @@ fn transistor_class_base(record: &CatalogRecord) -> Option<&'static str> {
         "OtherTransistor" => Some("igbt"),
         "Thyristor" => Some(thyristor_base(record.name)),
         "Protection" => Some(protection_base(record.name)),
-        "Switch" => Some(switch_base(record.name)),
+        "Switch" => Some(switch_base(record)),
         "Relay" => Some(relay_base(record.name)),
         "SolidStateRelay" => Some("optocoupler"),
-        "AnalogSwitch" => Some("switch_spdt"),
+        "AnalogSwitch" => Some(analog_switch_base(record)),
         "Connector" => Some("connector"),
         _ => None,
     }
@@ -228,14 +228,22 @@ fn protection_base(name: &str) -> &'static str {
     "fuse"
 }
 
-fn switch_base(name: &str) -> &'static str {
-    if contains(name, "pushbutton") {
+fn switch_base(record: &CatalogRecord) -> &'static str {
+    if record.pins == 2 && contains(record.name, "pushbutton") {
         return "button";
     }
-    if contains(name, "spdt") {
+    if record.pins == 3 && contains(record.name, "spdt") {
         return "switch_spdt";
     }
     "switch"
+}
+
+fn analog_switch_base(record: &CatalogRecord) -> &'static str {
+    match record.pins {
+        2 => "switch",
+        3 => "switch_spdt",
+        _ => "ic",
+    }
 }
 
 fn relay_base(name: &str) -> &'static str {

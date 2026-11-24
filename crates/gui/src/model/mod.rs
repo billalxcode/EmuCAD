@@ -211,6 +211,29 @@ pub struct PinDefinition {
     pub name: &'static str,
     pub number: &'static str,
     pub offset: GridPos,
+    pub direction: PinDirection,
+}
+
+/// Outward direction of a component pin.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PinDirection {
+    Left,
+    Right,
+    Up,
+    Down,
+}
+
+impl PinDirection {
+    /// Returns the one-cell outward vector.
+    #[must_use]
+    pub const fn delta(self) -> GridPos {
+        match self {
+            Self::Left => GridPos::new(-1, 0),
+            Self::Right => GridPos::new(1, 0),
+            Self::Up => GridPos::new(0, -1),
+            Self::Down => GridPos::new(0, 1),
+        }
+    }
 }
 
 /// Symbol family used by the canvas renderer.

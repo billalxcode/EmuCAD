@@ -78,15 +78,101 @@ impl Document {
         if ids.len() != moves.len() {
             return false;
         }
+        let Some(pin_moves) = self.pin_moves(library, moves) else {
+            return false;
+        };
+        self.apply_move(library, moves, &ids, &pin_moves)
+    }
+
+    fn apply_move(
+        &mut self,
+        library: &[ComponentDefinition],
+        moves: &[(ComponentId, GridPos)],
+        ids: &BTreeSet<ComponentId>,
+        pin_moves: &BTreeMap<GridPos, GridPos>,
+    ) -> bool {
         let mut candidate = self.clone();
         if !candidate.apply_moves(moves) {
             return false;
         }
-        if !ids.iter().all(|id| candidate.position_valid(library, *id)) {
+        let changed = candidate.move_wire_ends(pin_moves);
+        if !ids.iter().all(|id| candidate.position_valid(library, *id))
+            || !candidate.wires_valid(library, &changed)
+        {
             return false;
         }
         *self = candidate;
         true
+    }
+
+    fn pin_moves(
+        &self,
+        library: &[ComponentDefinition],
+        moves: &[(ComponentId, GridPos)],
+    ) -> Option<BTreeMap<GridPos, GridPos>> {
+        let mut map = BTreeMap::new();
+        for &(id, position) in moves {
+            self.add_pin_moves(&mut map, library, id, position)?;
+        }
+        Some(map)
+    }
+
+    fn add_pin_moves(
+        &self,
+        map: &mut BTreeMap<GridPos, GridPos>,
+        library: &[ComponentDefinition],
+        id: ComponentId,
+        position: GridPos,
+    ) -> Option<()> {
+        let instance = self.component(id)?;
+        let definition = find_definition(library, instance.definition)?;
+        for pin in definition.pins {
+            let old = world_pin(instance, definition, pin);
+            let offset =
+                transform_point(definition, pin.offset, instance.rotation, instance.mirror);
+            if map.insert(old, position.offset(offset)).is_some() {
+                return None;
+            }
+        }
+        Some(())
+    }
+
+    fn move_wire_ends(&mut self, pins: &BTreeMap<GridPos, GridPos>) -> BTreeSet<WireId> {
+        let mut changed = BTreeSet::new();
+        for wire in &mut self.wires {
+            if move_endpoint(&mut wire.points, pins) {
+                changed.insert(wire.id);
+            }
+        }
+        if !changed.is_empty() {
+            self.wire_index = crate::spatial::SegmentIndex::rebuild(&self.wires);
+        }
+        changed
+    }
+
+    fn wires_valid(&self, library: &[ComponentDefinition], changed: &BTreeSet<WireId>) -> bool {
+        self.wires
+            .iter()
+            .filter(|wire| changed.contains(&wire.id))
+            .all(|wire| self.validate_wire(library, &wire.points, Some(wire.id)))
+    }
+
+    fn has_connected_wire(&self, library: &[ComponentDefinition], id: ComponentId) -> bool {
+        let Some(instance) = self.component(id) else {
+            return false;
+        };
+        let Some(definition) = find_definition(library, instance.definition) else {
+            return false;
+        };
+        self.wires.iter().any(|wire| {
+            let (Some(&first), Some(&last)) = (wire.points.first(), wire.points.last()) else {
+                return false;
+            };
+            definition.pins.iter().any(|pin| {
+                let world = world_pin(instance, definition, pin);
+                first == world || last == world
+            })
+        })
     }
 
     pub(super) fn apply_moves(&mut self, moves: &[(ComponentId, GridPos)]) -> bool {
@@ -148,6 +234,9 @@ impl Document {
     ) -> bool {
         let unique: BTreeSet<_> = ids.iter().copied().collect();
         if unique.len() != ids.len() {
+            return false;
+        }
+        if ids.iter().any(|id| self.has_connected_wire(library, *id)) {
             return false;
         }
         let Some(candidate) = self.transformed_candidate(library, ids, &unique, update) else {
@@ -362,4 +451,22 @@ impl Document {
             .count()
             + 1
     }
+}
+
+fn move_endpoint(points: &mut [GridPos], pins: &BTreeMap<GridPos, GridPos>) -> bool {
+    let Some(first) = points.first_mut() else {
+        return false;
+    };
+    let mut changed = false;
+    if let Some(position) = pins.get(first).copied() {
+        *first = position;
+        changed = true;
+    }
+    if let Some(last) = points.last_mut() {
+        if let Some(position) = pins.get(last).copied() {
+            *last = position;
+            changed = true;
+        }
+    }
+    changed
 }

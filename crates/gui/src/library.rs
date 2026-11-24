@@ -1,6 +1,8 @@
 //! Built-in component library.
 
-use crate::model::{Category, ComponentDefinition, GridPos, GridSize, PinDefinition, SymbolKind};
+use crate::model::{
+    Category, ComponentDefinition, GridPos, GridSize, PinDefinition, PinDirection, SymbolKind,
+};
 use device::{CatalogRecord, catalog_records};
 use std::collections::BTreeMap;
 use std::sync::OnceLock;
@@ -10,11 +12,13 @@ const RESISTOR_PINS: &[PinDefinition] = &[
         name: "1",
         number: "1",
         offset: GridPos::new(0, 1),
+        direction: PinDirection::Left,
     },
     PinDefinition {
         name: "2",
         number: "2",
         offset: GridPos::new(4, 1),
+        direction: PinDirection::Right,
     },
 ];
 
@@ -23,11 +27,13 @@ const LED_PINS: &[PinDefinition] = &[
         name: "A",
         number: "1",
         offset: GridPos::new(0, 1),
+        direction: PinDirection::Left,
     },
     PinDefinition {
         name: "K",
         number: "2",
         offset: GridPos::new(4, 1),
+        direction: PinDirection::Right,
     },
 ];
 
@@ -35,12 +41,14 @@ const BUTTON_PINS: &[PinDefinition] = &[
     PinDefinition {
         name: "1",
         number: "1",
-        offset: GridPos::new(0, 1),
+        offset: GridPos::new(0, 2),
+        direction: PinDirection::Left,
     },
     PinDefinition {
         name: "2",
         number: "2",
-        offset: GridPos::new(4, 1),
+        offset: GridPos::new(4, 2),
+        direction: PinDirection::Right,
     },
 ];
 
@@ -48,12 +56,14 @@ const VCC_PINS: &[PinDefinition] = &[PinDefinition {
     name: "VCC",
     number: "1",
     offset: GridPos::new(1, 2),
+    direction: PinDirection::Down,
 }];
 
 const GND_PINS: &[PinDefinition] = &[PinDefinition {
     name: "GND",
     number: "1",
     offset: GridPos::new(1, 0),
+    direction: PinDirection::Up,
 }];
 
 const MCU_PINS: &[PinDefinition] = &[
@@ -118,7 +128,7 @@ const DEFINITIONS: &[ComponentDefinition] = &[
         category: Category::Passive,
         reference_prefix: "SW",
         default_value: "TACT",
-        size: GridSize::new(4, 2),
+        size: GridSize::new(4, 4),
         pins: BUTTON_PINS,
         symbol: SymbolKind::Button,
     },
@@ -188,7 +198,8 @@ fn build_definitions() -> Box<[ComponentDefinition]> {
 }
 
 fn catalog_definition(record: &CatalogRecord, variant: u16) -> ComponentDefinition {
-    let (size, pins) = pin_layout(record.pins);
+    let base = crate::symbols::base_for(record);
+    let (size, pins) = crate::symbols::pin_layout(base, record.pins);
     ComponentDefinition {
         id: record.id,
         name: record.name,
@@ -197,66 +208,22 @@ fn catalog_definition(record: &CatalogRecord, variant: u16) -> ComponentDefiniti
         default_value: default_value(record),
         size,
         pins: leak_pins(pins),
-        symbol: SymbolKind::Catalog {
-            base: crate::symbols::base_for(record),
-            variant,
-        },
-    }
-}
-
-fn pin_layout(count: u8) -> (GridSize, Vec<PinDefinition>) {
-    match count {
-        1 => (GridSize::new(2, 2), vec![pin(1, 1, 0)]),
-        2 => (GridSize::new(4, 2), vec![pin(1, 0, 1), pin(2, 4, 1)]),
-        3 => (
-            GridSize::new(4, 4),
-            vec![pin(1, 0, 1), pin(2, 4, 2), pin(3, 0, 3)],
-        ),
-        4 => (
-            GridSize::new(4, 4),
-            vec![pin(1, 0, 1), pin(2, 4, 1), pin(3, 0, 3), pin(4, 4, 3)],
-        ),
-        _ => grid_layout(count),
-    }
-}
-
-fn grid_layout(count: u8) -> (GridSize, Vec<PinDefinition>) {
-    let left = usize::from(count).div_ceil(2);
-    let right = usize::from(count) / 2;
-    let height = (left * 2 + 2) as i32;
-    let mut pins = Vec::with_capacity(usize::from(count));
-    for row in 0..left {
-        pins.push(pin((row + 1) as u8, 0, (row * 2 + 2) as i32));
-    }
-    for row in 0..right {
-        pins.push(pin((left + row + 1) as u8, 8, (row * 2 + 2) as i32));
-    }
-    (GridSize::new(8, height), pins)
-}
-
-fn pin(index: u8, x: i32, y: i32) -> PinDefinition {
-    let label = pin_label(index);
-    PinDefinition {
-        name: label,
-        number: label,
-        offset: GridPos::new(x, y),
+        symbol: SymbolKind::Catalog { base, variant },
     }
 }
 
 const fn mcu_pin(number: &'static str, name: &'static str, x: i32, y: i32) -> PinDefinition {
+    let direction = if x == 0 {
+        PinDirection::Left
+    } else {
+        PinDirection::Right
+    };
     PinDefinition {
         name,
         number,
         offset: GridPos::new(x, y),
+        direction,
     }
-}
-
-fn pin_label(index: u8) -> &'static str {
-    const LABELS: [&str; 8] = ["1", "2", "3", "4", "5", "6", "7", "8"];
-    LABELS
-        .get(usize::from(index).saturating_sub(1))
-        .copied()
-        .unwrap_or_else(|| Box::leak(index.to_string().into_boxed_str()))
 }
 
 fn leak_pins(pins: Vec<PinDefinition>) -> &'static [PinDefinition] {
@@ -345,8 +312,8 @@ fn switch_prefix(record: &CatalogRecord) -> &'static str {
 
 #[cfg(test)]
 mod tests {
-    use super::{builtin, find};
-    use crate::model::SymbolKind;
+    use super::{ComponentDefinition, builtin, find};
+    use crate::model::{GridPos, SymbolKind};
     use device::catalog_records;
     use std::collections::BTreeSet;
 
@@ -421,6 +388,44 @@ mod tests {
             })
             .collect();
         assert_eq!(variants.len(), 500);
+    }
+
+    #[test]
+    fn button_and_switch_use_square_pin_layout() {
+        let button = find("button").expect("button");
+        assert_eq!((button.size.width, button.size.height), (4, 4));
+        assert_eq!(button.pins[0].offset, GridPos::new(0, 2));
+        assert_eq!(button.pins[1].offset, GridPos::new(4, 2));
+        let pushbutton = find("switch.mechanical.pushbutton").expect("pushbutton");
+        assert_eq!((pushbutton.size.width, pushbutton.size.height), (4, 4));
+        assert_eq!(pushbutton.pins[0].offset, GridPos::new(0, 2));
+        assert_eq!(pushbutton.pins[1].offset, GridPos::new(4, 2));
+    }
+
+    #[test]
+    fn every_pin_is_unique_and_on_its_symbol_boundary() {
+        for definition in builtin() {
+            assert_pin_layout(definition);
+        }
+    }
+
+    fn assert_pin_layout(definition: &ComponentDefinition) {
+        let mut seen = BTreeSet::new();
+        for pin in definition.pins {
+            assert!(seen.insert(pin.offset), "{} duplicate pin", definition.id);
+            let boundary = pin.offset.x == 0
+                || pin.offset.x == definition.size.width
+                || pin.offset.y == 0
+                || pin.offset.y == definition.size.height;
+            assert!(boundary, "{} pin outside body", definition.id);
+            let direction = match pin.direction {
+                crate::model::PinDirection::Left => pin.offset.x == 0,
+                crate::model::PinDirection::Right => pin.offset.x == definition.size.width,
+                crate::model::PinDirection::Up => pin.offset.y == 0,
+                crate::model::PinDirection::Down => pin.offset.y == definition.size.height,
+            };
+            assert!(direction, "{} pin direction mismatch", definition.id);
+        }
     }
 
     #[test]
