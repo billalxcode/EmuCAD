@@ -72,6 +72,17 @@ icon_assets! {
     Clipboard => "clipboard.svg",
     Sun => "sun.svg",
     Moon => "moon.svg",
+    Pointer => "pointer.svg",
+    Route => "route.svg",
+    Palette => "palette.svg",
+    Export => "file-export.svg",
+    AlignLeft => "layout-align-left.svg",
+    AlignRight => "layout-align-right.svg",
+    AlignTop => "layout-align-top.svg",
+    AlignBottom => "layout-align-bottom.svg",
+    AlignCenter => "layout-align-center.svg",
+    DistributeHorizontal => "layout-distribute-horizontal.svg",
+    DistributeVertical => "layout-distribute-vertical.svg",
 }
 
 static ICONS: OnceLock<BTreeMap<IconKind, SvgSymbol>> = OnceLock::new();
@@ -104,17 +115,57 @@ pub(crate) fn draw_icon(
 /// A button with one Tabler icon and a text label.
 pub(crate) struct IconButton {
     icon: IconKind,
-    label: &'static str,
+    label: String,
+    selected: bool,
+    tooltip: Option<String>,
+    shortcut: Option<&'static str>,
 }
 
 /// Builds an icon button.
-pub(crate) fn icon_button(icon: IconKind, label: &'static str) -> IconButton {
-    IconButton { icon, label }
+pub(crate) fn icon_button(icon: IconKind, label: impl Into<String>) -> IconButton {
+    IconButton {
+        icon,
+        label: label.into(),
+        selected: false,
+        tooltip: None,
+        shortcut: None,
+    }
+}
+
+impl IconButton {
+    /// Marks the button as selected.
+    pub(crate) fn selected(mut self, selected: bool) -> Self {
+        self.selected = selected;
+        self
+    }
+
+    /// Overrides the default tooltip.
+    pub(crate) fn tooltip(mut self, tooltip: impl Into<String>) -> Self {
+        self.tooltip = Some(tooltip.into());
+        self
+    }
+
+    /// Adds a shortcut hint to the tooltip.
+    pub(crate) fn shortcut(mut self, shortcut: &'static str) -> Self {
+        self.shortcut = Some(shortcut);
+        self
+    }
+
+    fn hint(&self) -> String {
+        if let Some(tooltip) = &self.tooltip {
+            return tooltip.clone();
+        }
+        match self.shortcut {
+            Some(shortcut) => format!("{} ({shortcut})", self.label),
+            None => self.label.clone(),
+        }
+    }
 }
 
 impl egui::Widget for IconButton {
     fn ui(self, ui: &mut egui::Ui) -> egui::Response {
-        let response = ui.add(egui::Button::new(format!("      {}", self.label)));
+        let button = egui::Button::new(format!("      {}", self.label)).selected(self.selected);
+        let response = ui.add(button);
         let color = ui.style().interact(&response).fg_stroke.color;
         let size = 14.0;
         let rect = egui::Rect::from_min_size(
@@ -122,7 +173,8 @@ impl egui::Widget for IconButton {
             egui::vec2(size, size),
         );
         draw_icon(ui.painter(), rect, self.icon, color);
-        response
+        let hint = self.hint();
+        response.on_hover_text(hint)
     }
 }
 

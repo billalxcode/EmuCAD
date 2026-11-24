@@ -1,5 +1,6 @@
 use super::*;
 use crate::canvas::ZOOM_PRESETS;
+use crate::icons::IconKind;
 use crate::transient::TransientTrace;
 
 impl GuiApp {
@@ -560,35 +561,28 @@ impl GuiApp {
     }
 
     pub(super) fn tool_buttons(&mut self, ui: &mut egui::Ui) {
-        let previous = self.tool;
         for tool in Tool::ALL {
-            let text = format!("{} {}", tool.icon(), tool.label());
-            ui.selectable_value(&mut self.tool, tool, text);
-        }
-        if previous != self.tool {
-            self.wire_points.clear();
+            let button = icon_button(tool.icon(), tool.label()).selected(self.tool == tool);
+            let button = match tool.shortcut() {
+                Some(shortcut) => button.shortcut(shortcut),
+                None => button,
+            };
+            if ui.add(button).clicked() {
+                self.set_tool(tool);
+            }
         }
     }
 
     pub(super) fn sheet_buttons(&mut self, ui: &mut egui::Ui) {
-        if ui
-            .selectable_label(self.library_open, "[L] Library")
-            .clicked()
-        {
-            self.library_open = true;
-        }
-        if ui
-            .selectable_label(self.inspector_open, "[I] Inspector")
-            .clicked()
-        {
-            self.inspector_open = true;
-        }
-        if ui
-            .selectable_label(self.legend_open, "[K] Legend")
-            .clicked()
-        {
-            self.legend_open = true;
-        }
+        panel_button(ui, IconKind::Folder, "Library", &mut self.library_open, "L");
+        panel_button(
+            ui,
+            IconKind::Settings,
+            "Inspector",
+            &mut self.inspector_open,
+            "I",
+        );
+        panel_button(ui, IconKind::Palette, "Legend", &mut self.legend_open, "K");
     }
 
     pub(super) fn toolbar_view(&mut self, ui: &mut egui::Ui) {
@@ -816,6 +810,19 @@ impl GuiApp {
 
 pub(crate) fn fit_margin(rect: egui::Rect) -> f64 {
     if rect.height() < 768.0 { 1.10 } else { 1.04 }
+}
+
+fn panel_button(
+    ui: &mut egui::Ui,
+    icon: IconKind,
+    label: &'static str,
+    open: &mut bool,
+    shortcut: &'static str,
+) {
+    let button = icon_button(icon, label).selected(*open).shortcut(shortcut);
+    if ui.add(button).clicked() {
+        *open = true;
+    }
 }
 
 pub(super) fn default_transient_selection(trace: &TransientTrace) -> BTreeSet<usize> {

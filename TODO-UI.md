@@ -2,8 +2,8 @@
 
 Backlog UI setelah migrasi ikon Tabler dan worker mixed.
 
-**Status:** U0 dan U8-01 sampai U8-11 selesai, kecuali U8-03b dan
-U8-04b yang terblokir model halaman dan anchor label. U1 sampai U7
+**Status:** U0, U1, dan U8-01 sampai U8-11 selesai, kecuali U8-03b dan
+U8-04b yang terblokir model halaman dan anchor label. U2 sampai U7
 belum. Riset viewport dan grid KiCad selesai di
 `docs/96-viewport-grid.md`.
 
@@ -108,12 +108,14 @@ Setiap ikon baru harus:
 
 ### U1 - Toolbar dan Command Palette
 
-- [ ] U1-01 Ganti tombol tool dengan ikon select, wire, dan probe.
-- [ ] U1-02 Ganti tombol sheet dengan ikon pin, sheet, dan export.
-- [ ] U1-03 Tambahkan ikon pada menu Recent.
-- [ ] U1-04 Tambahkan ikon pada command palette.
-- [ ] U1-05 Tambahkan shortcut hint pada tooltip.
-- [ ] U1-06 Test render toolbar dan palette headless.
+- [x] U1-01 Ganti tombol tool dengan ikon select, place, wire, probe,
+  dan zoom.
+- [x] U1-02 Ganti tombol sheet dengan ikon library, inspector, legend,
+  dan export.
+- [x] U1-03 Tambahkan ikon pada menu Recent.
+- [x] U1-04 Tambahkan ikon pada command palette.
+- [x] U1-05 Tambahkan shortcut hint pada tooltip dan baris palette.
+- [x] U1-06 Test render toolbar dan palette headless.
 
 ### U2 - Library
 

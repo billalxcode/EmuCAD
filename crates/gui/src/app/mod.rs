@@ -104,13 +104,23 @@ impl Tool {
         }
     }
 
-    const fn icon(self) -> &'static str {
+    const fn icon(self) -> crate::icons::IconKind {
         match self {
-            Self::Select => "*",
-            Self::Place => "+",
-            Self::Wire => "~",
-            Self::Probe => "?",
-            Self::Zoom => "Z",
+            Self::Select => crate::icons::IconKind::Pointer,
+            Self::Place => crate::icons::IconKind::Package,
+            Self::Wire => crate::icons::IconKind::Route,
+            Self::Probe => crate::icons::IconKind::Crosshair,
+            Self::Zoom => crate::icons::IconKind::ZoomIn,
+        }
+    }
+
+    const fn shortcut(self) -> Option<&'static str> {
+        match self {
+            Self::Select => Some("V"),
+            Self::Place => Some("P"),
+            Self::Wire => Some("W"),
+            Self::Probe => Some("G"),
+            Self::Zoom => None,
         }
     }
 }

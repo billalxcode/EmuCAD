@@ -152,8 +152,8 @@ fn zoom_box_fits_dragged_area() {
 
 #[test]
 fn every_tool_has_an_icon() {
-    for tool in super::Tool::ALL {
-        assert!(!tool.icon().is_empty());
+    for tool in Tool::ALL {
+        assert!(crate::icons::IconKind::ALL.contains(&tool.icon()));
         assert!(!tool.label().is_empty());
     }
 }

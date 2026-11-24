@@ -208,16 +208,6 @@ fn units_format_coordinates() {
     assert_eq!(millimeters.pointer_text(), "X 2.54 Y 5.08");
 }
 
-fn key_event(key: eframe::egui::Key) -> eframe::egui::Event {
-    eframe::egui::Event::Key {
-        key,
-        physical_key: None,
-        pressed: true,
-        repeat: false,
-        modifiers: eframe::egui::Modifiers::NONE,
-    }
-}
-
 #[test]
 fn arrow_keys_map_to_axis_delta() {
     use eframe::egui::Key;

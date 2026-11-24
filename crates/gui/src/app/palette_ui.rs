@@ -25,6 +25,11 @@ pub(crate) fn palette_row(
     active: bool,
     running: bool,
 ) -> bool {
-    ui.selectable_label(active, command.label(running))
-        .clicked()
+    let mut label = command.label(running).to_string();
+    if let Some(shortcut) = command.shortcut() {
+        label.push_str("  ");
+        label.push_str(shortcut);
+    }
+    let button = icon_button(command.icon(running), label).selected(active);
+    ui.add(button).clicked()
 }

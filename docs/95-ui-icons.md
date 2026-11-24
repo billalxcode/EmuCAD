@@ -28,11 +28,11 @@ Itu transliterasi dari nama pada lisensi upstream.
 
 - Lokasi: `crates/gui/assets/icons/`.
 - Format: SVG Tabler 24 x 24, stroke 2 px.
-- Jumlah awal: 45 ikon.
+- Jumlah saat ini: 57 ikon.
 - Semua file harus ASCII.
 - Versi dan sumber dicatat di `NOTICE.md`.
 
-Ikon awal mencakup:
+Ikon mencakup:
 
 - Aksi file dan edit.
 - Simulasi: run, pause, step, reset, DC, transient.
@@ -40,6 +40,9 @@ Ikon awal mencakup:
 - Elektronik: resistor, capacitor, diode, inductor, CPU.
 - Data: database, chart, math, ruler, binary, file, folder, package.
 - Utilitas: alert, check, close, bug, crosshair, sun, moon.
+- Tool: pointer, route.
+- Layout: palette, export, align kiri/kanan/atas/bawah/center, dan
+  distribute horizontal/vertikal.
 
 ## 4. Integrasi
 
@@ -47,8 +50,9 @@ Ikon awal mencakup:
 - Asset dibaca dengan `include_str!`.
 - Parser memakai `crates/gui/src/symbols/svg.rs`.
 - Gambar memakai `symbols::draw_svg` yang sama dengan simbol skematik.
-- `IconButton` menggambar ikon di atas tombol teks.
-- Tooltip tetap memakai teks tombol.
+- `IconButton` menggambar ikon di atas tombol teks dan mendukung state
+  selected, label dinamis, serta tooltip shortcut.
+- Tooltip menampilkan label dan shortcut bila tersedia.
 
 Parser SVG sekarang mendukung perintah path `A` atau `a` untuk busur.
 Tanpa dukungan busur, banyak ikon Tabler gagal diparse.
@@ -58,18 +62,19 @@ Tanpa dukungan busur, banyak ikon Tabler gagal diparse.
 Sudah memakai ikon:
 
 - Toolbar edit: undo dan redo.
-- Toolbar file: open, save, dan PNG.
+- Toolbar file: open, save, export, dan menu recent per file.
 - Toolbar simulasi: load HEX, check netlist, DC, transient.
 - Toolbar run: run, pause, step, dan reset.
+- Toolbar tool: select, place, wire, probe, dan zoom.
+- Toolbar sheet: library, inspector, dan legend.
+- Command palette: ikon per command dan hint shortcut.
 - Panel simulasi: run, pause, step, dan reset.
 - Grafik AVR: run dan pause.
 
 Belum memakai ikon:
 
-- Tombol tool dan sheet.
 - Kategori library.
 - Inspector dan context menu.
-- Command palette.
 - Kontrol wire, junction, dan probe.
 - Status bar dan minimap.
 - Setting probe mixed.

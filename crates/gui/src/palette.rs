@@ -1,5 +1,7 @@
 //! Command palette catalog and state.
 
+use crate::icons::IconKind;
+
 /// One executable palette command.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Command {
@@ -85,6 +87,99 @@ impl Command {
             };
         }
         self.static_label()
+    }
+
+    /// Returns the icon shown next to the command.
+    #[must_use]
+    pub fn icon(self, running: bool) -> IconKind {
+        if self == Self::RunPause {
+            return if running {
+                IconKind::Pause
+            } else {
+                IconKind::Run
+            };
+        }
+        self.edit_icon()
+            .or_else(|| self.view_icon())
+            .unwrap_or_else(|| self.layout_icon())
+    }
+
+    /// Returns the keyboard shortcut hint, when one exists.
+    #[must_use]
+    pub fn shortcut(self) -> Option<&'static str> {
+        self.edit_shortcut().or_else(|| self.view_shortcut())
+    }
+
+    fn edit_icon(self) -> Option<IconKind> {
+        match self {
+            Self::Save => Some(IconKind::Save),
+            Self::Open => Some(IconKind::Open),
+            Self::LoadHex => Some(IconKind::LoadHex),
+            Self::Step => Some(IconKind::Step),
+            Self::Reset => Some(IconKind::Reset),
+            Self::Undo => Some(IconKind::Undo),
+            Self::Redo => Some(IconKind::Redo),
+            Self::Copy | Self::Duplicate => Some(IconKind::Copy),
+            Self::Paste => Some(IconKind::Clipboard),
+            Self::Delete => Some(IconKind::Trash),
+            _ => None,
+        }
+    }
+
+    fn view_icon(self) -> Option<IconKind> {
+        match self {
+            Self::ToggleGrid => Some(IconKind::Grid),
+            Self::ToggleMinimap => Some(IconKind::Map),
+            Self::ToggleLibrary => Some(IconKind::Folder),
+            Self::ToggleInspector => Some(IconKind::Settings),
+            Self::ToggleLegend => Some(IconKind::Palette),
+            Self::ToggleWaveform => Some(IconKind::Chart),
+            Self::ToggleUart => Some(IconKind::Binary),
+            Self::ToggleLog => Some(IconKind::FileText),
+            Self::ZoomReset => Some(IconKind::Fit),
+            Self::ZoomUndo => Some(IconKind::Undo),
+            Self::SelectTool => Some(IconKind::Pointer),
+            Self::WireTool => Some(IconKind::Route),
+            _ => None,
+        }
+    }
+
+    fn layout_icon(self) -> IconKind {
+        match self {
+            Self::AlignLeft => IconKind::AlignLeft,
+            Self::AlignRight => IconKind::AlignRight,
+            Self::AlignTop => IconKind::AlignTop,
+            Self::AlignBottom => IconKind::AlignBottom,
+            Self::AlignCenterX | Self::AlignCenterY => IconKind::AlignCenter,
+            Self::DistributeHorizontal => IconKind::DistributeHorizontal,
+            Self::DistributeVertical => IconKind::DistributeVertical,
+            _ => IconKind::Ruler,
+        }
+    }
+
+    fn edit_shortcut(self) -> Option<&'static str> {
+        match self {
+            Self::Save => Some("Ctrl+S"),
+            Self::Open => Some("Ctrl+O"),
+            Self::Undo => Some("Ctrl+Z"),
+            Self::Redo => Some("Ctrl+Shift+Z"),
+            Self::Copy => Some("Ctrl+C"),
+            Self::Paste => Some("Ctrl+V"),
+            Self::Duplicate => Some("Ctrl+D"),
+            Self::Delete => Some("Delete"),
+            _ => None,
+        }
+    }
+
+    fn view_shortcut(self) -> Option<&'static str> {
+        match self {
+            Self::ToggleLibrary => Some("L"),
+            Self::ToggleInspector => Some("I"),
+            Self::ToggleLegend => Some("K"),
+            Self::SelectTool => Some("V"),
+            Self::WireTool => Some("W"),
+            _ => None,
+        }
     }
 
     const fn static_label(self) -> &'static str {
@@ -202,6 +297,7 @@ pub fn step_selection(index: usize, count: usize, delta: isize) -> usize {
 #[cfg(test)]
 mod tests {
     use super::{Command, State, matching, step_selection};
+    use crate::icons::IconKind;
 
     #[test]
     fn filters_case_insensitive() {
@@ -215,6 +311,16 @@ mod tests {
         assert!(matching("pause", false).is_empty());
         assert_eq!(matching("pause", true), vec![Command::RunPause]);
         assert_eq!(matching("run", false), vec![Command::RunPause]);
+    }
+
+    #[test]
+    fn commands_have_icons_and_shortcuts() {
+        assert_eq!(Command::RunPause.icon(false), IconKind::Run);
+        assert_eq!(Command::RunPause.icon(true), IconKind::Pause);
+        assert_eq!(Command::Save.icon(false), IconKind::Save);
+        assert_eq!(Command::Save.shortcut(), Some("Ctrl+S"));
+        assert_eq!(Command::SelectTool.shortcut(), Some("V"));
+        assert_eq!(Command::AlignLeft.shortcut(), None);
     }
 
     #[test]

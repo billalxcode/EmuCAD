@@ -1,6 +1,7 @@
 use super::{
-    AUTOSAVE_DELAY, ConflictAction, FitTarget, GuiApp, WATCH_INTERVAL, axis_delta, content_bounds,
-    cycle_at_x, file_stamp, fit_margin, l_route, move_segment, watch_remaining, z_route,
+    AUTOSAVE_DELAY, ConflictAction, FitTarget, GuiApp, Tool, WATCH_INTERVAL, axis_delta,
+    content_bounds, cycle_at_x, file_stamp, fit_margin, l_route, move_segment, watch_remaining,
+    z_route,
 };
 use crate::canvas::GridCamera;
 use crate::model::{
@@ -10,6 +11,16 @@ use crate::model::{
 use crate::persist;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
+
+fn key_event(key: eframe::egui::Key) -> eframe::egui::Event {
+    eframe::egui::Event::Key {
+        key,
+        physical_key: None,
+        pressed: true,
+        repeat: false,
+        modifiers: eframe::egui::Modifiers::NONE,
+    }
+}
 
 fn temp_dir(name: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!("emucad-app-{}-{name}", std::process::id()));
@@ -70,6 +81,7 @@ mod geometry;
 mod graph;
 mod library;
 mod persistence;
+mod ui;
 mod wiring;
 
 use super::*;

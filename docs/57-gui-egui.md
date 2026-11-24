@@ -440,6 +440,9 @@ Aturan:
 | P | Place |
 | W | Wire |
 | G | Probe |
+| L | Toggle library |
+| I | Toggle inspector |
+| K | Toggle net legend |
 | Space + drag | Pan |
 | Wheel | Zoom di kursor |
 | Shift + wheel | Pan vertikal |

@@ -48,10 +48,16 @@ impl GuiApp {
 
     pub(super) fn edit_buttons(&mut self, ui: &mut egui::Ui) {
         let undo = ui
-            .add_enabled(self.history.can_undo(), icon_button(IconKind::Undo, "Undo"))
+            .add_enabled(
+                self.history.can_undo(),
+                icon_button(IconKind::Undo, "Undo").shortcut("Ctrl+Z"),
+            )
             .clicked();
         let redo = ui
-            .add_enabled(self.history.can_redo(), icon_button(IconKind::Redo, "Redo"))
+            .add_enabled(
+                self.history.can_redo(),
+                icon_button(IconKind::Redo, "Redo").shortcut("Ctrl+Shift+Z"),
+            )
             .clicked();
         if undo {
             self.undo();
@@ -62,13 +68,15 @@ impl GuiApp {
     }
 
     pub(super) fn file_buttons(&mut self, ui: &mut egui::Ui) {
-        if ui.add(icon_button(IconKind::Open, "Open")).clicked() {
+        let open = icon_button(IconKind::Open, "Open").shortcut("Ctrl+O");
+        if ui.add(open).clicked() {
             self.open_project();
         }
-        if ui.add(icon_button(IconKind::Save, "Save")).clicked() {
+        let save = icon_button(IconKind::Save, "Save").shortcut("Ctrl+S");
+        if ui.add(save).clicked() {
             self.save_project();
         }
-        if ui.add(icon_button(IconKind::Png, "PNG")).clicked() {
+        if ui.add(icon_button(IconKind::Export, "PNG")).clicked() {
             self.export_png(ui.ctx());
         }
         self.recent_menu(ui);
@@ -83,7 +91,8 @@ impl GuiApp {
             for path in &self.config.recent_files {
                 let label = file_name(path);
                 let hint = path.display().to_string();
-                if ui.button(label).on_hover_text(hint).clicked() {
+                let button = icon_button(IconKind::FileText, label).tooltip(hint);
+                if ui.add(button).clicked() {
                     chosen = Some(path.clone());
                     ui.close();
                 }

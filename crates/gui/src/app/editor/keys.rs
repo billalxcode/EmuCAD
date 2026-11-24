@@ -11,6 +11,8 @@ impl GuiApp {
         self.handle_file_keys(ui);
         self.handle_history_keys(ui);
         self.handle_clipboard_keys(ui);
+        self.handle_tool_keys(ui);
+        self.handle_panel_keys(ui);
         self.handle_edit_keys(ui);
         self.handle_cursor_keys(ui);
         self.handle_nudge_keys(ui);
@@ -137,6 +139,38 @@ impl GuiApp {
         }
     }
 
+    fn handle_tool_keys(&mut self, ui: &egui::Ui) {
+        let tool = ui.input(|input| {
+            if input.modifiers.command || input.modifiers.alt || input.modifiers.ctrl {
+                return None;
+            }
+            tool_shortcut(input)
+        });
+        if let Some(tool) = tool {
+            self.set_tool(tool);
+        }
+    }
+
+    fn handle_panel_keys(&mut self, ui: &egui::Ui) {
+        let (library, inspector, legend) = ui.input(|input| {
+            let plain = !input.modifiers.command && !input.modifiers.alt && !input.modifiers.ctrl;
+            (
+                plain && input.key_pressed(egui::Key::L),
+                plain && input.key_pressed(egui::Key::I),
+                plain && input.key_pressed(egui::Key::K),
+            )
+        });
+        if library {
+            self.library_open = !self.library_open;
+        }
+        if inspector {
+            self.inspector_open = !self.inspector_open;
+        }
+        if legend {
+            self.legend_open = !self.legend_open;
+        }
+    }
+
     pub(crate) fn handle_edit_keys(&mut self, ui: &egui::Ui) {
         self.handle_transform_keys(ui);
         self.handle_wire_keys(ui);
@@ -178,6 +212,22 @@ impl GuiApp {
         }
         self.nudge_selection(dx, dy);
     }
+}
+
+fn tool_shortcut(input: &egui::InputState) -> Option<Tool> {
+    if input.key_pressed(egui::Key::V) {
+        return Some(Tool::Select);
+    }
+    if input.key_pressed(egui::Key::P) {
+        return Some(Tool::Place);
+    }
+    if input.key_pressed(egui::Key::W) {
+        return Some(Tool::Wire);
+    }
+    if input.key_pressed(egui::Key::G) {
+        return Some(Tool::Probe);
+    }
+    None
 }
 
 fn cursor_delta(ui: &egui::Ui, step: i32) -> (i32, i32) {
