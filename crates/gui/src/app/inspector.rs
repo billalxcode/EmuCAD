@@ -1,4 +1,5 @@
 use super::*;
+use crate::icons::IconKind;
 use crate::netlist::ParameterField;
 
 impl GuiApp {
@@ -55,7 +56,8 @@ impl GuiApp {
         if let Some(rgb) = self.selection_wire_rgb(ui.visuals().dark_mode) {
             show_wire_color_button(ui, rgb, self.selection_has_color_override(), action);
         }
-        if self.selection.components().is_empty() && ui.button("Delete").clicked() {
+        let delete = icon_button(IconKind::Trash, "Delete");
+        if self.selection.components().is_empty() && ui.add(delete).clicked() {
             *action = Some(InspectorAction::Delete);
         }
     }
@@ -134,7 +136,8 @@ impl GuiApp {
             action,
         );
         show_wire_label_editor(ui, wire.label.as_deref(), action);
-        if ui.button("Delete").clicked() {
+        let delete = icon_button(IconKind::Trash, "Delete");
+        if ui.add(delete).clicked() {
             *action = Some(InspectorAction::Delete);
         }
     }
@@ -165,6 +168,14 @@ impl GuiApp {
             self.selection.components().len(),
             self.selection.wires().len()
         );
+    }
+
+    pub(super) fn cut_selection(&mut self) {
+        if self.selection.is_empty() {
+            return;
+        }
+        self.copy_selection();
+        self.delete_selection();
     }
 
     pub(super) fn paste_selection(&mut self) {

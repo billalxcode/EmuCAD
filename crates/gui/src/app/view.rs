@@ -722,22 +722,30 @@ impl GuiApp {
     }
 
     pub(super) fn wire_controls(&mut self, ui: &mut egui::Ui) {
-        ui.label("Wire");
-        ui.label("Class");
-        egui::ComboBox::from_id_salt("wire_class")
-            .selected_text(self.wire_class.label())
-            .show_ui(ui, |ui| {
-                for class in NetClass::ALL {
-                    ui.selectable_value(&mut self.wire_class, class, class.label());
-                }
-            });
+        icon_heading(ui, IconKind::Route, "Wire");
+        self.wire_class_control(ui);
         self.route_buttons(ui);
-        if ui.button("Finish").clicked() {
+        let finish = icon_button(IconKind::Check, "Finish").shortcut("Enter");
+        if ui.add(finish).clicked() {
             self.finish_wire();
         }
-        if ui.button("Cancel").clicked() {
+        let cancel = icon_button(IconKind::Close, "Cancel").shortcut("Esc");
+        if ui.add(cancel).clicked() {
             self.wire_points.clear();
         }
+    }
+
+    fn wire_class_control(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal(|ui| {
+            icon_slot(ui, IconKind::Junction);
+            egui::ComboBox::from_id_salt("wire_class")
+                .selected_text(self.wire_class.label())
+                .show_ui(ui, |ui| {
+                    for class in NetClass::ALL {
+                        ui.selectable_value(&mut self.wire_class, class, class.label());
+                    }
+                });
+        });
     }
 
     pub(super) fn route_buttons(&mut self, ui: &mut egui::Ui) {

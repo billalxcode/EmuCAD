@@ -1,4 +1,5 @@
 use super::*;
+use crate::icons::IconKind;
 
 pub(crate) fn context_closes(ui: &egui::Ui, response: &egui::Response, has_action: bool) -> bool {
     if has_action {
@@ -55,6 +56,7 @@ pub(crate) fn context_net_controls(
     net: &ContextNetState,
     action: &mut Option<ContextAction>,
 ) {
+    icon_heading(ui, IconKind::Junction, "Net");
     context_class_combo(ui, net.class, action);
     context_color_presets(ui, net, action);
     context_label_editor(ui, net, action);
@@ -66,16 +68,15 @@ pub(crate) fn context_color_presets(
     action: &mut Option<ContextAction>,
 ) {
     ui.horizontal_wrapped(|ui| {
+        icon_slot(ui, IconKind::Palette);
         ui.label("Color");
         for &(name, rgb) in &CONTEXT_COLORS {
             if context_color_button(ui, name, rgb).clicked() {
                 *action = Some(ContextAction::SetColor(Some(rgb)));
             }
         }
-        if ui
-            .add_enabled(net.has_override, egui::Button::new("Reset"))
-            .clicked()
-        {
+        let reset = icon_button(IconKind::Close, "Reset");
+        if ui.add_enabled(net.has_override, reset).clicked() {
             *action = Some(ContextAction::SetColor(None));
         }
     });
@@ -95,9 +96,11 @@ pub(crate) fn context_label_editor(
 ) {
     let mut label = net.label.clone();
     ui.horizontal(|ui| {
+        icon_slot(ui, IconKind::Pencil);
         ui.label("Label");
         ui.text_edit_singleline(&mut label);
-        if ui.button("Set").clicked() {
+        let set = icon_button(IconKind::Pencil, "Set");
+        if ui.add(set).clicked() {
             *action = Some(ContextAction::SetLabel(normalize_label(label)));
         }
     });
@@ -109,13 +112,16 @@ pub(crate) fn context_class_combo(
     action: &mut Option<ContextAction>,
 ) {
     let mut choice = current;
-    egui::ComboBox::from_id_salt("context_net_class")
-        .selected_text(class_combo_text(current))
-        .show_ui(ui, |ui| {
-            for class in NetClass::ALL {
-                ui.selectable_value(&mut choice, Some(class), class.label());
-            }
-        });
+    ui.horizontal(|ui| {
+        icon_slot(ui, IconKind::Route);
+        egui::ComboBox::from_id_salt("context_net_class")
+            .selected_text(class_combo_text(current))
+            .show_ui(ui, |ui| {
+                for class in NetClass::ALL {
+                    ui.selectable_value(&mut choice, Some(class), class.label());
+                }
+            });
+    });
     if let Some(class) = choice.filter(|value| Some(*value) != current) {
         *action = Some(ContextAction::SetClass(class));
     }
@@ -135,21 +141,53 @@ pub(crate) fn context_edit_buttons(
     action: &mut Option<ContextAction>,
 ) {
     let any = !selection.is_empty();
-    context_button(ui, any, "Copy", ContextAction::Copy, action);
-    context_button(ui, !clipboard_empty, "Paste", ContextAction::Paste, action);
-    context_button(ui, any, "Duplicate", ContextAction::Duplicate, action);
-    context_button(ui, any, "Delete", ContextAction::Delete, action);
-    context_button(ui, any, "Properties", ContextAction::Properties, action);
+    context_button(ui, any, IconKind::Copy, "Copy", ContextAction::Copy, action);
+    context_button(ui, any, IconKind::Cut, "Cut", ContextAction::Cut, action);
+    let paste = !clipboard_empty;
+    context_button(
+        ui,
+        paste,
+        IconKind::Clipboard,
+        "Paste",
+        ContextAction::Paste,
+        action,
+    );
+    context_button(
+        ui,
+        any,
+        IconKind::Copy,
+        "Duplicate",
+        ContextAction::Duplicate,
+        action,
+    );
+    context_button(
+        ui,
+        any,
+        IconKind::Trash,
+        "Delete",
+        ContextAction::Delete,
+        action,
+    );
+    context_button(
+        ui,
+        any,
+        IconKind::Settings,
+        "Properties",
+        ContextAction::Properties,
+        action,
+    );
 }
 
 pub(crate) fn context_button(
     ui: &mut egui::Ui,
     enabled: bool,
+    icon: IconKind,
     label: &str,
     value: ContextAction,
     action: &mut Option<ContextAction>,
 ) {
-    if ui.add_enabled(enabled, egui::Button::new(label)).clicked() {
+    let button = icon_button(icon, label);
+    if ui.add_enabled(enabled, button).clicked() {
         *action = Some(value);
     }
 }
@@ -160,34 +198,62 @@ pub(crate) fn context_transform_buttons(
     action: &mut Option<ContextAction>,
 ) {
     let components = !selection.components().is_empty();
-    if ui
-        .add_enabled(components, egui::Button::new("Rotate"))
-        .clicked()
-    {
+    let rotate = icon_button(IconKind::Rotate, "Rotate");
+    if ui.add_enabled(components, rotate).clicked() {
         *action = Some(ContextAction::Rotate);
     }
-    if ui
-        .add_enabled(components, egui::Button::new("Mirror"))
-        .clicked()
-    {
+    let mirror = icon_button(IconKind::FlipHorizontal, "Mirror");
+    if ui.add_enabled(components, mirror).clicked() {
         *action = Some(ContextAction::Mirror);
     }
 }
 
 pub(crate) fn context_tool_buttons(ui: &mut egui::Ui, action: &mut Option<ContextAction>) {
-    if ui.button("Digital graph").clicked() {
-        *action = Some(ContextAction::Graph);
-    }
-    if ui.button("Probe PB5").clicked() {
-        *action = Some(ContextAction::ProbePb5);
-    }
-    if ui.button("Probe LED").clicked() {
-        *action = Some(ContextAction::ProbeLed);
-    }
-    if ui.button("Select tool").clicked() {
-        *action = Some(ContextAction::SelectTool);
-    }
-    if ui.button("Wire tool").clicked() {
-        *action = Some(ContextAction::WireTool);
+    context_tool_button(
+        ui,
+        IconKind::Chart,
+        "Digital graph",
+        ContextAction::Graph,
+        action,
+    );
+    context_tool_button(
+        ui,
+        IconKind::Crosshair,
+        "Probe PB5",
+        ContextAction::ProbePb5,
+        action,
+    );
+    context_tool_button(
+        ui,
+        IconKind::Crosshair,
+        "Probe LED",
+        ContextAction::ProbeLed,
+        action,
+    );
+    context_tool_button(
+        ui,
+        IconKind::Pointer,
+        "Select tool",
+        ContextAction::SelectTool,
+        action,
+    );
+    context_tool_button(
+        ui,
+        IconKind::Route,
+        "Wire tool",
+        ContextAction::WireTool,
+        action,
+    );
+}
+
+fn context_tool_button(
+    ui: &mut egui::Ui,
+    icon: IconKind,
+    label: &str,
+    value: ContextAction,
+    action: &mut Option<ContextAction>,
+) {
+    if ui.add(icon_button(icon, label)).clicked() {
+        *action = Some(value);
     }
 }

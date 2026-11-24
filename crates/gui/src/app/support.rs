@@ -14,6 +14,13 @@ pub(crate) fn watch_remaining(last: Option<Instant>, now: Instant) -> Duration {
     })
 }
 
+/// Paints a 14 px icon inline with the current row.
+pub(crate) fn icon_slot(ui: &mut egui::Ui, icon: crate::icons::IconKind) {
+    let (rect, _) = ui.allocate_exact_size(egui::vec2(14.0, 14.0), egui::Sense::hover());
+    let color = crate::design::palette(ui.visuals().dark_mode).text_muted;
+    crate::icons::draw_icon(ui.painter(), rect, icon, color);
+}
+
 pub(crate) fn show_log_contents(ui: &mut egui::Ui, log: &Log, clear: &mut bool) {
     if ui.button("Clear").clicked() {
         *clear = true;

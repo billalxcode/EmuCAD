@@ -36,6 +36,7 @@ impl GuiApp {
     pub(crate) fn run_context_action(&mut self, action: ContextAction) {
         match action {
             ContextAction::Copy => self.copy_selection(),
+            ContextAction::Cut => self.cut_selection(),
             ContextAction::Paste => self.paste_selection(),
             ContextAction::Duplicate => self.duplicate_selection(),
             ContextAction::Delete => self.delete_selection(),

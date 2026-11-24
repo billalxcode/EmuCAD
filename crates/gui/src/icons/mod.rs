@@ -93,6 +93,16 @@ icon_assets! {
     Antenna => "antenna.svg",
     History => "history.svg",
     Filter => "filter.svg",
+    Rotate => "rotate-clockwise.svg",
+    FlipHorizontal => "flip-horizontal.svg",
+    FlipVertical => "flip-vertical.svg",
+    Pencil => "pencil.svg",
+    Junction => "git-branch.svg",
+    ArrowDown => "arrow-down.svg",
+    ArrowUp => "arrow-up.svg",
+    ArrowLeft => "arrow-left.svg",
+    ArrowRight => "arrow-right.svg",
+    WaveSquare => "wave-square.svg",
 }
 
 static ICONS: OnceLock<BTreeMap<IconKind, SvgSymbol>> = OnceLock::new();

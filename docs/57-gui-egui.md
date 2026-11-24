@@ -462,6 +462,7 @@ Aturan:
 | M | Mirror |
 | Delete | Hapus seleksi |
 | Ctrl+C | Copy seleksi |
+| Ctrl+X | Cut seleksi |
 | Ctrl+V | Paste |
 | Ctrl+D | Duplicate |
 | Ctrl+Z | Undo |

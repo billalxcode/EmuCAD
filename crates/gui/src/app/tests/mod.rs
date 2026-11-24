@@ -12,6 +12,16 @@ use crate::persist;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
+fn test_input() -> eframe::egui::RawInput {
+    eframe::egui::RawInput {
+        screen_rect: Some(eframe::egui::Rect::from_min_size(
+            eframe::egui::Pos2::ZERO,
+            eframe::egui::vec2(800.0, 600.0),
+        )),
+        ..Default::default()
+    }
+}
+
 fn key_event(key: eframe::egui::Key) -> eframe::egui::Event {
     eframe::egui::Event::Key {
         key,

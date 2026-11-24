@@ -1,4 +1,5 @@
 use super::*;
+use crate::icons::IconKind;
 
 pub(crate) fn show_canvas(
     ui: &mut egui::Ui,
@@ -106,6 +107,7 @@ fn show_mcu_pin_row(
     action: &mut Option<InspectorAction>,
 ) {
     ui.horizontal(|ui| {
+        icon_slot(ui, mcu_mode_icon(current));
         ui.label(format!("{} {}", pin.number, pin.name));
         let selected = mcu_pin_mode_combo(ui, number, current);
         if selected != current {
@@ -115,6 +117,18 @@ fn show_mcu_pin_row(
             });
         }
     });
+}
+
+/// Returns the icon that represents an MCU pin mode.
+pub(crate) fn mcu_mode_icon(mode: McuPinMode) -> IconKind {
+    match mode {
+        McuPinMode::Input => IconKind::ArrowDown,
+        McuPinMode::Output => IconKind::ArrowUp,
+        McuPinMode::Adc => IconKind::Dc,
+        McuPinMode::Pwm => IconKind::WaveSquare,
+        McuPinMode::UartTx => IconKind::ArrowRight,
+        McuPinMode::UartRx => IconKind::ArrowLeft,
+    }
 }
 
 fn mcu_pin_state(
@@ -252,13 +266,16 @@ pub(crate) fn show_component_pins(ui: &mut egui::Ui, definition: &ComponentDefin
 
 pub(crate) fn show_component_actions(ui: &mut egui::Ui, action: &mut Option<InspectorAction>) {
     ui.horizontal(|ui| {
-        if ui.button("Rotate").clicked() {
+        let rotate = icon_button(IconKind::Rotate, "Rotate").shortcut("R");
+        if ui.add(rotate).clicked() {
             *action = Some(InspectorAction::Rotate);
         }
-        if ui.button("Mirror").clicked() {
+        let mirror = icon_button(IconKind::FlipHorizontal, "Mirror").shortcut("M");
+        if ui.add(mirror).clicked() {
             *action = Some(InspectorAction::Mirror);
         }
-        if ui.button("Delete").clicked() {
+        let delete = icon_button(IconKind::Trash, "Delete").shortcut("Delete");
+        if ui.add(delete).clicked() {
             *action = Some(InspectorAction::Delete);
         }
     });

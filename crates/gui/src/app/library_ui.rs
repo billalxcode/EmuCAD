@@ -18,9 +18,7 @@ pub(crate) fn category_buttons(ui: &mut egui::Ui, category: &mut Option<Category
 /// Paints a small icon before a section label.
 pub(crate) fn icon_heading(ui: &mut egui::Ui, icon: IconKind, text: &str) {
     ui.horizontal(|ui| {
-        let (rect, _) = ui.allocate_exact_size(egui::vec2(14.0, 14.0), egui::Sense::hover());
-        let colors = crate::design::palette(ui.visuals().dark_mode);
-        crate::icons::draw_icon(ui.painter(), rect, icon, colors.text_muted);
+        icon_slot(ui, icon);
         ui.label(text);
     });
 }

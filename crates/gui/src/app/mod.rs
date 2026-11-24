@@ -162,6 +162,7 @@ pub(crate) enum ConflictAction {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum ContextAction {
     Copy,
+    Cut,
     Paste,
     Duplicate,
     Delete,

@@ -2,9 +2,9 @@
 
 Backlog UI setelah migrasi ikon Tabler dan worker mixed.
 
-**Status:** U0, U1, U2, dan U8-01 sampai U8-11 selesai, kecuali U8-03b
-dan U8-04b yang terblokir model halaman dan anchor label. U3 sampai U7
-belum. Riset viewport dan grid KiCad selesai di
+**Status:** U0, U1, U2, U3, dan U8-01 sampai U8-11 selesai, kecuali
+U8-03b dan U8-04b yang terblokir model halaman dan anchor label. U4
+sampai U7 belum. Riset viewport dan grid KiCad selesai di
 `docs/96-viewport-grid.md`.
 
 **Sumber kebenaran:**
@@ -128,12 +128,12 @@ Setiap ikon baru harus:
 
 ### U3 - Inspector dan Context Menu
 
-- [ ] U3-01 Tambahkan ikon rotate, mirror, dan delete.
-- [ ] U3-02 Tambahkan ikon copy, cut, dan duplicate.
-- [ ] U3-03 Tambahkan ikon wire, junction, dan label.
-- [ ] U3-04 Tambahkan ikon probe dan chart pada context menu.
-- [ ] U3-05 Tambahkan ikon mode pin MCU.
-- [ ] U3-06 Test action context menu dan inspector.
+- [x] U3-01 Tambahkan ikon rotate, mirror, dan delete.
+- [x] U3-02 Tambahkan ikon copy, cut, dan duplicate.
+- [x] U3-03 Tambahkan ikon wire, junction, dan label.
+- [x] U3-04 Tambahkan ikon probe dan chart pada context menu.
+- [x] U3-05 Tambahkan ikon mode pin MCU.
+- [x] U3-06 Test action context menu dan inspector.
 
 ### U4 - Canvas dan Status
 

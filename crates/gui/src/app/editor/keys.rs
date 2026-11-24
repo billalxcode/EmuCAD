@@ -114,11 +114,15 @@ impl GuiApp {
 
     pub(crate) fn handle_clipboard_keys(&mut self, ui: &egui::Ui) {
         let copy = ui.input(|input| input.modifiers.command && input.key_pressed(egui::Key::C));
+        let cut = ui.input(|input| input.modifiers.command && input.key_pressed(egui::Key::X));
         let paste = ui.input(|input| input.modifiers.command && input.key_pressed(egui::Key::V));
         let duplicate =
             ui.input(|input| input.modifiers.command && input.key_pressed(egui::Key::D));
         if copy {
             self.copy_selection();
+        }
+        if cut {
+            self.cut_selection();
         }
         if paste {
             self.paste_selection();
