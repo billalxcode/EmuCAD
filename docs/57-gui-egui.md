@@ -243,6 +243,8 @@ Referensi perilaku: [`96-viewport-grid.md`](96-viewport-grid.md).
 - Grid dapat dimatikan tanpa mematikan snap grid.
 - Status bar menampilkan koordinat snapped, delta, grid step, sumber
   snap, dan unit. Local origin saat ini 0 dan dapat dikembangkan nanti.
+- Golden grid 320 x 240 mengunci dots, coarse tick, axes, ruler, dan
+  kamera yang sama dengan golden scene.
 
 ### 5.5 Minimap
 
@@ -772,6 +774,8 @@ Test visual:
 - Setiap entri katalog harus punya base asset dan kode varian unik.
 - Library window harus dapat dirender dengan seluruh 500 entri katalog.
 - Snapshot RGBA mentah dari renderer headless atau screenshot test.
+- Golden scene mengunci pin, label, dan simbol yang diperbaiki.
+- Golden grid mengunci dots, coarse tick, axes, dan ruler.
 - Golden image membandingkan byte RGBA, bukan file PNG.
 - Perubahan yang disengaja harus memperbarui golden dengan review manual.
 

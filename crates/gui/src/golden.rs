@@ -20,6 +20,15 @@ struct Texture {
 
 /// Renders the fixed golden scene into straight RGBA bytes.
 pub fn render_golden() -> Vec<u8> {
+    render_with(draw_golden)
+}
+
+/// Renders the fixed grid golden into straight RGBA bytes.
+pub fn render_grid_golden() -> Vec<u8> {
+    render_with(draw_grid_golden)
+}
+
+fn render_with(draw: impl Fn(&mut egui::Ui)) -> Vec<u8> {
     let context = egui::Context::default();
     design::install_fonts(&context);
     let input = egui::RawInput {
@@ -29,7 +38,7 @@ pub fn render_golden() -> Vec<u8> {
         )),
         ..Default::default()
     };
-    let mut output = context.run_ui(input, draw_golden);
+    let mut output = context.run_ui(input, draw);
     let textures = collect_textures(&output.textures_delta);
     output.textures_delta.clear();
     let primitives = context.tessellate(output.shapes, 1.0);
@@ -41,10 +50,28 @@ fn draw_golden(ui: &mut egui::Ui) {
     let painter = ui.painter();
     painter.rect_filled(rect, 0.0, design::DARK.canvas);
     draw_golden_scene(painter, rect);
+    golden_caption(painter, "EmuCAD golden");
+}
+
+fn draw_grid_golden(ui: &mut egui::Ui) {
+    let rect = ui.max_rect();
+    let painter = ui.painter();
+    painter.rect_filled(rect, 0.0, design::DARK.canvas);
+    let options = crate::canvas::GridOptions {
+        style: crate::canvas::GridStyle::Dots,
+        axes: true,
+        rulers: true,
+        ..Default::default()
+    };
+    crate::canvas::draw_grid(painter, rect, &golden_camera(), options, &design::DARK);
+    golden_caption(painter, "EmuCAD grid golden");
+}
+
+fn golden_caption(painter: &egui::Painter, text: &str) {
     painter.text(
         egui::pos2(10.0, 216.0),
         egui::Align2::LEFT_TOP,
-        "EmuCAD golden",
+        text,
         design::mono(12.0),
         design::DARK.text,
     );
@@ -299,28 +326,40 @@ fn golden_path() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/golden/scene-320x240.rgba")
 }
 
+fn grid_golden_path() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/golden/grid-320x240.rgba")
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{golden_path, render_golden};
+    use super::{golden_path, grid_golden_path, render_golden, render_grid_golden};
 
     #[test]
     fn golden_render_is_deterministic() {
         assert_eq!(render_golden(), render_golden());
+        assert_eq!(render_grid_golden(), render_grid_golden());
     }
 
     #[test]
     fn golden_scene_matches_snapshot() {
-        let image = render_golden();
-        let path = golden_path();
+        check_golden(&render_golden(), golden_path());
+    }
+
+    #[test]
+    fn golden_grid_matches_snapshot() {
+        check_golden(&render_grid_golden(), grid_golden_path());
+    }
+
+    fn check_golden(image: &[u8], path: std::path::PathBuf) {
         if std::env::var_os("UPDATE_GOLDEN").is_some() {
             if let Some(parent) = path.parent() {
                 std::fs::create_dir_all(parent).expect("golden dir");
             }
-            std::fs::write(&path, &image).expect("write golden");
+            std::fs::write(&path, image).expect("write golden");
             return;
         }
         let expected = std::fs::read(&path).expect("read golden");
-        assert_snapshot(&image, &expected);
+        assert_snapshot(image, &expected);
     }
 
     fn assert_snapshot(actual: &[u8], expected: &[u8]) {

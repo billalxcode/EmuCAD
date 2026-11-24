@@ -2,10 +2,10 @@
 
 Backlog UI setelah migrasi ikon Tabler dan worker mixed.
 
-**Status:** U0 dan U8-01 sampai U8-09 selesai. U1 sampai U7, U8-03b,
-U8-04b, U8-10, dan U8-11 belum. Riset viewport dan grid KiCad selesai di
-`docs/96-viewport-grid.md`; sisa U8 antre setelah U1 sampai U7 atau
-setelah prioritas diubah.
+**Status:** U0 dan U8-01 sampai U8-11 selesai, kecuali U8-03b dan
+U8-04b yang terblokir model halaman dan anchor label. U1 sampai U7
+belum. Riset viewport dan grid KiCad selesai di
+`docs/96-viewport-grid.md`.
 
 **Sumber kebenaran:**
 
@@ -202,7 +202,7 @@ U8 mengatur perilaku viewport dan grid.
   tersedia. Label saat ini digambar di tengah segmen, bukan titik grid.
 - [x] U8-05 Ganti gambar grid menjadi gaya Dots/Lines/Cross, coarse tick
   10, jarak minimum 10 px, serta toggle axes dan ruler. Hapus urutan
-  visual 1/2/5 yang lama. Golden screenshot grid tetap di U8-11.
+  visual 1/2/5 yang lama. Golden screenshot grid selesai di U8-11.
 - [x] U8-06 Gunakan cursor native crosshair, cursor snapped, panah per
   grid, dan Ctrl+panah 10x grid. Panah memindahkan pointer nyata lewat
   `ViewportCommand::CursorPosition`; Shift+panah tetap nudge seleksi.
@@ -216,9 +216,10 @@ U8 mengatur perilaku viewport dan grid.
 - [x] U8-09 Simpan field grid baru di JSON proyek dengan default
   kompatibel. Test proyek lama tanpa field baru. Selesai lewat
   `ViewSettings` dan `ViewFile` flatten.
-- [ ] U8-10 Tambahkan test transformasi, anchor zoom, clamp, preset, fit,
-  snap origin, adaptive grid, coarse tick, cursor, dan persistensi.
-- [ ] U8-11 Perbarui `docs/57-gui-egui.md`, `docs/96-viewport-grid.md`,
+- [x] U8-10 Tambahkan test transformasi, anchor zoom, clamp, preset, fit,
+  snap origin, adaptive grid, coarse tick, visible range, cursor, dan
+  persistensi.
+- [x] U8-11 Perbarui `docs/57-gui-egui.md`, `docs/96-viewport-grid.md`,
   `TODO-GUI.md` G1/G2/G5/G9, dan golden screenshot grid.
 
 Batasan U8:

@@ -97,7 +97,8 @@ Pekerjaan lanjutan dipetakan ke `TODO-UI.md` U8.
 - [x] G1-01 Buat app shell dengan central panel, toolbar, dan status bar.
 - [x] G1-02 Implementasikan kamera world ke screen dan screen ke world.
 - [x] G1-03 Implementasikan pan, zoom preset, zoom halus, fit all, dan fit selection.
-- [x] G1-04 Gambar grid minor 20 px, grid major, sumbu X/Y, dan titik grid.
+- [x] G1-04 Gambar grid dots/lines/cross, coarse tick 10, sumbu X/Y,
+  ruler, dan culling marker.
 - [x] G1-05 Terapkan level of detail grid dan label.
 - [x] G1-06 Buat layout canvas dominan dengan sheet overlay.
 - [x] G1-07 Implementasikan culling grid dan objek di luar viewport.
@@ -287,7 +288,7 @@ data, dan semua aksi editing dapat di-undo.
 - [x] G9-06 Tambahkan interaction test dengan `egui::Context`.
 - [x] G9-07 Tulis user guide GUI dan screenshot.
 - [x] G9-08 Implementasikan export PNG melalui crate `png`.
-- [x] G9-09 Tambahkan golden image RGBA snapshot.
+- [x] G9-09 Tambahkan golden image RGBA untuk scene dan grid.
 - [x] G9-10 Lengkapi test model, interaction, integrasi, dan visual.
 - [x] G9-11 Verifikasi kontras WCAG AA dan shortcut keyboard.
 - [x] G9-12 Sediakan minimap opsional dengan toggle.

@@ -1,4 +1,4 @@
-use super::grid::grid_step;
+use super::grid::{grid_step, is_major};
 use super::{DVec2, GridCamera, GridOptions, GridStyle, MAX_ZOOM, MIN_ZOOM, ZOOM_PRESETS};
 use eframe::egui;
 
@@ -182,4 +182,34 @@ fn grid_step_keeps_readable_spacing() {
     assert_eq!(grid_step(20.0, 2, 10.0), 2);
     assert_eq!(grid_step(20.0, 5, 10.0), 5);
     assert_eq!(grid_step(8.0, 1, 5.0), 1);
+}
+
+#[test]
+fn coarse_ticks_land_every_ten_steps() {
+    assert!(is_major(0));
+    assert!(is_major(10));
+    assert!(is_major(-20));
+    assert!(!is_major(9));
+    assert!(!is_major(-1));
+}
+
+#[test]
+fn visible_range_covers_viewport() {
+    let camera = GridCamera {
+        pan: DVec2::ZERO,
+        zoom: 1.0,
+        cell_px: 20.0,
+        zoom_history: Vec::new(),
+    };
+    let rect = egui::Rect::from_min_size(egui::pos2(0.0, 0.0), egui::vec2(200.0, 100.0));
+    let range = camera.visible_range(rect, 1);
+    assert_eq!(
+        (range.min_x, range.max_x, range.min_y, range.max_y),
+        (0, 10, 0, 5)
+    );
+    let range = camera.visible_range(rect, 2);
+    assert_eq!(
+        (range.min_x, range.max_x, range.min_y, range.max_y),
+        (0, 5, 0, 3)
+    );
 }

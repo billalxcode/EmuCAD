@@ -172,7 +172,7 @@ use camera::{
 #[cfg(test)]
 pub(crate) use camera::{MAX_ZOOM, MIN_ZOOM};
 pub use frame::show;
-use grid::draw_grid;
+pub(crate) use grid::draw_grid;
 pub use state::CanvasState;
 #[cfg(test)]
 pub(crate) use state::ContextClick;

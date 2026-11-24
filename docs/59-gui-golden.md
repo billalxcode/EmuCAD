@@ -13,8 +13,11 @@ Golden RGBA sudah tersedia dan berjalan headless di test Linux:
   opamp berbasis SVG, label, dan teks tetap pada tema gelap.
 - Tujuan scene: mengunci keselarasan pin model dengan terminal SVG setelah
   layout pin per simbol dan pemetaan viewBox diterapkan.
+- Grid: dots, coarse tick setiap 10 unit, axes, dan ruler pada kamera
+  yang sama dengan scene.
 - Font: Source Sans 3 untuk label dan Source Code Pro untuk teks teknis.
-- Golden: `crates/gui/tests/golden/scene-320x240.rgba`.
+- Golden scene: `crates/gui/tests/golden/scene-320x240.rgba`.
+- Golden grid: `crates/gui/tests/golden/grid-320x240.rgba`.
 - Perbandingan: byte RGBA exact, tanpa toleransi.
 - Diagnostik: piksel, channel, dan nilai byte pertama yang berbeda.
 - Determinisme: test merender dua kali dan memastikan hasil identik.
@@ -33,18 +36,20 @@ Test yang berjalan:
 
 - `golden_render_is_deterministic`
 - `golden_scene_matches_snapshot`
+- `golden_grid_matches_snapshot`
 
 ## Prosedur Update
 
 Jika perubahan visual disengaja:
 
-1. Jalankan renderer untuk menulis golden baru:
+1. Jalankan renderer untuk menulis kedua golden baru:
 
    ```bash
-   UPDATE_GOLDEN=1 cargo test -p gui golden_scene_matches_snapshot
+   UPDATE_GOLDEN=1 cargo test -p gui golden
    ```
 
-2. Periksa file `crates/gui/tests/golden/scene-320x240.rgba`.
+2. Periksa `crates/gui/tests/golden/scene-320x240.rgba` dan
+   `crates/gui/tests/golden/grid-320x240.rgba`.
 3. Konversi atau buka file sebagai RGBA 320 x 240 untuk review visual.
 4. Pastikan hanya perubahan yang dimaksud yang terlihat.
 5. Commit golden dan perubahan renderer dalam satu perubahan terpisah.

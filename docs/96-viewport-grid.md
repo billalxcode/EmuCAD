@@ -614,8 +614,8 @@ Test yang harus ada:
 - Status bar menampilkan koordinat snapped, bukan raw.
 - Keyboard cursor bergerak per grid dan 10x grid.
 - Persistensi field grid baru membaca proyek lama tanpa error.
-- Golden screenshot grid dots, lines, dan cross pada zoom rendah dan
-  tinggi.
+- Golden screenshot grid default (dots) pada kamera golden; gaya Lines
+  dan Cross diverifikasi lewat smoke test render.
 
 U8-01 sudah ditutup oleh test clamp zoom, daftar preset, round-trip
 koordinat pada zoom maksimum, dan round-trip pan serta zoom di JSON.
@@ -632,10 +632,12 @@ wire, junction, dan koordinat snapped di status bar. Snap label menunggu
 anchor label eksplisit.
 
 U8-05 sudah ditutup oleh smoke test render gaya Dots, Lines, dan Cross
-dengan axes aktif. Golden screenshot grid tetap di U8-11.
+dengan axes aktif, plus test coarse tick setiap 10 unit dan visible
+range terhadap viewport.
 
-U8-06 memakai cursor native crosshair. Perpindahan pointer keyboard
-belum diuji end-to-end karena bergantung pada viewport backend.
+U8-06 memakai cursor native crosshair. Pemetaan panah ke delta per grid
+sudah diuji lewat `axis_delta`; perpindahan pointer end-to-end tetap
+bergantung pada viewport backend.
 
 U8-07 sudah ditutup oleh test format mils, mm, unit logis, dan delta
 terhadap local origin.
@@ -644,6 +646,14 @@ U8-08 sudah ditutup oleh smoke test render dialog Grid Settings.
 
 U8-09 sudah ditutup oleh round-trip `ViewSettings`, default untuk JSON
 lama, dan test pemetaan `apply_project`.
+
+U8-10 sudah ditutup oleh test transformasi, anchor zoom, clamp, preset,
+fit all/selection, snap GridStep terhadap origin positif dan negatif,
+grid adaptif, coarse tick, visible range, pemetaan panah, dan persistensi.
+
+U8-11 sudah ditutup oleh pembaruan `docs/57-gui-egui.md`, dokumen ini,
+`TODO-GUI.md` yang sudah selesai, serta golden grid
+`crates/gui/tests/golden/grid-320x240.rgba`.
 
 ## 9. Batas dan Risiko
 

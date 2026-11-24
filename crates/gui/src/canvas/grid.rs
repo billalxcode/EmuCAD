@@ -33,7 +33,7 @@ impl<'a> GridPaint<'a> {
     }
 }
 
-pub(super) fn draw_grid(
+pub(crate) fn draw_grid(
     painter: &egui::Painter,
     rect: egui::Rect,
     camera: &GridCamera,
@@ -147,7 +147,7 @@ fn paint_cross(painter: &egui::Painter, screen: egui::Pos2, size: f32, stroke: e
     );
 }
 
-fn is_major(index: i32) -> bool {
+pub(super) fn is_major(index: i32) -> bool {
     index.rem_euclid(10) == 0
 }
 
