@@ -389,20 +389,16 @@ state snap yang sebenarnya.
 
 ### 4.9 Cursor
 
-KiCad menggambar cursor di atas semua item. Mode cursor:
+KiCad menggambar cursor di atas semua item. Posisi cursor yang dipakai
+tool adalah posisi yang sudah di-snap, sedangkan posisi mouse mentah
+tetap disimpan terpisah. Panah keyboard menggerakkan cursor per grid;
+Ctrl ditambah panah menggerakkan 10x grid.
 
-- Small cross.
-- Fullscreen cross.
-- Fullscreen diagonal.
-
-Cursor dapat dipaksa selalu tampil. Posisi cursor yang dipakai tool
-adalah posisi yang sudah di-snap, sedangkan posisi mouse mentah tetap
-disimpan terpisah. Panah keyboard menggerakkan cursor per grid; Ctrl
-ditambah panah menggerakkan 10x grid.
-
-U8-06 memakai tiga mode crosshair dan memindahkan pointer nyata dengan
-`ViewportCommand::CursorPosition`. Shift+panah tetap menjadi nudge seleksi
-agar perilaku lama tidak hilang.
+EmuCAD memakai cursor native `CursorIcon::Crosshair` saat pointer berada
+di kanvas. Tidak ada crosshair gambar manual yang mengikuti mouse, karena
+objek seperti itu tertinggal satu frame dan terasa lambat. Panah
+memindahkan pointer nyata dengan `ViewportCommand::CursorPosition`.
+Shift+panah tetap menjadi nudge seleksi.
 
 ## 5. Observasi GUI
 
@@ -448,7 +444,7 @@ dokumentasi resmi, bukan dari klik tambahan.
 | Snap grid | Mode always/with grid/never | Always/WithGrid/Never | Selesai |
 | Snap objek | Pin, wire, junction, label | Pin, wire, junction | Sebagian, label U8-04b |
 | Modifier snap | Ctrl dan Shift | Tidak ada | Belum ada |
-| Cursor crosshair | 3 mode | Small, full, diagonal | Selesai |
+| Cursor crosshair | 3 mode | Native `CursorIcon::Crosshair` | Selesai |
 | Status bar | Snap coords, delta, grid, unit | Snap coords, delta, grid, snap source, unit | Selesai, local origin 0 |
 | Keyboard cursor | Panah per grid | Panah per grid, Ctrl 10x | Selesai |
 | Grid settings UI | Dialog lengkap | Dialog Grid Settings | Selesai |
@@ -559,8 +555,8 @@ belum dikerjakan.
 
 ### 7.7 Cursor dan status
 
-- Crosshair mode: small, full, diagonal.
-- Crosshair digambar di atas scene.
+- Crosshair memakai cursor native, bukan objek gambar manual.
+- Posisi snapped tetap ditampilkan di status bar.
 - Status bar: X/Y snapped, dx/dy/dist, grid step, zoom persen, snap state,
   unit.
 - Local origin saat ini 0; delta dihitung relatif ke titik itu.
@@ -587,7 +583,6 @@ view = {
   grid_rulers: bool,
   grid_line_width: f32,
   grid_min_spacing: f32,
-  crosshair: "small" | "full" | "diagonal",
   units: "mils" | "millimeters" | "logical",
   local_origin: [i32; 2],
   snap_mode: "always" | "with_grid" | "never",
@@ -639,9 +634,8 @@ anchor label eksplisit.
 U8-05 sudah ditutup oleh smoke test render gaya Dots, Lines, dan Cross
 dengan axes aktif. Golden screenshot grid tetap di U8-11.
 
-U8-06 sudah ditutup oleh smoke test crosshair Small, Full, dan Diagonal.
-Perpindahan pointer keyboard belum diuji end-to-end karena bergantung
-pada viewport backend.
+U8-06 memakai cursor native crosshair. Perpindahan pointer keyboard
+belum diuji end-to-end karena bergantung pada viewport backend.
 
 U8-07 sudah ditutup oleh test format mils, mm, unit logis, dan delta
 terhadap local origin.

@@ -218,7 +218,7 @@ Aturan layout:
 - Fit all, fit objects, fit selection, dan center origin.
 - Fit sheet menunggu model halaman atau sheet.
 - Zoom area lewat tool Zoom dan drag kotak.
-- Crosshair small, full, dan diagonal.
+- Cursor memakai crosshair native saat berada di kanvas.
 - Riwayat 8 level zoom untuk undo last zoom.
 - Level of detail: label kecil dan grid minor disembunyikan saat zoom
   rendah.
@@ -230,7 +230,7 @@ Referensi perilaku: [`96-viewport-grid.md`](96-viewport-grid.md).
 - Ukuran sel default 20 px pada zoom 100 persen.
 - Grid step 1, 2, 5, dan 10 lewat menu Grid.
 - Dialog Grid Settings mengatur fast grid, gaya, ketebalan, min spacing,
-  axes, rulers, crosshair, unit, dan local origin.
+  axes, rulers, unit, dan local origin.
 - Mode snap grid: Always, With grid, dan Never.
 - Snap objek: pin, ujung wire, dan junction.
 - Gaya grid: dots, lines, atau cross. Default dots.
@@ -651,7 +651,6 @@ Contoh skema:
     "grid_rulers": true,
     "grid_line_width": 1.0,
     "grid_min_spacing": 10.0,
-    "crosshair": "small",
     "units": "mils",
     "local_origin": [0, 0],
     "snap_mode": "always",

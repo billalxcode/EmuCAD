@@ -42,7 +42,7 @@ File ini tidak menggantikan backlog lama. Item yang sudah ada di
 | Grafik AVR | `app/graph_ui/` | Run, pause | Probe dan sample |
 | Grafik transient | `app/graph_ui/` | Teks | Probe dan cursor |
 | Grafik mixed | `app/windows/panels.rs` | Grafik pin output | Net, ADC, PWM |
-| Canvas | `app/view.rs`, `scene/` | Teks | Grid style/step, zoom preset, crosshair, fit, probe |
+| Canvas | `app/view.rs`, `scene/` | Teks | Grid style/step, zoom preset, native crosshair, fit, probe |
 | Context menu | `app/context_ui.rs` | Teks | Aksi komponen dan net |
 | Command palette | `app/palette_ui.rs` | Teks | Ikon per command |
 | Status bar | `app/status.rs` | Teks | Snap coords, delta, grid, unit |
@@ -203,16 +203,16 @@ U8 mengatur perilaku viewport dan grid.
 - [x] U8-05 Ganti gambar grid menjadi gaya Dots/Lines/Cross, coarse tick
   10, jarak minimum 10 px, serta toggle axes dan ruler. Hapus urutan
   visual 1/2/5 yang lama. Golden screenshot grid tetap di U8-11.
-- [x] U8-06 Tambahkan crosshair small/full/diagonal, cursor snapped,
-  panah per grid, dan Ctrl+panah 10x grid. Panah memindahkan pointer
-  nyata lewat `ViewportCommand::CursorPosition`; Shift+panah tetap
-  nudge seleksi.
+- [x] U8-06 Gunakan cursor native crosshair, cursor snapped, panah per
+  grid, dan Ctrl+panah 10x grid. Panah memindahkan pointer nyata lewat
+  `ViewportCommand::CursorPosition`; Shift+panah tetap nudge seleksi.
+  Crosshair gambar manual dihapus karena tertinggal dari mouse.
 - [x] U8-07 Perbaiki status bar: X/Y snapped, dx/dy/dist, grid step,
   zoom persen, snap state, dan unit. Hapus label "Snap grid" statis.
   Selesai dengan konvensi 1 unit = 50 mil = 1.27 mm dan local origin 0.
 - [x] U8-08 Tambahkan dialog Grid Settings: daftar preset, grid aktif,
-  dua fast grid, gaya, ketebalan, min spacing, axes, rulers, crosshair,
-  unit, dan local origin. Selesai lewat menu Grid > Settings.
+  dua fast grid, gaya, ketebalan, min spacing, axes, rulers, unit, dan
+  local origin. Selesai lewat menu Grid > Settings.
 - [x] U8-09 Simpan field grid baru di JSON proyek dengan default
   kompatibel. Test proyek lama tanpa field baru. Selesai lewat
   `ViewSettings` dan `ViewFile` flatten.

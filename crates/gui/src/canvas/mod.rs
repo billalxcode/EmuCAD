@@ -156,30 +156,6 @@ impl SnapMode {
     }
 }
 
-/// Crosshair shape drawn at the snapped cursor.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub(crate) enum CrosshairMode {
-    #[default]
-    Small,
-    Full,
-    Diagonal,
-}
-
-impl CrosshairMode {
-    pub(crate) const ALL: [Self; 3] = [Self::Small, Self::Full, Self::Diagonal];
-
-    /// Returns a short label.
-    #[must_use]
-    pub(crate) const fn label(self) -> &'static str {
-        match self {
-            Self::Small => "Small",
-            Self::Full => "Full",
-            Self::Diagonal => "Diagonal",
-        }
-    }
-}
-
 /// Screen-space state of the grid camera.
 mod camera;
 mod frame;

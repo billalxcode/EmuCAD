@@ -53,12 +53,6 @@ impl GuiApp {
                 ui.radio_value(&mut self.grid_style, style, style.label());
             }
         });
-        ui.horizontal(|ui| {
-            ui.label("Crosshair");
-            for mode in CrosshairMode::ALL {
-                ui.radio_value(&mut self.crosshair, mode, mode.label());
-            }
-        });
     }
 
     fn grid_settings_metrics(&mut self, ui: &mut egui::Ui) {

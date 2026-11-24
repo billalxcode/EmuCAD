@@ -1,7 +1,7 @@
 //! JSON project persistence for the GUI.
 
 use crate::analysis::AnalysisState;
-use crate::canvas::{CrosshairMode, DVec2, GridCamera, GridStep, GridStyle, SnapMode, Units};
+use crate::canvas::{DVec2, GridCamera, GridStep, GridStyle, SnapMode, Units};
 use crate::model::{
     ComponentDefinition, ComponentId, ComponentInstance, Document, GridPos, McuPinMode, Mirror,
     NetClass, Rotation, Wire,
@@ -34,7 +34,6 @@ pub(crate) struct ViewSettings {
     pub(crate) grid_rulers: bool,
     pub(crate) grid_line_width: f32,
     pub(crate) grid_min_spacing: f32,
-    pub(crate) crosshair: CrosshairMode,
     pub(crate) units: Units,
     pub(crate) local_origin: [i32; 2],
     pub(crate) snap_mode: SnapMode,
@@ -53,7 +52,6 @@ impl Default for ViewSettings {
             grid_rulers: true,
             grid_line_width: 1.0,
             grid_min_spacing: 10.0,
-            crosshair: CrosshairMode::Small,
             units: Units::Mils,
             local_origin: [0, 0],
             snap_mode: SnapMode::Always,
@@ -450,7 +448,7 @@ mod tests {
         to_json_with_view,
     };
     use crate::analysis::AnalysisState;
-    use crate::canvas::{CrosshairMode, DVec2, GridCamera, GridStep, GridStyle, SnapMode, Units};
+    use crate::canvas::{DVec2, GridCamera, GridStep, GridStyle, SnapMode, Units};
     use crate::library;
     use crate::model::{Document, GridPos, Mirror, NetClass, Rotation};
     use std::path::PathBuf;
@@ -504,7 +502,6 @@ mod tests {
             grid_rulers: false,
             grid_line_width: 2.0,
             grid_min_spacing: 20.0,
-            crosshair: CrosshairMode::Diagonal,
             units: Units::Logical,
             local_origin: [3, -4],
             snap_mode: SnapMode::Never,
@@ -533,7 +530,6 @@ mod tests {
         let project = from_json(text, library::builtin()).expect("load");
         assert_eq!(project.view.grid_step, GridStep::default());
         assert_eq!(project.view.grid_style, GridStyle::Dots);
-        assert_eq!(project.view.crosshair, CrosshairMode::Small);
         assert!(project.view.grid_rulers);
     }
 

@@ -293,7 +293,6 @@ impl GuiApp {
             grid_rulers: self.grid_rulers,
             grid_line_width: self.grid_line_width,
             grid_min_spacing: self.grid_min_spacing,
-            crosshair: self.crosshair,
             units: self.units,
             local_origin: [self.local_origin.x, self.local_origin.y],
             snap_mode: self.snap_mode,
@@ -326,7 +325,6 @@ impl GuiApp {
         self.grid_rulers = view.grid_rulers;
         self.grid_line_width = view.grid_line_width;
         self.grid_min_spacing = view.grid_min_spacing;
-        self.crosshair = view.crosshair;
         self.units = view.units;
         self.local_origin = GridPos::new(view.local_origin[0], view.local_origin[1]);
         self.snap_mode = view.snap_mode;

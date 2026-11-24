@@ -34,7 +34,7 @@ mod windows;
 
 use crate::analysis::{AnalysisKind, AnalysisState, SimulationDomain};
 use crate::canvas::{self, GridCamera};
-pub(crate) use crate::canvas::{CrosshairMode, GridStep, SnapMode, Units};
+pub(crate) use crate::canvas::{GridStep, SnapMode, Units};
 use crate::clipboard::{self, Clipboard};
 use crate::config;
 use crate::error::{GuiError, GuiResult};
@@ -208,7 +208,6 @@ pub(crate) struct SceneState {
     wire_class: NetClass,
     selection_box: Option<(GridPos, GridPos)>,
     snap: Option<crate::scene::SnapMarker>,
-    crosshair: CrosshairMode,
     minimap: bool,
     flow_phase: Option<f32>,
 }
@@ -235,7 +234,6 @@ pub struct GuiApp {
     fast_grid_1: GridStep,
     fast_grid_2: GridStep,
     grid_settings_open: bool,
-    crosshair: CrosshairMode,
     units: Units,
     local_origin: GridPos,
     snap_mode: SnapMode,

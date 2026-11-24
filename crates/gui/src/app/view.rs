@@ -603,7 +603,6 @@ impl GuiApp {
 
     pub(super) fn view_options(&mut self, ui: &mut egui::Ui) {
         self.grid_menu(ui);
-        self.crosshair_control(ui);
         self.units_control(ui);
         self.zoom_controls(ui);
         ui.checkbox(&mut self.minimap_open, "Mini");
@@ -656,16 +655,6 @@ impl GuiApp {
             ui.selectable_value(&mut self.snap_mode, mode, mode.label());
         }
         ui.checkbox(&mut self.snap_objects, "Snap objects");
-    }
-
-    fn crosshair_control(&mut self, ui: &mut egui::Ui) {
-        egui::ComboBox::from_id_salt("crosshair_mode")
-            .selected_text(self.crosshair.label())
-            .show_ui(ui, |ui| {
-                for mode in CrosshairMode::ALL {
-                    ui.selectable_value(&mut self.crosshair, mode, mode.label());
-                }
-            });
     }
 
     fn units_control(&mut self, ui: &mut egui::Ui) {

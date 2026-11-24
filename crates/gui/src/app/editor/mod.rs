@@ -39,7 +39,6 @@ impl GuiApp {
             wire_class: self.wire_class,
             selection_box: self.selection_box(),
             snap: self.pointer_world.map(|world| self.snap_world(world)),
-            crosshair: self.crosshair,
             minimap: self.minimap_open,
             flow_phase: flow_phase(self.flow_animation, time),
         }

@@ -22,7 +22,6 @@ fn view_settings() -> persist::ViewSettings {
         grid_visible: false,
         grid_step: crate::canvas::GridStep::ALL[2],
         grid_style: crate::canvas::GridStyle::Cross,
-        crosshair: crate::canvas::CrosshairMode::Diagonal,
         units: crate::canvas::Units::Logical,
         local_origin: [3, -4],
         ..Default::default()
@@ -43,7 +42,6 @@ fn apply_project_restores_view_settings() {
     assert!(!app.grid_visible);
     assert_eq!(app.grid_step, view.grid_step);
     assert_eq!(app.grid_style, view.grid_style);
-    assert_eq!(app.crosshair, view.crosshair);
     assert_eq!(app.local_origin, GridPos::new(3, -4));
 }
 

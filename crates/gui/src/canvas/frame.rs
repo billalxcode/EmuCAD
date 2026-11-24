@@ -30,6 +30,9 @@ fn handle_viewport_input(
     handle_scroll(response, ui, camera, rect);
     handle_zoom_keys(response, ui, camera, rect);
     focus_canvas(response);
+    if response.hovered() {
+        ui.ctx().set_cursor_icon(egui::CursorIcon::Crosshair);
+    }
     pointer_world(response, rect, camera)
 }
 
