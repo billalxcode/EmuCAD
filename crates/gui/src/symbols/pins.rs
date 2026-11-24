@@ -2,22 +2,75 @@ use crate::model::{GridPos, GridSize, PinDefinition, PinDirection};
 
 /// Returns the grid size and pin anchors for one base symbol.
 pub(crate) fn layout(base: &str, count: u8) -> (GridSize, Vec<PinDefinition>) {
+    if let Some(layout) = switch_layout(base, count) {
+        return layout;
+    }
+    if let Some(layout) = semiconductor_layout(base, count) {
+        return layout;
+    }
+    generic(count)
+}
+
+fn switch_layout(base: &str, count: u8) -> Option<(GridSize, Vec<PinDefinition>)> {
     match (base, count) {
-        ("button" | "switch", 2) => two(
+        ("button" | "switch", 2) => Some(two(
             4,
             4,
             (0, 2, PinDirection::Left),
             (4, 2, PinDirection::Right),
-        ),
-        ("switch_spdt", 3) => three(
+        )),
+        ("switch_spdt", 3) => Some(three(
             4,
             4,
             (0, 2, PinDirection::Left),
             (4, 1, PinDirection::Right),
             (4, 3, PinDirection::Right),
-        ),
-        _ => generic(count),
+        )),
+        _ => None,
     }
+}
+
+fn semiconductor_layout(base: &str, count: u8) -> Option<(GridSize, Vec<PinDefinition>)> {
+    if let Some(layout) = transistor_layout(base, count) {
+        return Some(layout);
+    }
+    opamp_layout(base, count)
+}
+
+fn transistor_layout(base: &str, count: u8) -> Option<(GridSize, Vec<PinDefinition>)> {
+    if count != 3 {
+        return None;
+    }
+    let pins = match base {
+        "bjt_npn" | "bjt_pnp" | "jfet_n" | "jfet_p" | "igbt" => (
+            (4, 0, PinDirection::Up),
+            (0, 3, PinDirection::Left),
+            (4, 6, PinDirection::Down),
+        ),
+        "mosfet_n" | "mosfet_p" => (
+            (0, 3, PinDirection::Left),
+            (4, 0, PinDirection::Up),
+            (4, 6, PinDirection::Down),
+        ),
+        _ => return None,
+    };
+    Some(three(6, 6, pins.0, pins.1, pins.2))
+}
+
+fn opamp_layout(base: &str, count: u8) -> Option<(GridSize, Vec<PinDefinition>)> {
+    if !matches!(base, "opamp" | "comparator") || count != 5 {
+        return None;
+    }
+    Some((
+        GridSize::new(6, 6),
+        vec![
+            pin(1, 0, 2, PinDirection::Left),
+            pin(2, 0, 4, PinDirection::Left),
+            pin(3, 3, 0, PinDirection::Up),
+            pin(4, 3, 6, PinDirection::Down),
+            pin(5, 6, 3, PinDirection::Right),
+        ],
+    ))
 }
 
 fn two(
@@ -124,17 +177,63 @@ fn pin_label(index: u8) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::layout;
-    use crate::model::{GridPos, PinDirection};
+    use crate::model::{GridPos, PinDefinition, PinDirection};
+
+    fn assert_pin(pin: &PinDefinition, x: i32, y: i32, direction: PinDirection) {
+        assert_eq!(pin.offset, GridPos::new(x, y));
+        assert_eq!(pin.direction, direction);
+    }
 
     #[test]
     fn spdt_layout_matches_svg_sides() {
         let (size, pins) = layout("switch_spdt", 3);
         assert_eq!((size.width, size.height), (4, 4));
-        assert_eq!(pins[0].offset, GridPos::new(0, 2));
-        assert_eq!(pins[1].offset, GridPos::new(4, 1));
-        assert_eq!(pins[2].offset, GridPos::new(4, 3));
-        assert_eq!(pins[0].direction, PinDirection::Left);
-        assert_eq!(pins[1].direction, PinDirection::Right);
-        assert_eq!(pins[2].direction, PinDirection::Right);
+        assert_pin(&pins[0], 0, 2, PinDirection::Left);
+        assert_pin(&pins[1], 4, 1, PinDirection::Right);
+        assert_pin(&pins[2], 4, 3, PinDirection::Right);
+    }
+
+    #[test]
+    fn button_and_switch_layout_matches_svg_sides() {
+        for base in ["button", "switch"] {
+            let (size, pins) = layout(base, 2);
+            assert_eq!((size.width, size.height), (4, 4), "{base}");
+            assert_pin(&pins[0], 0, 2, PinDirection::Left);
+            assert_pin(&pins[1], 4, 2, PinDirection::Right);
+        }
+    }
+
+    #[test]
+    fn bjt_and_jfet_layouts_match_symbol_terminals() {
+        for base in ["bjt_npn", "bjt_pnp", "jfet_n", "jfet_p", "igbt"] {
+            let (size, pins) = layout(base, 3);
+            assert_eq!((size.width, size.height), (6, 6), "{base}");
+            assert_pin(&pins[0], 4, 0, PinDirection::Up);
+            assert_pin(&pins[1], 0, 3, PinDirection::Left);
+            assert_pin(&pins[2], 4, 6, PinDirection::Down);
+        }
+    }
+
+    #[test]
+    fn mosfet_layout_matches_symbol_terminals() {
+        for base in ["mosfet_n", "mosfet_p"] {
+            let (_, pins) = layout(base, 3);
+            assert_pin(&pins[0], 0, 3, PinDirection::Left);
+            assert_pin(&pins[1], 4, 0, PinDirection::Up);
+            assert_pin(&pins[2], 4, 6, PinDirection::Down);
+        }
+    }
+
+    #[test]
+    fn opamp_layout_matches_symbol_terminals() {
+        for base in ["opamp", "comparator"] {
+            let (size, pins) = layout(base, 5);
+            assert_eq!((size.width, size.height), (6, 6), "{base}");
+            assert_pin(&pins[0], 0, 2, PinDirection::Left);
+            assert_pin(&pins[1], 0, 4, PinDirection::Left);
+            assert_pin(&pins[2], 3, 0, PinDirection::Up);
+            assert_pin(&pins[3], 3, 6, PinDirection::Down);
+            assert_pin(&pins[4], 6, 3, PinDirection::Right);
+        }
     }
 }

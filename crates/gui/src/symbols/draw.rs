@@ -33,7 +33,7 @@ pub(crate) fn draw_svg(
     symbol: &SvgSymbol,
     color: egui::Color32,
 ) {
-    let Some(fit) = Fit::new(symbol.bounds, body) else {
+    let Some(fit) = Fit::new(symbol.view_box, body) else {
         return;
     };
     for shape in &symbol.shapes {
@@ -74,31 +74,36 @@ fn draw_code_dot(
 
 #[derive(Clone, Copy)]
 struct Fit {
-    scale: f32,
+    scale: egui::Vec2,
     offset: egui::Vec2,
 }
 
 impl Fit {
-    fn new(bounds: Bounds, body: egui::Rect) -> Option<Self> {
-        let width = body.width() - 2.0;
-        let height = body.height() - 2.0;
-        if width <= 0.0 || height <= 0.0 || bounds.width() <= 0.0 || bounds.height() <= 0.0 {
+    fn new(view_box: Bounds, body: egui::Rect) -> Option<Self> {
+        if view_box.width() <= 0.0 || view_box.height() <= 0.0 {
             return None;
         }
-        let scale = (width / bounds.width()).min(height / bounds.height());
-        if !scale.is_finite() || scale <= 0.0 {
+        let scale = egui::vec2(
+            body.width() / view_box.width(),
+            body.height() / view_box.height(),
+        );
+        if !scale.x.is_finite() || !scale.y.is_finite() {
             return None;
         }
-        let center = bounds.center();
-        let offset = body.center().to_vec2() - egui::vec2(center.x * scale, center.y * scale);
+        let center = view_box.center();
+        let offset = body.center().to_vec2() - egui::vec2(center.x * scale.x, center.y * scale.y);
         Some(Self { scale, offset })
     }
 
     fn point(self, point: Point) -> egui::Pos2 {
         egui::pos2(
-            point.x * self.scale + self.offset.x,
-            point.y * self.scale + self.offset.y,
+            point.x * self.scale.x + self.offset.x,
+            point.y * self.scale.y + self.offset.y,
         )
+    }
+
+    fn stroke_scale(self) -> f32 {
+        (self.scale.x + self.scale.y) * 0.5
     }
 }
 
@@ -111,7 +116,7 @@ fn draw_shape(painter: &egui::Painter, shape: &SvgShape, fit: Fit, color: egui::
         paint_fill(painter, &points, color, alpha);
     }
     if let Some(alpha) = shape.stroke {
-        let width = stroke_width(shape.width, fit.scale);
+        let width = stroke_width(shape.width, fit.stroke_scale());
         paint_stroke(painter, &points, shape.closed, color, alpha, width);
     }
 }
@@ -156,8 +161,9 @@ fn with_alpha(color: egui::Color32, alpha: f32) -> egui::Color32 {
 
 #[cfg(test)]
 mod tests {
-    use super::{draw_symbol, with_alpha};
+    use super::{Fit, draw_symbol, with_alpha};
     use crate::model::SymbolKind;
+    use crate::symbols::svg::Point;
     use eframe::egui;
 
     const KINDS: [SymbolKind; 6] = [
@@ -223,6 +229,18 @@ mod tests {
         let definitions = crate::library::builtin();
         let count = draw_catalog_symbols(&egui::Context::default(), definitions);
         assert_eq!(count, 500);
+    }
+
+    #[test]
+    fn fit_maps_view_box_to_body() {
+        let text = r##"<svg viewBox="0 0 150 150"><path fill="none" stroke="#000" d="M0 0H150V150H0Z"/></svg>"##;
+        let symbol = crate::symbols::parse_svg(text).expect("symbol");
+        let body = egui::Rect::from_min_size(egui::pos2(10.0, 20.0), egui::vec2(60.0, 40.0));
+        let fit = Fit::new(symbol.view_box, body).expect("fit");
+        let center = fit.point(Point::new(75.0, 75.0));
+        let top_left = fit.point(Point::new(0.0, 0.0));
+        assert!((center - body.center()).length() < 0.01);
+        assert!((top_left - body.left_top()).length() < 0.01);
     }
 
     #[test]

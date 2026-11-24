@@ -55,6 +55,15 @@ impl Bounds {
         self.width() > 0.0 && self.height() > 0.0 && self.width().is_finite()
     }
 
+    const fn from_min_size(min_x: f32, min_y: f32, width: f32, height: f32) -> Self {
+        Self {
+            min_x,
+            min_y,
+            max_x: min_x + width,
+            max_y: min_y + height,
+        }
+    }
+
     pub(crate) fn width(self) -> f32 {
         self.max_x - self.min_x
     }
@@ -81,11 +90,12 @@ pub(crate) struct SvgShape {
     pub width: f32,
 }
 
-/// A parsed symbol with its drawn bounds.
+/// A parsed symbol with its drawn bounds and coordinate box.
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct SvgSymbol {
     pub shapes: Vec<SvgShape>,
     pub bounds: Bounds,
+    pub view_box: Bounds,
 }
 
 /// Parse failures for the supported SVG subset.
@@ -111,6 +121,7 @@ struct Parser<'a> {
     pos: usize,
     shapes: Vec<SvgShape>,
     bounds: Bounds,
+    view_box: Option<Bounds>,
     stack: Vec<Frame>,
     ignore_depth: usize,
 }
@@ -128,6 +139,7 @@ impl<'a> Parser<'a> {
             pos: 0,
             shapes: Vec::new(),
             bounds: Bounds::EMPTY,
+            view_box: None,
             stack: Vec::new(),
             ignore_depth: 0,
         }
@@ -150,6 +162,7 @@ impl<'a> Parser<'a> {
         Ok(SvgSymbol {
             shapes: self.shapes,
             bounds: self.bounds,
+            view_box: self.view_box.unwrap_or(self.bounds),
         })
     }
 
@@ -219,10 +232,17 @@ impl<'a> Parser<'a> {
         let style = self.current_style().with_attrs(tag);
         let transform = self.current_transform().with_attrs(tag);
         if name == "g" || name == "svg" {
+            self.update_view_box(name, tag);
             self.stack.push(Frame { style, transform });
             return Ok(());
         }
         self.push_shape(name, tag, style, transform)
+    }
+
+    fn update_view_box(&mut self, name: &str, tag: &Tag<'a>) {
+        if name == "svg" {
+            self.view_box = tag.view_box();
+        }
     }
 
     fn adjust_ignore(&mut self, tag: &Tag<'a>) {
@@ -429,6 +449,25 @@ impl<'a> Tag<'a> {
     fn length(&self, name: &str) -> Option<f32> {
         self.attr(name).and_then(parse_length)
     }
+
+    fn view_box(&self) -> Option<Bounds> {
+        parse_view_box(self.attr("viewBox")?)
+    }
+}
+
+fn parse_view_box(text: &str) -> Option<Bounds> {
+    let mut values = text
+        .split(|character: char| character.is_whitespace() || character == ',')
+        .filter(|part| !part.is_empty())
+        .map(parse_length);
+    let min_x = values.next()??;
+    let min_y = values.next()??;
+    let width = values.next()??;
+    let height = values.next()??;
+    if width <= 0.0 || height <= 0.0 {
+        return None;
+    }
+    Some(Bounds::from_min_size(min_x, min_y, width, height))
 }
 
 fn split_tag(content: &str) -> (&str, bool, bool) {

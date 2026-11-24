@@ -9,7 +9,10 @@ Golden RGBA sudah tersedia dan berjalan headless di test Linux:
 
 - Renderer: `crates/gui/src/golden.rs`, hanya dikompilasi untuk test.
 - Ukuran: 320 x 240 piksel, skala piksel 1.0.
-- Scene: resistor dan LED berbasis SVG, label, dan teks tetap pada tema gelap.
+- Scene: resistor, LED, button, switch SPST, switch SPDT, BJT NPN, dan
+  opamp berbasis SVG, label, dan teks tetap pada tema gelap.
+- Tujuan scene: mengunci keselarasan pin model dengan terminal SVG setelah
+  layout pin per simbol dan pemetaan viewBox diterapkan.
 - Font: Source Sans 3 untuk label dan Source Code Pro untuk teks teknis.
 - Golden: `crates/gui/tests/golden/scene-320x240.rgba`.
 - Perbandingan: byte RGBA exact, tanpa toleransi.

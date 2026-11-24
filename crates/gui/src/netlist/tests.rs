@@ -80,6 +80,21 @@ fn assert_voltage_divider(netlist: &Netlist) {
 }
 
 #[test]
+fn moving_part_keeps_divider_nets_connected() {
+    let mut document = divider();
+    let r1 = document
+        .components()
+        .iter()
+        .find(|part| part.label == "R1")
+        .expect("R1")
+        .id;
+    let moved = document.move_components(library::builtin(), &[(r1, GridPos::new(8, 1))]);
+    assert!(moved, "move rejected");
+    let netlist = extract(&document).expect("netlist");
+    assert_voltage_divider(&netlist);
+}
+
+#[test]
 fn missing_ground_is_rejected() {
     let mut document = Document::default();
     add(&mut document, "passive.resistor.ideal_resistor", 0, 0);
@@ -325,7 +340,9 @@ fn numeric_values_are_parsed() {
 fn bjt_circuit() -> Document {
     let mut document = Document::default();
     add_bjt_parts(&mut document);
-    set_parameter(&mut document, "V2", "voltage", 0.8);
+    // V2 keeps its positive terminal on ground, so -0.8 V drives the base
+    // node to +0.8 V.
+    set_parameter(&mut document, "V2", "voltage", -0.8);
     add_bjt_wires(&mut document);
     document
 }
@@ -333,21 +350,18 @@ fn bjt_circuit() -> Document {
 fn add_bjt_parts(document: &mut Document) {
     add(document, "source.independent.dc_voltage_source", 0, 0);
     add(document, "passive.resistor.ideal_resistor", 8, 0);
-    add(document, "transistor.bjt_npn.npn_small_signal", 8, 6);
-    add(document, "source.independent.dc_voltage_source", 14, 10);
-    add(document, "gnd", 8, 14);
+    add(document, "transistor.bjt_npn.npn_small_signal", 4, 4);
+    add(document, "source.independent.dc_voltage_source", -6, 6);
+    add(document, "gnd", 10, 12);
 }
 
 fn add_bjt_wires(document: &mut Document) {
-    wire(document, &[(0, 1), (0, -2), (8, -2), (8, 1)]);
-    wire(document, &[(4, 1), (4, 14), (8, 14), (9, 14)]);
-    wire(
-        document,
-        &[(12, 1), (14, 1), (14, 4), (6, 4), (6, 7), (8, 7)],
-    );
-    wire(document, &[(14, 11), (14, 8), (12, 8)]);
-    wire(document, &[(8, 9), (8, 12), (8, 14)]);
-    wire(document, &[(18, 11), (18, 12), (8, 12)]);
+    wire(document, &[(4, 1), (8, 1)]);
+    wire(document, &[(12, 1), (12, 3), (8, 3), (8, 4)]);
+    wire(document, &[(-2, 7), (4, 7)]);
+    wire(document, &[(8, 10), (8, 12), (11, 12)]);
+    wire(document, &[(0, 1), (-8, 1), (-8, 12), (-6, 12), (8, 12)]);
+    wire(document, &[(-6, 7), (-6, 12)]);
 }
 
 #[test]

@@ -60,9 +60,9 @@ fn draw_golden_scene(painter: &egui::Painter, rect: Rect) {
 
 fn golden_camera() -> crate::canvas::GridCamera {
     crate::canvas::GridCamera {
-        pan: DVec2::new(24.0, 20.0),
-        zoom: 1.0,
-        cell_px: 20.0,
+        pan: DVec2::new(14.0, 10.0),
+        zoom: 0.7,
+        cell_px: 17.0,
         zoom_history: Vec::new(),
     }
 }
@@ -72,12 +72,20 @@ fn golden_scene<'a>(document: &'a Document, selection: &'a Selection) -> Scene<'
 }
 
 fn golden_document() -> Document {
-    let resistor = crate::library::find("resistor").expect("resistor");
-    let led = crate::library::find("led").expect("led");
     let mut document = Document::new();
-    document.add(resistor, GridPos::new(1, 2), Rotation::Deg0, Mirror::None);
-    document.add(led, GridPos::new(8, 2), Rotation::Deg0, Mirror::None);
+    add_symbol(&mut document, "resistor", 0, 2);
+    add_symbol(&mut document, "led", 6, 2);
+    add_symbol(&mut document, "button", 12, 2);
+    add_symbol(&mut document, "switch.mechanical.spst_switch", 18, 2);
+    add_symbol(&mut document, "transistor.bjt_npn.npn_small_signal", 2, 9);
+    add_symbol(&mut document, "analog.opamp.ideal_opamp", 10, 9);
+    add_symbol(&mut document, "switch.mechanical.spdt_switch", 18, 9);
     document
+}
+
+fn add_symbol(document: &mut Document, id: &str, x: i32, y: i32) {
+    let definition = crate::library::find(id).expect(id);
+    document.add(definition, GridPos::new(x, y), Rotation::Deg0, Mirror::None);
 }
 
 fn collect_textures(delta: &egui::TexturesDelta) -> HashMap<egui::TextureId, Texture> {

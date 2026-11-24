@@ -11,6 +11,23 @@ fn parses_a_simple_path() {
 }
 
 #[test]
+fn view_box_is_parsed() {
+    let text =
+        r##"<svg viewBox="0 0 20 10"><path fill="none" stroke="#000" d="M0 0L20 10"/></svg>"##;
+    let symbol = svg::parse(text).expect("symbol");
+    assert_eq!(symbol.view_box.width(), 20.0);
+    assert_eq!(symbol.view_box.height(), 10.0);
+    assert_eq!(symbol.view_box.center(), Point::new(10.0, 5.0));
+}
+
+#[test]
+fn missing_view_box_uses_drawn_bounds() {
+    let text = r##"<svg><path fill="none" stroke="#000" d="M2 3L8 9"/></svg>"##;
+    let symbol = svg::parse(text).expect("symbol");
+    assert_eq!(symbol.view_box, symbol.bounds);
+}
+
+#[test]
 fn group_style_is_inherited() {
     let text = r##"<svg><g fill="none" stroke="#000" stroke-width="2"><line x1="0" y1="0" x2="10" y2="10"/></g></svg>"##;
     let symbol = svg::parse(text).expect("symbol");

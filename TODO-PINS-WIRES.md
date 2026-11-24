@@ -5,7 +5,7 @@ Backlog perbaikan dua bug yang ditemukan pada schematic:
 1. Wire tertinggal saat komponen dipindahkan.
 2. Posisi pin tidak mengikuti simbol komponen.
 
-**Status:** P0, P1 switch/button, W1, dan W2 selesai. P1 transistor/opamp, P2 penuh, dan W3 belum.
+**Status:** P0, P1, P2, W1, dan W2 selesai. W3 belum.
 
 **Sumber analisis:** diskusi screenshot R1/SW1 tanggal 2026-11-24.
 
@@ -41,7 +41,8 @@ Backlog perbaikan dua bug yang ditemukan pada schematic:
 
 ### P1 - Layout Pin per Simbol
 
-- [x] P1-01 Tambahkan tabel layout pin per base symbol (switch, button, SPDT).
+- [x] P1-01 Tambahkan tabel layout pin per base symbol (switch, button,
+  SPDT, BJT, JFET, MOSFET, IGBT, opamp, comparator).
 - [x] P1-02 Gunakan tabel untuk katalog, bukan `pin_layout(count)`.
 - [x] P1-03 Perbaiki base selection switch dan analog switch berdasarkan
   jumlah pin.
@@ -49,17 +50,18 @@ Backlog perbaikan dua bug yang ditemukan pada schematic:
   tengah kiri/kanan.
 - [x] P1-05 Tambahkan `PinDirection` eksplisit dan transform arah pin.
 - [x] P1-06 Validasi jumlah pin, duplikasi anchor, boundary, dan arah pin.
-- [~] P1-07 Test layout untuk resistor, button, switch, SPDT, dan IC.
-  BJT dan opamp masih memakai fallback generik.
+- [x] P1-07 Test layout untuk resistor, button, switch, SPDT, IC, BJT,
+  JFET, MOSFET, IGBT, opamp, dan comparator.
 
 ### P2 - Render Simbol dan Pin
 
-- [~] P2-01 Button dan switch memakai body persegi yang sama dengan SVG.
-  Transform generik untuk simbol lain belum disatukan.
-- [~] P2-02 Switch dan button sudah diperbaiki; simbol lain belum diaudit.
-- [ ] P2-03 Tambahkan golden screenshot untuk simbol yang diperbaiki.
-- [ ] P2-04 Test bahwa anchor pin berada di boundary body atau di posisi
-  yang didefinisikan layout.
+- [x] P2-01 Gunakan pemetaan viewBox yang sama untuk body, pin anchor, dan
+  seluruh geometri SVG.
+- [x] P2-02 Audit simbol switch, button, SPDT, BJT, JFET, MOSFET, IGBT,
+  opamp, dan comparator terhadap anchor pin.
+- [x] P2-03 Tambahkan golden scene untuk simbol yang diperbaiki.
+- [x] P2-04 Test bahwa anchor pin berada di boundary body dan arahnya
+  sesuai layout.
 
 ### W1 - Wire Movement
 
@@ -70,8 +72,7 @@ Backlog perbaikan dua bug yang ditemukan pada schematic:
   menabrak body komponen.
 - [x] W1-05 Test move horizontal yang membuat wire mengikuti.
 - [x] W1-06 Test move yang harus ditolak.
-- [~] W1-07 Wire tetap valid setelah move; test netlist penuh belum
-  ditambahkan karena fixture ground belum disiapkan.
+- [x] W1-07 Test netlist tetap terhubung setelah move.
 
 ### W2 - Rotate dan Mirror
 
@@ -93,8 +94,8 @@ Backlog perbaikan dua bug yang ditemukan pada schematic:
 - [x] Tidak ada wire yang tertinggal saat komponen dipindahkan.
 - [x] Move yang tidak valid ditolak tanpa mengubah dokumen.
 - [x] Rotate/mirror dengan wire terhubung tidak merusak net.
-- [ ] Pin model dan pin visual memakai layout yang sama.
-- [ ] Switch, button, SPDT, transistor, dan opamp memiliki pin yang
+- [x] Pin model dan pin visual memakai layout yang sama.
+- [x] Switch, button, SPDT, transistor, dan opamp memiliki pin yang
   sesuai simbol.
 - [x] Semua test lama tetap lulus.
 - [x] Test baru mencakup kedua bug.

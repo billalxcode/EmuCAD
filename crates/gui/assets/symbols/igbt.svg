@@ -1,3 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
-    <path fill="none" stroke="#000" stroke-width="5" d="M20 30V120M20 50H55M20 100H55M55 30V120M55 50H90M55 100H90M90 30V50M90 100V120M70 75L100 105M85 105H100V90"/>
+    <circle cx="75" cy="75" r="50" fill="none" stroke="#000" stroke-miterlimit="10" stroke-width="5"/>
+    <path fill="none" stroke="#000" stroke-miterlimit="10" stroke-width="5" d="M0 75h50m0-25v50M62.5 50v50M100 0v50H62.5M100 150v-50H62.5"/>
+    <path d="M68.75 100 87.5 87.5v25L68.75 100z"/>
 </svg>
